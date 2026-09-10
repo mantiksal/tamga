@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+
 concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: true
@@ -53,5 +54,6 @@ jobs:
 
       - name: imaji guncelle
         run: kubectl -n tamga set image deployment/tamga-docs app=${{ env.IMAGE }}:${{ github.sha }}
+
       - name: rollout
         run: kubectl -n tamga rollout status deployment/tamga-docs --timeout=300s

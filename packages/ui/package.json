@@ -1,6 +1,6 @@
 {
   "name": "tamga-ui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Tamga — ortak arayüz kütüphanesi — token'lar, fizik ve bileşenler.",
   "license": "MIT",
   "type": "module",
@@ -70,7 +70,7 @@
     "url": "git+https://github.com/mantiksal/tamga.git",
     "directory": "packages/ui"
   },
-  "homepage": "https://tamga.design",
+  "homepage": "https://tamga.org.tr",
   "bugs": {
     "url": "https://github.com/mantiksal/tamga/issues"
   },

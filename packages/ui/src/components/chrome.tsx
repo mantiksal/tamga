@@ -1,0 +1,224 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { cn } from "../lib/cn.js";
+import { Icon } from "./icon.js";
+import { Switch } from "./switch.js";
+import { ThemeDark, ThemeLight } from "./icons.js";
+
+/**
+ * Kabuk parçaları.
+ *
+ * Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md
+ */
+
+/** Tarayıcı depolaması patlayabilir (özel pencere, kapalı site verisi). */
+function read(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+function write(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* tercih hatırlanmaz, sayfa yine çalışır */
+  }
+}
+
+/**
+ * Açık/koyu tema düğmesi.
+ *
+ * SUNUCU TEMAYI BİLMEZ. İlk boyama her zaman açık temayla çıkar ve tercih
+ * `useEffect` içinde uygulanır — yani koyu tema seçmiş biri bir kare boyunca
+ * açık ekran görür. Bunu tamamen çözmenin tek yolu `<head>`'e engelleyici bir
+ * script koymak, ve o script'in yeri KİT DEĞİL uygulamadır: kitin bir
+ * `<head>`'i yoktur.
+ *
+ * `storageKey` bu yüzden bir prop: uygulama aynı anahtarı kendi script'inde
+ * de okuyabilsin diye. İki taraf farklı anahtar kullanırsa tercih sessizce
+ * kaybolur.
+ *
+ * Metinler dışarıdan geliyor. Kit çeviri yapmaz — ve bir düğmenin adı, içinde
+ * metin olmadığı için erişilebilirliğin tamamıdır.
+ *
+ * İKİ BİÇİM, VE SEBEBİ ORANTI. `icon` sıkışık bir araç çubuğuna girer: 40×40,
+ * tek simge. Ama yanında bir dil anahtarı gibi ANAHTAR biçimli bir kontrol
+ * varsa, kare düğme onun iki katı yüksekliğinde durur ve şerit dengesiz
+ * görünür. `switch` biçimi aynı iskeleti kullanıyor — iki uçta birer simge,
+ * ortada kayan bir anahtar — yani ikisi yan yana aynı satırda oturuyor.
+ */
+export function ThemeToggle({
+  labels,
+  variant = "icon",
+  storageKey = "tamga-theme",
+  className,
+}: {
+  labels: { toLight: string; toDark: string };
+  /**
+   * `icon` a square button · `switch` the same shape as a language toggle. TR: `icon` kare
+   * düğme · `switch` bir dil anahtarıyla aynı şekil.
+   */
+  variant?: "icon" | "switch";
+  storageKey?: string;
+  className?: string;
+}) {
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    const saved = read(storageKey);
+    const initial = saved
+      ? saved === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setDark(initial);
+    document.documentElement.classList.toggle("dark", initial);
+  }, [storageKey]);
+
+  function toggle() {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle("dark", next);
+    write(storageKey, next ? "dark" : "light");
+  }
+
+  if (variant === "switch") {
+    return (
+      <span className={cn("flex items-center gap-2", className)}>
+        {/* Simgeler `aria-hidden`: anahtarın kendi adı zaten durumu söylüyor,
+            ve üç şeyi birden okutmak aynı bilgiyi üç kez tekrarlardı. */}
+        <Icon
+          icon={ThemeLight}
+          size="xs"
+          aria-hidden
+          className={dark ? "text-ink-faint" : "text-ink"}
+        />
+        <Switch on={dark} onChange={toggle} label={dark ? labels.toLight : labels.toDark} />
+        <Icon
+          icon={ThemeDark}
+          size="xs"
+          aria-hidden
+          className={dark ? "text-ink" : "text-ink-faint"}
+        />
+      </span>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      className={cn("tamga-icon-btn", className)}
+      aria-label={dark ? labels.toLight : labels.toDark}
+    >
+      <Icon icon={dark ? ThemeLight : ThemeDark} size="sm" />
+    </button>
+  );
+}
+
+/**
+ * Dil değiştirici.
+ *
+ * Kit YÖNLENDİRME YAPMAZ. `onChange` seçilen dili verir; nereye gidileceği —
+ * `router.push`, tam sayfa yenileme, bir çerez yazıp yeniden yükleme —
+ * uygulamanın kararı ve yönlendiricisine bağlı. Kitin `next/navigation`'a
+ * bağlanması, onu bir framework'e bağlamak olurdu.
+ *
+ * Etiketler ENDONİM olmalı: "English", "İngilizce" değil. Bir dili arayan
+ * kişi onu kendi dilinde arar. Kit bunu zorlayamaz ama doküman söyler.
+ *
+ * İki dilde SEGMENTED, üç ve fazlasında SELECT — kendiliğinden. İki seçenek
+ * yan yana sığar ve tek tıkla değişir; beş dil yan yana konursa üst şeridi
+ * doldurur ve altıncı dilde taşar.
+ */
+export function LocaleSwitcher({
+  locales,
+  current,
+  onChange,
+  label,
+  className,
+}: {
+  /**
+   * `[{ value: "tr", label: "Türkçe" }, …]`: the labels are endonyms. TR: `[{ value: "tr",
+   * label: "Türkçe" }, …]`: etiketler endonim.
+   */
+  locales: readonly { value: string; label: string }[];
+  current: string;
+  onChange: (next: string) => void;
+  /** The control's name: "Dil", "Language". TR: Kontrolün adı: "Dil", "Language". */
+  label: string;
+  className?: string;
+}) {
+  if (locales.length <= 2) {
+    return (
+      <span className={cn("tamga-segment", className)} role="group" aria-label={label}>
+        {locales.map((l) => (
+          <button
+            key={l.value}
+            type="button"
+            data-active={l.value === current}
+            aria-current={l.value === current ? "true" : undefined}
+            onClick={() => onChange(l.value)}
+          >
+            {l.label}
+          </button>
+        ))}
+      </span>
+    );
+  }
+  return (
+    <select
+      className={cn("tamga-input h-9 w-auto", className)}
+      aria-label={label}
+      value={current}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      {locales.map((l) => (
+        <option key={l.value} value={l.value}>
+          {l.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+/**
+ * Kare marka karosu.
+ *
+ * Bir logonun etrafındaki kutu. Görsel yoksa baş harf — `Avatar`'la aynı
+ * gerekçe: gri bir yer tutucu hiçbir şeyi temsil etmez, bir harf gerçekten o
+ * şeyi işaret eder.
+ *
+ * `alt` boş bırakılıyor ve bu bilinçli: karo neredeyse her zaman adı YANINDA
+ * yazan bir şeyin yanında durur. İkisini de okutmak ekran okuyucuda adı iki
+ * kez tekrarlar.
+ */
+export function LogoTile({
+  name,
+  src,
+  size = "base",
+  className,
+}: {
+  /**
+   * The initial is built from it, and it is what shows when the image does not load. TR: Baş
+   * harf buradan üretilir; görsel yüklenmezse görünen şey bu.
+   */
+  name: string;
+  src?: string;
+  size?: "base" | "sm";
+  className?: string;
+}) {
+  return (
+    <span className={cn("tamga-logo-tile", size === "sm" && "tamga-logo-tile-sm", className)}>
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="" className="h-full w-full object-contain p-1.5" />
+      ) : (
+        <span aria-hidden className="font-mono text-subhead font-semibold text-ink-faint">
+          {name.trim().charAt(0).toLocaleUpperCase()}
+        </span>
+      )}
+    </span>
+  );
+}

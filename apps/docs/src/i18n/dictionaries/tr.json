@@ -1,0 +1,22 @@
+{
+  "nav": {
+    "home": "Ana sayfa",
+    "docs": "Doküman menüsü",
+    "toc": "İçindekiler"
+  },
+  "chrome": {
+    "theme": {
+      "toLight": "Açık temaya geç",
+      "toDark": "Koyu temaya geç"
+    },
+    "language": "Dil",
+    "skipToContent": "İçeriğe geç"
+  },
+  "demo": {
+    "preview": "Önizleme",
+    "code": "Kod",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı",
+    "copyAria": "Kodu kopyala"
+  }
+}

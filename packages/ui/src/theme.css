@@ -1,0 +1,812 @@
+/* ==============================================================
+   tamga-ui · TEMA KATMANI
+
+   Token'lar burada yaşar: renk rampası, semantik renkler, tip skalası,
+   ölçü, şekil ve motion. Sınıflar kit.css'te.
+
+   KULLANIM — tüketici kendi CSS'inde şu sırayı kurar:
+
+     @import "tailwindcss";
+     @import "tamga-ui/styles.css";
+     :root { --color-accent: #d6336c; }   ← markanın tamamı
+
+   Bu dosya Tailwind v4 gerektirir (@theme direktifi kullanıyor).
+   kit.css gerektirmez — o saf CSS.
+
+   KURALLAR (guard'larla zorlanır):
+     · her token HEM :root HEM .dark içinde  (check-token-parity)
+     · bileşen token'a adıyla erişir, ham hex yazmaz  (check-hardcoded-colors)
+     · motion yalnız token üzerinden  (check-motion-tokens)
+   ============================================================== */
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================
+   TOKEN KATMANI — kitin tek renk, ölçü ve hareket kaynağı.
+
+   KALICI (mekanizma, tartışmaya kapalı)
+     · token isimleri + @theme inline köprüsü
+     · her token HEM :root HEM .dark içinde (parite CI'da denetlenir)
+     · motion yalnız token üzerinden — ham süre ve eğri yasak
+     · yükselme tek formülden gelir: 1px kenar + N px sert offset, bulanıklık yok
+
+   DEĞİŞTİRİLEBİLİR (ürünün kararı)
+     · rampanın DEĞERLERİ. Bir ürün kendi CSS girişinde :root ve .dark blokları
+       yazarak markasını verir. Token'ın ADI kitin, DEĞERİ ürünündür.
+
+   Buradaki bir değeri değiştirmeden önce kitin ilgili karar belgesini güncelle —
+   sıra hep aynı: önce doküman, sonra değer.
+   ============================================================ */
+
+/* tamga:sabit-olcek — temadan bağımsız: marka rampası, kırılma noktası,
+   hareket eğrileri ve süreler. Gece de gündüz de aynı. */
+@theme {
+  /* Raw brand ramp. Nothing consumes it directly: the semantic tokens below are
+     the interface, and a component reaching for --color-brand-500 is skipping the
+     layer that makes theming work. Kept in step with the accent so that if anyone
+     ever does reach for it they get this product's blue, not the placeholder v2
+     shipped with.
+     TR: Ham marka rampası. Hiçbir şey doğrudan tüketmiyor: arayüz aşağıdaki anlamsal
+     token'lar, ve --color-brand-500'e uzanan bir bileşen temalandırmayı çalıştıran
+     katmanı atlıyor. */
+  --color-brand-50: #ecedf3;
+  /* Raw ramp, second step.
+     TR: Ham rampa, ikinci adım. */
+  --color-brand-100: #d6e2f5;
+  --color-brand-400: #53a4fa; /* = dark --primary TR: = koyu --primary */
+  --color-brand-500: #2069c9; /* = light --primary TR: = açık --primary */
+  --color-brand-600: #12245c; /* = the base under the face TR: = yüzün altındaki taban */
+
+  --breakpoint-xs: 30rem;
+
+  /* Motion (docs/13-design-soul §1) — theme-invariant, defined once here and read through the
+     ease/duration custom properties below. Components never write raw curves/durations (§10).
+     (Spelled out rather than written with a wildcard: Tailwind scans this file for class
+     candidates and read the glob form as an arbitrary utility, warning on every build.) */
+  --ease-instrument: cubic-bezier(0.22, 1, 0.36, 1); /* THE signature: everything that enters or moves TR: İMZA: giren ya da hareket eden her şey */
+  --ease-press: cubic-bezier(0.22, 1, 0.36, 1); /* the same curve: a press is not a different physics TR: aynı eğri: basmak farklı bir fizik değil */
+  /* --ease-settle removed (13 §1): the only curve with overshoot, and nothing in this
+     product bounces. An overshoot placed anywhere leaks everywhere. */
+  --ease-breath: ease-in-out; /* the two loops: beacon and skeleton TR: iki döngü: işaret ve iskelet */
+
+  --duration-instant: 100ms; /* press, hover, focus: every control (13 §1 --duration-press) TR: basma, üzerine gelme, odak: her kontrol (13 §1 --duration-press) */
+  --duration-quick: 160ms; /* colour and tone shifts TR: renk ve ton geçişleri */
+  --duration-base: 240ms; /* panels, popovers, toasts, value changes TR: paneller, balonlar, bildirimler, değer değişimleri */
+  --duration-slow: 340ms; /* route-level reveals TR: rota düzeyinde açılışlar */
+  /* Loops — long by design, the only things allowed past --duration-slow */
+  --duration-breath: 1100ms; /* skeleton TR: iskelet */
+  --duration-beacon: 1800ms; /* the live mark. 2400ms read as heavy on an instrument. TR: canlı işaret. 2400ms bir göstergede ağır okunuyordu. */
+}
+
+/* İŞARETÇİ YORUMU KENDİNDEN BAŞKA BİR İŞARETÇİNİN ADINI TAŞIMAZ. İlk hâli
+   burada koyu bloğun adını da anıyordu; ayrıştırıcı "koyu" işaretçisini
+   ararken bu yorumu buluyor ve AÇIK bloğu koyu sanıyordu. Parite kapısı da
+   bu yüzden açık bloğu kendisiyle karşılaştırıp sessizce geçiyordu.
+   tamga:tema-acik */
+:root {
+  --radius: 6px; /* 13 §5: instrument sharpness, a knowing DNA §12 deviation (ADR pending) TR: 13 §5: gösterge keskinliği, DNA §12'den bilerek yapılan bir sapma (ADR bekliyor) */
+
+  /* Elevation — hard, blurless, offset shadows (docs/13-design-soul §2). Blur only on the
+     overlay's ambient second layer. Parity-checked in both :root and .dark (docs/03).
+     Every formula carries the SAME two layers in every theme (bottom shadow + inset top rim) so the
+     structure is parallel — light just holds the rim transparent; dark's rim is the load-bearing
+     "night edge" (§2). Equal layer counts also guarantee smooth box-shadow interpolation on press. */
+  --shadow-color: #d2cec8; /* = --color-edge: the offset IS the edge colour (13 Yasa 1). Darkened from #d9d6d1, which measured ΔL* 9.8 against the page, under this gate's floor of 10. TR: = --color-edge: kaydırmanın kendisi kenarın rengidir (13 Yasa 1). #d9d6d1'den koyulaştırıldı; sayfaya karşı ΔL* 9.8 ölçülmüştü, bu kapının 10 tabanının altında. */
+  --shadow-rim: transparent; /* no rim in either theme; see .dark TR: iki temada da çerçeve yok; bkz. .dark */
+  --shadow-ambient: rgb(38 34 26 / 0.32); /* scrim/overlay drop, warm ink TR: katman gölgesi, sıcak mürekkep */
+  --shadow-raised: 2px 2px 0 0 var(--shadow-color); /* diagonal, blurless (13 Yasa 1) TR: çapraz, bulanıksız (13 Yasa 1) */
+  --shadow-hover: 3px 3px 0 0 var(--shadow-color);
+  --shadow-pressed: 0 0 0 0 var(--shadow-color);
+  --shadow-overlay: 6px 6px 0 0 var(--shadow-color); /* the overlay plane: 6px, past anything the page can reach TR: katman düzlemi: 6px, sayfanın ulaşabileceği her şeyin ötesinde */
+  --shadow-seated-pressed: inset 0 0 0 0 transparent; /* seated never lifts, so it has nothing to collapse (13 §2) TR: oturmuş olan hiç kalkmaz, yani çökecek bir şeyi yok (13 §2) */
+
+  --background: #f5f2ec; /* warm paper TR: sıcak kâğıt */
+  --foreground: #26221a;
+  --card: #fdfcfa;
+  --card-foreground: #26221a;
+  --popover: #fdfcfa;
+  --popover-foreground: #26221a;
+
+  --primary: #2069c9; /* the FACE: L* 45, carries white ink at 5.22:1 (13 §2) TR: YÜZ: L* 45, beyaz mürekkebi 5.22:1 ile taşıyor (13 §2) */
+  --primary-foreground: #fdfcfa;
+  --secondary: #eceae6;
+  --secondary-foreground: #453f34;
+  --muted: #eceae6;
+  --muted-foreground: #6f695b; /* = --color-ink-faint: the same colour in the other name family, moved in step (contrast gate) TR: = --color-ink-faint: öteki ad ailesindeki aynı renk, onunla birlikte taşındı (kontrast kapısı) */
+  --accent: #ecedf3; /* selected-row wash TR: seçili satır yıkaması */
+  --accent-foreground: #12245c;
+  --destructive: #b3341f;
+  --destructive-foreground: #fdfcfa;
+  --success: #0a7a5f; /* healthy AND resolved share one green (13 Yasa 3) TR: sağlıklı VE çözüldü tek bir yeşili paylaşıyor (13 Yasa 3) */
+  --success-foreground: #fdfcfa;
+  --warning: #8a5a0b;
+  --warning-foreground: #fdfcfa;
+  --beacon: #12245c; /* ⚠️ no separate signature colour; see note below TR: ⚠️ ayrı bir imza rengi yok; aşağıdaki nota bakın */
+  --beacon-foreground: #fdfcfa;
+
+  --border: #e2ded6; /* the single rule colour TR: tek çizgi rengi */
+  /* Instrument scale marks (13 §4). NOT a border: a gauge's ticks are how the dial is READ, so they
+     answer to a FLOOR (be visible on every surface the dial can sit on), never to the border band's
+     deliberate softness. Kept warm-taupe in family, several steps darker than --border. */
+  --tick: #bdb8ae; /* scale marks answer to a FLOOR, not to the border's softness: they must read on card, page AND muted (13 §4) TR: ölçek işaretleri kenarın yumuşaklığına değil bir TABANA cevap verir: kartta, sayfada VE soluk zeminde okunmalı (13 §4) */
+  --input: #d2cec8; /* = --shadow-color. Yasa 1: the edge and the offset are one colour TR: = --shadow-color. Yasa 1: kenar ile kaydırma tek renktir */
+  --ring: #12245c;
+
+  /* Categorical series: for data that is NOT a status (regions, plans, series).
+     Deliberately QUIETER than the status palette: C* 26 against status's 36–65, so a
+     chart can never out-shout an event. Hues avoid critical's red (40°) and
+     resolved's green (169°) — the two carrying the strongest meaning, and the two a
+     reader would most easily mistake on a line. Measured: 22 ΔE between neighbours,
+     20 ΔE to the nearest status colour.
+     TR: Kategorik seriler: durum OLMAYAN veri için (bölgeler, planlar, seriler). Durum
+     paletinden bilerek daha SESSİZ: durumun 36–65'ine karşı C* 26, yani bir grafik bir
+     olayın sesini asla bastıramıyor. */
+  --chart-1: #887c4f;
+  --chart-2: #32888a;
+  --chart-3: #4782a5;
+  --chart-4: #7f76a2;
+  --chart-5: #a36c84;
+}
+
+/* tamga:tema-koyu */
+.dark {
+  /* Night field station — warm charcoal, not cold navy. */
+  /* Elevation (docs/13-design-soul §2 "night edge"): a darkening bottom shadow can't read on a
+     near-black ground (measured ceiling ΔL* ~8 vs light's ~16-20), so dark pushes --shadow-color to
+     near-black for max bottom separation AND adds the load-bearing cue — a 1px warm-white inset TOP
+     rim (light catches the raised top edge at night). Same two-layer formulas as light; on press the
+     rim goes transparent → the surface reads pressed flat (1:1 with light's bottom-out). */
+  --shadow-color: #363e6e;
+  --shadow-rim: transparent; /* the edge colour carries dark on its own — no rim needed */
+  --shadow-ambient: rgb(6 6 22 / 0.62);
+  --shadow-raised: 2px 2px 0 0 var(--shadow-color); /* diagonal, blurless (13 Yasa 1) */
+  --shadow-hover: 3px 3px 0 0 var(--shadow-color);
+  --shadow-pressed: 0 0 0 0 var(--shadow-color);
+  --shadow-overlay: 6px 6px 0 0 var(--shadow-color); /* the overlay plane: 6px, past anything the page can reach */
+  --shadow-seated-pressed: inset 0 0 0 0 transparent;
+
+  --background: #0f1127;
+  --foreground: #efeef4;
+  --card: #131832;
+  --card-foreground: #efeef4;
+  --popover: #131832;
+  --popover-foreground: #efeef4;
+
+  --primary: #53a4fa; /* face flips bright: white ink caps the fill at L* 47 on a dark ground */
+  --primary-foreground: #12245c; /* navy ink on the bright face — 5.62:1 */
+  --secondary: #1c2241;
+  --secondary-foreground: #d4d4df;
+  --muted: #1c2241;
+  --muted-foreground: #9494a8;
+  --accent: #0f2458;
+  --accent-foreground: #86a7f3;
+  --destructive: #ff9478;
+  --destructive-foreground: #0f1127;
+  --success: #4fd4ac;
+  --success-foreground: #0f1127;
+  --warning: #e8ab3c;
+  --warning-foreground: #0f1127;
+  --beacon: #86a7f3;
+  --beacon-foreground: #0f1127;
+
+  --border: #262d54;
+  --tick: #3f4880; /* same floor, measured against the darkest dial surface */
+  --input: #363e6e;
+  --ring: #86a7f3;
+
+  --chart-1: #ada072;
+  --chart-2: #5badaf;
+  --chart-3: #6ea7cc;
+  --chart-4: #a49ac9;
+  --chart-5: #ca90a9;
+}
+
+/* Köprü: tema ailesinin adlarını kitin `--color-*` ad alanına bağlıyor. Bir
+   token'ın Tailwind utility'si üretip üretmediği buradan geçip geçmediğine
+   bağlı, o yüzden işaretli.
+   tamga:kopru */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-beacon: var(--beacon);
+  --color-beacon-foreground: var(--beacon-foreground);
+  --color-border: var(--border);
+  --color-tick: var(--tick);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  /* Teal, the second series. Far enough from resolved's green that a line is
+     never mistaken for a status. */
+  --color-chart-2: var(--chart-2);
+  /* Blue, the third series. */
+  --color-chart-3: var(--chart-3);
+  /* Violet, the fourth series. */
+  --color-chart-4: var(--chart-4);
+  /* Rose, the fifth and last. Beyond five the eye stops telling series apart
+     and a legend stops helping. */
+  --color-chart-5: var(--chart-5);
+
+  /* Typographic lock (docs/13-design-soul §6) — DECISION CHANGED 2026-08-16 (Berika).
+     The product runs on the SYSTEM UI stack. Outfit and JetBrains Mono were the earlier lock, but
+     the prototype everyone judged the design against had a broken variable chain and was silently
+     rendering system UI the whole time — that is the typography the design was actually approved
+     with, so it is the typography that ships.
+     Written out as an explicit value rather than left to a fallback: a stack you can read is a
+     stack you can change. Reverting is these three lines. */
+  --font-sans: -apple-system, "system-ui", "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  /* Measure — how long a line is allowed to get before the eye loses the start
+     of the next one. A typographic decision, so it lives with the tokens rather
+     than as an invented number in a className (13 §6). */
+  --measure-tight: 36ch; /* a note under a control */
+  --measure: 54ch; /* body copy in a card */
+  --measure-wide: 70ch; /* documentation prose */
+
+  --font-display: -apple-system, "system-ui", "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* headings are the same face, heavier — never a separate display cut (13 §6) */
+  /* Mono is the same face too — this is what the prototype did, and it is the shape the design was
+     approved in. The cost is real and worth stating: digits are no longer tabular by default, so a
+     column of numbers stops aligning on its own. `tabular-nums` is still available where a column
+     needs it. */
+  --font-mono: -apple-system, "system-ui", "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* Shape rhythm (docs/13-design-soul §5), base --radius = 0.75rem. Kept as a single-knob
+     calc scale: sm = 0.5rem and lg = 1rem land exactly on §5; md stays a shadcn-compat step. */
+  --radius-sm: calc(var(--radius) - 4px); /* 0.5rem — badges, tags, inline chips (§5) */
+  --radius-md: calc(var(--radius) - 2px); /* 0.625rem — shadcn default step */
+  --radius-lg: calc(var(--radius) + 4px); /* 1rem — cards, panels (§5) */
+  --radius-xl: calc(var(--radius) + 8px); /* 1.25rem — large surfaces */
+  --radius-full: 9999px; /* avatars and the live dot ONLY (§5) */
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: var(--ring);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+  /* GEÇİCİ (Faz 2): headings in the display cut. Which face, which tracking — undecided. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  /* Skeleton breath — an opacity breath, never a shimmer sweep (13 §8, §10).
+     Deep and quick on purpose: it started shallow and slow, which was right in
+     principle and useless in practice — at a glance you could not tell a loading
+     panel from a settled one, and that is its only job. */
+  @keyframes skeleton-breath {
+    0%,
+    100% {
+      opacity: 0.78;
+    }
+    50% {
+      opacity: 0.06;
+    }
+  }
+  .animate-skeleton-breath {
+    animation: skeleton-breath var(--duration-breath) var(--ease-breath) infinite;
+    animation-delay: var(--skeleton-delay, 0ms);
+  }
+
+  /* The live mark. Brightness only — never a transform, or it starts competing
+     with the mascot's channel and Yasa 4 stops being enforceable (13 §3). */
+  @keyframes beacon-breath {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.25;
+    }
+  }
+  .animate-beacon-breath {
+    animation: beacon-breath var(--duration-beacon) var(--ease-breath) infinite;
+  }
+
+  /* Decorative motion goes static under reduced motion. MECHANISM — keep in every art direction.
+     A stopped skeleton must still READ as a placeholder, so it parks near the middle of the
+     breath rather than at either end; an empty box is worse than no skeleton. */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-skeleton-breath {
+      animation: none;
+      opacity: 0.42;
+    }
+    .animate-beacon-breath {
+      animation: none;
+    }
+  }
+}
+
+/* ============================================================
+   Press choreography (docs/13-design-soul §2) — THE single source for every raised interactive
+   surface (buttons, clickable cards). Apply the `press-surface` class; never re-implement it per
+   component (no second copy). Decorative, non-clickable surfaces must NOT use it (Law 2).
+   No transition-all — the property list is explicit.
+   ============================================================ */
+.press-surface {
+  transform: translateY(0);
+  box-shadow: var(--shadow-raised);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition-property: transform, box-shadow, border-color, outline-color, background-color, color;
+  transition-duration: var(--duration-quick);
+  transition-timing-function: var(--ease-instrument);
+}
+/* The working surface: one card that holds a whole screen (13 §4b).
+   The chrome around it — rail, header, ground — is all --card with no dividing
+   line, so it reads as one continuous frame. This is the only thing on top of
+   that frame, which is why it takes the CONTROL radius rather than the card
+   radius: at this size a softer corner makes the whole screen look like a
+   widget, and the sharper one keeps it in the same family as the buttons
+   inside it.
+   NOT a motion rule: this sat inside the reduced-motion query, so the surface
+   had no ground, no edge and no radius for anyone who had not turned reduced
+   motion on. */
+.app-surface {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Functional feedback (lift, press travel, focus ring) stays — just shortened (13 §11). */
+  .press-surface {
+    transition-duration: var(--duration-instant);
+  }
+}
+.press-surface:hover:not(:disabled):not([aria-disabled="true"]):not([data-loading="true"]) {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-hover);
+  /* Hover is carried by HEIGHT alone (13 §2). The inherited rule also turned the
+     border to the signature colour; that was dropped deliberately. One event
+     should produce one signal, and in this system an accent border already means
+     "selected or focused" — spending it on "the pointer is here" would blunt it. */
+}
+/* 1:1 on BOTH axes — the offset is diagonal (13 Yasa 1), so the travel has to be too, or the
+   surface lands beside its own shadow instead of on it. Measured in-browser: a vertical-only
+   press against a 2px 2px offset left the button 2px to the left of where it bottomed out.
+   If this scale ever changes, keep the press translate EQUAL to --shadow-raised's offset on
+   both x and y. */
+.press-surface:active:not(:disabled):not([aria-disabled="true"]):not([data-loading="true"]) {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-pressed);
+  transition-duration: var(--duration-instant);
+  transition-timing-function: var(--ease-press);
+}
+.press-surface:focus-visible {
+  /* 2px beacon ring @2px offset; box-shadow + transform untouched — focus NEVER flattens (13 §2). */
+  outline-color: var(--beacon);
+}
+.press-surface:disabled,
+.press-surface[aria-disabled="true"] {
+  transform: translateY(0);
+  box-shadow: none;
+  border-color: color-mix(in oklab, var(--border) 50%, transparent);
+}
+.press-surface[data-loading="true"] {
+  transform: translateY(0); /* travel locked */
+  box-shadow: var(--shadow-raised);
+}
+
+/* ============================================================
+   Surfaces (docs/13 §5) — the raised panel, defined once.
+
+   §5 is explicit and was not being followed: surfaces take --radius-card (6px), the edge is 1px in
+   the SHADOW colour (Yasa 1: the edge and the offset are one colour), and emphasis comes from a
+   hard diagonal offset. shadcn's `rounded-xl border shadow-sm` broke all three — `shadow-sm` is a
+   BLURRED shadow, which Yasa 1 forbids outright, and a blurred shadow is exactly what makes a
+   neobrutalist surface read as a generic SaaS card.
+
+   Role aliases, so call sites read by ROLE rather than by size (§5):
+   ============================================================ */
+/* tamga:sabit-rol — rol takma adları ve yapısal ölçüler. Temaya bağlı değil. */
+:root {
+  --radius-ctl: var(--radius-md); /* 4px: button, input, chip, segment TR: 4px: düğme, girdi, çip, segment */
+  --radius-card: var(--radius); /* 6px: card, overlay, panel TR: 6px: kart, katman, panel */
+
+  /* §5's structural rhythm. `--gutter` is the vertical line every heading, label, row and cell
+     starts on; it existed in the decision and nowhere in the code, so each screen was picking its
+     own px-6 / px-8 and the left edge wandered from page to page.
+     TR: §5'in yapısal ritmi. `--gutter` her başlığın, etiketin, satırın ve hücrenin
+     üstünde başladığı dikey çizgi; kararda vardı ama kodda hiçbir yerde yoktu, o yüzden
+     her ekran kendi px-6 / px-8'ini seçiyor ve sol kenar sayfadan sayfaya kayıyordu. */
+  --gutter: 24px;
+  --row: 56px; /* list row TR: liste satırı */
+  --row-sm: 48px; /* dense row TR: sık satır */
+  --control: 40px; /* every control's height (§5) TR: her kontrolün yüksekliği (§5) */
+}
+
+/* The one left line every page shares. */
+.gutter {
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+/* A raised panel. Same grammar as .press-surface but with no choreography: it is not pressable, so
+   it never lifts and never presses (Law 2). */
+.card-surface {
+  background: var(--card);
+  border: 1px solid var(--shadow-color);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-raised);
+}
+
+/* A seated well: content that sits IN the page rather than on it — filter bars, table headers,
+   sub-panels. No offset, ever. */
+.sunk-surface {
+  background: var(--muted);
+  border: 1px solid var(--shadow-color);
+  border-radius: var(--radius-card);
+}
+
+/* Rayın kendi fiziği artık `kit.css`'te `.tamga-rail-link` olarak yaşıyor ve
+   `--color-nav-*` okuyor. Burada duran `.rail-link` bloğu ile onu besleyen
+   sekiz `--sidebar-*` token'ı SİLİNDİ: hiçbir bileşen onlara dokunmuyordu, ve
+   ölü bir token yalnız yer kaplamıyor, yanlış da söylüyor. Token sayfası
+   `--sidebar-primary` için kırmızı bir 1.08 basıyordu; hiçbir yerde
+   kullanılmayan bir rengin kontrast uyarısı, gerçek uyarıların arasında
+   gürültüdür. */
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-link {
+    transition-duration: var(--duration-instant);
+  }
+}
+
+/* ============================================================
+   Seated choreography (docs/13-design-soul §2) — THE single source for controls that sit IN a track
+   (tabs trigger, switch, checkbox, radio, segmented). Sibling of .press-surface, SAME grammar
+   (beacon focus ring, beacon hover warm, same tokens, same reduced-motion) — but the seated physics:
+   flat at rest, presses INTO the track on active (inset mirror of the raised bottom-out). No translate,
+   no scale. Apply the `seated-surface` class + a `border border-transparent` (so the warm shows).
+   Never re-implement it per component; decorative surfaces must NOT use it (Law 2).
+   ============================================================ */
+.seated-surface {
+  position: relative; /* anchors the ::after tint overlay */
+  box-shadow: inset 0 0 0 0 var(--shadow-color); /* flat, but transitionable to the inset press */
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition-property: box-shadow, border-color, outline-color, color;
+  transition-duration: var(--duration-quick);
+  transition-timing-function: var(--ease-instrument);
+}
+/* The beacon "light" LAYERS over the control's own background via a solid-color ::after overlay —
+   it never replaces the state (a checked switch keeps --primary; an active tab keeps --background).
+   Solid color, NOT a gradient (§10). This also sidesteps the specificity clash with the component's
+   data-[state]:bg-* utility entirely — it's a different element and a different property. */
+.seated-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-color: transparent;
+  transition: background-color var(--duration-quick) var(--ease-instrument);
+}
+@media (prefers-reduced-motion: reduce) {
+  /* functional feedback kept, shortened (13 §11) */
+  .seated-surface,
+  .seated-surface::after {
+    transition-duration: var(--duration-instant);
+  }
+}
+.seated-surface:hover:not(:disabled):not([aria-disabled="true"]) {
+  /* seated answers by FILLING, not by recolouring its edge (13 §2) */
+}
+.seated-surface:hover:not(:disabled):not([aria-disabled="true"])::after {
+  background-color: var(--accent);
+}
+.seated-surface:active:not(:disabled):not([aria-disabled="true"]) {
+  box-shadow: var(--shadow-seated-pressed); /* presses INTO the track — inset mirror of raised */
+  transition-duration: var(--duration-instant);
+  transition-timing-function: var(--ease-press);
+}
+.seated-surface:focus-visible {
+  outline-color: var(--beacon); /* SAME 2px beacon ring as raised — the shared grammar */
+}
+.seated-surface:disabled,
+.seated-surface[aria-disabled="true"] {
+  box-shadow: none;
+  border-color: color-mix(in oklab, var(--border) 50%, transparent);
+}
+
+/* ==============================================================
+   TASLAK tokens (src/taslak) — here rather than in taslak.css because Tailwind generates utilities
+   only for the entry that imports it, and the draft needs `bg-shell`, `text-ink`, `text-body`.
+   Names are additive: v5 speaks --background/--card and Tailwind's own text scale, so nothing is
+   overwritten. `static` because a token reached only through var() in a TSX inline style is
+   invisible to the tree-shaker. Dark overrides and the tamga-* classes stay in taslak.css.
+   ============================================================== */
+/* Kitin kendi ad ailesi (--color-page, --color-ink …). Koyu karşılıkları
+   kit.css'te, ayrı bir dosyada: tam olarak bir parite kapısı gerektiren şey.
+   tamga:kit-acik */
+@theme static {
+
+
+  /* 1 · neutral ramp — cooled off, one step per layer */
+  /* The ground everything sits on. The rail and the band share it: what divides
+     them is a 1px line, never a fill.
+     TR: Her şeyin üstünde durduğu zemin. Ray ve şerit de aynı zemini kullanıyor: onları
+     ayıran şey 1px'lik bir çizgi, asla bir dolgu. */
+  --color-page: #f5f2ec;
+  /* A raised surface: cards, overlays, popovers. It is barely lighter than the
+     page on purpose; the edge does the lifting.
+     TR: Yükseltilmiş yüzey: kartlar, katmanlar, balonlar. Sayfadan bilerek çok az açık;
+     yükseltmeyi kenar yapıyor. */
+  --color-shell: #fdfcfa;
+  /* A row under the pointer, and a selected row's neutral wash. Same value as
+     sunk, different job.
+     TR: İmlecin altındaki satır, ve seçili satırın nötr yıkaması. Gömülü ile aynı değer,
+     farklı iş. */
+  --color-hover: #eceae6;
+  /* The strip above a table: counters, page-size, summary lines. It is the
+     page, separated by a line.
+     TR: Tablonun üstündeki şerit: sayaçlar, sayfa boyu, özet satırları. Sayfanın
+     kendisi, bir çizgiyle ayrılmış. */
+  --color-band: #f5f2ec;
+  /* The navigation rail. Also the page: a sidebar that fills itself becomes a
+     second surface competing with the content.
+     TR: Gezinme rayı. O da sayfa: kendini dolduran bir kenar çubuğu, içerikle yarışan
+     ikinci bir yüzeye dönüşüyor. */
+  --color-rail: #f5f2ec;
+  /* Content that sits IN the page rather than on it: filter bars, table
+     headers, code blocks, sub-panels.
+     TR: Sayfanın üstünde değil İÇİNDE duran içerik: filtre çubukları, tablo başlıkları,
+     kod blokları, alt paneller. */
+  --color-sunk: #eceae6;
+  /* the single rule colour: dividers and card edges
+     TR: tek çizgi rengi: ayraçlar ve kart kenarları */
+  --color-line: #e2ded6;
+  /* Darkened from #d9d6d1 after v5's contrast gate measured it at ΔL* 9.8 against
+     the page, just under the floor of 10 where a raised surface stops reading as
+     raised. check-token-contrast now measures it here too, and reproduces that
+     same 9.8, which is how we know the two gates share one arithmetic.
+     TR: #d9d6d1'den koyulaştırıldı: v5'in kontrast kapısı sayfaya karşı ΔL* 9.8
+     ölçmüştü, yükseltilmiş bir yüzeyin yükseltilmiş okunmayı bıraktığı 10 tabanının
+     hemen altında. check-token-contrast artık burada da ölçüyor ve aynı 9.8'i üretiyor;
+     iki kapının tek bir aritmetiği paylaştığını böyle biliyoruz. */
+  --color-edge: #d2cec8;
+  /* neutral fill under a chart: area body, sparkline wash
+     TR: grafiğin altındaki nötr dolgu: alan gövdesi, kıvılcım çizgisi yıkaması */
+  --color-chart-fill: #eceae6;
+  /* Lightened text, and it answers to AA like any other text. Was #716b5d, which
+     measured 4.41 against --color-sunk and --color-hover, under the 4.5 floor, so
+     secondary text on a filter bar, a table header or a hovered row was failing
+     while the same colour passed on the page. Nobody saw it: it fails by 0.09.
+     Darkened one step to clear 4.5 on every surface it can land on (4.54 on sunk,
+     4.89 on the page, 5.32 on a card). check-token-contrast measures it now.
+     TR: Açılmış metin, ve her metin gibi AA'ya cevap veriyor. #716b5d'ydi; --color-sunk
+     ve --color-hover'a karşı 4.41 ölçüldü, 4.5 tabanının altında, yani bir filtre
+     çubuğundaki ya da tablo başlığındaki ikincil metin, aynı renk sayfada geçerken orada
+     kalıyordu. */
+  --color-ink-faint: #6f695b;
+  /* The second weight: labels, secondary rows, anything that supports the
+     heading without competing with it.
+     TR: İkinci ağırlık: etiketler, ikincil satırlar, başlıkla yarışmadan onu destekleyen
+     her şey. */
+  --color-ink-soft: #453f34;
+  /* The heaviest weight: headings, table values, anything the eye should land
+     on first.
+     TR: En ağır ağırlık: başlıklar, tablo değerleri, gözün ilk konması gereken her şey. */
+  --color-ink: #26221a;
+
+  /* 2 · accent — interaction only */
+  /* A face on a base, never a fill with a shadow. #12245c is L* 16 — our body
+     text is L* 27 and our heading ink is L* 13, so as a fill it was a text
+     colour, and every product primary worth comparing sits at L* 46–62. A
+     near-black face leaves no room for a base under it, which is why the offset
+     kept having to escape upward. The navy moved to the base, and the face
+     sits at L* 45 carrying white ink: 29 ΔL* between the two layers. */
+  --color-accent: #2069c9; /* primary fill TR: birincil dolgu */
+  --color-accent-hover: #005ab5; /* darkens, not lightens; white ink needs it TR: açılmaz, koyulaşır; beyaz mürekkep bunu istiyor */
+  /* The pressed face. It keeps going in the same direction as hover: darker in
+     light, brighter in dark.
+     TR: Basılı yüz. Üzerine gelmeyle aynı yönde devam ediyor: açıkta daha koyu, koyuda
+     daha parlak. */
+  --color-accent-active: #004c9b;
+  --color-accent-ink: #fdfcfa; /* white ink on the fill, 5.22:1 TR: dolgunun üstünde beyaz mürekkep, 5.22:1 */
+  --color-accent-line: #12245c; /* link text, focus ring, thin marks TR: bağlantı metni, odak halkası, ince işaretler */
+  --color-accent-bg: #ecedf3; /* selected row ground TR: seçili satırın zemini */
+  /* The base the face sits on, and the primary's edge. This is where the brand
+     navy belongs: dark, saturated, and doing the job a shadow is supposed to do
+     instead of pretending to be a fill.
+     TR: Yüzün üstüne oturduğu taban, ve birincilin kenarı. Marka lacivertinin yeri
+     burası: koyu, doygun, ve bir dolgu taklidi yapmak yerine bir gölgenin yapması
+     gereken işi yapıyor. */
+  --color-accent-shadow: #12245c;
+
+  /* 3 · status — healthy green, silenced neutral */
+  /* Something is broken and someone has to act. The only red in the system, and
+     it never decorates.
+     TR: Bir şey bozuldu ve birinin harekete geçmesi gerekiyor. Sistemdeki tek kırmızı,
+     ve asla süslemiyor. */
+  --color-critical: #b3341f;
+  /* The wash behind a critical chip or row. A tint, not a fill: it carries no
+     text of its own.
+     TR: Kritik bir çipin ya da satırın arkasındaki yıkama. Bir dolgu değil bir ton:
+     kendi metnini taşımıyor. */
+  --color-critical-bg: #fbeae4;
+  /* Not broken yet, but heading there. A threshold crossed, a queue growing, a
+     stock running low.
+     TR: Henüz bozulmadı ama o yöne gidiyor. Aşılan bir eşik, büyüyen bir kuyruk, azalan
+     bir stok. */
+  --color-warn: #8a5a0b;
+  /* The wash behind a warning chip or row.
+     TR: Uyarı çipinin ya da satırının arkasındaki yıkama. */
+  --color-warn-bg: #fbf1dd;
+  /* Healthy, and also resolved. One green for both, because a reader should
+     not have to learn two.
+     TR: Sağlıklı, ve aynı zamanda çözüldü. İkisi için tek yeşil, çünkü okuyanın iki renk
+     öğrenmesi gerekmemeli. */
+  --color-resolved: #0a7a5f;
+  /* The wash behind a healthy or resolved chip.
+     TR: Sağlıklı ya da çözülmüş bir çipin arkasındaki yıkama. */
+  --color-resolved-bg: #e3f3ec;
+  /* Was #716b5d, the same value as ink-faint, and it failed on the one ground it
+     is documented against: silent on chart-fill measured 4.41:1, under AA. It
+     passed on the card (5.17:1), which is why it went unnoticed: the healthy
+     and paused chips are the only place the pair actually meets. Darkened to
+     clear the wash (5.02:1) while staying clearly the muted tone. It no longer
+     tracks ink-faint, which is correct: they are different roles.
+     TR: #716b5d'ydi, ink-faint ile aynı değer, ve belgelendiği tek zeminde kalıyordu:
+     chart-fill üstünde 4.41:1, AA'nın altında. Kartta geçiyordu (5.17:1), fark
+     edilmemesinin sebebi de bu. */
+  --color-silent: #696256;
+
+  /* Instrument scale marks: the progress dial's ticks. NOT --color-edge: a tick is
+     READ, so it answers to a floor (visible on card, page AND the sunk wash), never
+     to the rule line's deliberate softness. On --color-sunk the edge measured ΔL* 7.0
+     against a floor of 12.
+     TR: Gösterge ölçek işaretleri: ilerleme kadranının çentikleri. --color-edge DEĞİL:
+     bir çentik OKUNUR, yani çizginin bilerek seçilmiş yumuşaklığına değil bir tabana
+     cevap verir (kartta, sayfada VE gömülü yıkamada görünecek). */
+  --color-tick: #bdb8ae;
+
+  /* Categorical series: data that is NOT a status (regions, plans, series).
+     Quieter than the status palette on purpose: C* 26 against status's 36–65, so a
+     chart can never out-shout an event. Hues avoid critical's red and resolved's
+     green, the two a reader would most easily misread on a line.
+     TR: Kategorik seriler: durum OLMAYAN veri (bölgeler, planlar, seriler). Durum
+     paletinden bilerek daha sessiz: durumun 36–65'ine karşı C* 26, yani bir grafik bir
+     olayın sesini asla bastıramıyor. */
+  --color-chart-1: #887c4f;
+  /* Teal, the second series. Far enough from resolved's green that a line is
+     never mistaken for a status.
+     TR: Deniz mavisi, ikinci seri. Çözüldü yeşilinden, bir çizginin durum sanılmayacağı
+     kadar uzak. */
+  --color-chart-2: #32888a;
+  /* Blue, the third series.
+     TR: Mavi, üçüncü seri. */
+  --color-chart-3: #4782a5;
+  /* Violet, the fourth series.
+     TR: Mor, dördüncü seri. */
+  --color-chart-4: #7f76a2;
+  /* Rose, the fifth and last. Beyond five the eye stops telling series apart
+     and a legend stops helping.
+     TR: Gül, beşinci ve sonuncu. Beşten sonra göz serileri ayırmayı bırakıyor ve bir
+     gösterge artık yardım etmiyor. */
+  --color-chart-5: #a36c84;
+
+  /* rail navigation */
+  /* An idle rail label is TEXT, so it answers to AA. Was #8a857a: 3.29 against the
+     rail, while dark's counterpart sat at 5.42, and the asymmetry was the tell that
+     light had never been measured. Now L* 46, the same band as --color-ink-faint,
+     which is what a faint label should be.
+     TR: Boştaki bir ray etiketi METİNDİR, yani AA'ya cevap verir. #8a857a'ydı: raya
+     karşı 3.29, koyudaki karşılığı 5.42'de dururken. Bu asimetri, açığın hiç
+     ölçülmediğinin işaretiydi. */
+  --color-nav-idle: #726d62;
+  /* A rail item under the pointer. Darker than idle in light, brighter in
+     dark: the label steps toward the reader.
+     TR: İmlecin altındaki ray öğesi. Açıkta boştakinden koyu, koyuda daha parlak: etiket
+     okuyana doğru bir adım atıyor. */
+  --color-nav-hover: #4a4438;
+  /* The wash behind a hovered rail item. The current item takes an outline
+     instead, never this fill.
+     TR: Üzerine gelinen ray öğesinin arkasındaki yıkama. Bulunulan öğe bunun yerine bir
+     dış çizgi alıyor, asla bu dolguyu. */
+  --color-nav-hover-bg: #eae6dd;
+
+  /* overlay plane: dropdowns, popovers, dialogs, toasts
+     TR: katman düzlemi: açılır listeler, balonlar, diyaloglar, bildirimler */
+  --color-scrim: rgba(38, 34, 26, 0.32);
+
+  /* ---------------------------------------------------------------- *
+   * Type scale. Ten steps, and nothing outside them.
+   *
+   * The kit ran on 19 hand-written sizes across 272 places, including
+   * 12.5px, 13.5px and 14.5px — half pixels, which no screen renders
+   * cleanly and which nobody chose on purpose. They existed because
+   * each one was typed at the moment it was needed, so the answer to
+   * "how big is body text?" was "somewhere between 12 and 14".
+   *
+   * Each step has ONE job. Pick by role, never by how it looks in the
+   * spot you happen to be in.
+   * ---------------------------------------------------------------- */
+  --text-micro: 10px; /* axis ticks, scale ends, the smallest label TR: eksen çentikleri, ölçek uçları, en küçük etiket */
+  --text-caption: 11px; /* dense mono identifiers, chip text TR: sık eşaralıklı kimlikler, çip metni */
+  --text-small: 12px; /* meta, secondary, table sub-lines TR: üstveri, ikincil satırlar, tablo alt satırları */
+  --text-body: 13px; /* THE default: rows, cells, body copy TR: VARSAYILAN: satırlar, hücreler, gövde metni */
+  --text-control: 14px; /* inputs, textareas, larger body TR: girdiler, metin alanları, daha büyük gövde */
+  --text-subhead: 15px; /* card and section titles TR: kart ve bölüm başlıkları */
+  --text-title: 18px; /* page titles TR: sayfa başlıkları */
+  /* The small display step: a card's hero number, a score.
+     TR: Küçük gösterim adımı: bir kartın öne çıkan sayısı, bir puan. */
+  --text-display-sm: 24px;
+  --text-display: 30px; /* KPI numbers TR: KPI sayıları */
+  /* The largest step, and the rarest. One per screen at most.
+     TR: En büyük adım, ve en nadiri. Ekran başına en fazla bir tane. */
+  --text-display-lg: 40px;
+
+  /* Measure — how long a line of text is allowed to get before the eye loses
+     the start of the next one. Three steps, and nothing outside them; the kit
+     ran on ten hand-written `ch` values across 31 places, which is the type
+     scale's disease in a second coat. */
+  --measure-tight: 36ch; /* a note under a control TR: bir kontrolün altındaki not */
+  --measure: 54ch; /* body copy in a card TR: kart içindeki gövde metni */
+  --measure-wide: 70ch; /* documentation prose TR: doküman metni */
+
+  /* ---------------------------------------------------------------- *
+   * Shape. One knob, and everything derives from it.
+   *
+   * Written as a calc scale rather than two loose numbers so "make the
+   * product a little softer" stays a one-line edit — v5 inherits the
+   * same single-knob structure, and matching it means the values port
+   * without redesigning anything.
+   *
+   * The VALUE is a deliberate departure. v5 carries --radius: 12px with
+   * a note pointing at the brand DNA's "soft corners"; this product went
+   * the other way on purpose. It is an instrument read at 3am, and a
+   * dense table of rows reads faster with corners that stop rather than
+   * curve. Recorded as a knowing deviation, not an oversight — the same
+   * way v5 records its own amber beacon as one.
+   * ---------------------------------------------------------------- */
+
+  /* aliases kept so call sites read by ROLE rather than by size */
+
+  /* ---------------------------------------------------------------- *
+   * Motion. Durations and curves are tokens for exactly the reason
+   * colours are: written inline they drift. Before this block existed
+   * the kit held 16 hand-written values doing four jobs, and they had
+   * already scattered — a toast appeared in 200ms, a progress bar moved
+   * in 240ms, a route revealed in 340ms. Nobody could point at a line
+   * and call it wrong; it just felt uneven.
+   *
+   * --press is its own step and the smallest on purpose: a control that
+   * answers a click in 100ms feels mechanical, which is the whole point
+   * of a hard-offset button. Anything slower reads as lag.
+   * ---------------------------------------------------------------- */
+  --duration-press: 100ms; /* hover, press, focus: every control TR: üzerine gelme, basma, odak: her kontrol */
+
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1); /* everything that enters or moves TR: giren ya da hareket eden her şey */
+
+  /* Loops. Long by design, and the only things allowed past --duration-slow.
+     `--duration-spin` and `--ease-linear` lived here for the old CSS `.tamga-spinner`, a rotating
+     ring. The kit's spinner is three marching bars (ui/spinner.tsx) — nothing in this product
+     rotates any more, so both went with it.
+     TR: Döngüler. Bilerek uzun, ve --duration-slow'u geçmesine izin verilen tek şeyler. */
+  --duration-bar: 900ms;
+}

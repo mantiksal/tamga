@@ -1,0 +1,38 @@
+node_modules/
+dist/
+
+# Next'in build çıktısı. Yoksayılmıyordu ve `apps/docs/.next` binlerce üretilmiş
+# dosyayla ilk commit'e girecekti; ayrıca `.next/types` bayatladığında typecheck
+# artık var olmayan sayfaları arıyor.
+.next/
+.DS_Store
+*.log
+.turbo/
+storybook-static/
+# ÜRETİLEN DOKÜMAN İÇERİĞİ. Dördü de her `dev` ve her `build` öncesinde
+# kaynaktan yeniden üretiliyor (apps/docs `predev`/`prebuild`), yani depoda
+# durmalarının tek etkisi her commit'te gürültü çıkarmaları olurdu. Biri
+# yoksayılıp öteki üçü commit edilirse hangisinin doğru olduğu belirsizleşir.
+apps/docs/src/content/props.json
+apps/docs/src/content/tokens.json
+apps/docs/src/content/icons.json
+apps/docs/src/content/counts.json
+
+# Tarball çıktısı: `pnpm --filter tamga-ui pack` üretir, sürümle birlikte
+# değişir, ve bir yapı çıktısıdır.
+*.tgz
+
+# ÜRÜN VE MÜŞTERİ ADLARI. `check-names` kapısının aradığı kelimeler.
+# Depo public: bir yasak kelime listesi, yasakladığı kelimeleri barındırmak
+# zorunda, o yüzden liste depoda değil yanında duruyor. Biçimi
+# `scripts/urun-adlari.example.json` gösteriyor.
+scripts/urun-adlari.json
+
+# İÇ BELGELER. Yol haritası, eksik envanteri, müşteri adı geçen ADR'ler.
+# Depo public; müşteri adı, teknoloji yığını ve iç değerlendirmeler dışarı
+# çıkmaz. Gerekçesi: docs/ozel/README.md
+docs/ozel/
+
+# TypeScript'in artımlı derleme önbelleği. 1 MB'lık üretilmiş bir dosya, her
+# typecheck'te değişiyor ve her commit'te gürültü çıkarıyor. Kaynak değil çıktı.
+*.tsbuildinfo

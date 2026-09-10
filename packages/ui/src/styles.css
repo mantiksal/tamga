@@ -1,0 +1,5 @@
+/* tamga-ui — tek satırda her şey. Ayrı ayrı da alınabilir:
+   @import "tamga-ui/theme.css";   sadece token'lar
+   @import "tamga-ui/kit.css";     sadece sınıflar (saf CSS) */
+@import "./theme.css";
+@import "./kit.css";

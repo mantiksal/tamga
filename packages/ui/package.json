@@ -1,0 +1,87 @@
+{
+  "name": "tamga-ui",
+  "version": "0.1.0",
+  "description": "Tamga — ortak arayüz kütüphanesi — token'lar, fizik ve bileşenler.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./theme.css": "./dist/theme.css",
+    "./kit.css": "./dist/kit.css",
+    "./package.json": "./package.json",
+    "./icons": {
+      "types": "./dist/components/icons.d.ts",
+      "import": "./dist/components/icons.js",
+      "default": "./dist/components/icons.js"
+    },
+    "./patterns": {
+      "types": "./dist/patterns/index.d.ts",
+      "import": "./dist/patterns/index.js",
+      "default": "./dist/patterns/index.js"
+    },
+    "./blocks": {
+      "types": "./dist/blocks/index.d.ts",
+      "import": "./dist/blocks/index.js",
+      "default": "./dist/blocks/index.js"
+    },
+    "./palette": {
+      "types": "./dist/lib/palette.d.ts",
+      "import": "./dist/lib/palette.js",
+      "default": "./dist/lib/palette.js"
+    }
+  },
+  "scripts": {
+    "build": "node build.mjs && tsc",
+    "prepare": "node build.mjs && tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "typescript": "^7.0.2",
+    "vitest": "3.2.4"
+  },
+  "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.6.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mantiksal/tamga.git",
+    "directory": "packages/ui"
+  },
+  "homepage": "https://tamga.design",
+  "bugs": {
+    "url": "https://github.com/mantiksal/tamga/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "ui",
+    "react",
+    "design-system",
+    "components",
+    "tailwind"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "tamga-docs",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 6070",
+    "build": "next build",
+    "start": "next start -p 6070",
+    "typecheck": "tsc --noEmit",
+    "predev": "node ../../scripts/extract-props.mjs && node ../../scripts/extract-tokens.mjs && node ../../scripts/extract-icons.mjs && node ../../scripts/extract-counts.mjs",
+    "prebuild": "node ../../scripts/extract-props.mjs && node ../../scripts/extract-tokens.mjs && node ../../scripts/extract-icons.mjs && node ../../scripts/extract-counts.mjs"
+  },
+  "dependencies": {
+    "tamga-ui": "workspace:*",
+    "next": "^16.3.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.4.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2"
+  }
+}

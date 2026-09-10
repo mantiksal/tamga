@@ -1,0 +1,10 @@
+packages:
+  - "packages/*"
+  - "apps/*"
+
+# esbuild vitest'in paketleyicisi ve kurulumda kendi ikilisini indiriyor.
+# pnpm bunu onay bekleyen bir yer tutucu olarak bırakmıştı ("set this to true or
+# false"), ve o hâliyle her `pnpm install` ERR_PNPM_IGNORED_BUILDS ile
+# kırılıyordu. İzin veriliyor: testleri çalıştıran şeyin kurulması gerekiyor.
+allowBuilds:
+  esbuild: true

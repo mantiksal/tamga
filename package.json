@@ -1,0 +1,31 @@
+{
+  "name": "tamga",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "check:names": "node scripts/check-no-product-names.mjs",
+    "verify": "pnpm run props && pnpm run check:names && pnpm run check:scale && pnpm run check:docs-i18n && pnpm run check:prop-coverage && pnpm run check:no-emdash && pnpm run check:css && pnpm run check:kit-class && pnpm run check:token-parity && pnpm run check:token-contrast && pnpm run typecheck && pnpm --filter tamga-ui build && pnpm run check:palette && pnpm run test && pnpm run build",
+    "release": "pnpm build && changeset publish",
+    "check:docs-i18n": "node scripts/check-docs-i18n.mjs",
+    "props": "node scripts/extract-props.mjs && node scripts/extract-tokens.mjs && node scripts/extract-icons.mjs && node scripts/extract-counts.mjs",
+    "check:prop-coverage": "node scripts/check-prop-coverage.mjs",
+    "check:scale": "node scripts/check-scale.mjs",
+    "changeset": "changeset",
+    "test": "pnpm -r test",
+    "check:no-emdash": "node scripts/check-no-emdash.mjs",
+    "check:css": "node scripts/check-css.mjs",
+    "check:kit-class": "node scripts/check-kit-class.mjs",
+    "check:token-parity": "node scripts/check-token-parity.mjs",
+    "check:token-contrast": "node scripts/check-token-contrast.mjs",
+    "check:palette": "node scripts/check-palette.mjs"
+  },
+  "devDependencies": {
+    "@changesets/cli": "2.29.8"
+  }
+}

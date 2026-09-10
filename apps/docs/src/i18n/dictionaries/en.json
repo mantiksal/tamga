@@ -1,0 +1,22 @@
+{
+  "nav": {
+    "home": "Home",
+    "docs": "Documentation menu",
+    "toc": "On this page"
+  },
+  "chrome": {
+    "theme": {
+      "toLight": "Switch to light theme",
+      "toDark": "Switch to dark theme"
+    },
+    "language": "Language",
+    "skipToContent": "Skip to content"
+  },
+  "demo": {
+    "preview": "Preview",
+    "code": "Code",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyAria": "Copy code"
+  }
+}

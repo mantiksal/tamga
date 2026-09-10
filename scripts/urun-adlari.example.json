@@ -1,0 +1,5 @@
+{
+  "_": "Örnek. Gerçek liste `scripts/urun-adlari.json` adıyla yanına konur ve .gitignore'da durur; depo public olduğu için müşteri adları depoya giremez. Bu dosya yalnız biçimi gösteriyor.",
+  "names": ["acmecorp", "ornekmusteri"],
+  "domain": ["ornekalan"]
+}

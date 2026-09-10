@@ -1,0 +1,151 @@
+import { ScoreMatrix } from "tamga-ui";
+import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { PageHead, H2, P, Note } from "@/components/prose";
+import { Demo } from "@/components/demo";
+import { Xref } from "@/components/xref";
+import { Props } from "@/components/props";
+import { findPage } from "@/content/nav";
+
+export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }) {
+  const { lang } = await params;
+  return { title: findPage("score-matrix")!.title[lang] };
+}
+
+/**
+ * Sayfa metni, iki dilli.
+ *
+ * Neden burada ve sözlükte değil: bir doküman paragrafını JSON anahtarına
+ * çevirmek onu okunamaz hâle getirir ve yapıyı metinden koparır. Sözlük ARAYÜZ
+ * metinleri içindir ("Kopyala", "Önizleme"); sayfa içeriği sayfayla yaşar.
+ *
+ * İkisi aynı dosyada, çünkü asıl risk çeviri değil AYRIŞMA: Türkçesi
+ * güncellenip İngilizcesi unutulursa iki farklı gerçek doğar. Yan yana
+ * durduklarında bu unutuş görünür olur.
+ *
+ * ÖRNEKLERİN İÇİ DE ÇEVRİLİYOR — buton yazıları, yer tutucular, örnek veri.
+ * Bir İngilizce sayfada "Kaydet" yazan bir buton, çevrilmemiş bir sayfadan
+ * daha kötüdür: sayfa çevrilmiş görünür, ama ekrandaki şey değildir.
+ */
+const T = {
+  tr: {
+    lead: (
+      <>
+        Aynı okumanın kare ızgara hâli. Halka bir <em>oranı</em>, matris bir <em>doluluğu</em>
+        gösterir: kaç hücre yandı, kaçı boş kaldı; sayıyı saymadan görürsün.
+      </>
+    ),
+    rel: (
+      <>
+        Halka hâli <Xref to="score-ring">Score ring</Xref>; yatık hâli{" "}
+        <Xref to="score-meter">Score meter</Xref>.
+      </>
+    ),
+    bands: "Bantlar",
+    bandsWhy: (
+      <>
+        Bunlar kitin varsayılanı. Farklı eşikleri olan bir ürün kendi tonunu verir; sayı ile
+        anlam arasındaki eşik bir ürün kararıdır.
+      </>
+    ),
+    noField: (
+      <>
+        <strong>Bu bileşenin bir alanı yok.</strong> SEO skoru, stok doluluk oranı, sipariş
+        karşılama yüzdesi, tamamlanma, memnuniyet; hepsi aynı bileşen. Adının nötr olması
+        bilinçli.
+      </>
+    ),
+    labelRule: (
+      <>
+        <code>label</code> isteğe bağlı değil. Bir gösterge ekran okuyucuya &quot;96&quot; demez;
+        ne olduğunu söylemesi gerekir. Ve kit onu <em>üretemez</em>: çeviri çağıranın işi.
+      </>
+    ),
+    rules: "Kurallar",
+    related: "İlgili",
+    good: "İyi",
+    mid: "Orta",
+    low: "Düşük",
+    score: (n: number) => `Skor ${n} / 100`,
+  },
+  en: {
+    lead: (
+      <>
+        The same reading as a square grid. A ring shows a <em>ratio</em>; a matrix shows{" "}
+        <em>fill</em>: how many cells lit and how many stayed empty; you see it without counting.
+      </>
+    ),
+    rel: (
+      <>
+        As a ring, <Xref to="score-ring">Score ring</Xref>; laid flat,{" "}
+        <Xref to="score-meter">Score meter</Xref>.
+      </>
+    ),
+    bands: "Bands",
+    bandsWhy: (
+      <>
+        These are the kit&apos;s defaults. A product with different thresholds passes its own tone
+, where a number turns into a meaning is a product decision.
+      </>
+    ),
+    noField: (
+      <>
+        <strong>This component has no field.</strong> An SEO score, stock fill rate, order
+        fulfilment percentage, completion, satisfaction; all the same component. Its neutral name
+        is deliberate.
+      </>
+    ),
+    labelRule: (
+      <>
+        <code>label</code> is not optional. A gauge does not say &quot;96&quot; to a screen
+        reader; it has to say what it is. And the kit <em>cannot</em> produce it: translation is
+        the caller&apos;s job.
+      </>
+    ),
+    rules: "Rules",
+    related: "Related",
+    good: "Good",
+    mid: "Fair",
+    low: "Low",
+    score: (n: number) => `Score ${n} / 100`,
+  },
+};
+
+export default async function Page({ params }: { params: Promise<{ lang: Locale }> }) {
+  const { lang } = await params;
+  const dict = await getDictionary(lang);
+  const p = findPage("score-matrix")!;
+  const t = T[lang];
+  return (
+    <>
+      <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
+      <P>{t.lead}</P>
+      <Demo
+        labels={dict.demo}
+        align="start"
+        code={`<ScoreMatrix value={91} delta={1.8} label="${t.score(91)}" bandLabel="${t.good}" />`}
+      >
+        <div className="flex w-full flex-wrap items-start gap-10">
+          <ScoreMatrix value={91} delta={1.8} label={t.score(91)} bandLabel={t.good} />
+          <ScoreMatrix value={54} delta={-6.4} label={t.score(54)} bandLabel={t.low} />
+        </div>
+      </Demo>
+
+      <H2>{t.bands}</H2>
+      <pre className="docs-code my-4">{`>= 90   positive
+>= 70   caution
+<  70   danger`}</pre>
+      <P>{t.bandsWhy}</P>
+
+      <H2>{t.rules}</H2>
+      <Note>{t.labelRule}</Note>
+      <Note>{t.noField}</Note>
+
+      <H2>Props</H2>
+      <Props of="ScoreMatrix" lang={lang} />
+
+      <H2>{t.related}</H2>
+      <P>{t.rel}</P>
+    </>
+  );
+}

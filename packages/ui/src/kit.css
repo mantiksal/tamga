@@ -1,0 +1,2248 @@
+/* ==============================================================
+   tamga-ui · KİT
+
+   Bileşen sınıfları ve fizik. Saf CSS — Tailwind direktifi yok,
+   Tailwind'i olmayan bir projede de çalışır.
+
+   Token'lar theme.css'te. Bu dosya yalnız onları tüketir.
+   ============================================================== */
+
+/* ==============================================================
+   THE KIT.
+
+   This was an isolated island (`.taslak`) while it was a reference. It is not a reference any more
+   — it is the product's kit, so the scoping came off: `tamga-*` is global, the tokens sit in the same
+   @theme as everything else, and the base layer styles the document rather than a wrapper div.
+
+   What that replaced: a second, shadcn-derived kit under components/ui with twelve components
+   duplicated by name. Two kits meant two answers to "what does a button look like", and Storybook
+   showed both. One kit now.
+   ============================================================== */
+
+/* ------------------------------------------------------------------ *
+ * Measurements that are NOT on the spacing scale, and why.
+ *
+ * check-scale forbids invented bracket values and prescribes exactly this escape: name the value
+ * next to the tokens with the reason, then use the `var()` form at the call site. Each of these is
+ * a mechanic, not a spacing choice — rounding it to a 4px step would break the thing it measures.
+ * ------------------------------------------------------------------ */
+/* tamga:sabit-kit — kitin kendi yapısal ölçüleri; temaya bağlı değil. */
+:root {
+  /* The gap an overlay floats above its trigger. 8px, so the offset shadow (2px) clears the edge
+     with room to read as detached rather than stuck.
+     TR: Bir katmanın tetikleyicisinin üstünde durduğu boşluk. 8px, yani 2px'lik kaydırma
+     gölgesi kenarı yapışık değil ayrık okunacak kadar rahat geçiyor. */
+  --overlay-gap: 8px;
+  /* The whole computed offset, not just the gap: check-scale accepts a token reference, and a
+     token that still needs arithmetic at the call site is half a token.
+     TR: Yalnız boşluk değil hesaplanmış kaydırmanın tamamı: check-scale bir token
+     referansını kabul ediyor, ve çağrı yerinde hâlâ aritmetik isteyen bir token yarım
+     token. */
+  --overlay-below: calc(100% + var(--overlay-gap));
+  --overlay-above: calc(100% + var(--overlay-gap));
+  /* The dial's band label sits just under the ring's baseline. Negative and tiny: a position, not
+     a spacing step.
+     TR: Kadranın bant etiketi halkanın taban çizgisinin hemen altında duruyor. Negatif
+     ve çok küçük: bir boşluk adımı değil bir konum. */
+  --dial-label-drop: -4px;
+  /* Room a raised object needs BESIDE itself so its 2px offset is not clipped by the parent's
+     overflow. 3px, one more than the offset, which is the clipping trap in §2.
+     TR: Yükseltilmiş bir nesnenin, 2px'lik kaydırması üst öğenin taşmasıyla kırpılmasın
+     diye YANINDA ihtiyaç duyduğu yer. 3px, kaydırmadan bir fazla; §2'deki kırpılma
+     tuzağı tam olarak bu. */
+  --offset-room: 3px;
+  /* The instrument marks: a 2px tick and a 6px dot. Below the spacing scale on purpose: these are
+     read as marks, not as boxes, and 4px is already too heavy for a dial tick.
+     TR: Gösterge işaretleri: 2px'lik bir çentik ve 6px'lik bir nokta. Boşluk ölçeğinin
+     altında, bilerek: bunlar kutu değil işaret olarak okunuyor, ve 4px bir kadran
+     çentiği için şimdiden ağır. */
+  --mark-tick: 2px;
+  --mark-dot: 6px;
+
+  /* Adım işaretinin karesi ve iki adımı bağlayan çizginin uzunluğu. Bir ölçek
+     adımı değil: işaret, iki haneli bir sayı ile bir çentik glifinin İKİSİNİ
+     birden tutması gereken en küçük kare. Sabit olması şart, çünkü adım
+     tamamlandığında büyüyen bir işaret şeridin tamamını kaydırıyor.
+     TR: Adım işaretinin karesi ve iki adımı bağlayan çizginin uzunluğu. Bir
+     ölçek adımı değil: iki haneli bir sayıyı da çentik glifini de tutabilen en
+     küçük kare. Sabit olmak zorunda, yoksa tamamlanan adım şeridi kaydırıyor. */
+  --step-mark: 24px;
+  --step-line: 28px;
+  /* Smallest radius in the system: the checkbox tick and the skeleton block. --radius-ctl (4px)
+     reads as a control; these are neither.
+     TR: Sistemdeki en küçük yarıçap: onay kutusunun çentiği ve iskelet bloğu.
+     --radius-ctl (4px) bir kontrol gibi okunuyor; bunların ikisi de kontrol değil. */
+  --radius-mark: 3px;
+  /* The ceiling for a wide dialog. Not a scale step but a LIMIT: a preview
+     should be able to take the whole screen and still not grow without end,
+     because at 2000px a list stops being readable. 3rem is the shell's own
+     margin.
+     TR: Geniş diyaloğun tavanı. Bir ölçek adımı değil bir SINIR: bir önizleme ekranın
+     tamamını alabilmeli ama sonsuz da genişlememeli, çünkü 2000 pikselde bir liste artık
+     okunmuyor. 3rem, kabuğun kendi kenar boşluğu. */
+  --dialog-wide: min(96rem, calc(100vw - 3rem));
+
+  /* Where a dense table stops shrinking and starts scrolling. Content-driven, not a scale step:
+     it is the width at which the narrowest column stops being readable.
+     TR: Sık bir tablonun küçülmeyi bırakıp kaydırmaya başladığı yer. Bir ölçek adımı
+     değil içerikten gelen bir sayı: en dar sütunun okunmaz olduğu genişlik. */
+  --table-min: 720px;
+  --table-min-wide: 980px;
+  --table-min-widest: 1080px;
+}
+
+/* tamga:kit-koyu */
+.dark {
+
+  color-scheme: dark;
+
+  /* The neutral ramp is tinted toward the accent hue, specified in LCh — never
+     in HSL, and never by copying another product's numbers. Two earlier attempts
+     failed and both failures are the reason this comment is long.
+
+     1st: matched Sentry's HSL saturation (14%). HSL S is not perceptual chroma —
+     at identical S and L, violet at 258° carries ~1.4x the real chroma of blue.
+     Matching their number guaranteed a weaker tint. The ramp read grey.
+
+     2nd: rebuilt in LCh at hue 277° with raised chroma. Still grey, for a worse
+     reason: 277° is the middle of the Tailwind slate band (271–283°), and the
+     chroma sat under slate's own (slate-900 is C* 14.45). A colour inside that
+     hue band and below that chroma IS the industry-default dark grey. Raising
+     chroma alone had only made it a more saturated slate.
+
+     What actually makes a tint read as a tint is hue distance from the neutral
+     band, not chroma. Sentry gets away with LOW chroma (5.5–12.7) because its
+     hue sits at 299–304° — about 20° clear of slate, where nothing generic
+     lives. Our blue does not have that luxury: blue IS the neutral band.
+
+     So: hue 291°, the true LCh hue of our own primary #12245c, which clears
+     slate's edge — and chroma pushed past slate's 14.45 to cover the fact that
+     we clear it by 8° where Sentry clears it by 20°. Exceeding Sentry's chroma
+     is not an inconsistency; it is what equal perception costs on a blue axis.
+     L* is pinned exactly where it already sat, so the ramp gains colour without
+     moving a single contrast value.
+        L*  5.9 -> C* 16      L* 19.9 -> C* 26      L* 85.1 -> C* 6.0
+        L*  9.3 -> C* 19      L* 27.9 -> C* 31      L* 94.4 -> C* 2.8
+        L* 14.2 -> C* 22      L* 61.9 -> C* 11
+     Light stays warm paper on purpose: paper by day, instrument screen by night,
+     and a cool ground makes the warm status colours separate harder. */
+  --color-page: #0f1127;
+  /* A raised surface: cards, overlays, popovers. It is barely lighter than the
+     page on purpose; the edge does the lifting. */
+  --color-shell: #131832;
+  /* A row under the pointer, and a selected row's neutral wash. Same value as
+     sunk, different job. */
+  --color-hover: #1c2241;
+  /* Rail and band ARE the page in both themes — a 1px line does the dividing,
+     never a fill. Dark briefly had them 1.9 ΔL* off the page: too small to read
+     as a surface, too large to be the same one. */
+  --color-band: #0f1127;
+  /* The navigation rail. Also the page: a sidebar that fills itself becomes a
+     second surface competing with the content. */
+  --color-rail: #0f1127;
+  /* Content that sits IN the page rather than on it: filter bars, table
+     headers, code blocks, sub-panels. */
+  --color-sunk: #1c2241;
+  --color-line: #262d54;
+  --color-edge: #363e6e;
+  --color-chart-fill: #1c2241;
+  --color-ink-faint: #9494a8;
+  /* The second weight: labels, secondary rows, anything that supports the
+     heading without competing with it. */
+  --color-ink-soft: #d4d4df;
+  /* The heaviest weight: headings, table values, anything the eye should land
+     on first. */
+  --color-ink: #efeef4;
+
+  /* Dark inverts the face, and it has to. The rule across both themes is that
+     the FACE is the layer furthest from the ground and the BASE is the brand
+     navy. Light's ground is paper, so the face goes mid-dark and carries white
+     ink. Dark's ground is near-black, and there white ink is what kills the
+     press: it caps the fill at L* 47, while the base has to reach L* 26 just to
+     separate from the page — leaving at most 21 ΔL* between the two layers,
+     less than light already has. Dark ink lifts that ceiling, the face goes to
+     L* 66, and the layers separate by 50. Hue sits at 272° rather than light's
+     284° to stay plainly blue at high lightness, where 284° starts to read
+     periwinkle. */
+  --color-accent: #53a4fa;
+  --color-accent-hover: #78b4ff; /* lightens here — dark ink wants it brighter */
+  --color-accent-active: #4097eb;
+  --color-accent-ink: #12245c; /* navy ink on the bright face — 5.62:1 */
+  --color-accent-line: #86a7f3;
+  /* Must out-chroma the neutral hover it sits next to. At the old C* 16.3 it
+     fell UNDER hover's C* 22, so a selected row read duller than a hovered one. */
+  --color-accent-bg: #0f2458;
+  /* The brand navy LIFTED, and the lift is the whole point. A base has to clear
+     two things at once — the face above it and the ground behind it — and light
+     manages both without help (79 ΔL* off the paper, 29 off the face). Dropped
+     into dark unchanged, #12245c clears the face by 50 but the page by only 10,
+     so it sinks into the page and the button loses its base entirely. Being
+     bright next to the face is not enough; it also has to be visibly NOT the
+     page. L* 30 buys 24 off the page and still leaves 36 off the face. */
+  --color-accent-shadow: #344479;
+
+  /* Status stays warm against the cool ground — deviation separates harder. */
+  --color-critical: #ff9478;
+  /* The wash behind a critical chip or row. A tint, not a fill: it carries no
+     text of its own. */
+  --color-critical-bg: #331a12;
+  /* Not broken yet, but heading there. A threshold crossed, a queue growing, a
+     stock running low. */
+  --color-warn: #e8ab3c;
+  /* The wash behind a warning chip or row. */
+  --color-warn-bg: #33260f;
+  /* Healthy, and also resolved. One green for both, because a reader should
+     not have to learn two. */
+  --color-resolved: #4fd4ac;
+  /* The wash behind a healthy or resolved chip. */
+  --color-resolved-bg: #0f2a22;
+  --color-silent: #9494a8;
+  --color-tick: #3f4880;
+  --color-chart-1: #ada072;
+  /* Teal, the second series. Far enough from resolved's green that a line is
+     never mistaken for a status. */
+  --color-chart-2: #5badaf;
+  /* Blue, the third series. */
+  --color-chart-3: #6ea7cc;
+  /* Violet, the fourth series. */
+  --color-chart-4: #a49ac9;
+  /* Rose, the fifth and last. Beyond five the eye stops telling series apart
+     and a legend stops helping. */
+  --color-chart-5: #ca90a9;
+
+  /* Same LCh treatment — these echo ramp steps and must not drift off the axis. */
+  --color-nav-idle: #89899d;
+  /* A rail item under the pointer. Darker than idle in light, brighter in
+     dark: the label steps toward the reader. */
+  --color-nav-hover: #d4d4df;
+  /* The wash behind a hovered rail item. The current item takes an outline
+     instead, never this fill. */
+  --color-nav-hover-bg: #1c2241;
+  --color-scrim: rgba(6, 6, 22, 0.62);
+}
+
+@layer base {
+
+  body {
+    background: var(--color-shell);
+    /* PUNTO DA BURADA, ve uzun süre değildi.
+       Kit `--text-body: 13px`i "THE default: rows, cells, body copy" diye
+       tanımlıyordu ama hiçbir yer onu BODY'ye uygulamıyordu. Sonuç: sınıfı
+       olan her metin ölçekte, sınıfı olmayan her metin tarayıcının 16px'inde,
+       yani aynı ekranda iki ayrı ölçek. Doküman sitesinde görünmedi çünkü o
+       kendi okuma ölçeğini yazıyor; bir tüketici panelinde tablo hücreleri %23
+       büyük çıktı ve fark oradan yakalandı.
+       Tüketici kendi ölçeğini isterse yine yazabilir; bu bir varsayılan. */
+    font-size: var(--text-body);
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-ink-soft);
+    -webkit-font-smoothing: antialiased;
+  }
+  :is(h1, h2, h3, h4, h5, h6, th, strong, b) {
+    color: var(--color-ink);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-edge) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-edge);
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  /* native checkboxes are restyled so tables and the kit look identical */
+  input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    display: inline-grid;
+    place-content: center;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    border: 1px solid var(--color-edge);
+    border-radius: 3px;
+    background: var(--color-shell);
+    box-shadow: 1px 1px 0 var(--color-edge);
+    cursor: pointer;
+    transition: background var(--duration-press) var(--ease-standard), border-color var(--duration-press) var(--ease-standard), box-shadow var(--duration-press) var(--ease-standard);
+  }
+  input[type="checkbox"]::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    transform: scale(0);
+    transition: transform var(--duration-press) var(--ease-standard);
+    background: var(--color-accent-ink);
+    clip-path: polygon(
+      14% 47%, 0 61%, 39% 100%, 100% 22%, 85% 8%, 37% 70%
+    );
+  }
+  input[type="checkbox"]:hover {
+    border-color: var(--color-accent-line);
+    box-shadow: 1px 1px 0 var(--color-accent-line);
+  }
+  input[type="checkbox"]:checked {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    box-shadow: 1px 1px 0 var(--color-accent-shadow);
+  }
+  input[type="checkbox"]:checked::before {
+    transform: scale(1);
+  }
+  ::selection {
+    background: var(--color-accent-bg);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 1px solid var(--color-accent-line);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+
+  /* ---------- structure ---------- */
+
+  /* the one left line every page shares */
+  .tamga-gutter {
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+  }
+
+  /* a full-bleed rule, still used for page bands and inside cards */
+  .tamga-section {
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  /* a card is a button that grew: same 1px edge, same soft 2px offset */
+  /* The working surface: one card that holds a whole screen.
+     The chrome around it — rail, header, ground — is all --color-page and has
+     no dividing line, so it reads as one continuous frame. This is the only
+     thing on top of that frame, which is why it takes the control radius
+     rather than the card radius: at this size the sharper corner keeps it
+     reading as a plane, and it stays in the same family as the buttons inside
+     it. A softer corner here would make the whole screen look like a widget. */
+  .tamga-surface {
+    background: var(--color-page);
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-ctl);
+  }
+
+  .tamga-card {
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-edge);
+    background: var(--color-shell);
+    box-shadow: 2px 2px 0 var(--color-edge);
+    overflow: hidden;
+  }
+  /* Kırpmayı kapatan kaçış yolu.
+
+     `.tamga-card`'ın `overflow: hidden`'ı tabloların köşe yuvarlaması için
+     gerekli — ve aynı satır, kartın İÇİNDE açılan her paneli kesiyor:
+     bir Combobox listesi, bir DatePicker takvimi, bir satır menüsü. Panel
+     çalışıyor, tıklanıyor, ama yarısı görünmüyor. Z-index bunu çözmez;
+     hiçbir yığın sırası bir `overflow` kırpmasını aşamaz.
+
+     `CellActions` aynı tuzağın tablo hücresi karşılığıydı ve ayrı çözülmüştü;
+     bu, kart seviyesindeki hâli. */
+  .tamga-card-open {
+    overflow: visible;
+  }
+
+  /* a second column, opened by one full-height rule */
+  .tamga-col {
+    border-left: 1px solid var(--color-line);
+  }
+
+  /* section heading sits on the gutter with no box of its own */
+  .tamga-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    min-height: var(--row-sm);
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  /* rail item: outlined and lifted when active — never a solid fill */
+  /*
+   * KAYAN BİR RAY, YÜKSELEN BİR KONTROLÜ KIRPAR.
+   *
+   * Ölçülen hata: menüsü uzun olan bir kenar çubuğunda `overflow-y: auto`
+   * gerekiyor, ama CSS bir eksende `visible` dışında bir değer görünce ÖTEKİ
+   * ekseni de `auto`ya çeviriyor. Yani dikey kaydırma isteyen bir kap yatayda
+   * da kırpıyor, ve seçili ray girişinin 2px sert kaydırması tam kenarda
+   * kesiliyor: düğme sağdan ve alttan eksik görünüyor. Hover'da kaydırma 3px'e
+   * çıkıyor, basılınca yer değiştiriyor — üçü de kırpılıyor.
+   *
+   * Çözüm z-index DEĞİL: hiçbir yığın sırası bir `overflow` kırpmasını aşmaz.
+   * Kaydırmanın sığacağı yer AÇILIYOR (`--offset-room`, kaydırmadan bir fazla).
+   */
+  .tamga-rail-scroll {
+    min-height: 0;
+    overflow-y: auto;
+    /* DÖRT YANDAN DA YER, yalnız sağ ve alttan değil.
+       İlk hâli kaydırma gölgesini (sağ+alt) düşünüp hover'ı unutmuştu: seçili
+       giriş hover'da `translate(-1px, -1px)` ile YUKARI ve SOLA kayıyor, ve
+       sol kenarda yer olmadığı için oradan kesiliyordu. Simetrik dolgu ayrıca
+       ikinci bir şeyi düzeltiyor: dar rayda `items-center` artık gerçekten
+       ortalıyor — tek yönlü dolgu ikonları 1.5 piksel sola çekiyordu. */
+    padding: var(--offset-room);
+    /* Kaydırma çubuğu gizli: ray dar ve bir çubuk orada ikonların yerini
+       daraltıyor. Kaydırma yine çalışıyor. */
+    scrollbar-width: none;
+  }
+  .tamga-rail-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tamga-rail-link {
+    position: relative;
+    display: flex;
+    height: 40px;
+    width: 40px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: var(--radius-ctl);
+    color: var(--color-nav-idle);
+    transition: color var(--duration-press) var(--ease-standard), background var(--duration-press) var(--ease-standard), border-color var(--duration-press) var(--ease-standard),
+      box-shadow var(--duration-press) var(--ease-standard), transform var(--duration-press) var(--ease-standard);
+  }
+  /* ETİKETLİ HÂLİ. Aynı kontrolün ikinci genişliği, ayrı bir bileşen değil:
+     dar ray yalnız ikon taşır, geniş kenar çubuğu ikonun yanına etiketi açar.
+     İkiye bölünseydi hover, seçili ve odak fizikleri iki yerde yaşardı ve
+     zamanla ayrışırdı. */
+  .tamga-rail-link-wide {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 10px;
+    padding-inline: 10px;
+  }
+  .tamga-rail-link:hover {
+    color: var(--color-nav-hover);
+    background: var(--color-nav-hover-bg);
+  }
+  .tamga-rail-link[data-active="true"] {
+    color: var(--color-accent-line);
+    background: var(--color-shell);
+    border-color: var(--color-accent-line);
+    box-shadow: 2px 2px 0 var(--color-accent-line);
+  }
+  .tamga-rail-link[data-active="true"]:hover {
+    background: var(--color-shell);
+    color: var(--color-accent-line);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--color-accent-line);
+  }
+  .tamga-rail-link[data-active="true"]:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--color-accent-line);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Press snaps, release eases.
+   *
+   * Both directions used the same 100ms ease, and on a trackpad TAP that meant the press was never
+   * seen: `:active` lasts about 10–40ms on a tap, so the control got a third of the way down and
+   * turned round. Holding a physical click gives it the full 100ms, which is why the same button
+   * felt right under a click and dead under a tap.
+   *
+   * So the press is instant and only the RETURN is animated. Even a 15ms tap now bottoms the
+   * control out completely, and the 100ms float back is the part the eye actually reads as a
+   * click — perception needs the movement, not the dwell.
+   *
+   * Only the duration changes. Travel, shadow and colour are untouched.
+   * ------------------------------------------------------------------ */
+  .tamga-btn:not(:disabled):active,
+  .tamga-icon-btn:not(:disabled):active,
+  .tamga-mini-btn:not(:disabled):active,
+  .tamga-rail-link[data-active="true"]:active,
+  .tamga-art-tile:active,
+  .tamga-art-route:active {
+    transition-duration: 0s;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * The press-travel hit fix.
+   *
+   * A raised control moves down-right when pressed — hover sits at −1,−1 and active at +2,+2 (the
+   * primary goes to +3,+3), so the box travels 3–4px out from under the pointer. A transform moves
+   * the HIT AREA with it, so a pointer resting within that band along the top or left edge ends up
+   * over the parent by the time the button comes up. `mousedown` lands on the button, `mouseup`
+   * lands on its container, and a `click` event is never born — the control simply does nothing.
+   *
+   * It shows up on a trackpad TAP far more than on a physical click: a tap has no dwell time and
+   * the finger drifts a pixel or two, while a real click holds the pointer still while the box
+   * moves. Same defect, different odds — which is exactly why it read as "tap is broken".
+   *
+   * The fix is a hit extender that reaches back up and left by the travel distance. It rides along
+   * with the transform, so once the control has moved it covers precisely the ground the control
+   * left behind. It only ever grows up and left, never down or right, so it cannot reach into the
+   * next control in a row or a column.
+   * ------------------------------------------------------------------ */
+  .tamga-btn,
+  .tamga-icon-btn,
+  .tamga-mini-btn,
+  .tamga-rail-link {
+    position: relative;
+  }
+  .tamga-btn::after,
+  .tamga-icon-btn::after,
+  .tamga-mini-btn::after,
+  .tamga-rail-link::after {
+    content: "";
+    position: absolute;
+    /* 4px covers the deepest travel in the kit (the primary's +3 from a −1 hover). */
+    inset: -4px 0 0 -4px;
+    border-radius: inherit;
+  }
+
+  /* ---------- raised objects ---------- */
+  /* buttons and the few genuinely detached cards share one soft edge:
+     a 1px rule plus the same rule offset by 2px. No hard black. */
+
+  .tamga-raised {
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-edge);
+    background: var(--color-shell);
+    box-shadow: 2px 2px 0 var(--color-edge);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * TWO PHYSICS, ONE GRAMMAR.
+   *
+   * RAISED — sits on top of the page, and pressing puts it back down.
+   *   1px edge + N px hard offset; press travels the offset and collapses it.
+   *   Buttons, cards, rail items, segments, the primary action.
+   *
+   * SEATED — is part of its surface and never lifts at all. It answers by
+   *   FILLING or by drawing a rule, not by travelling.
+   *   Tabs (underline), switches (filled track), checkboxes and radios
+   *   (filled box), chips (edge only — and chips are not even interactive).
+   *
+   * The split is not decoration. A tab is not an object lying on the page,
+   * it is part of the bar; pushing it "down" would be a lie about what it is.
+   * v5 inherits the same two-physics idea under the names .press-surface and
+   * .seated-surface — the grammar matches even though the surfaces differ.
+   *
+   * The rule that follows from it: DEPTH MEANS PRESSABLE. Anything that
+   * cannot be pressed does not get an offset, which is exactly why the chip
+   * lost the one it briefly had.
+   * ------------------------------------------------------------------ */
+
+  .tamga-btn {
+    border-radius: var(--radius-ctl);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: var(--control);
+    padding: 0 16px;
+    border: 1px solid var(--color-edge);
+    background: var(--color-shell);
+    font-size: var(--text-body);
+    font-weight: 500;
+    color: var(--color-ink);
+    box-shadow: 2px 2px 0 var(--color-edge);
+    transition: transform var(--duration-press) var(--ease-standard), box-shadow var(--duration-press) var(--ease-standard), background var(--duration-press) var(--ease-standard),
+      border-color var(--duration-press) var(--ease-standard);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  /* a real button: lifts under the cursor, presses flat when clicked */
+  .tamga-btn:not(:disabled):hover {
+    background: var(--color-hover);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--color-edge);
+  }
+  .tamga-btn:not(:disabled):active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--color-edge);
+  }
+  /* KAPALI BİR DÜĞME YASAK DEĞİL, ATIL. `not-allowed` imleci "buna hakkın
+     yok" diyor; oysa kaydet düğmesi değişiklik olmadığı için kapalı, ve
+     kullanıcı bir şey yanlış yapmış değil. İmleç bir suçlama taşımamalı. */
+  /* SÜRERKEN YÜKSELMİYOR AMA SOLMUYOR DA. `disabled` görünümü "bu düğme
+     kapalı" der; oysa çalışan bir düğme kapalı değil MEŞGUL, ve soldurmak
+     kullanıcıya işin durduğunu düşündürüyor. Spinner zaten durumu söylüyor. */
+  /* `:disabled` de eşleşiyor (kilit onunla kuruluyor) ve aynı özgüllükte,
+     sonra geldiği için kazanıyordu: meşgul bir düğme "atıl" imleci
+     gösteriyordu. İkisi birden yazılıyor, böylece sıra değil anlam kazanıyor. */
+  .tamga-btn[data-busy]:disabled {
+    opacity: 1;
+    cursor: progress;
+  }
+  .tamga-btn[data-busy] > [role="status"] {
+    position: absolute;
+  }
+  .tamga-btn[data-busy] {
+    position: relative;
+  }
+
+  .tamga-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  /* The edge is the BASE colour, not the pressed colour. A keycap and the base
+     it sits on are one object seen from two sides, so they share an outline —
+     that is what stops a bright face from floating free of its own shadow. */
+  .tamga-btn-primary {
+    background: var(--color-accent);
+    border-color: var(--color-accent-shadow);
+    color: var(--color-accent-ink);
+    box-shadow: 3px 3px 0 var(--color-accent-shadow);
+  }
+  .tamga-btn-primary:not(:disabled):hover {
+    background: var(--color-accent-hover);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--color-accent-shadow);
+  }
+  .tamga-btn-primary:not(:disabled):active {
+    background: var(--color-accent-active);
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 var(--color-accent-shadow);
+  }
+
+  /* Success and danger are the same object in two colours: outlined, never
+     filled. The fill belongs to the one primary action on a page — publishing a
+     draft and deleting a record are both important, but neither is THE
+     action, and filling them would put two shouting buttons in one view.
+     This rule was missing entirely for a while: the class was used in five
+     places and defined in none, so every "success" button silently rendered as
+     a plain neutral one. Green belongs to resolved, which is exactly what this
+     button does — it is the one place the resolved colour touches a control. */
+  .tamga-btn-success {
+    background: var(--color-shell);
+    border-color: var(--color-resolved);
+    color: var(--color-resolved);
+    box-shadow: 2px 2px 0 var(--color-resolved);
+  }
+  .tamga-btn-success:not(:disabled):hover {
+    background: var(--color-resolved-bg);
+    box-shadow: 3px 3px 0 var(--color-resolved);
+  }
+  .tamga-btn-success:not(:disabled):active {
+    box-shadow: 0 0 0 var(--color-resolved);
+  }
+
+  .tamga-btn-danger {
+    background: var(--color-shell);
+    border-color: var(--color-critical);
+    color: var(--color-critical);
+    box-shadow: 2px 2px 0 var(--color-critical);
+  }
+  .tamga-btn-danger:not(:disabled):hover {
+    background: var(--color-critical-bg);
+    box-shadow: 3px 3px 0 var(--color-critical);
+  }
+  .tamga-btn-danger:not(:disabled):active {
+    box-shadow: 0 0 0 var(--color-critical);
+  }
+
+  /* The one member of the family that is not an object on the page: no edge,
+     no offset, and therefore no lift. Cancel and dismiss have to stay out of
+     the way, and anything raised competes with the action beside it.
+     This rule was missing entirely — the class was used and never written, so
+     every ghost button silently rendered as a full secondary button, edge and
+     offset included. The same hole .tamga-btn-success had. */
+  .tamga-btn-ghost {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--color-ink-soft);
+  }
+  .tamga-btn-ghost:not(:disabled):hover {
+    background: var(--color-hover);
+    border-color: transparent;
+    box-shadow: none;
+    transform: none;
+    color: var(--color-ink);
+  }
+  .tamga-btn-ghost:not(:disabled):active {
+    background: var(--color-sunk);
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* A button that reads as a link. Same element, same keyboard behaviour, no
+     surface at all — for the rare navigation that sits in a row of buttons and
+     must not compete with them.
+     It is a BUTTON, not an <a>: use this when the click runs code. If it
+     navigates, use a real anchor with .tamga-link, because a link that is not an
+     anchor cannot be opened in a new tab and is a lie to a screen reader. */
+  .tamga-btn-link {
+    height: auto;
+    padding: 0;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--color-accent-line);
+    text-underline-offset: 3px;
+  }
+  .tamga-btn-link:not(:disabled):hover {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    transform: none;
+    text-decoration: underline;
+  }
+  .tamga-btn-link:not(:disabled):active {
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .tamga-btn-sm {
+    height: 32px;
+    padding: 0 8px;
+    font-size: var(--text-small);
+  }
+
+  .tamga-icon-btn {
+    border-radius: var(--radius-ctl);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--control);
+    height: var(--control);
+    border: 1px solid var(--color-edge);
+    background: var(--color-shell);
+    color: var(--color-ink);
+    box-shadow: 2px 2px 0 var(--color-edge);
+    transition: transform var(--duration-press) var(--ease-standard), box-shadow var(--duration-press) var(--ease-standard), background var(--duration-press) var(--ease-standard);
+    cursor: pointer;
+  }
+  .tamga-icon-btn:not(:disabled):hover {
+    background: var(--color-hover);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--color-edge);
+  }
+  .tamga-icon-btn:not(:disabled):active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--color-edge);
+  }
+
+  /* Sayı girdisinin artır/azalt okları.
+
+     `mini-btn` KULLANILAMAZ ve ilk sürüm onu kullanıyordu: o 32×32 bir
+     kontrol, ikisi üst üste 65px eder, girdi ise 40px. Oklar kutunun dışına
+     taşıyordu — çalışıyorlardı ama alanın içinde durmuyorlardı.
+
+     Bir spinner ayrı bir şekildir: alanın SAĞ KENARINA yapışır, yüksekliğini
+     ondan alır ve kendi kutusu yoktur — girdiden tek bir dikey kuralla
+     ayrılır. Yükselmez; bu boyutta bir offset kenardan taşar (mini butonun
+     yükselmemesiyle aynı gerekçe, Yasa 1'in boyut istisnası). */
+  /* Sayfalayıcının sayfa düğmesi.
+
+     `.tamga-option` KULLANILAMAZ ve ilk sürüm onu kullanıyordu — üstelik
+     kodun yanındaki yorumda "seçili sayfa dolgu almaz" yazarken. Yorum
+     doğruydu, sınıf yalanlıyordu: `.tamga-option[data-selected]` bir DOLGU ve
+     sola oturan bir iç iz veriyor. Sonuç ekranda üç ayrı yanlış oldu — dolu
+     bir blok, sayının solunda başıboş duran dikey bir çizgi, ve `width: 100%`
+     olduğu için esneyen bir kutu.
+
+     Sayfa düğmesi rail'in dilini konuşur: seçili olan YÜKSELMEZ, oturur —
+     kabuk zemini, aksan kenarı, 2px sert offset. Yasa 2: "buradasın" bir
+     eylem değildir. */
+  .tamga-page {
+    /* İMLEÇ. Kitteki her tıklanabilir sınıf bunu taşıyor (`btn`, `icon-btn`,
+       `mini-btn`, `tab`, `segment`, `option`, `switch`); sayfalayıcı tek
+       istisnaydı ve bu bir gözden kaçmaydı. Tailwind v4 önyüklemesi artık
+       `button`a imleç vermiyor, yani eksiklik doğrudan görünüyor. */
+    cursor: pointer;
+    display: inline-flex;
+    height: 40px;
+    min-width: 40px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-ctl);
+    color: var(--color-ink-soft);
+    font-size: var(--text-body);
+    transition:
+      background var(--duration-press) var(--ease-standard),
+      color var(--duration-press) var(--ease-standard),
+      border-color var(--duration-press) var(--ease-standard),
+      box-shadow var(--duration-press) var(--ease-standard);
+  }
+  .tamga-page:hover {
+    background: var(--color-hover);
+    color: var(--color-ink);
+  }
+  .tamga-page[aria-current="page"] {
+    background: var(--color-shell);
+    border-color: var(--color-accent-line);
+    box-shadow: 2px 2px 0 var(--color-accent-line);
+    color: var(--color-accent-line);
+    font-weight: 500;
+  }
+  .tamga-page[aria-current="page"]:hover {
+    background: var(--color-shell);
+    color: var(--color-accent-line);
+  }
+
+  .tamga-stepper {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    bottom: 1px;
+    display: flex;
+    width: 22px;
+    flex-direction: column;
+    overflow: hidden;
+    border-left: 1px solid var(--color-edge);
+    border-radius: 0 var(--radius-ctl) var(--radius-ctl) 0;
+  }
+  .tamga-stepper > button {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-ink-faint);
+    transition:
+      background var(--duration-press) var(--ease-standard),
+      color var(--duration-press) var(--ease-standard);
+  }
+  .tamga-stepper > button:first-child {
+    border-bottom: 1px solid var(--color-edge);
+  }
+  .tamga-stepper > button:hover:not(:disabled) {
+    background: var(--color-hover);
+    color: var(--color-ink);
+  }
+  .tamga-stepper > button:active:not(:disabled) {
+    background: var(--color-sunk);
+  }
+  .tamga-stepper > button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .tamga-mini-btn {
+    border-radius: var(--radius-ctl);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--color-edge);
+    background: var(--color-shell);
+    color: var(--color-ink);
+    box-shadow: 1px 1px 0 var(--color-edge);
+    transition: transform var(--duration-press) var(--ease-standard), box-shadow var(--duration-press) var(--ease-standard), background var(--duration-press) var(--ease-standard),
+      border-color var(--duration-press) var(--ease-standard);
+    cursor: pointer;
+  }
+  .tamga-mini-btn:not(:disabled):hover {
+    background: var(--color-hover);
+    border-color: var(--color-accent-line);
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0 var(--color-accent-line);
+  }
+  .tamga-mini-btn:not(:disabled):active {
+    transform: translate(1px, 1px);
+    box-shadow: 0 0 0 var(--color-edge);
+  }
+
+  .tamga-input {
+    border-radius: var(--radius-ctl);
+    height: var(--control);
+    width: 100%;
+    border: 1px solid var(--color-edge);
+    background: var(--color-shell);
+    color: var(--color-ink);
+    /* Room for a LEADING ICON is opt-in. It used to be baked in at 40px, so every plain field —
+       name, title, email — opened with an empty inset that read as a rendering fault. A field
+       reserves space for a thing it has only when it has it. */
+    padding: 0 16px;
+    font-size: var(--text-body);
+    outline: none;
+  }
+  /* Çok satırlı hâli.
+
+     `.tamga-input` `padding: 0 16px` taşıyor ve tek satır için bu DOĞRU: sabit
+     `height` metni zaten dikeyde ortalıyor, dikey padding eklemek onu bozardı.
+
+     Ama bir `<textarea>` aynı sınıfı alıp yüksekliğini `rows`'tan aldığında o
+     sıfır padding görünür bir hataya dönüşüyor: ilk satır üst kenara YAPIŞIYOR.
+     Aynı sınıfın iki farklı yükseklik modelinde farklı davranması gerekiyor, ve
+     ayrım elemanın kendisinde — o yüzden seçici `textarea`, bir modifier değil.
+     Çağıranın hatırlaması gereken bir sınıf olsaydı, unutulduğu her yerde metin
+     kenara yapışırdı. */
+  textarea.tamga-input {
+    height: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    line-height: 1.55;
+    resize: vertical;
+  }
+
+  .tamga-input[data-leading="true"] {
+    padding-left: 40px;
+  }
+
+  /* Yoğun bir yerdeki alan: bir tablo başlığındaki filtre satırı, bir araç
+     çubuğu, bir satır içi düzeltme.
+
+     NEDEN AYRI BİR ÖLÇÜ DEĞİL. 32px `.tamga-btn-sm` ile AYNI basamak, ve bu
+     tesadüf değil: filtre kutusunun yanında duran "Temizle" düğmesi de `sm`
+     oluyor, ikisi aynı satırda birbirini tutuyor. Yeni bir yükseklik uydurmak,
+     yan yana gelen iki kontrolün 2px kayması demekti.
+
+     NE ZAMAN KULLANILMAZ. Bir formun kendi alanları. Orada alan ASIL iştir ve
+     40px onun hakkı; küçültmek yalnız yardımcı bir yüzeyde, verinin kendisinden
+     daha çok yer kaplamasın diye. */
+  .tamga-input-sm {
+    height: 32px;
+    padding: 0 10px;
+    font-size: var(--text-small);
+  }
+  /* Küçük alanda ikon da içeri geliyor: 40px'lik oyuk 32px'lik bir kutuda
+     alanın yarısını yutuyordu. */
+  .tamga-input-sm[data-leading="true"] {
+    padding-left: 30px;
+  }
+
+  /* `Code`'un dış kutusu.
+   *
+   * KOPYALAMA DÜĞMESİ MUTLAK KONUMLU ve sağ üste sabitli. Tek satırlık bir
+   * gövdede bu bir hataya dönüşüyordu: kutu 42px, düğme 32px, üstte 9px altta
+   * 1.5px kalıyordu; düğme ortalı değil ALTA YAPIŞIK görünüyordu.
+   *
+   * İki kural birlikte çözüyor. `min-height` düğmenin altına ve üstüne eşit
+   * boşluk bırakacak kadar yer açıyor (8 + 32 + 8), ve dikey ortalama tek
+   * satırlık gövdeyi o yüksekliğin ortasına alıyor, yani metnin ortası ile
+   * düğmenin ortası aynı yere düşüyor. Çok satırlı bir gövdede kutu zaten
+   * daha uzun: ortalamanın etkisi kalmıyor, düğme sağ üstte kalıyor ve orası
+   * bir kod bloğu için doğru yer.
+   */
+  .tamga-code-block {
+    min-height: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /*
+   * YAZAR METNİ. Bir ürünün açıklaması, bir bilgi tabanı yazısı, bir notun
+   * gövdesi: kitin denetlemediği, insanın yazdığı HTML.
+   *
+   * NEDEN BİR SINIF, BİLEŞEN DEĞİL. Buraya gelen şey zaten bir HTML dizgisi;
+   * sarmalayan bir bileşen ona `dangerouslySetInnerHTML`den başka bir şey
+   * yapamaz, ve o kararı çağıran vermeli. Kitin katkısı biçim: gelen etiketler
+   * kitin kendi ölçeğinde ve kendi renginde çizilsin.
+   *
+   * NE TEMİZLEMEZ. Bu bir güvenlik sınırı DEĞİL. Hangi etiketin geçeceğine
+   * ürün karar veriyor, çünkü beyaz liste ürünün vitrinine ait bir kural.
+   *
+   * SIFIRLAMA GEREKİYOR ÇÜNKÜ tarayıcının kendi başlık ve liste ölçüleri
+   * kitin ölçeğiyle ilgisiz: `h3` 1.17em, `ul` 40px girinti. Ölçek dışından
+   * gelen bir sayı, uydurulmuş bir sayı kadar yanlış.
+   */
+  /*
+   * EDİTÖR: araç çubuğu + yazma alanı, tek bir kutu gibi.
+   *
+   * Çubuk ile alan AYRI ÖĞELER ama TEK bir kenarlık taşıyorlar; iki ayrı
+   * kutu, aralarındaki çift çizgiyle "burada iki şey var" der, oysa burada
+   * bir tane var.
+   *
+   * ODAK DIŞ KUTUDA. Yazılan yer içerideki `contenteditable`; odak halkası
+   * ona verilirse çubuk halkanın dışında kalıyor ve kontrolün sınırı
+   * belirsizleşiyor. `:focus-within` odağı dışarı taşıyor.
+   */
+  .tamga-editor {
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-ctl);
+    /* ZEMİN `--color-shell`, `--color-input` DEĞİL. Ölçüldü ve düzeltildi:
+       `--color-input` shadcn geleneğinden gelen bir KENAR rengi (#d2cec8),
+       dolgu değil. Onunla boyanan alan girdiden çok DEVRE DIŞI bir kutuya
+       benziyordu. Metin kutularının gerçek zemini `--color-shell`, ve editör
+       de bir metin kutusu. */
+    background: var(--color-shell);
+    overflow: hidden;
+  }
+  .tamga-editor:focus-within {
+    outline: 2px solid var(--color-ring);
+    outline-offset: -1px;
+  }
+  .tamga-editor-disabled {
+    opacity: 0.6;
+  }
+
+  .tamga-editor-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 4px;
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-sunk);
+  }
+
+  /* Biçim düğmesi. AÇIK OLAN DURUM DOLU ZEMİNLE söyleniyor, yalnız renkle
+     değil: bir düğmenin basılı olduğunu tek başına renk anlatamaz. */
+  .tamga-editor-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    border-radius: var(--radius-mark);
+    color: var(--color-ink-soft);
+    font-size: var(--text-caption);
+    cursor: pointer;
+  }
+  .tamga-editor-btn:hover {
+    background: var(--color-hover);
+    color: var(--color-ink);
+  }
+  .tamga-editor-btn[data-on] {
+    background: var(--color-ink);
+    color: var(--color-page);
+  }
+  .tamga-editor-btn:disabled {
+    cursor: default;
+  }
+
+  /* Bağlantı adresi satırı: çubuğun ALTINDA açılıyor, üstünde değil, çünkü
+     çubuk yerinde kalmalı; açılan bir şey düğmelerin yerini oynatırsa
+     kullanıcı ikinci düğmeyi kaybediyor. */
+  .tamga-editor-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-sunk);
+  }
+
+  .tamga-editor-body {
+    padding: 12px;
+    outline: none;
+  }
+
+  .tamga-prose {
+    color: var(--color-ink-soft);
+    font-size: var(--text-body);
+    line-height: 1.65;
+  }
+  .tamga-prose > :first-child {
+    margin-top: 0;
+  }
+  .tamga-prose > :last-child {
+    margin-bottom: 0;
+  }
+  .tamga-prose p,
+  .tamga-prose ul,
+  .tamga-prose ol {
+    margin: 0 0 0.75em;
+  }
+  .tamga-prose h3,
+  .tamga-prose h4,
+  .tamga-prose h5 {
+    color: var(--color-ink);
+    font-weight: 600;
+    margin: 1.25em 0 0.5em;
+  }
+  .tamga-prose h3 {
+    font-size: var(--text-subhead);
+  }
+  .tamga-prose h4,
+  .tamga-prose h5 {
+    font-size: var(--text-body);
+  }
+  .tamga-prose ul,
+  .tamga-prose ol {
+    padding-left: 1.25em;
+  }
+  .tamga-prose ul {
+    list-style: disc;
+  }
+  .tamga-prose ol {
+    list-style: decimal;
+  }
+  .tamga-prose li {
+    margin: 0.25em 0;
+  }
+  .tamga-prose strong {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  .tamga-prose a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .tamga-input::placeholder {
+    color: var(--color-ink-faint);
+  }
+
+  /* An invalid field carries the critical colour on its edge only — never a
+     wash. The message under it is what explains the problem; the field just
+     has to be findable. Paired with aria-invalid by the Input component, so
+     the state is not only visible. */
+  .tamga-input-invalid, .tamga-input-invalid:focus {
+    border-color: var(--color-critical);
+    box-shadow: 2px 2px 0 var(--color-critical);
+  }
+  .tamga-input:focus {
+    border-color: var(--color-accent-line);
+    box-shadow: 2px 2px 0 var(--color-accent-line);
+    outline: none;
+  }
+
+  /* A chip is FLAT, and that is load-bearing rather than shy.
+     In this system depth means "you can press this" — so a raised chip promises
+     a press it cannot deliver. It carried a 2px offset for two days and the
+     promise was the problem: nothing about a status label is clickable.
+     Weight comes from the 1px edge in its own colour instead. Anything that
+     genuinely needs to be pressed stops being a chip and becomes a mini button,
+     which already exists and already lifts. */
+  .tamga-chip {
+    border-radius: var(--radius-ctl);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 24px;
+    padding: 0 8px;
+    border: 1px solid currentColor;
+    font-size: var(--text-caption);
+    font-weight: 500;
+  }
+  .tamga-chip-mono {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: var(--text-caption);
+  }
+
+  /* AKTİF ÇİZGİ SEKMENİN KENDİ KENARLIĞI, dışarı taşan bir `::after` değil.
+   *
+   * Önce şöyleydi: `position: absolute; bottom: -1px`, yani işaret sekmenin
+   * kutusunun BİR PİKSEL ALTINA çiziliyordu ve şeridin kendi alt çizgisinin
+   * üstüne oturuyordu. Duran bir şeritte doğru görünüyor.
+   *
+   * Ama şerit KAYDIRILABİLİR olduğu anda kayboluyor. `overflow-x: auto` veren
+   * bir kap, CSS gereği `overflow-y`yi de `auto` yapıyor (bir eksen `visible`
+   * değilse öteki de olamaz), ve kutunun dışına çizilen o bir piksel kırpılıyor.
+   * On dokuz sekmeli bir şeritte aktif sekme işaretsiz kalıyordu: şerit kitin
+   * şeridine "benzemiyordu" ve sebebi buydu.
+   *
+   * Kenarlık kutunun İÇİNDE: kırpılacak bir taşma yok. Saydam bir kenarlık
+   * her sekmede duruyor ki aktif olunca yükseklik değişmesin. */
+  .tamga-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: var(--row-sm);
+    border-bottom: 1px solid transparent;
+    font-size: var(--text-body);
+    font-weight: 500;
+    color: var(--color-ink-faint);
+    cursor: pointer;
+    transition: color var(--duration-press) var(--ease-standard),
+      border-color var(--duration-press) var(--ease-standard);
+  }
+
+  /* Kapalı sekme: yerinde ama gidilemez. Solgun ve tıklanamaz, ama YOK
+     değil, çünkü orada bir şey olduğunu bilmek kullanıcının işine yarıyor. */
+  .tamga-tab[data-disabled] {
+    color: var(--color-ink-faint);
+    cursor: default;
+    pointer-events: none;
+  }
+  .tamga-tab:hover {
+    color: var(--color-ink-soft);
+  }
+  .tamga-tab[data-active="true"] {
+    color: var(--color-ink);
+    border-bottom-color: var(--color-accent-line);
+  }
+
+  /* segmented control: one of N, so it follows the rail — outlined and
+     lifted when chosen, never filled. Filling is reserved for actions. */
+  .tamga-segment {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  /* Inactive labels take ink-faint, not nav-idle. nav-idle is an ICON colour —
+     icons clear at 3:1, text needs 4.5:1, and as text it measured 3.29:1 on
+     paper. Same glyph colour, wrong job. */
+  .tamga-segment > button {
+    display: inline-flex;
+    align-items: center;
+    height: var(--control);
+    padding: 0 16px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-ctl);
+    font-size: var(--text-small);
+    font-weight: 500;
+    color: var(--color-ink-faint);
+    cursor: pointer;
+    transition: color var(--duration-press) var(--ease-standard), background var(--duration-press) var(--ease-standard), border-color var(--duration-press) var(--ease-standard),
+      box-shadow var(--duration-press) var(--ease-standard), transform var(--duration-press) var(--ease-standard);
+  }
+  .tamga-segment > button:not(:disabled):hover {
+    background: var(--color-nav-hover-bg);
+    color: var(--color-nav-hover);
+  }
+  .tamga-segment > button[data-active="true"] {
+    background: var(--color-shell);
+    color: var(--color-accent-line);
+    border-color: var(--color-accent-line);
+    box-shadow: 2px 2px 0 var(--color-accent-line);
+  }
+  .tamga-segment > button[data-active="true"]:hover {
+    background: var(--color-shell);
+    color: var(--color-accent-line);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--color-accent-line);
+  }
+  .tamga-segment > button[data-active="true"]:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--color-accent-line);
+  }
+
+  /* ---------- overlay plane ---------- */
+  /* Same language as everything else — 1px edge, hard offset, no blur.
+     The offset jumps to 6px, past the 4px page maximum, and that gap is
+     what says "this is floating, not part of the page". */
+  .tamga-overlay {
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-card);
+    background: var(--color-shell);
+    box-shadow: 6px 6px 0 var(--color-edge);
+    /* KENDİ YÜZEYİ, kendi hizası. Bir panel ağaçta nerede doğduysa oranın
+       hizasını miras alıyordu: bir tablo hücresinin içinde açıldığında
+       (`.tamga-cell-actions` sağa yaslar) panelin İÇİNDEKİ metin de sağa
+       yaslanıyordu. Bir yüzey başladığı yerde metin akışı da yeniden başlar. */
+    text-align: start;
+  }
+  /* TAM EKRAN PANEL: bir çalışma yüzeyi, bir kutu değil.
+     Kenar, yarıçap ve kaydırma gölgesi kalkıyor — üçü de "bu şey sayfanın
+     üstünde duruyor" demek için var, ve sayfanın tamamını kaplayan bir şeyin
+     altında sayfa kalmıyor. Dikey akış: başlık ile ayak yerinde kalırken gövde
+     kendi içinde kayıyor. */
+  .tamga-overlay-full {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  /* ---------- steps ---------- */
+  /*
+   * ADIM ŞERİDİ, ve üç durumu üç FARKLI FİZİKLE söylüyor.
+   *
+   * Önce üçü de aynı şeydi: ince kenarlı bir daire, yalnız rengi değişiyordu.
+   * Renk tek başına bir hiyerarşi kurmuyor — ve daire, kitin hiçbir yerde
+   * kullanmadığı bir şekil. Kit tam yuvarlağı yalnız avatarda ve noktada
+   * kullanıyor; bir adım işareti bir kontrol boyunda bir işarettir, o yüzden
+   * kontrolün yarıçapını alıyor.
+   *
+   * ÜÇ DURUM, ÜÇ FİZİK (13 Yasa 1: 1px kenar + kaydırılmış tam renk):
+   *   gelecek  düz durur — henüz bir şey olmadı
+   *   şimdiki  YÜKSELİR — 2px sert kaydırma, aksan renginde: buradasın
+   *   biten    OTURUR — dolu aksan, kaydırma yok: bitmiş bir iş kalkmaz
+   *
+   * ÇİZGİ DE BİLGİ TAŞIYOR. Geçilen aralık aksan, kalanı kenar rengi: şerit
+   * yalnız adımları saymıyor, ne kadar yol alındığını da gösteriyor. 1px
+   * `--color-line` idi ve kâğıdın üstünde neredeyse görünmüyordu.
+   */
+  .tamga-step-mark {
+    display: inline-flex;
+    width: var(--step-mark);
+    height: var(--step-mark);
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-ctl);
+    background: var(--color-shell);
+    color: var(--color-ink-faint);
+    font-variant-numeric: tabular-nums;
+    transition:
+      box-shadow var(--duration-quick) var(--ease-standard),
+      background var(--duration-quick) var(--ease-standard);
+  }
+  .tamga-step-mark[data-state="current"] {
+    border-color: var(--color-accent-line);
+    color: var(--color-accent-line);
+    box-shadow: 2px 2px 0 0 var(--color-accent-line);
+  }
+  .tamga-step-mark[data-state="done"] {
+    border-color: var(--color-accent-line);
+    background: var(--color-accent-line);
+    color: var(--color-accent-ink);
+  }
+  .tamga-step-line {
+    display: block;
+    width: var(--step-line);
+    height: var(--mark-tick);
+    flex-shrink: 0;
+    background: var(--color-edge);
+  }
+  .tamga-step-line[data-done="true"] {
+    background: var(--color-accent-line);
+  }
+
+  .tamga-scrim {
+    background: var(--color-scrim);
+  }
+
+  /* ---------- form controls ---------- */
+  /* checkbox and radio carry the same 1px edge and 1px offset as a mini
+     button, so they read as part of the family rather than browser chrome */
+  /*
+   * SEÇENEK İŞARETİ İLK SATIRIN ORTASINA.
+   *
+   * Etiket tek satırken kutuyu dikeyde ortalamak doğru duruyor; altına bir
+   * açıklama satırı eklenince işaret İKİ SATIRIN ortasına kaçıyor ve neyi
+   * işaretlediği belirsizleşiyor. İşaret ilk satıra ait.
+   *
+   * Sayı UYDURULMUYOR, satırdan hesaplanıyor: `1lh` öğenin kendi satır
+   * kutusu, `18px` de işaretin boyu (yukarıdaki kuralın kendisi), ve fark
+   * ikiye bölününce işaret ilk satırın tam ortasına oturuyor. Punto ya da
+   * satır aralığı değişirse hizalama kendiliğinden düzeliyor.
+   */
+  .tamga-choice-mark {
+    align-self: flex-start;
+    margin-top: calc((1lh - 18px) / 2);
+  }
+
+  .tamga-check, .tamga-radio {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    border: 1px solid var(--color-edge);
+    border-radius: 3px;
+    background: var(--color-shell);
+    color: var(--color-accent-ink);
+    box-shadow: 1px 1px 0 var(--color-edge);
+    cursor: pointer;
+    transition: background var(--duration-press) var(--ease-standard), border-color var(--duration-press) var(--ease-standard), box-shadow var(--duration-press) var(--ease-standard);
+  }
+  .tamga-check:hover, .tamga-radio:hover {
+    border-color: var(--color-accent-line);
+    box-shadow: 1px 1px 0 var(--color-accent-line);
+  }
+  .tamga-check[data-checked="true"] {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    box-shadow: 1px 1px 0 var(--color-accent-shadow);
+  }
+  .tamga-radio[data-checked="true"] {
+    border-color: var(--color-accent);
+    box-shadow: 1px 1px 0 var(--color-accent);
+  }
+  .tamga-radio[data-checked="true"]::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 1px;
+    background: var(--color-accent);
+  }
+
+  .tamga-switch {
+    display: inline-flex;
+    align-items: center;
+    width: 40px;
+    height: 24px;
+    flex-shrink: 0;
+    padding: 2px;
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-ctl);
+    background: var(--color-shell);
+    cursor: pointer;
+    transition: background var(--duration-press) var(--ease-standard), border-color var(--duration-press) var(--ease-standard);
+  }
+  .tamga-switch[data-on="true"] {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .tamga-switch > span {
+    display: block;
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+    background: var(--color-edge);
+    transition: transform var(--duration-press) var(--ease-standard), background var(--duration-press) var(--ease-standard);
+  }
+  .tamga-switch[data-on="true"] > span {
+    background: var(--color-accent-ink);
+    transform: translateX(16px);
+  }
+
+
+  /* A skeleton breathes; it never shimmers. A sweeping gradient is the
+     default-SaaS tell and this product has no gradients anywhere else, so one
+     here would be the single exception — and it would be the loudest thing on
+     a page whose whole point is that nothing has arrived yet.
+     Two blocks, not one: the ground never animates, only the bar on top of it.
+     That keeps a floor under the shape so it stays a placeholder at every point
+     in the cycle instead of fading toward the page and back. */
+  /* Progress is an instrument scale, not a bar. The ticks let the value be read
+     without reading the number, which is what a gauge is for.
+     Deliberately NOT the segmented strip form: a segmented horizontal strip is a
+     timeline — one mark per bucket, colour as state — and reusing that shape for
+     completion would read as history rather than as progress.
+     Neutral throughout — progress reports completion, never health, so a status
+     colour here would be a false signal.
+     Note it carries a 2px offset, so it paints outside its box: reserve room in
+     the container or the offset lands on whatever sits below. */
+  .tamga-progress {
+    position: relative;
+    height: 16px;
+    background: var(--color-sunk);
+    border: 1px solid var(--color-edge);
+    box-shadow: 2px 2px 0 var(--color-edge);
+    border-radius: var(--radius-ctl);
+    overflow: hidden;
+  }
+  .tamga-progress-fill {
+    height: 100%;
+    background: var(--color-ink);
+    transition: width var(--duration-base) var(--ease-standard);
+  }
+  .tamga-progress-tick {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 1px;
+  }
+
+  .tamga-skeleton {
+    position: relative;
+    background: var(--color-sunk);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .tamga-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--color-edge);
+    opacity: 0.78;
+    animation: tamga-breathe var(--duration-breath) var(--ease-breath) infinite;
+    animation-delay: var(--tamga-delay, 0ms);
+  }
+
+  .tamga-option {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    font-size: var(--text-body);
+    text-align: left;
+    color: var(--color-ink-soft);
+    cursor: pointer;
+  }
+  /* KLAVYE VURGUSU FARE HOVER'IYLA AYNI GÖRÜNÜR.
+     İki ayrı görünüş vermek, aynı anlamı ("Enter buna basacak") iki dille
+     anlatmak olurdu; kullanıcının ikisini de öğrenmesi gerekirdi. */
+  .tamga-option:hover,
+  .tamga-option[data-active] {
+    background: var(--color-hover);
+    color: var(--color-ink);
+  }
+  .tamga-option[data-selected="true"] {
+    background: var(--color-accent-bg);
+    color: var(--color-accent-line);
+    box-shadow: inset 2px 0 0 var(--color-accent-line);
+  }
+
+  /* ---------- feedback and structure ---------- */
+
+  /* inline banner — status wash, no fill, a left rule carries the state */
+  .tamga-alert {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--color-edge);
+    border-left-width: 3px;
+    border-radius: var(--radius-ctl);
+    background: var(--color-shell);
+  }
+
+  /* the live mark — neutral by rule: running is not a deviation */
+  .tamga-beacon {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    background: var(--color-silent);
+  }
+  .tamga-beacon[data-live="true"] {
+    animation: tamga-pulse var(--duration-beacon) var(--ease-breath) infinite;
+  }
+
+  /* keeps a button's width when its label swaps for a loading label */
+  .tamga-swap {
+    display: grid;
+    place-items: center;
+  }
+  .tamga-swap > * {
+    grid-area: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .tamga-swap > [data-hidden="true"] {
+    visibility: hidden;
+  }
+
+
+  .tamga-rule-h {
+    height: 1px;
+    width: 100%;
+    background: var(--color-line);
+  }
+  .tamga-rule-v {
+    width: 1px;
+    align-self: stretch;
+    background: var(--color-line);
+  }
+
+  /* ---------- lists and tables ---------- */
+  /* row height is fixed so a list never breathes with its content */
+
+  /* Slider topuzu.
+
+     `appearance: none` çubuğu bize bırakıyor ama TOPUZU DA SİLİYOR — ve
+     silinen topuz hata vermiyor, sadece kaydırıcı tutulamaz hâle geliyor.
+     WebKit ve Firefox iki ayrı sözde-eleman kullanıyor; ikisi de yazılmak
+     zorunda, biri unutulursa o tarayıcıda topuz yok. */
+  .tamga-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--color-accent-line);
+    border-radius: 50%;
+    background: var(--color-shell);
+    box-shadow: 1px 1px 0 var(--color-accent-line);
+    cursor: grab;
+  }
+  .tamga-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--color-accent-line);
+    border-radius: 50%;
+    background: var(--color-shell);
+    box-shadow: 1px 1px 0 var(--color-accent-line);
+    cursor: grab;
+  }
+  .tamga-slider:focus-visible {
+    outline: 2px solid var(--color-accent-line);
+    outline-offset: 4px;
+  }
+
+  /* THE GUTTER IS THE ROW'S, not the caller's.
+   *
+   * This class carried no horizontal padding, and every single caller added
+   * `tamga-gutter` by hand: the settings sub-nav, both skeletons, the docs
+   * example. Five out of five is not a convention, it is a missing rule, and
+   * the sixth caller (a blocks recipe) forgot it and rendered edge to edge.
+   *
+   * `.tamga-table` was already doing this correctly through
+   * `td:first-child { padding-left: var(--gutter) }`. A row and a cell sit on
+   * the same left rule; one of them should not need reminding. */
+  .tamga-list-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: var(--row);
+    padding-inline: var(--gutter);
+    border-bottom: 1px solid var(--color-line);
+    transition: background var(--duration-press) var(--ease-standard);
+  }
+  .tamga-list-row:last-child {
+    border-bottom: none;
+  }
+  .tamga-list-row:hover {
+    background: var(--color-sunk);
+  }
+  .tamga-list-row-sm {
+    height: var(--row-sm);
+  }
+
+  .tamga-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+  .tamga-table th, .tamga-table td {
+    padding: 0 16px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  /* A cell that HOSTS AN OVERLAY cannot clip its own content.
+     The truncation trio above (overflow:hidden + nowrap + ellipsis) is right for text and fatal for
+     a row's action menu: the panel is absolutely positioned inside the cell, so `overflow:hidden`
+     cuts it off at the cell's edge. Measured 2026-08-20 — the menu rendered, looked fine, and
+     swallowed every click, because `elementFromPoint` returned the td.
+     Actions never need truncating, so the cell opts out of all three rather than the table losing
+     ellipsis everywhere.
+
+     AND IT REALLY IS ALL THREE. The comment said three, the rule reset two: `white-space: nowrap`
+     stayed, and it is inherited, so every panel opened inside this cell inherited it too. A popover
+     listing an order's products rendered each line on one unbreakable line and spilled past its own
+     edge. The overlay looked broken; the cause was a table rule three levels up. Found 2026-09-09
+     in a consumer panel.
+
+     KIRPMA VE HİZA AYRI İKİ ŞEY. Bu kaçış uzun süre tek parçaydı ve sağa
+     yaslamayı da beraberinde getiriyordu, yani sola yaslı bir hücrede bir ipucu
+     ya da açılır panel barındırmak isteyen, hizasını da feda etmek zorunda
+     kalıyordu. Yakalandığı yer: bir tüketici listesinde durum rozetinin ipucu
+     hücre kenarında kesiliyordu, ve tek çare hücreyi sağa yaslamaktı.
+
+     SEÇİCİ `.tamga-table td` KADAR SPESİFİK OLMAK ZORUNDA: düz
+     `.tamga-cell-open` (0,1,0) yazılırsa kırpma kuralı `.tamga-table td`
+     (0,1,1) onu yener ve sınıf hiçbir şey yapmaz. */
+  .tamga-table td.tamga-cell-open,
+  .tamga-table th.tamga-cell-open {
+    overflow: visible;
+    white-space: normal;
+    text-overflow: clip;
+  }
+  .tamga-table td.tamga-cell-actions {
+    text-align: right;
+  }
+
+  .tamga-table th:first-child, .tamga-table td:first-child {
+    padding-left: var(--gutter);
+  }
+  .tamga-table th:last-child, .tamga-table td:last-child {
+    padding-right: var(--gutter);
+  }
+  .tamga-table thead th {
+    height: var(--row-sm);
+    border-bottom: 1px solid var(--color-line);
+    font-size: var(--text-caption);
+    font-weight: 500;
+    color: var(--color-ink-faint);
+  }
+  .tamga-table tbody tr {
+    height: var(--row);
+    border-bottom: 1px solid var(--color-line);
+    transition: background var(--duration-press) var(--ease-standard);
+  }
+  .tamga-table tbody tr:last-child {
+    border-bottom: none;
+  }
+  .tamga-table tbody tr:hover {
+    background: var(--color-sunk);
+  }
+  .tamga-table tbody tr[data-selected="true"] {
+    background: var(--color-accent-bg);
+  }
+  .tamga-table tbody tr[data-selected="true"] td:first-child {
+    box-shadow: inset 2px 0 0 var(--color-accent-line);
+  }
+  .tamga-list-row[data-selected="true"] {
+    background: var(--color-accent-bg);
+    box-shadow: inset 2px 0 0 var(--color-accent-line);
+  }
+
+  .tamga-link {
+    color: var(--color-accent-line);
+    font-weight: 500;
+    text-underline-offset: 3px;
+  }
+  .tamga-link:hover {
+    text-decoration: underline;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * KPI KAROSU: tek bir sayı, büyük.
+   *
+   * REFERANS NOKTASI YUMUŞAK KARTTI (daire ikon rozeti, bulanık gölge, kenar
+   * yok); buradaki karşılığı 1. yasa: 1px kenar, BULANIKSIZ kaymış gölge, ve
+   * daire yerine KARE karo. Kit hiçbir yerde daire kullanmıyor (avatar ve
+   * nokta dışında) ve tek bir daire, kartı ödünç alınmış gösteriyor.
+   *
+   * İKON KARONUN ZEMİNİ `--color-hover`, marka rengi DEĞİL. Bir panoda dört
+   * karo yan yana duruyor; dördünün de ikonu marka renginde parlarsa hiçbiri
+   * öne çıkmıyor ve göz asıl bakması gereken sayıyı en son buluyor. Renk
+   * kartın kendi verisinin (`accent` şeridi) ve dikkat isteyen sayının hakkı.
+   * ------------------------------------------------------------------ */
+  .tamga-kpi {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-edge);
+    background: var(--color-shell);
+    box-shadow: 2px 2px 0 var(--color-edge);
+    overflow: hidden;
+    text-align: left;
+    text-decoration: none;
+  }
+
+  .tamga-kpi-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-ctl);
+    border: 1px solid var(--color-line);
+    background: var(--color-hover);
+    color: var(--color-ink-soft);
+  }
+
+  /*
+   * FİZİK YALNIZ TIKLANABİLİR KARODA.
+   *
+   * `.tamga-kpi-live` bir stil değil bir SÖZ: bu karo tıklanıyor. Okunan bir
+   * karo hover'da yükselirse tıklanabilir göründüğü hâlde hiçbir şey yapmıyor,
+   * ve kullanıcı bir kez tıklayıp bir daha denemiyor.
+   *
+   * Kaymalar 1. yasanın kendisi: hover'da -1/-1 ve 3px gölge, basınca +2/+2 ve
+   * gölge yok. `--offset-room` tuzağı burada da geçerli — bu karolar bir
+   * ızgarada duruyor ve ızgaranın kendisi kırpmıyor, ama kaydırılan bir kabın
+   * içine konulursa `.tamga-rail-scroll` gibi bir dolgu gerekir.
+   */
+  .tamga-kpi-live {
+    cursor: pointer;
+    transition:
+      transform var(--duration-press, 120ms) var(--ease-press, ease-out),
+      box-shadow var(--duration-press, 120ms) var(--ease-press, ease-out),
+      background var(--duration-press, 120ms);
+  }
+  /* HOVER'DA KENAR RENGİ DEĞİŞMİYOR, ve ilk sürümde değişiyordu. Kitin
+     1. yasasında hover üç şey yapar: zemin bir tık koyulaşır, kontrol
+     -1/-1 yükselir, gölge 3px'e çıkar. Kenarın renklenmesi bu dilde yok
+     (`tamga-btn`de de, `tamga-icon-btn`de de yok) ve tek başına bir kartta
+     yapıldığında kart ötekilerden farklı bir şey konuşuyor. */
+  .tamga-kpi-live:hover {
+    background: var(--color-hover);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--color-edge);
+  }
+  .tamga-kpi-live:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--color-edge);
+  }
+
+  /* SEÇİLİ HÂL NÖTR, VURGU RENGİ DEĞİL. Vurgu rengi bir EYLEMİN rengi (kaydet,
+     sil); bir filtrenin açık olması bir eylem değil bir DURUM. Vurguya
+     boyandığında listede bir sorun varmış gibi okunuyordu. */
+  .tamga-kpi-live[data-pressed] {
+    border-color: var(--color-ink);
+    background: var(--color-hover);
+    box-shadow: 2px 2px 0 var(--color-ink);
+  }
+  .tamga-kpi-live[data-pressed]:hover {
+    box-shadow: 3px 3px 0 var(--color-ink);
+  }
+  .tamga-kpi-live[data-pressed]:active {
+    box-shadow: 0 0 0 var(--color-ink);
+  }
+
+  /*
+   * KAROLARIN IZGARASI.
+   *
+   * SÜTUN SAYISI KARO SAYISINDAN geliyor (`--tamga-kpi-cols`), ekrandan
+   * verilmiyor. Elle verilen bir sütun sayısı yeni bir karo eklendiğinde
+   * yalnız o ekranda güncelleniyor, ve tek başına kalan bir karo bütün satırı
+   * kaplayıp panoyu dengesiz gösteriyor.
+   *
+   * Dar ekranda iki sütun, geniş ekranda karo sayısı kadar: bir karo 40px
+   * ikon ve display boyunda bir sayı taşıyor, üçten dar bir sütunda sayı
+   * sarıyor.
+   */
+  .tamga-kpi-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (min-width: 640px) {
+    .tamga-kpi-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1280px) {
+    .tamga-kpi-grid {
+      grid-template-columns: repeat(var(--tamga-kpi-cols, 4), minmax(0, 1fr));
+    }
+  }
+
+  .tamga-label {
+    font-size: var(--text-caption);
+    font-weight: 500;
+    color: var(--color-ink-faint);
+  }
+
+  /* an identifier-shaped micro-label above a title: mono, wide, quiet. It says
+     what KIND of thing this is before the title says which one. */
+  .tamga-kicker {
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint);
+  }
+
+  /* ---------- the mascot's furniture ---------- */
+  /* The mascot lives INSIDE the instrument, never floating on top of it.
+     Everything here exists to say that in the language the rest of the kit
+     already speaks: a seated recess, ruled paper, a hard floor, a hard
+     shadow. Drop the art on a plain coloured plane and you get somebody
+     else's product with our artwork pasted into it. */
+
+  /* The well: a recess carved into the panel. SEATED physics — sunk ground,
+     no offset, never lifts. The ground defaults to --color-sunk; a call site
+     may pass --art-ground to tint it. */
+  .tamga-art-well {
+    position: relative;
+    background: var(--art-ground, var(--color-sunk));
+    overflow: hidden;
+  }
+  /* Ruled paper. The art direction is "an instrument on paper", so the ground
+     the figure stands on is squared paper — the same 8px module the layout uses.
+     It also does real work: the grid gives the eye a scale, which is what
+     stops a large drawing from reading as a decorative blob. */
+  .tamga-art-well::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(to right, var(--color-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--color-line) 1px, transparent 1px);
+    background-size: 8px 8px;
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  /* content sits above the ruling */
+  .tamga-art-well > * {
+    position: relative;
+  }
+
+  /* The floor. A character standing on a hard rule reads as standing; the same
+     character with nothing under it reads as falling. One line fixes it. */
+  .tamga-art-floor {
+    border-bottom: 1px solid var(--color-edge);
+  }
+
+  /* The cast shadow: the elevation formula applied to a character. Our light
+     has always come from the upper left — every offset in the kit lands down
+     and to the right — so the figure's shadow does too. A BAR rather than a copy of
+     his silhouette, deliberately: a body-shaped offset would read as the
+     pressable-object signature, and artwork is not pressable (Yasa: depth means
+     pressable). A bar reads as ground, not as affordance. */
+  .tamga-art-fig {
+    position: relative;
+    display: inline-block;
+  }
+  /* Off at portrait size: a 3px bar under 30px of art is noise, not ground. */
+  .tamga-art-fig[data-ground="true"]::after {
+    content: "";
+    position: absolute;
+    left: 26%;
+    right: -4px;
+    bottom: 0;
+    height: 3px;
+    background: var(--color-edge);
+    pointer-events: none;
+  }
+
+  /* The portrait: the figure framed in a window, for use inside a row.
+     72px, not 46px. Every drawing is a SCENE — a figure at a desk, a figure in a
+     boat — and a scene under about 50px is a smudge: the frame reads, the
+     character does not, so the whole thing becomes decoration that costs a row.
+     If it cannot be seen it should not be there. */
+  .tamga-art-port {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    padding-top: 6px;
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-sm);
+  }
+
+  /* The base plate: what happens next, as an instrument's legend.
+     A whole-surface empty state that is one short paragraph and two buttons
+     leaves the reader with nothing to do but read the buttons. The steps are
+     the actual answer to "what IS this screen for" — and they are what earns
+     the full width, instead of stretching two sentences across it.
+     Seated: sunk ground, no offset, so it never competes with the action. */
+  .tamga-art-steps {
+    display: grid;
+    border-top: 1px solid var(--color-edge);
+  }
+  .tamga-art-step {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--color-line);
+  }
+  .tamga-art-step:first-child {
+    border-top: 0;
+  }
+  @media (width >= 40rem) {
+    .tamga-art-steps {
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+    }
+    .tamga-art-step {
+      border-top: 0;
+      border-left: 1px solid var(--color-line);
+      padding: 16px 24px;
+    }
+    .tamga-art-step:first-child {
+      border-left: 0;
+    }
+  }
+  /* mono, because it is a SEQUENCE and not a quantity */
+  .tamga-art-step-n {
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    color: var(--color-accent-line);
+  }
+
+  /* The stage: the empty state is ONE object made of two materials — a seated
+     well on the left, the raised face on the right, divided by a real edge.
+     Both physics visible at once, which is the whole idea of the kit. */
+  .tamga-art-stage {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    flex-shrink: 0;
+    min-width: 236px;
+    padding: 24px 28px 0;
+    border-right: 1px solid var(--color-edge);
+  }
+
+  /* A full-width shallow band of ruled paper with a floor under it — the
+     mascot's stage when the composition runs on ONE vertical axis rather than
+     splitting left and right. */
+  .tamga-art-band {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+    padding-top: 28px;
+    border-bottom: 1px solid var(--color-edge);
+  }
+
+  /* The ticket's divider. It was drawn as a PERFORATION — a dashed rule meaning
+     "tear here" — and v5 proved that wrong on contact: dashed already means
+     "not real content yet" (the logo bounding box,
+     the logo bounding box). A second meaning for the same mark makes a finished
+     empty state read as a placeholder, which is the opposite of what it says.
+     Solid, in the edge colour, like every other divider. Changed here too so
+     the two do not drift — a kit whose copy disagrees with it is not a kit. */
+  .tamga-art-divider {
+    height: 0;
+    border-top: 1px solid var(--color-edge);
+  }
+
+  /* A way in, offered as a row rather than a button. An empty screen with two
+     buttons asks a yes/no question; a list of routes answers "what can I even
+     do here", which is the actual question somebody arriving has. */
+  .tamga-art-route {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    text-align: left;
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-ctl);
+    background: var(--color-shell);
+    box-shadow: 1px 1px 0 var(--color-edge);
+    color: var(--color-ink);
+    cursor: pointer;
+    transition: transform var(--duration-press) var(--ease-standard),
+      box-shadow var(--duration-press) var(--ease-standard),
+      border-color var(--duration-press) var(--ease-standard);
+  }
+  .tamga-art-route:hover {
+    border-color: var(--color-accent-line);
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0 var(--color-accent-line);
+  }
+  .tamga-art-route:active {
+    transform: translate(1px, 1px);
+    box-shadow: 0 0 0 var(--color-edge);
+  }
+
+  /* A logo tile. The mascot's portrait window is 72px because a SCENE needs the room; a service
+     mark is a single glyph and reads at 48. Same frame, different job — sharing the portrait class
+     made every integration card look like it was missing something. */
+  .tamga-logo-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-sm);
+    background: var(--color-sunk);
+  }
+  .tamga-logo-tile-sm {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* No box at all. For a whole body with nothing in it, where a bordered panel
+     would be a box drawn around a void — the floor rule is the only structure,
+     and it is as wide as the artwork rather than as wide as the screen. */
+  .tamga-art-blank-floor {
+    height: 1px;
+    background: var(--color-edge);
+  }
+
+  /* The tile: a card you PICK, so it is raised and it presses — a template
+     that cannot be chosen has no business looking like a card. */
+  .tamga-art-tile {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    text-align: left;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-edge);
+    background: var(--color-shell);
+    box-shadow: 2px 2px 0 var(--color-edge);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform var(--duration-press) var(--ease-standard),
+      box-shadow var(--duration-press) var(--ease-standard),
+      border-color var(--duration-press) var(--ease-standard);
+  }
+  .tamga-art-tile:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--color-edge);
+    border-color: var(--color-accent-line);
+  }
+  .tamga-art-tile:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--color-edge);
+  }
+  /* The category colour is a RULE, not a field. A wall of coloured banners
+     would out-shout a real event; a 3px spine under the art carries the
+     same information and outranks nothing. */
+  /* The five tones are spelled out rather than composed from a custom property:
+     Tailwind only emits an @theme variable that something actually references,
+     and a var() built inside a template literal is invisible to it — the token
+     resolves to nothing at runtime and the rule silently goes grey. Naming them
+     here is what keeps them alive. */
+  .tamga-art-spine {
+    height: 3px;
+    background: var(--color-edge);
+  }
+  .tamga-art-spine[data-tone="1"] {
+    background: var(--color-chart-1);
+  }
+  .tamga-art-spine[data-tone="2"] {
+    background: var(--color-chart-2);
+  }
+  .tamga-art-spine[data-tone="3"] {
+    background: var(--color-chart-3);
+  }
+  .tamga-art-spine[data-tone="4"] {
+    background: var(--color-chart-4);
+  }
+  .tamga-art-spine[data-tone="5"] {
+    background: var(--color-chart-5);
+  }
+
+  .tamga-scroll-x {
+    overflow-x: auto;
+  }
+}
+
+@keyframes tamga-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tamga-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tamga-bar {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+@keyframes tamga-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.tamga-rise {
+  animation: tamga-rise var(--duration-slow) var(--ease-standard) both;
+}
+
+.tamga-live {
+  animation: tamga-pulse var(--duration-beacon) var(--ease-breath) infinite;
+}
+
+/* Deep breath, chosen over the shallow one. The shallow version was correct in
+   principle and invisible in practice — on a real page you could not tell a
+   loading panel from a settled one at a glance, which is the only job it has.
+   0.78 → 0.06 at 1.1s is far enough and fast enough to register peripherally
+   without ever becoming a shimmer. */
+@keyframes tamga-breathe {
+  0%,
+  100% {
+    opacity: 0.78;
+  }
+  50% {
+    opacity: 0.06;
+  }
+}
+
+/* Al breathing. Slow and tiny on purpose — a mascot that moves a lot turns into
+   a distraction on a screen people watch for events. Whole pixels only, or
+   the pixel art lands on a half pixel and blurs on the way past. */
+/* Al floats; he never pulses — and that distinction is the whole reason a
+   mascot can share a screen with the beacon at all.
+   Law 3 (v2, 13-design-soul) says the beacon is the only thing that pulses.
+   The mascot is exempt because it moves in a different CHANNEL: the beacon
+   changes BRIGHTNESS, Al changes POSITION. The eye reads a brightness change
+   as "look here" and a slow drift as "this thing is alive", so the two do not
+   compete for the same attention.
+   The price of that exemption: this animation must never touch opacity. If it
+   ever does, Al starts competing with the one real signal on the screen. */
+@keyframes tamga-float-loop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+.tamga-float {
+  animation: tamga-float-loop var(--duration-float) var(--ease-breath) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tamga-rise, .tamga-live, .tamga-float, .tamga-beacon[data-live="true"] {
+    animation: none;
+  }
+  /* a stopped skeleton must still read as a placeholder, so it keeps the bar —
+     parked near the middle of the breath rather than at either end */
+  .tamga-skeleton::after {
+    animation: none;
+    opacity: 0.42;
+  }
+  .tamga-toast {
+    animation: none;
+  }
+  /* a stopped spinner must still be a visible mark, never an empty box */
+  .tamga-spin-part {
+    animation: none !important;
+    opacity: 0.6 !important;
+    transform: none !important;
+  }
+  /* keeps a button's width when its label swaps for a loading label */
+  .tamga-swap {
+    display: grid;
+    place-items: center;
+  }
+  .tamga-swap > * {
+    grid-area: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .tamga-swap > [data-hidden="true"] {
+    visibility: hidden;
+  }
+
+}
+
+@layer components {
+  /* ------------------------------------------------------------------ *
+   * SAVE BAR — stuck to the bottom of a scrolling surface.
+   *
+   * WHY THE `::after`. `position: sticky; bottom: 0` aligns the bar's bottom
+   * edge with the surface's CONTENT box, but a surface carries its own bottom
+   * padding, and content was flowing THROUGH the bar in that gap. The
+   * extension covers exactly that padding; the ground is the same colour, so
+   * the seam is invisible. The gap is read from `--surface-pad`, which the
+   * consumer sets on the scrolling surface.
+   *
+   * NEGATIVE MARGIN, not a full-bleed trick: the bar spans the surface edge to
+   * edge while its content stays on the same left rule as everything else.
+   * ------------------------------------------------------------------ */
+  .tamga-save-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin-inline: calc(var(--surface-pad, 1.5rem) * -1);
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    border-top: 1px solid var(--color-line);
+    background: var(--color-page);
+    padding: 12px var(--surface-pad, 1.5rem);
+  }
+  .tamga-save-bar::after {
+    content: "";
+    position: absolute;
+    inset: 100% 0 auto;
+    height: var(--surface-pad, 1.5rem);
+    background: var(--color-page);
+  }
+}

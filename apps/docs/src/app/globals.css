@@ -1,0 +1,714 @@
+/* ==============================================================
+   Doküman sitesinin CSS girişi.
+
+   Bu dosya bir müşteri projesinin göreceği şeyin AYNISI — üç satır: Tailwind'i
+   kur, kiti al, kendi ölçünü yaz. Site kendi kitini tüketiyor: sayfalardaki
+   butonlar ekran görüntüsü değil, paketten gelen gerçek butonlar.
+   ============================================================== */
+
+@import "tailwindcss";
+@import "tamga-ui/styles.css";
+
+/* Tailwind v4 node_modules'u kendiliğinden taramaz; kitin kendi utility'leri
+   olmadan bileşenler yarı çıplak render olur. */
+/* SEMBOLİK BAĞIN ARKASINA GEÇMİYOR — bu yüzden gerçek yol.
+
+   Burası bir zamanlar `../../node_modules/tamga-ui/dist` diyordu ve HİÇBİR
+   ŞEY taramıyordu. Sebebi ölçüldü: `.gitignore` değil (gitignore'lu bir
+   klasör gerçek yolla verildiğinde taranıyor), **sembolik bağ**. pnpm
+   çalışma alanı ve npm'in `file:` bağımlılığı, paketi `node_modules` altına
+   bir bağ olarak kuruyor; Tailwind o bağın arkasına geçmiyor.
+
+   YAYINLANMIŞ PAKETTE BU SORUN YOK: npm'den kurulan `tamga-ui` gerçek bir
+   klasördür. Yani hata yalnız YEREL BAĞ modunda — yani tam da geliştirirken.
+
+   Hatası sessizdi ve o yüzden geç bulundu. Kitin ve tüketicinin ORTAK
+   kullandığı utility'ler (`flex`, `items-center`) tüketicinin kendi
+   kaynağından zaten üretiliyordu, yani çoğu şey doğru görünüyordu. Yalnız
+   kite ÖZGÜ olan biri kırılıyordu — `grid-cols-7`, ve takvimin yedi sütunu
+   tek sütuna çöküyordu. */
+@source "../../../../packages/ui/src";
+
+/* ==============================================================
+   SİTENİN KENDİ OKUMA ÖLÇEĞİ.
+
+   Kitin tip skalası bir gösterge paneli için ölçüldü: 13px gövde, sıkı satır
+   aralığı, ekrana çok satır sığsın diye. Bir doküman sitesinde aynı değerler
+   kısılmış ve yorucu görünür — burada her satır baştan sona OKUNUR.
+
+   O yüzden site kitin RENKLERİNİ ve FİZİĞİNİ alıyor, tipografisini almıyor.
+   Doğru katman ayrımı: tip skalası ürün yoğunluğu içindir, düzyazı ayrı iştir.
+   ============================================================== */
+:root {
+  /* Üç sütun + iç boşluklar. Daha geniş olsaydı içerik ekranın ortasından
+     kayardı; dar olsaydı içindekiler sıkışırdı. */
+  --docs-wrap: 1400px;
+  --docs-rail: 260px;
+  --docs-toc: 220px;
+  --docs-measure: 68ch;
+  --docs-top: 68px;
+
+  /* Okuma ölçeği */
+  --docs-text: 17px;
+  --docs-lead: 20px;
+  --docs-h1: clamp(2.25rem, 1.6rem + 2vw, 3rem);
+  --docs-h2: 1.625rem;
+  --docs-h3: 1.1875rem;
+  --docs-small: 15px;
+  --docs-code: 14px;
+  --docs-line: 1.75;
+
+  /* Ölçek dışında kalan üç değer, gerekçeleriyle — bir sayıyı doğrudan
+     `className`'e yazmak yerine buraya koymak, onu bir KARAR hâline getiriyor.
+     `check-scale` uydurulmuş sayıyı yakalar, token biçimini geçirir. */
+
+  /* Marka yazısı. Okuma ölçeğinin bir parçası değil: bir logotype metin
+     değil, bir işaret — ve boyutu işaretin kendi oranından geliyor. */
+  --docs-brand: 19px;
+  /* Bir prop açıklamasının satır uzunluğu. Gövde metni 68ch okunur, ama bir
+     tablo hücresinde aynı uzunluk sütunu ezer; yarısı hücreye sığan ölçü. */
+  --docs-prop-doc: 34ch;
+  /* Yalnız ScrollX örneğinde: kabı taşırmak için kasten geniş bir blok.
+     Bir ölçü değil, bir gösteri. */
+  --docs-overflow-demo: 900px;
+}
+
+body {
+  font-size: var(--docs-text);
+  line-height: var(--docs-line);
+}
+
+/* ==============================================================
+   CANLI ÖRNEK ADASI — kitin kendi ölçeği.
+
+   BULUNAN HATA. Site `body`ye 17px ve 1.75 satır yüksekliği veriyor, çünkü
+   düzyazı okunacak. Ama canlı örneklerin içindeki kit bileşenleri kendi yazı
+   boyutunu yazmayan her yerde bunu MİRAS ALIYORDU: kitin gövde ölçeği 13px,
+   ekranda 17px görünüyordu. Sonuç, doküman sitesindeki hiçbir örneğin gerçek
+   panele benzememesiydi — şablonlar, bloklar, bileşen örnekleri, hepsi.
+
+   Site kitin RENKLERİNİ ve FİZİĞİNİ alıp tipografisini almıyor; doğru karar,
+   ama örnek kutularının içi siteye değil KİTE ait. Bu sınıf o sınırı çiziyor.
+   ============================================================== */
+.docs-kit {
+  font-size: var(--text-body);
+  line-height: 1.5;
+}
+
+/* ---- Başlıklar ---- */
+.docs-h1 {
+  color: var(--color-ink);
+  font-size: var(--docs-h1);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+.docs-lead {
+  color: var(--color-ink-faint);
+  font-size: var(--docs-lead);
+  line-height: 1.55;
+  margin-top: 14px;
+  max-width: 46ch;
+}
+.docs-h2 {
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-ink);
+  font-size: var(--docs-h2);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin-block: 64px 18px;
+  padding-bottom: 12px;
+  scroll-margin-top: 88px;
+  text-wrap: balance;
+}
+.docs-h3 {
+  color: var(--color-ink);
+  font-size: var(--docs-h3);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-block: 36px 10px;
+}
+.docs-p {
+  margin-block: 18px;
+}
+.docs-p:first-child {
+  margin-top: 0;
+}
+
+/* Vurgulu not — sayfanın akışını kesen tek şey, o yüzden nadir kullanılır. */
+.docs-note {
+  background: var(--color-accent-bg);
+  border-left: 3px solid var(--color-accent-line);
+  margin-block: 28px;
+  padding: 18px 22px;
+}
+.docs-note > :first-child {
+  margin-top: 0;
+}
+.docs-note > :last-child {
+  margin-bottom: 0;
+}
+
+/* Satır içi kod: gövde metninden ayrılsın ama bağırmasın. */
+.docs-p code,
+.docs-note code,
+li code {
+  background: var(--color-sunk);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-mark);
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  padding: 1px 5px;
+}
+
+/* ---- Kod bloğu ----
+   Kitin kartıyla aynı kenar, ama sunk zeminde: kod okunacak bir yüzey,
+   basılacak bir kontrol değil. */
+.docs-code {
+  background: var(--color-sunk);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  color: var(--color-ink-soft);
+  font-family: var(--font-mono);
+  font-size: var(--docs-code);
+  line-height: 1.7;
+  overflow-x: auto;
+  padding: 20px 22px;
+  tab-size: 2;
+  white-space: pre;
+}
+
+/* Kareli kâğıt — kitin boş-durum kuyusuyla aynı 8px modül. Göze ölçek verir,
+   böylece bir bileşen boşlukta yüzüyormuş gibi durmaz. */
+.docs-grid {
+  background-image:
+    linear-gradient(to right, var(--color-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-line) 1px, transparent 1px);
+  background-size: 8px 8px;
+  background-position: -1px -1px;
+}
+
+/* ---- Gezinme ----
+   Menü de OKUNAN bir metindir, tablo satırı değil. Sol kural sürekli;
+   aktif satır o kuralı boyar (Yasa 2: dolgu eylem demek, "buradasın" eylem değil). */
+.docs-toc-link {
+  border-left: 2px solid transparent;
+  color: var(--color-ink-faint);
+  display: block;
+  font-size: var(--docs-small);
+  line-height: 1.45;
+  margin-left: -1px;
+  padding: 8px 12px 8px 16px;
+  transition: color var(--duration-quick) var(--ease-instrument);
+}
+.docs-toc-link:hover {
+  color: var(--color-ink);
+}
+/* Menü satırı — rail'in dilinin metin ölçeğindeki karşılığı.
+
+   Seçili satır DOLGU almıyor: `kit.css`'te `.tamga-rail-link`'in üstünde
+   "outlined and lifted when active — never a solid fill" yazıyor, ve Yasa 2
+   aynı şeyi söylüyor. Kitin `.tamga-option`'ı burada denendi ve yanlıştı — o
+   bir açılır listedeki satır, orada dolgu bir DEĞER atandığını söyler; bir
+   menüde aynı dolgu rayı boydan boya kaplayan ağır bir blok oluyor. */
+.docs-nav-link {
+  display: block;
+  border: 1px solid transparent;
+  border-radius: var(--radius-ctl);
+  color: var(--color-ink-faint);
+  font-size: var(--docs-small);
+  line-height: 1.4;
+  margin-right: 12px;
+  padding: 7px 12px;
+  transition:
+    color var(--duration-press) var(--ease-standard),
+    background var(--duration-press) var(--ease-standard);
+}
+.docs-nav-link:hover {
+  background: var(--color-nav-hover-bg);
+  color: var(--color-nav-hover);
+}
+.docs-nav-link[data-active="true"] {
+  background: var(--color-shell);
+  border-color: var(--color-accent-line);
+  box-shadow: 2px 2px 0 var(--color-accent-line);
+  color: var(--color-accent-line);
+  font-weight: 500;
+}
+.docs-nav-link[data-active="true"]:hover {
+  background: var(--color-shell);
+  color: var(--color-accent-line);
+}
+
+/* İçindekiler daha sessiz: nerede olduğunu söyler, nereye gidileceğini değil. */
+.docs-toc-link {
+  font-size: 14px;
+  padding-block: 6px;
+}
+.docs-toc-link[aria-current="true"] {
+  border-left-color: var(--color-accent-line);
+  color: var(--color-ink);
+}
+
+.docs-eyebrow {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ---- Karşı örnekler ----------------------------------------------------
+   Fizik sayfası dört yasayı yalnız ANLATMIYOR, ihlallerini de gösteriyor: bir
+   kural, çiğnendiğinde ne olduğu görülmeden ikna etmez.
+
+   Bu sınıflar hiçbir token kullanmıyor ve KULLANMAMALI — anlattıkları şey tam
+   olarak "token kullanmayınca ne oluyor". Tek bir yerde durmalarının sebebi
+   de bu: kaçak değerler değil, sergilenen numuneler. Kaçak olsalardı
+   `check-scale` onları yakalardı; burada olmaları bilinçli.
+   ------------------------------------------------------------------------ */
+.docs-wrong {
+  display: inline-flex;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  border-radius: var(--radius-ctl);
+  font-size: var(--text-body);
+}
+/* Yasa 1'in ihlali: bulanık gölge. Nesne kâğıdın üstünde durmuyor, üstünde
+   YÜZÜYOR — ve yüksekliği belirsiz, çünkü bulanıklık bir ölçü vermiyor. */
+.docs-wrong-shadow {
+  background: #ffffff;
+  border: 1px solid #e6e2d9;
+  box-shadow: 0 6px 16px rgba(15, 15, 15, 0.18);
+}
+/* Yasa 1 ve 3'ün ihlali: gradyan. İki renk arasında yüz ara ton var ve
+   hiçbiri bir şey söylemiyor. */
+.docs-wrong-gradient {
+  background-image: linear-gradient(135deg, #6d8cff, #b06dff);
+  border: none;
+  color: #ffffff;
+}
+/* Yasa 1'in ihlali: cam. Arkasındakini bulanıklaştırmak, okunabilirliği
+   tesadüfe bırakmak demek — altındaki içerik değiştiğinde metin kaybolur. */
+.docs-wrong-glass {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+/* Yasa 1'in ihlali: hap rozet. Kitin her köşesi aynı yarıçapı taşıyor;
+   tam yuvarlak bir kenar sistemin dışından gelen tek şekildir. */
+.docs-wrong-pill {
+  background: #efece4;
+  border: 1px solid #e6e2d9;
+  border-radius: 999px;
+}
+
+/* ---- Tanıtım sayfası ölçeği --------------------------------------------
+   Landing, dokümanla AYNI token'ları kullanıyor ama kendi tip ölçeğini
+   kuruyor — tıpkı dokümanın kitin gösterge paneli ölçeğinden ayrıldığı gibi.
+
+   Gerekçe aynı: bir doküman satırı OKUNUR (17px, 1.75), bir landing başlığı
+   ise BİR SANİYEDE görülür. Aynı ölçeği ikisine dayatmak, birini yorucu
+   ötekini cılız yapar.
+   ------------------------------------------------------------------------ */
+:root {
+  --home-h1: clamp(2.75rem, 1.9rem + 3.2vw, 4.25rem);
+  --home-h2: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem);
+  --home-lead: clamp(1.125rem, 1rem + 0.4vw, 1.375rem);
+  --home-wrap: 1160px;
+  --home-section: 96px;
+}
+
+.home-h1 {
+  font-size: var(--home-h1);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.04;
+  text-wrap: balance;
+  color: var(--color-ink);
+}
+.home-h2 {
+  font-size: var(--home-h2);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  text-wrap: balance;
+  color: var(--color-ink);
+}
+.home-lead {
+  font-size: var(--home-lead);
+  line-height: 1.55;
+  color: var(--color-ink-soft);
+  max-width: 46ch;
+}
+.home-section {
+  padding-block: var(--home-section);
+  border-top: 1px solid var(--color-line);
+}
+
+/* ==============================================================
+   TOKEN GALERİSİ.
+
+   Nord'un token sayfasının DÜZENİ alındı (örnek · açıklama · token, geniş
+   satırlar, rengin içinde okunurluk rozeti), görsel dili değil: onlarınki
+   yumuşak gri kutular, bizimki 1px kenar ve sert ofset.
+
+   ÖNCEKİ HÂLİ 28 PİKSELLİK BİR KARE ve kırpılmış bir alt satırdı. Bir token
+   sayfasının tek işi rengi GÖSTERMEK; 28 piksel bir rengi göstermiyor, ima
+   ediyor.
+   ============================================================== */
+.token-row {
+  display: grid;
+  gap: 20px 28px;
+  grid-template-columns: minmax(0, 1fr);
+  padding-block: 22px;
+  border-bottom: 1px solid var(--color-line);
+}
+@media (min-width: 62rem) {
+  .token-row {
+    grid-template-columns: 208px minmax(0, 1fr) 240px;
+    align-items: start;
+  }
+}
+
+/* Renk bloğu İKİYE BÖLÜNMÜŞ: solda açık, sağda koyu. Nord'un tek bloğu var
+   çünkü tek teması var; bizim iki temamız aynı anda görünmeli, yoksa okuyucu
+   sayfayı iki kez gezmek zorunda. */
+/* Örnek hücresinin yüksekliği. Bir ölçek adımı DEĞİL, bir kap boyu: renk
+   bloğu, gölge yüzeyi ve yazı örneği aynı hizada dursun diye tek bir sayı.
+   Doğrudan `h-[92px]` diye yazılıyordu ve `check-scale` haklı olarak durdurdu:
+   iki yerde tekrarlanan uydurma bir sayı, bir karar değil bir kazadır. */
+:root {
+  --token-ornek-h: 92px;
+}
+
+.token-ornek {
+  height: var(--token-ornek-h);
+}
+
+.token-swatch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: var(--token-ornek-h);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  box-shadow: 2px 2px 0 0 var(--color-edge);
+  overflow: hidden;
+}
+.token-swatch-solo {
+  grid-template-columns: 1fr;
+}
+.token-swatch > span {
+  display: flex;
+  align-items: flex-end;
+  padding: 8px;
+}
+.token-swatch > span + span {
+  border-left: 1px solid var(--color-edge);
+}
+
+/* Okunurluk rozeti: rengin İÇİNDE duruyor, çünkü ölçtüğü şey o rengin
+   üstündeki okunabilirlik. Yanına konsaydı hangi bloğa ait olduğu
+   sorulurdu. */
+/* DOLGU YOK. Dolu bir plaka okunuyordu ama rengin üstüne ikinci bir kart
+   çiziyordu: blok artık rengi değil kutuyu gösteriyordu. Kenar `currentColor`,
+   yani ölçülerek seçilmiş yazı rengiyle aynı. */
+.token-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-mark);
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+
+/* Eşiği geçmeyen rozet: aynı renk, kalın kenar. Ayrımı renk değil AĞIRLIK
+   taşıyor, çünkü ölçülen rengin üstünde ikinci bir renge yer yok. */
+.token-badge-kotu {
+  border-width: 2px;
+  font-weight: 600;
+}
+
+/* Gölge örneği: gerçek gölgeyi taşıyan bir yüzey. Bir gölgeyi anlatmak,
+   göstermekten uzun. */
+.token-shadow-demo {
+  display: flex;
+  height: var(--token-ornek-h);
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-card);
+  background: var(--color-sunk);
+}
+.token-shadow-demo > span {
+  height: 40px;
+  width: 84px;
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-ctl);
+  background: var(--color-shell);
+}
+
+.token-code {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-ctl);
+  background: var(--color-sunk);
+  padding: 6px 6px 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-ink);
+}
+
+/* ==============================================================
+   GALERİ — bloklar ve şablonlar aynı iskeleti kullanıyor.
+
+   ÖNCEKİ HÂLİ DÜZ AKIŞTI: başlık, paragraf, canlı örnek, başlık, paragraf…
+   Sayfayı açan kişi "ne var ne yok" sorusunun cevabını ancak sonuna kadar
+   kaydırarak alıyordu. Kart ızgarası o soruyu ilk ekranda cevaplıyor.
+
+   ÖNİZLEME KIRPILIYOR, ÖLÇEKLENMİYOR. `transform: scale` metni okunmaz yapıyor
+   ve tıklama hedeflerini kaydırıyor. Kırpmak dürüst: üstteki bölge gerçek
+   boyutunda, gerisi için kartı açıyorsun.
+   ============================================================== */
+.galeri-izgara {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 52rem) {
+  .galeri-izgara {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* KART BİR DÜĞME DEĞİL, ve bu bir üslup tercihi değil bir zorunluluk.
+   Önce `<button>`dı: tamamı tıklansın diye. Ama önizlemenin içinde de düğmeler
+   var (bir `Select`in tetikleyicisi, "Tüm filtreler"), ve `<button>` içinde
+   `<button>` GEÇERSİZ HTML. Tarayıcı içtekini dışarı çıkarıyor, sunucunun
+   ürettiği ağaç ile istemcininki ayrışıyor, ve React hidrasyonu patlıyor.
+
+   Çözüm "gerilmiş bağlantı": kart bir `div`, ayaktaki düğmenin `::after`ı
+   kartın tamamını kaplıyor. Tıklama hedefi yine 190 piksel, ama iç içe geçmiş
+   etkileşimli öğe yok. */
+.galeri-kart {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  background: var(--color-shell);
+  box-shadow: 2px 2px 0 0 var(--color-edge);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard);
+}
+.galeri-kart:has(.galeri-ac:hover) {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 0 var(--color-edge);
+}
+.galeri-kart:has(.galeri-ac:active) {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 0 var(--color-edge);
+}
+
+/* Önizleme kuyusu: çökük zemin, ki kartın kendisi yükselirken içindeki örnek
+   üstünde DURSUN, içine gömülmesin. */
+.galeri-onizleme {
+  position: relative;
+  height: 190px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-sunk);
+  padding: 16px;
+}
+
+/* SAHNE: önizleme GERÇEK EKRAN GENİŞLİĞİNDE çiziliyor, sonra kırpılıyor.
+   İlk hâli bloğu kartın 340 pikseline sıkıştırıyordu ve filtre çubuğunun
+   ızgarası çöküyordu: "DurumÖncelikSahip" üst üste biniyor, "Tüm filtreler"
+   ortadan kesiliyordu. Yani önizleme bloğu tanıtmıyor, bozuk gösteriyordu.
+   Bir ekran parçası dar bir kutuda küçültülemez; gerçek boyutunda çizilip
+   kenarından kırpılır. */
+.galeri-sahne {
+  display: block;
+  width: 1080px;
+  transform-origin: top left;
+}
+
+/* EKRAN KARTI DAHA DERİN. Bir blok tek bir bölge ve 190 pikselde tanınıyor;
+   bir şablon bir EKRAN, ve aynı kuyuda yalnız başlık şeridi görünüyordu. Kart
+   "ne var ne yok" sorusunu cevaplayamıyorsa katalog değil liste olur. */
+.galeri-onizleme[data-boy="ekran"] {
+  /* Yükseklik sabit değil ORAN: sahne kartın genişliğine göre küçültülüyor ve
+     kuyunun boyu onu tam karşılıyor. Sabit 240 pikselde, kart genişledikçe
+     sağda bir gri şerit kalıyordu. */
+  height: auto;
+  aspect-ratio: 1080 / 760;
+  padding: 0;
+}
+
+/* EKRAN KIRPILMIYOR, KÜÇÜLTÜLÜYOR — ve bu bloğun tersi bir karar, çünkü soru
+   farklı. Bir blokta soru "bu bölüm neye benziyor": kırpmak doğru, metni
+   okunur bırakıyor. Bir ekranda soru "bu ekranın ŞEKLİ ne": kırpmak yalnız
+   başlık şeridini gösteriyor, ve ortalanmış olanı (oturum ekranları) hiç
+   göstermiyordu — iki kart bomboş duruyordu. Şekli görmek için tamamı
+   gerekiyor; okumak için modal var, orada gerçek boyunda ve tıklanabilir.
+   1080 × 1000 sahne, 0.24 ile 259 × 240: kuyunun tam ölçüsü. */
+.galeri-onizleme[data-boy="ekran"] .galeri-sahne {
+  width: 1080px;
+  height: 760px;
+  /* ÖLÇEK JS'TEN GELİYOR ve sebebi ölçüldü: sabit bir `scale(0.24)` yalnız
+     259 piksellik bir kartta tam oturuyor, ama kartın genişliği ekranla
+     değişiyor (ölçülen: 352). Oran bir konteyner sorgusu birimiyle de
+     kurulamıyor — CSS iki uzunluğu bölüp birimsiz sayı vermiyor. Galeri kuyuyu
+     bir ResizeObserver ile ölçüp `--galeri-olcek`i yazıyor. */
+  transform: scale(var(--galeri-olcek, 0.24));
+}
+
+/* Modaldeki ekranın çerçevesi. Şablonların bir kısmı `h-dvh` taşıyor (oturum,
+   kamusal, kabuk) ve sınırsız bir kapta diyaloğu taşırıyordu. Kırpmak
+   ölçeklemekten dürüst: metin gerçek boyunda kalıyor. */
+.galeri-ekran {
+  height: min(72vh, 42rem);
+  overflow: hidden;
+  /* TEK ÇİZGİ, kart değil: kaydırma gölgesi ve yükselme burada yanlış olurdu.
+     Bir ekran görüntüsünün çerçevesi bir nesne değil bir SINIR — nerede
+     bittiğini söylüyor, üstünde durduğunu değil. */
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+}
+
+/* Dar ekranda sahne kartı taşırmasın diye ölçekleniyor: burada ölçeklemek
+   dürüst, çünkü alternatif yatay kaydırma açmak. */
+@media (max-width: 52rem) {
+  .galeri-sahne {
+    transform: scale(0.42);
+  }
+}
+/* Kırpılan kenarı yumuşatan perde: içeriğin kesildiği yer bir hata değil bir
+   sınır olduğunu söylüyor. */
+.galeri-onizleme::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 48px;
+  background: linear-gradient(to bottom, transparent, var(--color-sunk));
+}
+
+/* Gerilmiş düğme: metni ayakta, tıklama alanı kartın tamamı. */
+.galeri-ac::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-card);
+}
+.galeri-ac:focus-visible::after {
+  outline: 2px solid var(--color-accent-line);
+  outline-offset: 2px;
+}
+
+.galeri-ayak {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+}
+
+/* Filtre çipleri: seçili olan dolu değil ÇERÇEVELİ (Yasa 2, dolgu eylem
+   demek). Ray bağlantısıyla aynı dil. */
+.galeri-cip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-ctl);
+  background: var(--color-shell);
+  padding: 5px 12px;
+  font-size: var(--text-small);
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  transition: color var(--duration-press) var(--ease-standard);
+}
+.galeri-cip:hover {
+  color: var(--color-ink);
+}
+.galeri-cip[data-active="true"] {
+  border-color: var(--color-accent-line);
+  box-shadow: 2px 2px 0 var(--color-accent-line);
+  color: var(--color-accent-line);
+  font-weight: 500;
+}
+
+/* Öğe rozeti: paketten mi geliyor, kopyalanacak bir tarif mi. Okuyucunun ilk
+   sorusu bu; ikisini ayırmayan bir katalog, hangi satırın bir API olduğunu
+   gizler. */
+.galeri-rozet {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-mark);
+  padding: 0 6px;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  line-height: 1.7;
+  color: var(--color-ink-faint);
+}
+.galeri-rozet[data-tur="paket"] {
+  color: var(--color-accent-line);
+}
+
+/* ---- Menü grupları ----
+   Başlık bir satır değil bir ETİKET: tıklanmıyor (katlanır grup hariç), o
+   yüzden bağlantı diliyle yazılmıyor. Küçük, seyrek harfli, sessiz. */
+.docs-nav-baslik {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding-inline: 12px;
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Katlanır grup: yalnız bileşenler. Ok işareti başlığın solunda değil, çünkü
+   solda zaten menünün kendi hizası var; sağdaki sayı hem "kaç tane" diyor hem
+   de tıklanacak bir hedef veriyor. */
+.docs-nav-grup > summary {
+  cursor: pointer;
+  list-style: none;
+  border-radius: var(--radius-ctl);
+  padding-block: 4px;
+  transition: color var(--duration-press) var(--ease-standard);
+}
+.docs-nav-grup > summary::-webkit-details-marker {
+  display: none;
+}
+.docs-nav-grup > summary:hover {
+  color: var(--color-ink);
+}
+.docs-nav-grup > summary::after {
+  content: "+";
+  order: 99;
+  font-family: var(--font-mono);
+  font-size: var(--text-body);
+  line-height: 1;
+}
+.docs-nav-grup[open] > summary::after {
+  content: "−";
+}

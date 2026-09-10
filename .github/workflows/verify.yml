@@ -1,0 +1,27 @@
+# Kapılar CI'da koşar.
+#
+# NEDEN VAR. Guard'lar yazıldı ve hepsi YEREL çalışıyordu — yani tavsiyeydiler,
+# kural değil. Koşturmayı unutan bir dal yeşil görünüp kırık gelir; ve bir
+# guard'ın değeri, atlanamaz olmasıyla doğru orantılı.
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      # `--frozen-lockfile`: lock dosyası ile package.json ayrıştıysa CI durur.
+      # Yereldeki kurulumun sessizce farklı olması, "bende çalışıyordu"nun en
+      # yaygın sebebi.
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify

@@ -9,7 +9,7 @@
     "start": "next start -p 6070",
     "typecheck": "tsc --noEmit",
     "predev": "node ../../scripts/extract-props.mjs && node ../../scripts/extract-tokens.mjs && node ../../scripts/extract-icons.mjs && node ../../scripts/extract-counts.mjs",
-    "prebuild": "node ../../scripts/extract-props.mjs && node ../../scripts/extract-tokens.mjs && node ../../scripts/extract-icons.mjs && node ../../scripts/extract-counts.mjs"
+    "prebuild": "pnpm --filter tamga-ui build && node ../../scripts/extract-props.mjs && node ../../scripts/extract-tokens.mjs && node ../../scripts/extract-icons.mjs && node ../../scripts/extract-counts.mjs"
   },
   "dependencies": {
     "tamga-ui": "workspace:*",

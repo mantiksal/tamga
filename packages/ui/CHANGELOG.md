@@ -5,6 +5,44 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.2.1
+
+### Added
+
+- **`AppearanceTemplate`** (`tamga-ui/patterns`) — the whole appearance screen: logo, mark, brand
+  colour, theme and sidebar width. This screen had been built twice, by hand, in two products, and
+  the second one came out bare: a hex field instead of swatches, three words instead of three
+  pictures, no logo area at all. Handing over the parts and saying "arrange them yourself" is what
+  let them drift; that is the job the pattern layer exists for (ADR-0004).
+
+  It stores NOTHING and applies NOTHING. `value` in, `onChange` and `onSave` out, every word from
+  `labels`. Where the preference lives (session, account, browser) is a product decision, and
+  turning the chosen colour into tokens stays the product's call too, because the root element is
+  its own.
+
+- **`ColorSwatches`, `ThemeCards`, `ImageField`** — the parts, for a screen that needs a different
+  arrangement. `ThemeCards` draws a miniature of each option rather than naming it; a theme is not
+  chosen by a word, it is chosen by seeing the result.
+- **`SquarePicker`** — dragging a square over an uploaded logo to cut a mark out of it. A mark
+  cannot be derived automatically, and this is the honest alternative: the human says where it is.
+- **`prepareImage` and `cropSquare`** (`tamga-ui`) — resize and square-crop an uploaded file, with
+  no library: a `<canvas>`. The ratio is kept and nothing is cropped silently; SVG passes through
+  untouched, because baking a vector into a 512px PNG stops it being sharp.
+- **`SettingsPanel.accent`** — a coloured left edge on a section block.
+
+### Fixed
+
+- **Completed steps were darker than everything else on the screen.** `StepStrip` filled them with
+  `--color-accent-line`, which is the accent's TEXT variant: it is derived by SEARCHING for 4.5
+  contrast against the page, so it is always darker than the face. Every button and badge on the
+  same screen used `--color-accent`, and the gap widened with each new brand colour. The ink on top
+  was measured against `accent`, never against `accent-line`, so that pairing was never checked at
+  all. Filled accent objects now follow the button's contract everywhere: `accent` for the fill,
+  `accent-shadow` for the edge, `accent-ink` for the ink.
+
+  Nothing errored here: the colours were valid and the contrast gates passed. `check-css` now
+  refuses `--color-accent-line` as a fill, so this class of mistake cannot pass silently again.
+
 ## 0.2.0
 
 Most of this release came out of gaps found by two people using the kit **from the outside**:

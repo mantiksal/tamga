@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3313 3313">
+  <!--
+    Mantıksal amblemi, sekme ikonu olarak.
+
+    ZEMİN DOLU, AMBLEM OYUK. Şeritteki amblem saydam zeminde lacivert duruyor
+    ve orada doğrusu bu; ama bir sekme ikonu tarayıcının kendi şeridinde
+    yaşıyor ve o şerit koyu da olabiliyor. Lacivert bir işaret koyu bir şeritte
+    kayboluyor. Dolu bir karo her iki şeritte de görünüyor.
+
+    RENKLER SABİT, TOKEN DEĞİL: bu dosya bir SVG, kitin CSS değişkenlerine
+    erişimi yok. Değerler token'ların açık temadaki karşılığı: lacivert
+    #12245c (color accent line), mürekkep #fdfcfa (color accent ink).
+
+    KARE viewBox, ve sanat KÜÇÜLTÜLMÜŞ. İlk hâlde amblem kareyi kenardan
+    kenara dolduruyordu ve yuvarlak köşeler yan üçgenlerin uçlarını kesiyordu.
+    Bir sekme ikonu 16 pikselde okunacak; kenara değen bir işaret orada
+    çerçeveye yapışıp şekil olmaktan çıkıyor. 0.68 ölçek, dört yanda nefes
+    payı bırakıyor.
+  -->
+  <rect width="3313" height="3313" rx="620" fill="#12245c"/>
+  <g transform="translate(530,671) scale(0.68)" fill="#fdfcfa">
+    <polygon points="2285.07 464.04 2673.45 985.2 1656.57 1751.53 639.65 985.2 1028.03 464.04 2285.07 464.04"/>
+    <polygon points="3312.64 630.46 2811.23 985.2 2128.16 2897.01 3312.64 1898.32 3312.64 630.46"/>
+    <polygon points="0.5 632.22 501.96 985.2 1184.94 2897.01 0.5 1898.32 0.5 632.22"/>
+  </g>
+</svg>

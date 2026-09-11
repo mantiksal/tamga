@@ -413,7 +413,15 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
       </main>
 
       <footer className="mt-8 border-t border-[var(--color-line)] py-10">
-        <div className="mx-auto flex max-w-(--home-wrap) flex-wrap items-center gap-4 px-5 sm:px-7">
+        {/* DAR EKRANDA ALT ALTA, GENİŞ EKRANDA İKİ UÇTA.
+            Tek satırdı ve bağlantılar `ml-auto` ile sağa itiliyordu; satır
+            sarınca `ml-auto` ikinci satırda da işliyor ve bağlantılar tek
+            başlarına sağa yapışıyordu. Sonuç, solda bir cümle sağda bir küme
+            ve ikisinin arasında sebebi görünmeyen bir boşluktu. Telefonda iki
+            satır, ikisi de sola hizalı; ikinci satırdaki bağlantılar arası
+            boşluk da 20'den 24'e çıkıyor, çünkü orada dokunma hedefleri
+            birbirine yakın. */}
+        <div className="mx-auto flex max-w-(--home-wrap) flex-col gap-4 px-5 sm:flex-row sm:items-center sm:px-7">
           <span className="text-[length:var(--docs-small)] text-ink-faint">
             {t.footerNote} ·{" "}
             <a
@@ -425,7 +433,7 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
               {t.footerBy}
             </a>
           </span>
-          <span className="ml-auto flex items-center gap-5">
+          <span className="flex items-center gap-6 sm:ml-auto sm:gap-5">
             <a
               href="https://github.com/mantiksal/tamga"
               target="_blank"

@@ -1791,6 +1791,27 @@
     }
   }
 
+  /*
+   * ÇEKMECE: kenardan kayarak giren panel.
+   *
+   * Animasyonsuz hâli bir kare içinde beliriyordu ve nereden geldiği
+   * okunmuyordu; bir panelin nereden geldiğini görmek, onu nereye geri
+   * iteceğini de öğretiyor.
+   *
+   * KAYMA YÖNÜ GİRDİĞİ KENARLA AYNI. Ters yönden kayan bir panel kapatma
+   * hareketini ters öğretir.
+   *
+   * SÜRE `--duration-base`: bu bir kontrol değil bir PANEL, ve paneller
+   * kontrollerden yavaş girer (13 §1). Eğri `--ease-standard`: giren her şey
+   * aynı eğriyle giriyor.
+   */
+  .tamga-sheet-start {
+    animation: tamga-sheet-start var(--duration-base) var(--ease-standard);
+  }
+  .tamga-sheet-end {
+    animation: tamga-sheet-end var(--duration-base) var(--ease-standard);
+  }
+
   .tamga-label {
     font-size: var(--text-caption);
     font-weight: 500;
@@ -2105,6 +2126,24 @@
   }
 }
 
+@keyframes tamga-sheet-start {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes tamga-sheet-end {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
 @keyframes tamga-bar {
   0%,
   100% {
@@ -2183,6 +2222,12 @@
     opacity: 0.42;
   }
   .tamga-toast {
+    animation: none;
+  }
+  /* Duran bir çekmece yine de AÇIK olmalı: kayma gidiyor, panel yerinde
+     beliriyor. */
+  .tamga-sheet-start,
+  .tamga-sheet-end {
     animation: none;
   }
   /* a stopped spinner must still be a visible mark, never an empty box */

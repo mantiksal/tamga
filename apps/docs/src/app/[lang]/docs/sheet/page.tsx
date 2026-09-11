@@ -42,6 +42,17 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    yonH: "Hangi kenardan girdiği bir anlam taşır",
+    yonP: (
+      <>
+        <code>side</code> iki değer alıyor. <code>end</code> (varsayılan) bakılan şeyin
+        AYRINTISI için: kaydın yanında, gözün zaten bittiği tarafta açılıyor. <code>start</code>{" "}
+        GEZİNME için, çünkü bu kitin kurduğu her panelde menü solda yaşıyor; ters taraftan giren
+        bir menü başka bir şey gibi okunuyor. Panel girdiği kenardan kayarak geliyor, ve bu da
+        bir öğretme: nereden geldiğini gören, onu nereye geri iteceğini de biliyor.{" "}
+        <code>prefers-reduced-motion</code> açıksa kayma yok, panel yerinde beliriyor.
+      </>
+    ),
     plane: (
       <>
         <strong>Beşi de aynı düzlemde yaşar:</strong> 6px sert offset, sayfadaki hiçbir nesnenin
@@ -67,6 +78,18 @@ const T = {
       </>
     ),
     rules: "Rules",
+    yonH: "Which edge it enters from carries meaning",
+    yonP: (
+      <>
+        <code>side</code> takes two values. <code>end</code> (the default) is for DETAIL about
+        the thing you were looking at: it opens beside the record, on the side the eye already
+        ended on. <code>start</code> is for NAVIGATION, because a menu lives on the left in every
+        panel this kit builds, and a menu that slides in from the opposite side reads as a
+        different kind of thing. The panel slides in from the edge it belongs to, and that too
+        teaches something: seeing where it came from tells you where to push it back. With{" "}
+        <code>prefers-reduced-motion</code> the slide is dropped and the panel simply appears.
+      </>
+    ),
     plane: (
       <>
         <strong>All five live on the same plane:</strong> a 6px hard offset, a height no other
@@ -95,6 +118,9 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         <SheetDemo lang={lang} />
       </Demo>
       <P>{t.use}</P>
+
+      <H2>{t.yonH}</H2>
+      <P>{t.yonP}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.plane}</Note>

@@ -155,6 +155,7 @@ export function Select({
   placeholder,
   loading = false,
   loadingRows = 4,
+  "aria-label": ariaLabel,
   className,
 }: {
   options: string[];
@@ -189,6 +190,22 @@ export function Select({
    * hatadır.
    */
   loadingRows?: number;
+  /**
+   * Accessible name when the control has no visible label. TR: Görünür etiketi
+   * olmayan kontrolün erişilebilir adı.
+   *
+   * WHY IT EXISTS. Inside a `Field` the label is already wired and this is not
+   * needed. But a select can also sit alone in a toolbar (a language picker, a
+   * page-size chooser) where there is no room for a label, and there it was
+   * announced as just "button": a screen reader user heard the current value
+   * and no clue what changing it would do. TR: NEDEN VAR. Bir `Field` içinde
+   * etiket zaten bağlı ve bu gerekmiyor. Ama bir seçim kutusu bir araç
+   * çubuğunda tek başına da durabiliyor (dil seçici, sayfa boyu) ve orada
+   * etikete yer yok; o hâliyle yalnız "düğme" diye duyuruluyordu: ekran
+   * okuyucu kullanıcısı o anki değeri duyuyor, değiştirince ne olacağına dair
+   * hiçbir şey duymuyordu.
+   */
+  "aria-label"?: string;
   /** Genişlik ve konum çağıranın. Varsayılan `w-56`; `w-full` verildiğinde
    *  tailwind-merge onu ezer, yani kontrol kabına uyar. */
   className?: string;
@@ -219,6 +236,7 @@ export function Select({
       <Button full className="justify-between"
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-label={ariaLabel}
         onClick={() => setOpen((o) => !o)}
       >
         {/* ETİKET KIRPILIR, OK KIRPILMAZ.
@@ -276,12 +294,27 @@ export function Sheet({
   footer,
   loading = false,
   closeLabel,
+  side = "end",
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  /**
+   * Which edge the panel enters from. TR: Panelin hangi kenardan girdiği.
+   *
+   * NOT A TASTE, A MEANING. `end` is for detail about the thing you were
+   * looking at: it opens beside the record, on the side the eye already ended
+   * on. `start` is for NAVIGATION, because a menu lives on the left in every
+   * panel this kit builds, and a menu that slides in from the opposite side
+   * reads as a different kind of thing. TR: Zevk değil, ANLAM. `end` bakılan
+   * şeyin ayrıntısı için: kaydın yanında, gözün zaten bittiği tarafta
+   * açılıyor. `start` GEZİNME için, çünkü bu kitin kurduğu her panelde menü
+   * solda yaşıyor, ve ters taraftan giren bir menü başka bir şey gibi
+   * okunuyor.
+   */
+  side?: "start" | "end";
   /**
    * Accessible name for the close control, supplied by the caller (docs/08 rule 5). TR: Kapatma
    * kontrolünün erişilebilir adı, çağıran veriyor (docs/08 kural 5).
@@ -306,7 +339,7 @@ export function Sheet({
 
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
+    <div className={cn("fixed inset-0 z-50 flex", side === "start" ? "justify-start" : "justify-end")}>
       {/* mouse affordance only: Escape and the Close button already cover the
             keyboard, and leaving this in the a11y tree gave the panel two
             controls both announced as "Close" */}
@@ -316,7 +349,16 @@ export function Sheet({
         role="dialog"
         aria-modal
         aria-label={title}
-        className="tamga-overlay relative z-10 flex h-full w-full max-w-md flex-col"
+        /* PANEL KAYARAK GİRİYOR, VE GİRDİĞİ KENARDAN.
+           Animasyonsuz hâli bir kare içinde beliriyordu: nereden geldiği,
+           dolayısıyla nereye geri gideceği okunmuyordu. Kayma yönü `side` ile
+           aynı; ters yönden kayan bir panel, kapatma hareketini de ters
+           öğretiyor. `prefers-reduced-motion` açıksa kayma yok, panel yerinde
+           beliriyor. */
+        className={cn(
+          "tamga-overlay relative z-10 flex h-full w-full max-w-md flex-col",
+          side === "start" ? "tamga-sheet-start" : "tamga-sheet-end",
+        )}
         style={{ borderRadius: 0 }}
         aria-busy={loading || undefined}
       >

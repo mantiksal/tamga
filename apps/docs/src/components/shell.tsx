@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { Icon, Sheet, Switch, ThemeToggle } from "tamga-ui";
+import { cn, Icon, Select, Sheet, Switch, ThemeToggle } from "tamga-ui";
 import { Menu } from "tamga-ui/icons";
 import { navGruplari } from "@/content/nav";
 import { icSlug, yol } from "@/content/yollar";
@@ -120,30 +120,52 @@ function LocaleSwitcher({ lang, dict }: { lang: Locale; dict: Dictionary }) {
   }
 
   return (
-    /* DAR EKRANDA BOŞLUK 6px, 8 DEĞİL, ve harfler daha sıkı: şeridin sağ ucunda
-       iki anahtar yan yana duruyor ve 390 pikselde ikisi birlikte 173 piksel
-       istiyordu, oysa 136 piksel vardı. */
-    <span className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-      {locales.map((l) => (
-        <span
-          key={l}
-          aria-hidden
-          /* Etkin olmayan taraf soluk: anahtarın topuzu nerede olursa olsun,
-             hangi dilde olduğun okunabilir kalıyor. */
-          className={
-            l === lang
-              ? "font-mono text-small tracking-wide text-ink"
-              : "font-mono text-small tracking-wide text-ink-faint"
-          }
-          /* Sırayı kaynaktan değil anahtardan alıyoruz: kapalı uç solda. */
-          style={{ order: l === "tr" ? 0 : 2 }}
-          title={endonym[l]}
-        >
-          {l.toUpperCase()}
-        </span>
-      ))}
-      <Switch on={on} onChange={go} label={dict.chrome.language} className="order-1" />
-    </span>
+    <>
+      {/* DAR EKRANDA SEÇİM KUTUSU, ANAHTAR DEĞİL.
+
+          Anahtar "TR [•] EN" olarak 89 piksel yer kaplıyordu ve şeridin sağ
+          ucunda tema anahtarıyla yan yana durunca iki anahtar birbirine
+          karışıyordu: hangisinin dili hangisinin temayı değiştirdiği
+          okunmuyordu. Kutu hem dar hem de ne olduğunu kendi söylüyor.
+
+          İki ayrı kontrol render ediliyor ve biri gizleniyor: aynı bileşenin
+          iki farklı biçimi değil, iki farklı bileşen. Tek bir işaretle
+          ("mobilse şunu göster") yapılamıyor çünkü karar CSS kırılımında,
+          JavaScript'te değil; `useEffect` ile ölçseydik ilk boyamada yanlış
+          olanı gösterirdik. */}
+      <span className="sm:hidden">
+        <Select
+          options={locales.map((l) => l.toUpperCase())}
+          value={lang.toUpperCase()}
+          onChange={(v) => go(v.toLowerCase() === "en")}
+          placeholder={lang.toUpperCase()}
+          aria-label={dict.chrome.language}
+          className="w-20"
+        />
+      </span>
+
+      <span className="hidden shrink-0 items-center gap-2 sm:flex">
+        {locales.map((l) => (
+          <span
+            key={l}
+            aria-hidden
+            /* Etkin olmayan taraf soluk: anahtarın topuzu nerede olursa olsun,
+               hangi dilde olduğun okunabilir kalıyor. */
+            className={
+              l === lang
+                ? "font-mono text-small tracking-wide text-ink"
+                : "font-mono text-small tracking-wide text-ink-faint"
+            }
+            /* Sırayı kaynaktan değil anahtardan alıyoruz: kapalı uç solda. */
+            style={{ order: l === "tr" ? 0 : 2 }}
+            title={endonym[l]}
+          >
+            {l.toUpperCase()}
+          </span>
+        ))}
+        <Switch on={on} onChange={go} label={dict.chrome.language} className="order-1" />
+      </span>
+    </>
   );
 }
 
@@ -244,7 +266,16 @@ export function SiteHeader({
           </button>
         ) : null}
 
-        <Link href={`/${lang}`} className="min-w-0 no-underline">
+        {/* MENÜ DÜĞMESİ VARKEN LOGO DAR EKRANDA YOK.
+            İkisi yan yana durunca şeridin solunda iki işaret oluyordu: biri
+            gezinme aracı, öteki marka, ve ikisi de tıklanabilir. Hangisinin
+            menüyü açacağı bakarak anlaşılmıyordu. Marka çekmecenin tepesine
+            taşındı; menüyü açan kişi zaten oraya bakıyor. Menü düğmesi
+            olmayan tanıtım sayfasında logo yerinde kalıyor. */}
+        <Link
+          href={`/${lang}`}
+          className={cn("min-w-0 no-underline", onMenu && "hidden md:inline-flex")}
+        >
           <LogoMark />
         </Link>
 
@@ -363,9 +394,20 @@ export function DocsShell({ children, lang, dict }: { children: ReactNode; lang:
       <Sheet
         open={menuAcik}
         onClose={() => setMenuAcik(false)}
+        side="start"
         title={dict.nav.docs}
         closeLabel={dict.nav.menuKapat}
       >
+        {/* MARKA ÇEKMECENİN TEPESİNDE, şeritte değil. Çekmece açıkken şerit
+            zaten görünmüyor; marka buraya gelince hem yerini koruyor hem de
+            ana sayfaya giden yol menünün içinde kalıyor. */}
+        <Link
+          href={`/${lang}`}
+          onClick={() => setMenuAcik(false)}
+          className="mb-6 inline-flex no-underline"
+        >
+          <LogoMark />
+        </Link>
         <MenuGovdesi lang={lang} dict={dict} pathname={pathname} onGit={() => setMenuAcik(false)} />
       </Sheet>
 

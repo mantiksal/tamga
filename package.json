@@ -10,7 +10,7 @@
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "check:names": "node scripts/check-no-product-names.mjs",
-    "verify": "pnpm run props && pnpm run check:names && pnpm run check:scale && pnpm run check:docs-i18n && pnpm run check:prop-coverage && pnpm run check:no-emdash && pnpm run check:css && pnpm run check:kit-class && pnpm run check:token-parity && pnpm run check:token-contrast && pnpm run typecheck && pnpm --filter tamga-ui build && pnpm run check:palette && pnpm run test && pnpm run build",
+    "verify": "pnpm run props && pnpm run check:names && pnpm run check:scale && pnpm run check:docs-i18n && pnpm run check:prop-coverage && pnpm run check:no-emdash && pnpm run check:css && pnpm run check:kit-class && pnpm run check:token-parity && pnpm run check:token-contrast && pnpm run typecheck && pnpm --filter tamga-ui build && pnpm run check:palette && pnpm run test && BUILD_DIR=.next-verify pnpm run build",
     "release": "pnpm build && changeset publish",
     "check:docs-i18n": "node scripts/check-docs-i18n.mjs",
     "props": "node scripts/extract-props.mjs && node scripts/extract-tokens.mjs && node scripts/extract-icons.mjs && node scripts/extract-counts.mjs",

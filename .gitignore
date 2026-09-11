@@ -5,6 +5,7 @@ dist/
 # dosyayla ilk commit'e girecekti; ayrıca `.next/types` bayatladığında typecheck
 # artık var olmayan sayfaları arıyor.
 .next/
+.next-verify/
 .DS_Store
 *.log
 .turbo/

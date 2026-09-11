@@ -8,24 +8,13 @@ sözlüğünü ve kimliğini kit hiç bilmez.
 
 ### Bugün nasıl kullanılır
 
-Paket **henüz npm'de değil** (`0.1.0`, yayınlanmadı). Tüketen bir projede:
-
-```bash
-pnpm install                    # bu depoda
-pnpm --filter tamga-ui pack     # tamga-ui-0.1.0.tgz
-
-# tüketen projede
-npm install ../tamga/packages/ui/tamga-ui-0.1.0.tgz
-```
-
-`dist/` depoda durmuyor (üretilmiş çıktı commit edilmez) ama paketin `prepare` betiği onu
-kurulum anında üretiyor, yani tüketicinin ayrı bir build adımı yok.
-
-Yayınlandığında tek satır olacak:
-
 ```bash
 npm install tamga-ui
 ```
+
+Paket npm'de yayında, `mantiksal` organizasyonuna ait. `dist/` depoda durmuyor (üretilmiş çıktı
+commit edilmez) ama `prepare` betiği onu yayın anında üretiyor, yani tüketicinin ayrı bir build
+adımı yok.
 
 **Tüketicinin şartları:** React 19, Tailwind v4, Node 20+. Kurulumun tamamı ve `@source`
 uyarısı [`packages/ui/README.md`](packages/ui/README.md) içinde.

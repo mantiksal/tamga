@@ -16,24 +16,20 @@ Doküman sitesi: depoyu klonlayıp `pnpm install && pnpm --filter tamga-docs dev
 
 ## Kurulum
 
-### Henüz npm'de değil
-
-Paket yayınlanmadı. Bugün üç yol var, üçü de çalışıyor:
-
-**1 · Tarball (en temiz).** Kit deposunda:
-
 ```bash
-pnpm install
-pnpm --filter tamga-ui pack     # tamga-ui-0.1.0.tgz üretir
+npm install tamga-ui
 ```
 
-Kendi projende:
+Paket npm'de yayında ve `mantiksal` organizasyonuna ait. Yayın ve depo bağlantıları
+[npmjs.com/package/tamga-ui](https://www.npmjs.com/package/tamga-ui) sayfasında.
 
-```bash
-npm install ../tamga/packages/ui/tamga-ui-0.1.0.tgz
-```
+> **Bir makine okuyorsa:** paket sayfası (`npmjs.com/...`) tarayıcı dışı isteklere **403**
+> döndürüyor; bu npm'in bot korumasıdır, paketle ilgisi yok. Sürüm ve metadata için kayıt
+> defterini kullan: `https://registry.npmjs.org/tamga-ui` (200 döner, düz JSON).
 
-**2 · Yerel yol.** Aynı makinede duruyorsa:
+### Yerel geliştirme
+
+Kitin kendisini değiştirirken, tüketen projeye yayınlamadan bağlamak için:
 
 ```bash
 npm install file:../tamga/packages/ui
@@ -41,12 +37,8 @@ npm install file:../tamga/packages/ui
 
 > **Dikkat:** `file:` bir SEMBOLİK BAĞ kuruyor, ve Tailwind v4 `@source` taramasını sembolik
 > bağın ardına götürmüyor. Sonuç sinsi: tipler çözülür, importlar çalışır, ama utility sınıfları
-> üretilmediği için bileşenler yarı çıplak çıkar. Geliştirirken hızlı, teslim ederken tarball.
-
-**3 · Git.** npm bir monorepo'nun alt klasörünü doğrudan kuramıyor, o yüzden depoyu klonlayıp
-1 ya da 2'yi kullan.
-
-Üçünde de `prepare` betiği `dist/`i kurulum anında üretiyor; ayrıca bir build adımı gerekmiyor.
+> üretilmediği için bileşenler yarı çıplak çıkar. Bu yolu yalnız kiti geliştirirken kullan;
+> gerçek kurulum yukarıdaki tek satır.
 
 ### Gerekenler
 

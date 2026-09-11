@@ -1,46 +1,47 @@
 # tamga-ui
 
-Mantıksal'ın ortak arayüz kütüphanesi: token'lar, fizik ve bileşenler.
+Mantıksal's shared interface library: tokens, physics and components.
 
-Framework değil **kütüphane** — ekranları sen kurarsın, kit parçaları verir. Kit hiçbir ürünün
-adını, sözlüğünü ya da kimliğini bilmez.
+> 🇹🇷 **Türkçe:** the documentation is bilingual and lives at
+> **[tamga.org.tr/tr](https://tamga.org.tr/tr)**. This file is in English because it is the first
+> page an installer sees on npm, and npm is read from everywhere.
 
-- **Bileşenler** `tamga-ui`
-- **İkonlar** `tamga-ui/icons`
-- **Bloklar** `tamga-ui/blocks` — bir bileşenden büyük, bir ekrandan küçük
-- **Şablonlar** `tamga-ui/patterns` — ekranların şekli (liste, detay, ayar, oturum, kabuk)
+Not a framework but a **library**: you build the screens, the kit hands you the parts. The kit
+knows no product's name, vocabulary or identity.
 
-Doküman sitesi: depoyu klonlayıp `pnpm install && pnpm --filter tamga-docs dev` (port **6070**).
+- **Components** `tamga-ui`
+- **Icons** `tamga-ui/icons`
+- **Blocks** `tamga-ui/blocks` — larger than a component, smaller than a screen
+- **Patterns** `tamga-ui/patterns` — the shape of a screen (list, detail, settings, auth, shell)
+
+Docs: **[tamga.org.tr](https://tamga.org.tr)** · Changelog: [CHANGELOG.md](./CHANGELOG.md)
 
 ---
 
-## Kurulum
+## Install
 
 ```bash
 npm install tamga-ui
 ```
 
-Paket npm'de yayında ve `mantiksal` organizasyonuna ait. Yayın ve depo bağlantıları
-[npmjs.com/package/tamga-ui](https://www.npmjs.com/package/tamga-ui) sayfasında.
+> **If a machine is reading this:** the package page (`npmjs.com/...`) returns **403** to
+> non-browser requests. That is npm's bot protection, nothing to do with this package. For
+> versions and metadata use the registry: `https://registry.npmjs.org/tamga-ui` (200, plain JSON).
 
-> **Bir makine okuyorsa:** paket sayfası (`npmjs.com/...`) tarayıcı dışı isteklere **403**
-> döndürüyor; bu npm'in bot korumasıdır, paketle ilgisi yok. Sürüm ve metadata için kayıt
-> defterini kullan: `https://registry.npmjs.org/tamga-ui` (200 döner, düz JSON).
+### Local development
 
-### Yerel geliştirme
-
-Kitin kendisini değiştirirken, tüketen projeye yayınlamadan bağlamak için:
+To link the kit into a consuming project without publishing, while changing the kit itself:
 
 ```bash
 npm install file:../tamga/packages/ui
 ```
 
-> **Dikkat:** `file:` bir SEMBOLİK BAĞ kuruyor, ve Tailwind v4 `@source` taramasını sembolik
-> bağın ardına götürmüyor. Sonuç sinsi: tipler çözülür, importlar çalışır, ama utility sınıfları
-> üretilmediği için bileşenler yarı çıplak çıkar. Bu yolu yalnız kiti geliştirirken kullan;
-> gerçek kurulum yukarıdaki tek satır.
+> **Careful:** `file:` creates a SYMLINK, and Tailwind v4 does not follow `@source` scanning past
+> a symlink. The result is sneaky: types resolve, imports work, but utility classes are never
+> generated and components come out half-naked. Use this only while developing the kit; a real
+> install is the one line above.
 
-### Gerekenler
+### Requirements
 
 | | |
 | --- | --- |
@@ -48,8 +49,8 @@ npm install file:../tamga/packages/ui
 | Tailwind | **v4** |
 | Node | 20+ |
 
-Tailwind v4 bir tercih değil şart: bileşenler utility sınıfı kullanıyor ve o sınıfları **senin**
-build'in üretiyor.
+Tailwind v4 is not a preference but a requirement: components use utility classes and **your**
+build is what generates them.
 
 ### CSS
 
@@ -60,105 +61,104 @@ build'in üretiyor.
 @source "../../node_modules/tamga-ui/dist";
 ```
 
-**`@source` satırını atlama.** Onsuz Tailwind kitin `dist/`i içindeki sınıfları taramaz, üretmez,
-ve bileşenler **stilsiz** çıkar. Yol senin CSS dosyandan `node_modules`a göre; derinliğe göre
-`../` sayısı değişir.
+**Do not skip the `@source` line.** Without it Tailwind never scans the classes inside the kit's
+`dist/`, never generates them, and components render **unstyled**. The path is relative to your
+own CSS file, so the number of `../` depends on how deep that file sits.
 
-### Kullanım
+### Usage
 
 ```tsx
-import { Button, StatusChip } from "tamga-ui";
+import { Button, Icon } from "tamga-ui";
 import { Plus } from "tamga-ui/icons";
 
 <Button variant="primary">
   <Icon icon={Plus} size="xs" />
-  Yeni kayıt
+  New record
 </Button>;
 ```
 
 ---
 
-## Kurulum anketi
+## The setup survey
 
-**Bu bölüm kiti kuran kişi ya da ajan içindir.** Kit kurulduğunda proje çalışır ama KİMSESİZDİR:
-mavi bir vurgu, baş harften bir karo, adsız bir kullanıcı. Aşağıdaki yedi sorunun cevabı
-alınmadan kurulum bitmiş sayılmaz.
+**This section is for the person or agent installing the kit.** Once installed the project runs,
+but it has NO IDENTITY: a blue accent, a tile with an initial on it, a nameless user. Setup is
+not finished until these seven questions have answers.
 
-Her satırın son sütunu önemli: **cevap bir kere sorulup koda gömülmez, bir ayar ekranına da
-konur.** Kurulumda sorulan her şey projenin üçüncü ayında da değiştirilebilir olmalı; yoksa
-müşteri rengini değiştirmek istediğinde tek yol bir geliştiricinin CSS yazıp yeniden yayın
-alması olur.
+The last column is the important one: **an answer is never only compiled in, it also goes into a
+settings screen.** Everything asked at setup has to still be changeable in the project's third
+month; otherwise, when the customer wants a different colour, the only route left is a developer
+editing a file and shipping a release.
 
-| # | Sorulacak | Nereye gider | Ayar ekranında |
+| # | Ask for | Where it goes | In settings |
 | --- | --- | --- | --- |
-| 1 | Ürünün adı | Kabuk, sekme başlığı, oturum ekranı | hayır, ürünün kimliği |
-| 2 | **Marka rengi (tek hex)** | `paletUret()` → token'lar (aşağıda) | **evet** |
-| 3 | Logo (geniş, yatay) | Oturum ekranı, geniş kenar çubuğu | **evet** |
-| 4 | Amblem (kare) | Dar kenar çubuğu, sekme ikonu | **evet** |
-| 5 | Varsayılan tema | `açık` · `koyu` · `sistem` | **evet** |
-| 6 | Kenar çubuğu davranışı | `hep dar` · `hep geniş` · `kullanıcı seçsin` | **evet** |
-| 7 | Arayüz dili / dilleri | Bütün `labels` prop'ları | duruma göre |
+| 1 | The product's name | Shell, tab title, auth screen | no, it is the product's identity |
+| 2 | **Brand colour (one hex)** | `makePalette()` → tokens (below) | **yes** |
+| 3 | Logo (wide, horizontal) | Auth screen, wide sidebar | **yes** |
+| 4 | Mark (square) | Narrow sidebar, tab icon | **yes** |
+| 5 | Default theme | `light` · `dark` · `system` | **yes** |
+| 6 | Sidebar behaviour | `always narrow` · `always wide` · `user chooses` | **yes** |
+| 7 | Interface language(s) | Every `labels` prop | depends |
 
-**2, 3 ve 4 birbirinden bağımsız sorulur.** Yüklenen bir logodan amblem OTOMATİK çıkarılamaz:
-bir görsel dosyasında "amblem" diye işaretli bir şey yoktur, konumu sabit değildir (solda, üstte,
-yazının içinde ya da hiç yok), ve yanlış kesim sessizdir. Yarım bir harf panelin her sayfasının
-sol üstünde durur ve kimse bunun otomatik kesildiğini bilmez. Amblemi ya ayrı bir dosya olarak
-iste, ya kullanıcıya logo üzerinde kare bir alan seçtir, ya da hiç isteme: amblem yoksa
-`LogoTile` baş harften bir karo üretir ve bu çalışan bir cevaptır.
+**2, 3 and 4 are asked separately.** A mark CANNOT be extracted from an uploaded logo: nothing in
+an image file is marked as "the mark", its position is not fixed (left, on top, inside the
+wordmark, or absent altogether), and a wrong crop fails silently. Half a letter then sits in the
+top left of every page and nobody knows it was cropped automatically. Either ask for the mark as
+its own file, let the user drag a square over the logo, or do not ask at all: with no mark,
+`LogoTile` draws a tile from the initial, and that is a working answer.
 
-Sorulacakların ekranı `SettingsTemplate` ile kuruluyor; adım adım anlatımı doküman sitesinde
-`/docs/yeni-panel` sayfasında.
+The screen for all this is built with `SettingsTemplate`; the walkthrough is at
+[/docs/new-panel](https://tamga.org.tr/en/docs/new-panel).
 
 ---
 
-## Renkleri değiştirmek
+## Changing the colours
 
-Bir bileşen hiçbir yerde sabit renk taşımıyor; hepsi token okuyor.
+No component anywhere carries a fixed colour; every one of them reads tokens.
 
-### Tek hex'ten bütün palet
+### A whole palette from one hex
 
-`tamga-ui/palette` bir marka renginden iki temanın tamamını üretiyor. Elle üç token yazmaktan
-daha güvenli, çünkü üreteç kontrastı ARAYARAK buluyor: yüzün açıklığını, üstündeki mürekkebin
-AA eşiğini geçene kadar adım adım kaydırıyor. Kırk ton ve iki tema, bir kapının sürekli ölçtüğü
-880 ölçüm.
+`tamga-ui/palette` derives both themes from a single brand colour. Safer than writing three
+tokens by hand, because the generator SEARCHES for contrast: it nudges the face's lightness step
+by step until the ink on top clears the AA threshold. Forty hues across two themes, 880
+measurements that a gate keeps re-running.
 
 ```ts
-import { paletUret, paletCss } from "tamga-ui/palette";
+import { makePalette, paletteCss } from "tamga-ui/palette";
 
-const cift = paletUret("#e02938");   // { light, dark }
-document.documentElement.setAttribute("style", paletCss(cift));
+const pair = makePalette("#e02938");   // { light, dark }
+document.documentElement.setAttribute("style", paletteCss(pair));
 ```
 
-Renk çalışma zamanında değişebiliyorsa (ayar ekranı) yol budur: token'lar kök elemana yazılıyor
-ve kitin 87 sınıfı onları okuduğu için bütün panel tek satırda dönüyor, hiçbir CSS yeniden
-derlenmeden.
+This is the route whenever the colour can change at runtime (a settings screen): the tokens are
+written onto the root element and, because the kit's 87 classes read them, the whole panel turns
+in one line with no CSS recompiled.
 
-### Ya da elle
+### Or by hand
 
-Rengin sabit olduğu ve derleme zamanında bilindiği projelerde token'ları doğrudan geçersiz
-kılabilirsin:
+Where the colour is fixed and known at build time, override the tokens directly:
 
 ```css
 @import "tamga-ui/styles.css";
 
 :root {
-  --color-accent: #2069c9;        /* birincil yüz */
-  --color-accent-shadow: #12245c; /* yüzün altındaki taban */
-  --color-accent-ink: #fdfcfa;    /* yüzün üstündeki mürekkep */
+  --color-accent: #2069c9;        /* the primary face */
+  --color-accent-shadow: #12245c; /* the base under the face */
+  --color-accent-ink: #fdfcfa;    /* the ink on top of the face */
 }
 ```
 
-Bu yolda kontrastı kendin doğrulamak zorundasın: üreteç yok, kapı yok.
+On this route you verify the contrast yourself: no generator, no gate.
 
-Bu yüzden **kendi bileşenlerinde de sabit renk yazma**: `text-ink`, `bg-shell`,
-`var(--color-critical)` yaz. Palet değiştiğinde ekranların onunla birlikte döner; sabit yazılmış
-her renk elle bulunup düzeltilir.
+Which is also why **you should not hardcode colours in your own components**. Write `text-ink`,
+`bg-shell`, `var(--color-critical)`. When the palette changes your screens turn with it; every
+hardcoded colour has to be hunted down by hand.
 
-Token'ların tamamı doküman sitesinde (`/docs/tokens`), temayı değiştirmenin adımları
-`/docs/tema` sayfasında.
+The full token list is on the docs site (`/docs/tokens`), and the steps for changing a theme are
+on `/docs/theme`.
 
 ---
 
-## Lisans
+## Licence
 
 MIT — [LICENSE](./LICENSE)

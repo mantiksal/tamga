@@ -1,7 +1,7 @@
 {
   "name": "tamga-ui",
-  "version": "0.1.1",
-  "description": "Tamga — ortak arayüz kütüphanesi — token'lar, fizik ve bileşenler.",
+  "version": "0.2.0",
+  "description": "Mantıksal's shared interface library: tokens, physics and components.",
   "license": "MIT",
   "type": "module",
   "sideEffects": [
@@ -10,6 +10,7 @@
   "files": [
     "dist",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "exports": {

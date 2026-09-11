@@ -19,7 +19,7 @@ const srgbDoğrusal = (v: number) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 
 const doğrusalSrgb = (v: number) => (v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055);
 
 /** `#abc` ya da `#aabbcc`. Kısa biçim de sayılıyor, boşluk sayılmıyor. */
-export const gecerliHex = (v: string): boolean => /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v.trim());
+export const isHex = (v: string): boolean => /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v.trim());
 
 /**
  * Hex → RGB, GEÇERSİZ GİRDİDE FIRLATARAK.
@@ -30,10 +30,10 @@ export const gecerliHex = (v: string): boolean => /^#?([0-9a-f]{3}|[0-9a-f]{6})$
  * sebebi rengin kendisinde aranıyor.
  *
  * Kit KATI, çağıran toleranslı: yarım yazılmış bir kodun ne anlama geldiği
- * ekranın kararı (bkz. `gecerliHex`).
+ * ekranın kararı (bkz. `isHex`).
  */
-export function hexRgb(hex: string): [number, number, number] {
-  if (!gecerliHex(hex)) throw new Error(`Geçersiz hex: ${JSON.stringify(hex)}`);
+export function hexToRgb(hex: string): [number, number, number] {
+  if (!isHex(hex)) throw new Error(`Geçersiz hex: ${JSON.stringify(hex)}`);
   const s = hex.trim().replace("#", "");
   const t = s.length === 3 ? [...s].map((c) => c + c).join("") : s;
   const n = Number.parseInt(t, 16);
@@ -41,18 +41,18 @@ export function hexRgb(hex: string): [number, number, number] {
 }
 
 const kanal = (v: number) => Math.max(0, Math.min(255, Math.round(v * 255)));
-export const rgbHex = (r: number, g: number, b: number) =>
+export const rgbToHex = (r: number, g: number, b: number) =>
   "#" + [r, g, b].map((v) => kanal(v).toString(16).padStart(2, "0")).join("");
 
 /** WCAG bağıl parlaklık. Metin kontrastı bununla ölçülüyor. */
-export function parlaklik(hex: string): number {
-  const [r, g, b] = hexRgb(hex).map((v) => srgbDoğrusal(v / 255)) as [number, number, number];
+export function luminance(hex: string): number {
+  const [r, g, b] = hexToRgb(hex).map((v) => srgbDoğrusal(v / 255)) as [number, number, number];
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
 /** WCAG kontrast oranı. AA metin eşiği 4.5. */
-export function oran(a: string, b: string): number {
-  const [ust, alt] = [parlaklik(a), parlaklik(b)].sort((x, y) => y - x) as [number, number];
+export function contrast(a: string, b: string): number {
+  const [ust, alt] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [number, number];
   return (ust + 0.05) / (alt + 0.05);
 }
 
@@ -62,17 +62,17 @@ export function oran(a: string, b: string): number {
  * İki YÜZEYİN ayrı okunup okunmadığı bununla ölçülüyor; kontrast oranı metin
  * içindir, yüzey için değil. Bir kartın kenarı sayfadan ΔL* ≥ 10 ayrı olmalı.
  */
-export function acikligi(hex: string): number {
-  const y = parlaklik(hex);
+export function lightness(hex: string): number {
+  const y = luminance(hex);
   return y > 216 / 24389 ? 116 * Math.cbrt(y) - 16 : (y * 24389) / 27;
 }
 
-export const dL = (a: string, b: string) => Math.abs(acikligi(a) - acikligi(b));
+export const deltaL = (a: string, b: string) => Math.abs(lightness(a) - lightness(b));
 
 /* ---- OKLab ---- */
 
-export function hexOklch(hex: string): Oklch {
-  const [r8, g8, b8] = hexRgb(hex);
+export function hexToOklch(hex: string): Oklch {
+  const [r8, g8, b8] = hexToRgb(hex);
   const r = srgbDoğrusal(r8 / 255);
   const g = srgbDoğrusal(g8 / 255);
   const b = srgbDoğrusal(b8 / 255);
@@ -98,7 +98,7 @@ export function hexOklch(hex: string): Oklch {
  * doyum (C) ikili aramayla sığana kadar düşürülüyor; ton ve açıklık korunuyor,
  * yalnız canlılık gerektiği kadar azalıyor.
  */
-export function oklchHex({ l, c, h }: Oklch): string {
+export function oklchToHex({ l, c, h }: Oklch): string {
   const dene = (kroma: number) => {
     const hr = (h * Math.PI) / 180;
     const A = Math.cos(hr) * kroma;
@@ -126,7 +126,7 @@ export function oklchHex({ l, c, h }: Oklch): string {
     }
     rgb = dene(alt);
   }
-  return rgbHex(...rgb);
+  return rgbToHex(...rgb);
 }
 
 /**
@@ -139,7 +139,7 @@ export function oklchHex({ l, c, h }: Oklch): string {
  * `yon` "koyulaş" (-1) ya da "açıl" (+1): koyu temada aynı hedef ters yönden
  * yakalanıyor.
  */
-export function oranaGoreAcikligi(
+export function lightnessForContrast(
   taban: Oklch,
   karsi: string,
   hedef: number,
@@ -149,7 +149,42 @@ export function oranaGoreAcikligi(
   for (let i = 0; i < 60; i++) {
     const aday = { ...taban, l: Math.max(0.02, Math.min(0.99, taban.l + yon * 0.01 * i)) };
     en = aday;
-    if (oran(oklchHex(aday), karsi) >= hedef) break;
+    if (contrast(oklchToHex(aday), karsi) >= hedef) break;
   }
   return en;
 }
+
+/* ------------------------------------------------------------------ *
+ * ESKİ TÜRKÇE ADLAR, BİR SÜRÜM BOYUNCA.
+ *
+ * ADR-0001: "Adlar İngilizce, yorumlar Türkçe" — bir ad tanımlayıcıdır ve
+ * çevrilmez. Bu modül o kuralı çiğniyordu ve kuralı yazan bizdik; dışarıdan
+ * bir tüketici fark etti. `gecerliHex` gören bir yabancı ne yaptığını
+ * bilmiyor, ve bir kütüphanenin kamusal yüzeyi bakımcısının ana dilinde
+ * olamaz.
+ *
+ * ESKİLERİ SİLMEDİM çünkü `0.1.1` npm'de yayında ve şu an bu adları KULLANAN
+ * bir tüketici var. Sessizce kırmak, bir sürüm numarasının söylemesi gereken
+ * şeyi söylemeden kırmaktır. Bir sürüm daha duruyorlar, sonra gidiyorlar.
+ * ------------------------------------------------------------------ */
+
+/** @deprecated `isHex` kullan. 0.3.0'da kaldırılacak. */
+export const gecerliHex = isHex;
+/** @deprecated `hexToRgb` kullan. 0.3.0'da kaldırılacak. */
+export const hexRgb = hexToRgb;
+/** @deprecated `rgbToHex` kullan. 0.3.0'da kaldırılacak. */
+export const rgbHex = rgbToHex;
+/** @deprecated `luminance` kullan. 0.3.0'da kaldırılacak. */
+export const parlaklik = luminance;
+/** @deprecated `contrast` kullan. 0.3.0'da kaldırılacak. */
+export const oran = contrast;
+/** @deprecated `lightness` kullan. 0.3.0'da kaldırılacak. */
+export const acikligi = lightness;
+/** @deprecated `deltaL` kullan. 0.3.0'da kaldırılacak. */
+export const dL = deltaL;
+/** @deprecated `hexToOklch` kullan. 0.3.0'da kaldırılacak. */
+export const hexOklch = hexToOklch;
+/** @deprecated `oklchToHex` kullan. 0.3.0'da kaldırılacak. */
+export const oklchHex = oklchToHex;
+/** @deprecated `lightnessForContrast` kullan. 0.3.0'da kaldırılacak. */
+export const oranaGoreAcikligi = lightnessForContrast;

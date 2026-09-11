@@ -1,8 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Icon } from "../components/icon.js";
-import { Check } from "../components/icons.js";
+import { Steps } from "../components/display.js";
 import { ErrorSlot, type ErrorLabels, type TemplateError } from "./shared.js";
 
 /**
@@ -53,40 +52,23 @@ export function WizardTemplate({
     <div className="flex min-h-0 flex-col" data-wizard-state={state}>
       {/* Söz, görünür tutuluyor. Uzunluğunu gizleyen bir sihirbaz, bir şey daha
           istemeye devam eden bir formdan başka bir şey değil. */}
-      <ol className="tamga-section tamga-gutter flex flex-wrap items-center gap-x-6 gap-y-2 py-4">
-        {steps.map((step, i) => {
-          const current = step.key === activeStep;
-          /* "Bitti" konumsal, çağıranın taşıması gereken bir bayrak değil: açık
-             adımdan öncekilerin hepsinden geçilmiş. Tek kaynak, kayma yok. */
-          const done = activeIndex >= 0 && i < activeIndex;
-          return (
-            <li
-              key={step.key}
-              data-step={step.key}
-              data-current={current}
-              data-done={done}
-              aria-current={current ? "step" : undefined}
-              className={`flex items-center gap-2 text-small ${
-                current ? "font-medium text-ink" : done ? "text-ink-soft" : "text-ink-faint"
-              }`}
-            >
-              {/* İŞARETİN GENİŞLİĞİ SABİT. İçeriğe bırakıldığında "02" ile
-                  `Check` glifi farklı genişlikteydi ve bir adım tamamlanır
-                  tamamlanmaz yanındaki etiket yana kayıyordu: ilerleme
-                  işaretinin kendisi şeridi oynatıyordu. `Steps` bileşeninde de
-                  aynı kaçak vardı. */}
-              <span className="inline-flex w-5 shrink-0 justify-center font-mono text-caption tabular-nums">
-                {done ? (
-                  <Icon icon={Check} size="xs" weight="bold" />
-                ) : (
-                  String(i + 1).padStart(2, "0")
-                )}
-              </span>
-              {step.label}
-            </li>
-          );
-        })}
-      </ol>
+      {/* ŞERİDİ ŞABLON DEĞİL `Steps` ÇİZİYOR, VE BU BİR DÜZELTME.
+
+          Burada elle yazılmış bir şerit vardı: mono "01", çıplak, aralarında
+          çizgi yok. `Steps` bileşeni ise aynı fikri başka türlü çiziyordu:
+          24px'lik bir karo ve aralarında bir çizgi. Yani kit "bir dizide
+          neredeyim" sorusunu İKİ farklı görsel dille cevaplıyordu, ve bunu
+          dışarıdan bir tüketici fark etti.
+
+          Bir tasarım sisteminin tek sözü "aynı şey her yerde aynı görünür".
+          Şerit artık tek yerde çiziliyor; `Steps`e dokunan onu her sihirbazda
+          birden değiştiriyor.
+
+          `aria` ŞERİDİN İÇİNDE: `Steps` kendi `<ol>`unu ve `aria-current`ini
+          taşıyor, o yüzden buradaki sarmalayıcı yalnız yerleşim veriyor. */}
+      <div className="tamga-section tamga-gutter py-4">
+        <Steps steps={steps.map((s) => s.label)} current={activeIndex < 0 ? 0 : activeIndex} />
+      </div>
 
       <div className="tamga-gutter min-h-0 flex-1 py-6">
         <div className="max-w-[var(--measure)]">
@@ -98,8 +80,15 @@ export function WizardTemplate({
         </div>
       </div>
 
+      {/* ALT ŞERİT YAPIŞKAN. Uzun bir adım formunda "İleri" ekranın altına
+          kayıyordu: kullanıcı formu doldurup devam edemiyor, önce aşağı
+          kaydırması gerektiğini keşfetmesi gerekiyordu. Bir sihirbazın ileriye
+          götüren düğmesi her an erişilebilir olmalı — akışın kendisi o.
+
+          `bottom-0` + zemin: yapışkan bir şerit saydam olursa altından geçen
+          içerik okunuyor ve şerit kirli görünüyor. */}
       {back || next ? (
-        <div className="tamga-section tamga-gutter flex items-center gap-2 py-4">
+        <div className="tamga-section tamga-gutter sticky bottom-0 z-10 flex items-center gap-2 bg-shell py-4">
           {back}
           {/* İleri, geri olmasa bile sağda: ileriye götüren eylem adımlar
               arasında YER DEĞİŞTİRMİYOR, ve bakmadan tıklanan tek kontrol o. */}

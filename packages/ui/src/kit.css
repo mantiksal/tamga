@@ -1659,6 +1659,14 @@
   .tamga-table tbody tr[data-selected="true"] td:first-child {
     box-shadow: inset 2px 0 0 var(--color-accent-line);
   }
+  /* SEÇİLİ SATIR İKİ ADLA GELEBİLİYOR, VE BİRİ BOYANMIYORDU.
+     `SettingsTemplate` menüsündeki açık bölümü `data-active` ile işaretliyor
+     (bir GEZİNME satırı: hangi sayfadasın), liste satırları ise `data-selected`
+     ile (bir SEÇİM: hangi kayıtları işaretledin). İkisi farklı anlam ama aynı
+     görünüm, ve kural yalnız ikincisi için yazılmıştı: ayarlar menüsünde
+     hangi bölümde olduğun hiç görünmüyordu. Hiçbir şey patlamadı, çünkü
+     tarayıcı bilmediği bir nitelik seçicisini sessizce atlıyor. */
+  .tamga-list-row[data-active="true"],
   .tamga-list-row[data-selected="true"] {
     background: var(--color-accent-bg);
     box-shadow: inset 2px 0 0 var(--color-accent-line);

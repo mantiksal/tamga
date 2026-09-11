@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { oran, hexOklch } from "./color.js";
-import { paletUret, paletiOlc } from "./palette.js";
+import { contrast, hexToOklch } from "./color.js";
+import { makePalette, measurePalette } from "./palette.js";
 
 /**
  * Palet üreticisinin sözleşmesi.
@@ -23,13 +23,13 @@ const TONLAR = {
   gri: "#64748b",
 };
 
-describe("paletUret", () => {
+describe("makePalette", () => {
   for (const [ad, hex] of Object.entries(TONLAR)) {
     it(`${ad}: iki temada da bütün eşikleri geçiyor`, () => {
-      const { light, dark } = paletUret(hex);
+      const { light, dark } = makePalette(hex);
       for (const [tema, p] of [["acik", light], ["koyu", dark]] as const) {
-        for (const o of paletiOlc(p)) {
-          expect(o.gecti, `${tema} · ${o.ad} = ${o.deger}, eşik ${o.esik}`).toBe(true);
+        for (const o of measurePalette(p)) {
+          expect(o.passed, `${tema} · ${o.name} = ${o.value}, eşik ${o.threshold}`).toBe(true);
         }
       }
     });
@@ -39,20 +39,20 @@ describe("paletUret", () => {
      yorum "beyaz mürekkep 5.22:1" diyor. Üretici aynı markadan aynı ölçüyü
      buluyorsa, elle yapılan iş ile aritmetik aynı şeyi söylüyor demektir. */
   it("elle seçilmiş mavi paletin ölçüsünü yeniden üretiyor", () => {
-    const { light } = paletUret("#2069c9");
-    expect(oran(light.accent, light.accentInk)).toBeCloseTo(5.22, 1);
+    const { light } = makePalette("#2069c9");
+    expect(contrast(light.accent, light.accentInk)).toBeCloseTo(5.22, 1);
   });
 
   /* MARKA TANINIR KALIYOR. İlk hâli sarıyı beyaz mürekkep geçene kadar
      koyulaştırıp #8f6c00 yapıyordu: ölçüm geçiyor, marka gidiyor. */
   it("açık tonlarda yüzü koyulaştırmıyor, mürekkebi çeviriyor", () => {
-    const { light } = paletUret("#eab308");
-    expect(hexOklch(light.accent).l).toBeGreaterThan(0.72);
+    const { light } = makePalette("#eab308");
+    expect(hexToOklch(light.accent).l).toBeGreaterThan(0.72);
     expect(light.accentInk).toBe(light.ink);
   });
 
   it("koyu tonlarda beyaz mürekkep kalıyor", () => {
-    const { light } = paletUret("#1e3a8a");
+    const { light } = makePalette("#1e3a8a");
     expect(light.accentInk).toBe(light.shell);
   });
 
@@ -60,13 +60,13 @@ describe("paletUret", () => {
      panel, hex yazılırken ara adımlarda griye dönüyordu. */
   it("geçersiz kodda fırlatıyor", () => {
     for (const kotu of ["#zz", "#7", "", "mor", "#12345"]) {
-      expect(() => paletUret(kotu)).toThrow();
+      expect(() => makePalette(kotu)).toThrow();
     }
   });
 
   it("kısa biçimi ve boşluğu kabul ediyor", () => {
-    expect(() => paletUret("#abc")).not.toThrow();
-    expect(() => paletUret(" #7c3aed ")).not.toThrow();
+    expect(() => makePalette("#abc")).not.toThrow();
+    expect(() => makePalette(" #7c3aed ")).not.toThrow();
   });
 
   /* NÖTRLER MARKANIN TONUNU TAŞIYOR: mor bir markanın grisi mor grisi.
@@ -77,10 +77,10 @@ describe("paletUret", () => {
    * yüzden yanlış yerde kırılırdı: ölçülmesi gereken şey "gri kaldı mı" ve
    * "markanın ailesinde mi". */
   it("zemin markanın tonunu alıyor, grisi kalarak", () => {
-    const mor = paletUret("#7c3aed").light;
-    const yesil = paletUret("#0a7a5f").light;
+    const mor = makePalette("#7c3aed").light;
+    const yesil = makePalette("#0a7a5f").light;
     expect(mor.page).not.toBe(yesil.page);
-    expect(Math.abs(hexOklch(mor.page).h - hexOklch("#7c3aed").h)).toBeLessThan(15);
-    expect(hexOklch(mor.page).c).toBeLessThan(0.02);
+    expect(Math.abs(hexToOklch(mor.page).h - hexToOklch("#7c3aed").h)).toBeLessThan(15);
+    expect(hexToOklch(mor.page).c).toBeLessThan(0.02);
   });
 });

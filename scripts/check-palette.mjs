@@ -11,7 +11,7 @@
  * Ayrıca `check-token-contrast` ile AYNI eşikler kullanılıyor; ikisi ayrışırsa
  * elle kurulmuş palet ile üretilen palet farklı kurallara tabi olurdu.
  */
-import { paletUret, paletiOlc } from "../packages/ui/dist/lib/palette.js";
+import { makePalette, measurePalette } from "../packages/ui/dist/lib/palette.js";
 import { oklchHex } from "../packages/ui/dist/lib/color.js";
 
 const tonlar = Array.from({ length: 36 }, (_, i) => ({
@@ -29,13 +29,13 @@ tonlar.push(
 const hatalar = [];
 let olcum = 0;
 for (const { ad, hex } of tonlar) {
-  const cift = paletUret(hex);
+  const cift = makePalette(hex);
   for (const [tema, palet] of [["açık", cift.light], ["koyu", cift.dark]]) {
-    for (const o of paletiOlc(palet)) {
+    for (const o of measurePalette(palet)) {
       olcum++;
-      if (!o.gecti) {
+      if (!o.passed) {
         hatalar.push(
-          `  ${ad} · ${tema} · ${o.ad}: ${o.deger} (eşik ${o.tur === "oran" ? "≥" : "ΔL* ≥"} ${o.esik})`,
+          `  ${ad} · ${tema} · ${o.name}: ${o.value} (eşik ${o.kind === "contrast" ? "≥" : "ΔL* ≥"} ${o.threshold})`,
         );
       }
     }

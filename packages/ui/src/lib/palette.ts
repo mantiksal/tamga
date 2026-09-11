@@ -1,4 +1,4 @@
-import { acikligi, dL, gecerliHex, hexOklch, oklchHex, oran, type Oklch } from "./color.js";
+import { lightness, deltaL, isHex, hexToOklch, oklchToHex, contrast, type Oklch } from "./color.js";
 
 /**
  * Tek bir marka renginden iki temalık palet.
@@ -19,7 +19,7 @@ import { acikligi, dL, gecerliHex, hexOklch, oklchHex, oran, type Oklch } from "
  */
 
 /** Bir temanın üreteceği token'lar. Adlar `theme.css`'teki kit ailesiyle birebir. */
-export type Palet = {
+export type Palette = {
   page: string;
   shell: string;
   hover: string;
@@ -45,7 +45,7 @@ export type Palet = {
   navHoverBg: string;
 };
 
-export type PaletCifti = { light: Palet; dark: Palet };
+export type PalettePair = { light: Palette; dark: Palette };
 
 /**
  * Nötrlerin AÇIKLIK basamakları, iki temada.
@@ -73,7 +73,7 @@ const BASAMAK = {
  */
 const NOTR_DOYUM = { zemin: 0.006, yuzey: 0, cizgi: 0.009, murekkep: 0.014 } as const;
 
-const notr = (h: number, l: number, c: number) => oklchHex({ l, c, h });
+const notr = (h: number, l: number, c: number) => oklchToHex({ l, c, h });
 
 /**
  * Yüzün üstündeki mürekkep: beyaz mı koyu mu.
@@ -83,10 +83,10 @@ const notr = (h: number, l: number, c: number) => oklchHex({ l, c, h });
  * markada okunmayan bir düğme üretiyor.
  */
 function yuzMurekkebi(yuz: string, acikNotr: string, koyuNotr: string): string {
-  return oran(acikNotr, yuz) >= oran(koyuNotr, yuz) ? acikNotr : koyuNotr;
+  return contrast(acikNotr, yuz) >= contrast(koyuNotr, yuz) ? acikNotr : koyuNotr;
 }
 
-function temaUret(marka: Oklch, koyu: boolean): Palet {
+function temaUret(marka: Oklch, koyu: boolean): Palette {
   const h = marka.h;
   const b = koyu ? BASAMAK.dark : BASAMAK.light;
   const page = notr(h, b.page, NOTR_DOYUM.zemin);
@@ -110,27 +110,27 @@ function temaUret(marka: Oklch, koyu: boolean): Palet {
   const yuzL = Math.max(band.alt, Math.min(band.ust, marka.l));
   /* DOYUM KIRPILMIYOR. Bir süre `min(marka.c, 0.16)` vardı ve doygun bir marka
      kırmızısını (C 0.215) `#c74a4a`ya soldurup markayı gözle görülür şekilde
-     değiştiriyordu. Kırpma gereksizdi: `oklchHex` zaten gamut'a sığmayan bir
+     değiştiriyordu. Kırpma gereksizdi: `oklchToHex` zaten gamut'a sığmayan bir
      rengi ikili aramayla sığdırıyor ve TONU koruyor. Kırpmak, çözülmüş bir
      sorunu ikinci kez ve daha kötü çözmekti. */
   const kroma = marka.c;
-  let yuz = oklchHex({ l: yuzL, c: kroma, h });
+  let yuz = oklchToHex({ l: yuzL, c: kroma, h });
   let murekkep = yuzMurekkebi(yuz, shell, ink);
-  for (let i = 1; i <= 40 && oran(yuz, murekkep) < 4.5; i++) {
+  for (let i = 1; i <= 40 && contrast(yuz, murekkep) < 4.5; i++) {
     /* Mürekkep açıksa yüz koyulaşır, koyuysa açılır: mesafe hep açılıyor. */
-    const yon = acikligi(murekkep) > 50 ? -1 : 1;
-    yuz = oklchHex({ l: Math.max(0.2, Math.min(0.92, yuzL + yon * 0.01 * i)), c: kroma, h });
+    const yon = lightness(murekkep) > 50 ? -1 : 1;
+    yuz = oklchToHex({ l: Math.max(0.2, Math.min(0.92, yuzL + yon * 0.01 * i)), c: kroma, h });
     murekkep = yuzMurekkebi(yuz, shell, ink);
   }
 
-  const yuzOk = hexOklch(yuz);
-  const adim = (d: number) => oklchHex({ ...yuzOk, l: Math.max(0.06, Math.min(0.96, yuzOk.l + d)) });
+  const yuzOk = hexToOklch(yuz);
+  const adim = (d: number) => oklchToHex({ ...yuzOk, l: Math.max(0.06, Math.min(0.96, yuzOk.l + d)) });
 
   /* ÇİZGİ RENGİ (bağlantı, odak halkası) sayfada AA geçmek zorunda: bir
      bağlantı metindir. Yüz genelde geçmiyor, o yüzden ayrıca aranıyor. */
   let cizgi = koyu ? adim(0.08) : adim(-0.18);
-  for (let i = 0; i < 40 && oran(cizgi, page) < 4.5; i++) {
-    cizgi = oklchHex({ ...yuzOk, l: Math.max(0.08, Math.min(0.95, yuzOk.l + (koyu ? 1 : -1) * (0.18 + 0.01 * i))) });
+  for (let i = 0; i < 40 && contrast(cizgi, page) < 4.5; i++) {
+    cizgi = oklchToHex({ ...yuzOk, l: Math.max(0.08, Math.min(0.95, yuzOk.l + (koyu ? 1 : -1) * (0.18 + 0.01 * i))) });
   }
 
   return {
@@ -153,9 +153,9 @@ function temaUret(marka: Oklch, koyu: boolean): Palet {
     accentInk: murekkep,
     accentLine: cizgi,
     /* Seçili satır zemini: sayfaya çok yakın, ama ayrı okunuyor. */
-    accentBg: oklchHex({ l: koyu ? b.page + 0.06 : b.page - 0.035, c: 0.03, h }),
+    accentBg: oklchToHex({ l: koyu ? b.page + 0.06 : b.page - 0.035, c: 0.03, h }),
     /* Taban: yüzün ALTINDA duran koyu, doygun renk (13 Yasa 1). */
-    accentShadow: oklchHex({ l: koyu ? 0.42 : 0.28, c: Math.min(marka.c, 0.13), h }),
+    accentShadow: oklchToHex({ l: koyu ? 0.42 : 0.28, c: Math.min(marka.c, 0.13), h }),
     navIdle: notr(h, b.navIdle, NOTR_DOYUM.murekkep),
     navHover: notr(h, b.navHover, NOTR_DOYUM.murekkep),
     navHoverBg: notr(h, koyu ? b.hover : b.hover - 0.01, NOTR_DOYUM.zemin),
@@ -166,19 +166,36 @@ function temaUret(marka: Oklch, koyu: boolean): Palet {
  * Bir marka renginden iki tema.
  *
  * Geçersiz bir kodda FIRLATIYOR, sessizce griye düşmüyor: yarım yazılmış bir
- * hex'in ne anlama geldiğine çağıran karar veriyor (`gecerliHex`).
+ * hex'in ne anlama geldiğine çağıran karar veriyor (`isHex`).
  */
-export function paletUret(markaHex: string): PaletCifti {
-  if (!gecerliHex(markaHex)) throw new Error(`Geçersiz marka rengi: ${JSON.stringify(markaHex)}`);
-  const marka = hexOklch(markaHex);
+export function makePalette(markaHex: string): PalettePair {
+  if (!isHex(markaHex)) throw new Error(`Geçersiz marka rengi: ${JSON.stringify(markaHex)}`);
+  const marka = hexToOklch(markaHex);
   return { light: temaUret(marka, false), dark: temaUret(marka, true) };
 }
 
-export { gecerliHex };
+export { isHex };
 
 /* ---- doğrulama ---- */
 
-export type Olcum = { ad: string; tur: "oran" | "dL"; deger: number; esik: number; gecti: boolean };
+/**
+ * Tek bir kontrast ölçümü.
+ *
+ * ALAN ADLARI DA İNGİLİZCE, ve bir ara değildi. Bu modülün kamusal yüzeyi
+ * (`gecerliHex`, `paletiOlc`, `{ ad, tur, deger, esik, gecti }`) bakımcının
+ * ana dilindeydi; ADR-0001 ise adların İngilizce olduğunu söylüyor. Kuralı
+ * yazan bizdik ve tutmayan da bizdik. Bir kütüphaneyi kuran yabancı `gecti`
+ * alanının ne olduğunu bilemez.
+ */
+export type Measurement = {
+  /** Neyin neye karşı ölçüldüğü: "ink · page". */
+  name: string;
+  /** `contrast` WCAG oranı, `deltaL` açıklık farkı. */
+  kind: "contrast" | "deltaL";
+  value: number;
+  threshold: number;
+  passed: boolean;
+};
 
 /**
  * Üretilen paleti `check-token-contrast` ile AYNI eşiklerden geçirir.
@@ -187,14 +204,14 @@ export type Olcum = { ad: string; tur: "oran" | "dL"; deger: number; esik: numbe
  * yarın bir ton için yanlış olur. Marka rengi değiştiğinde bu liste yeniden
  * koşuyor, ve geçmeyen bir palet build'i kırıyor.
  */
-export function paletiOlc(p: Palet): Olcum[] {
-  const metin = (ad: string, a: string, b: string, esik = 4.5): Olcum => {
-    const deger = Number(oran(a, b).toFixed(2));
-    return { ad, tur: "oran", deger, esik, gecti: deger >= esik };
+export function measurePalette(p: Palette): Measurement[] {
+  const metin = (name: string, a: string, b: string, threshold = 4.5): Measurement => {
+    const value = Number(contrast(a, b).toFixed(2));
+    return { name, kind: "contrast", value, threshold, passed: value >= threshold };
   };
-  const yuzey = (ad: string, a: string, b: string, esik: number): Olcum => {
-    const deger = Number(dL(a, b).toFixed(1));
-    return { ad, tur: "dL", deger, esik, gecti: deger >= esik };
+  const yuzey = (name: string, a: string, b: string, threshold: number): Measurement => {
+    const value = Number(deltaL(a, b).toFixed(1));
+    return { name, kind: "deltaL", value, threshold, passed: value >= threshold };
   };
   return [
     metin("ink · page", p.ink, p.page),
@@ -213,15 +230,15 @@ export function paletiOlc(p: Palet): Olcum[] {
 
 /** `:root` bloğuna yapıştırılabilir CSS. */
 /**
- * Palet alanı → CSS simge adı.
+ * Palette alanı → CSS simge adı.
  *
- * DIŞARI AÇIK, ÇÜNKÜ ÜÇÜNCÜ KOPYASI DOĞACAKTI. Bu eşleme `paletCss`in içinde
+ * DIŞARI AÇIK, ÇÜNKÜ ÜÇÜNCÜ KOPYASI DOĞACAKTI. Bu eşleme `paletteCss`in içinde
  * özeldi; bir ürün paneli aynısını kendi dosyasına elle yazmıştı (rengi
  * çalışma zamanında köke yazmak için), ve doküman sitesi de üçüncüsünü
  * yazacaktı. Aynı yirmi iki satırın üç kopyası, kite bir simge eklendiği gün
  * ikisinin sessizce eksik kalması demek.
  */
-const AD: Record<keyof Palet, string> = {
+const AD: Record<keyof Palette, string> = {
   page: "--color-page", shell: "--color-shell", hover: "--color-hover", band: "--color-band",
   rail: "--color-rail", sunk: "--color-sunk", chartFill: "--color-chart-fill",
   line: "--color-line", edge: "--color-edge", tick: "--color-tick",
@@ -236,24 +253,45 @@ const AD: Record<keyof Palet, string> = {
 /**
  * Bir paleti CSS değişkeni sözlüğüne çevirir: `{ "--color-accent": "#..." }`.
  *
- * NEDEN `paletCss` YETMİYOR: o bir STİL SAYFASI dizgisi üretiyor (`:root { … }`),
+ * NEDEN `paletteCss` YETMİYOR: o bir STİL SAYFASI dizgisi üretiyor (`:root { … }`),
  * ve bir stil sayfası ancak belgenin tamamına uygulanabiliyor. Bir paleti tek
  * bir kutuya uygulamak (bir önizleme, bir tema seçici) ya da köke çalışma
  * zamanında yazmak için gereken şey bir SÖZLÜK. Simge adları kalıtsal olduğu
  * için bir kutuya yazılan palet, içindeki her bileşeni birlikte döndürüyor.
  */
-export function paletStili(p: Palet): Record<string, string> {
+export function paletteVars(p: Palette): Record<string, string> {
   const stil: Record<string, string> = {};
-  for (const alan of Object.keys(AD) as (keyof Palet)[]) stil[AD[alan]] = p[alan];
+  for (const alan of Object.keys(AD) as (keyof Palette)[]) stil[AD[alan]] = p[alan];
   return stil;
 }
 
-export function paletCss(cift: PaletCifti): string {
-  const blok = (p: Palet) =>
-    Object.entries(paletStili(p))
+export function paletteCss(cift: PalettePair): string {
+  const blok = (p: Palette) =>
+    Object.entries(paletteVars(p))
       .map(([ad, deger]) => `  ${ad}: ${deger};`)
       .join("\n");
   return `:root {\n${blok(cift.light)}\n}\n\n.dark {\n${blok(cift.dark)}\n}\n`;
 }
 
-export { acikligi, dL, oran };
+export { lightness, deltaL, contrast };
+
+/* ------------------------------------------------------------------ *
+ * ESKİ TÜRKÇE ADLAR, BİR SÜRÜM BOYUNCA. Gerekçe `lib/color.ts` sonunda.
+ * ------------------------------------------------------------------ */
+
+/** @deprecated `makePalette` kullan. 0.3.0'da kaldırılacak. */
+export const paletUret = makePalette;
+/** @deprecated `measurePalette` kullan. 0.3.0'da kaldırılacak. */
+export const paletiOlc = measurePalette;
+/** @deprecated `paletteVars` kullan. 0.3.0'da kaldırılacak. */
+export const paletStili = paletteVars;
+/** @deprecated `paletteCss` kullan. 0.3.0'da kaldırılacak. */
+export const paletCss = paletteCss;
+/** @deprecated `Palette` kullan. 0.3.0'da kaldırılacak. */
+export type Palet = Palette;
+/** @deprecated `PalettePair` kullan. 0.3.0'da kaldırılacak. */
+export type PaletCifti = PalettePair;
+/** @deprecated `Measurement` kullan. 0.3.0'da kaldırılacak. */
+export type Olcum = Measurement;
+/** @deprecated `isHex` kullan (tamga-ui/palette üzerinden). 0.3.0'da kaldırılacak. */
+export { gecerliHex, hexRgb, rgbHex, parlaklik, oran, acikligi, dL, hexOklch, oklchHex, oranaGoreAcikligi } from "./color.js";

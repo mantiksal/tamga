@@ -102,7 +102,7 @@ const T = {
         <strong>Eşikler tahmin değil arama.</strong> Her renk bir formülle değil, hedef orana
         ulaşana kadar ölçülerek bulunuyor; bir tonun beyaz mürekkebi hangi açıklıkta taşıdığı tona
         göre değişiyor. Sarı bir markanın yüzü sarı kalıyor ve mürekkebi koyuya dönüyor; koyulaşıp
-        kahverengi olmuyor. Sonuç <code>paletiOlc()</code> ile ölçülebiliyor, ve ölçüm{" "}
+        kahverengi olmuyor. Sonuç <code>measurePalette()</code> ile ölçülebiliyor, ve ölçüm{" "}
         <Xref to="theme">Tema</Xref> sayfasındaki kapıyla aynı eşikleri kullanıyor.
       </>
     ),
@@ -214,7 +214,7 @@ const T = {
         until it meets its target rather than by a formula, because the lightness at which a hue can
         carry white ink depends on the hue. A yellow brand keeps a yellow face and flips its ink to
         dark; it does not darken into brown. The result can be measured with{" "}
-        <code>paletiOlc()</code>, against the same thresholds as the gate on the{" "}
+        <code>measurePalette()</code>, against the same thresholds as the gate on the{" "}
         <Xref to="theme">Theme</Xref> page.
       </>
     ),

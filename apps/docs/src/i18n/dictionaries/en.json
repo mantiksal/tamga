@@ -12,7 +12,11 @@
       "toDark": "Switch to dark theme"
     },
     "language": "Language",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "themeState": {
+      "light": "Light",
+      "dark": "Dark"
+    }
   },
   "demo": {
     "preview": "Preview",

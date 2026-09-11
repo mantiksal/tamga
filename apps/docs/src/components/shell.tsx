@@ -287,7 +287,23 @@ export function SiteHeader({
           {cta ? <span className="hidden sm:inline-flex">{cta}</span> : null}
           <span className="hidden font-mono text-body text-ink-faint sm:inline">v0.0.0</span>
           <LocaleSwitcher lang={lang} dict={dict} />
-          <ThemeToggle variant="switch" labels={dict.chrome.theme} storageKey="docs-theme" />
+          {/* TELEFONDA KUTU, MASAÜSTÜNDE ANAHTAR.
+              Dil kutu, tema anahtar olunca ikisi yan yana iki ayrı dilden
+              konuşuyordu: biri kenarlı ve okluydu, öteki iki simge arasında
+              bir topuz. Telefonda ikisi de kutu; ne olduklarını sözcükle
+              söylüyorlar ve aynı şekli paylaşıyorlar. Geniş ekranda yer bol,
+              anahtar duruyor: orada tema durumu hiç açmadan görünüyor. */}
+          <span className="sm:hidden">
+            <ThemeToggle
+              variant="select"
+              labels={dict.chrome.themeState}
+              storageKey="docs-theme"
+              className="w-24"
+            />
+          </span>
+          <span className="hidden sm:inline-flex">
+            <ThemeToggle variant="switch" labels={dict.chrome.theme} storageKey="docs-theme" />
+          </span>
         </span>
       </div>
     </header>

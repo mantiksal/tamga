@@ -63,12 +63,26 @@ const T = {
     ),
     variant: (
       <>
-        İki biçim var ve seçim ORANTI meselesi. <code>icon</code> (varsayılan) sıkışık bir araç
-        çubuğuna girer: 40×40, tek simge. Ama yanında bir dil değiştirici gibi ANAHTAR biçimli
-        bir kontrol varsa, kare düğme onun iki katı yüksekliğinde durur ve şerit dengesiz
-        görünür. <code>switch</code> biçimi aynı iskeleti kullanıyor: iki uçta birer simge,
-        ortada kayan bir anahtar, yani ikisi aynı satırda oturuyor. Bu sitenin üst şeridinde
-        gördüğün hâli o.
+        Üç biçim var ve seçim ORANTI meselesi: kontrol, YANINDA DURANA benzemeli.{" "}
+        <code>icon</code> (varsayılan) sıkışık bir araç çubuğuna girer: 40×40, tek simge. Ama
+        yanında bir dil değiştirici gibi ANAHTAR biçimli bir kontrol varsa, kare düğme onun iki
+        katı yüksekliğinde durur ve şerit dengesiz görünür. <code>switch</code> biçimi aynı
+        iskeleti kullanıyor: iki uçta birer simge, ortada kayan bir anahtar.{" "}
+        <code>select</code> ise komşusu bir SEÇİM KUTUSU olduğunda: dar bir şeritte kutu ile
+        anahtar yan yana durunca ikisi iki ayrı dilden konuşuyor, biri kenarlı ve oklu öteki iki
+        simge arasında bir topuz. Bu sitenin şeridinde üçünü de görebilirsin: telefonda kutu,
+        geniş ekranda anahtar.
+      </>
+    ),
+    etiketH: "Eylem sözcüğü ve durum sözcüğü ayrı şeyler",
+    etiketP: (
+      <>
+        <code>icon</code> ve <code>switch</code> basılarak bir şey YAPILIYOR, o yüzden basınca ne
+        olacağıyla adlandırılıyorlar: <code>toLight</code> · <code>toDark</code>.{" "}
+        <code>select</code> ise o an SEÇİLİ olanı gösteriyor, yani durumla:{" "}
+        <code>light</code> · <code>dark</code>. Eylem sözcüklerini kutuda kullanmak, tema zaten
+        açıkken kutuda &ldquo;Koyu temaya geç&rdquo; yazması demekti: kontrol kendi tersini
+        duyurur. Tip bunu zorunlu tutuyor, yanlış küme geçilemiyor.
       </>
     ),
     rules: "Kurallar",
@@ -109,12 +123,27 @@ const T = {
     ),
     variant: (
       <>
-        There are two forms and the choice is about PROPORTION. <code>icon</code> (the default)
-        fits a dense toolbar: 40×40, one glyph. But next to a switch-shaped control such as a
-        locale switcher, the square button stands twice its height and the strip looks
-        unbalanced. The <code>switch</code> form uses the same skeleton: a glyph at each end, a
-        sliding switch between, so the two sit on one line. That is what you see in this
-        site&apos;s top bar.
+        There are three forms and the choice is about PROPORTION: a control should look like
+        whatever stands NEXT to it. <code>icon</code> (the default) fits a dense toolbar: 40×40,
+        one glyph. But next to a switch-shaped control such as a locale switcher, the square
+        button stands twice its height and the strip looks unbalanced. The <code>switch</code>{" "}
+        form uses the same skeleton: a glyph at each end, a sliding switch between.{" "}
+        <code>select</code> is for when the neighbour is a SELECT BOX: on a narrow strip a box
+        and a switch side by side speak two different languages, one bordered with a caret, the
+        other a knob between two glyphs. This site&apos;s bar shows all three: a box on a phone,
+        a switch on a wide screen.
+      </>
+    ),
+    etiketH: "Action words and state words are different things",
+    etiketP: (
+      <>
+        <code>icon</code> and <code>switch</code> are pressed to DO something, so they are named
+        by what pressing them does: <code>toLight</code> · <code>toDark</code>.{" "}
+        <code>select</code> shows what is currently CHOSEN, so it is named by the state:{" "}
+        <code>light</code> · <code>dark</code>. Reusing the action words in the box would put
+        &ldquo;Switch to dark theme&rdquo; in it while the theme is already light: the control
+        would announce its own opposite. The type enforces this; the wrong set will not
+        compile.
       </>
     ),
     rules: "Rules",
@@ -136,6 +165,9 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       </Demo>
 
       <P>{t.variant}</P>
+
+      <H2>{t.etiketH}</H2>
+      <P>{t.etiketP}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.flash}</Note>

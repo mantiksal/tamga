@@ -12,7 +12,11 @@
       "toDark": "Koyu temaya geç"
     },
     "language": "Dil",
-    "skipToContent": "İçeriğe geç"
+    "skipToContent": "İçeriğe geç",
+    "themeState": {
+      "light": "Açık",
+      "dark": "Koyu"
+    }
   },
   "demo": {
     "preview": "Önizleme",

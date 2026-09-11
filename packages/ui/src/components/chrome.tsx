@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { cn } from "../lib/cn.js";
 import { Icon } from "./icon.js";
+import { Select } from "./primitives.js";
 import { Switch } from "./switch.js";
 import { ThemeDark, ThemeLight } from "./icons.js";
 
@@ -56,12 +57,26 @@ export function ThemeToggle({
   storageKey = "tamga-theme",
   className,
 }: {
-  labels: { toLight: string; toDark: string };
   /**
-   * `icon` a square button · `switch` the same shape as a language toggle. TR: `icon` kare
-   * düğme · `switch` bir dil anahtarıyla aynı şekil.
+   * `icon` and `switch` need ACTION words, `select` needs STATE words. TR: `icon` ve `switch`
+   * EYLEM sözcüğü ister, `select` DURUM sözcüğü.
+   *
+   * A button and a switch are pressed to DO something, so they are named by what pressing them
+   * does ("switch to dark"). A select shows what is currently CHOSEN, so it is named by the
+   * state ("Dark"). Reusing the action words in the select would put "Switch to dark theme" in
+   * the box while the theme is already light: the control would be announcing its own opposite.
+   * TR: Düğme ve anahtar bir şey YAPMAK için basılıyor, o yüzden basınca ne olacağıyla
+   * adlandırılıyorlar ("koyu temaya geç"). Seçim kutusu ise o an SEÇİLİ olanı gösteriyor, yani
+   * durumla adlandırılıyor ("Koyu"). Eylem sözcüklerini kutuda kullanmak, tema zaten açıkken
+   * kutuda "Koyu temaya geç" yazması demekti: kontrol kendi tersini duyurur.
    */
-  variant?: "icon" | "switch";
+  labels: { toLight: string; toDark: string } | { light: string; dark: string };
+  /**
+   * `icon` a square button · `switch` the same shape as a language toggle · `select` a box that
+   * says the current theme in words. TR: `icon` kare düğme · `switch` bir dil anahtarıyla aynı
+   * şekil · `select` o anki temayı sözcükle yazan bir kutu.
+   */
+  variant?: "icon" | "switch" | "select";
   storageKey?: string;
   className?: string;
 }) {
@@ -83,6 +98,27 @@ export function ThemeToggle({
     write(storageKey, next ? "dark" : "light");
   }
 
+  if (variant === "select") {
+    /* DURUM SÖZCÜKLERİ ŞART, ve verilmediyse bu bir hata. Sessizce eylem
+       sözcüklerine düşmek, kutuda kendi tersini yazan bir kontrol üretirdi. */
+    if (!("light" in labels)) {
+      throw new Error('ThemeToggle variant="select" için labels {light, dark} olmalı');
+    }
+    return (
+      <Select
+        options={[labels.light, labels.dark]}
+        value={dark ? labels.dark : labels.light}
+        onChange={(v) => {
+          const next = v === labels.dark;
+          if (next !== dark) toggle();
+        }}
+        placeholder={labels.light}
+        aria-label={labels.light + " / " + labels.dark}
+        className={cn("w-28", className)}
+      />
+    );
+  }
+
   if (variant === "switch") {
     return (
       <span className={cn("flex items-center gap-2", className)}>
@@ -94,7 +130,11 @@ export function ThemeToggle({
           aria-hidden
           className={dark ? "text-ink-faint" : "text-ink"}
         />
-        <Switch on={dark} onChange={toggle} label={dark ? labels.toLight : labels.toDark} />
+        <Switch
+          on={dark}
+          onChange={toggle}
+          label={"toLight" in labels ? (dark ? labels.toLight : labels.toDark) : ""}
+        />
         <Icon
           icon={ThemeDark}
           size="xs"
@@ -110,7 +150,7 @@ export function ThemeToggle({
       type="button"
       onClick={toggle}
       className={cn("tamga-icon-btn", className)}
-      aria-label={dark ? labels.toLight : labels.toDark}
+      aria-label={"toLight" in labels ? (dark ? labels.toLight : labels.toDark) : undefined}
     >
       <Icon icon={dark ? ThemeLight : ThemeDark} size="sm" />
     </button>

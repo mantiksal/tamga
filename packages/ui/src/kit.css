@@ -1799,20 +1799,8 @@
     }
   }
 
-  /*
-   * ÇEKMECE: kenardan kayarak giren panel.
-   *
-   * Animasyonsuz hâli bir kare içinde beliriyordu ve nereden geldiği
-   * okunmuyordu; bir panelin nereden geldiğini görmek, onu nereye geri
-   * iteceğini de öğretiyor.
-   *
-   * KAYMA YÖNÜ GİRDİĞİ KENARLA AYNI. Ters yönden kayan bir panel kapatma
-   * hareketini ters öğretir.
-   *
-   * SÜRE `--duration-base`: bu bir kontrol değil bir PANEL, ve paneller
-   * kontrollerden yavaş girer (13 §1). Eğri `--ease-standard`: giren her şey
-   * aynı eğriyle giriyor.
-   */
+  /* Çekmece kenardan kayarak girer; yön `side` ile aynı olmak zorunda, yoksa
+     kapatma hareketi ters öğretilir. Gerekçe: /docs/sheet */
   .tamga-sheet-start {
     animation: tamga-sheet-start var(--duration-base) var(--ease-standard);
   }

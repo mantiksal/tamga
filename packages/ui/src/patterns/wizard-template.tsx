@@ -52,20 +52,9 @@ export function WizardTemplate({
     <div className="flex min-h-0 flex-col" data-wizard-state={state}>
       {/* Söz, görünür tutuluyor. Uzunluğunu gizleyen bir sihirbaz, bir şey daha
           istemeye devam eden bir formdan başka bir şey değil. */}
-      {/* ŞERİDİ ŞABLON DEĞİL `Steps` ÇİZİYOR, VE BU BİR DÜZELTME.
-
-          Burada elle yazılmış bir şerit vardı: mono "01", çıplak, aralarında
-          çizgi yok. `Steps` bileşeni ise aynı fikri başka türlü çiziyordu:
-          24px'lik bir karo ve aralarında bir çizgi. Yani kit "bir dizide
-          neredeyim" sorusunu İKİ farklı görsel dille cevaplıyordu, ve bunu
-          dışarıdan bir tüketici fark etti.
-
-          Bir tasarım sisteminin tek sözü "aynı şey her yerde aynı görünür".
-          Şerit artık tek yerde çiziliyor; `Steps`e dokunan onu her sihirbazda
-          birden değiştiriyor.
-
-          `aria` ŞERİDİN İÇİNDE: `Steps` kendi `<ol>`unu ve `aria-current`ini
-          taşıyor, o yüzden buradaki sarmalayıcı yalnız yerleşim veriyor. */}
+      {/* Şeridi `Steps` çiziyor, burada elle çizilmiyor: aynı fikrin iki
+          görsel dili olmasın diye (ADR-0004). `Steps` kendi `<ol>`unu ve
+          `aria-current`ini taşıyor; buradaki sarmalayıcı yalnız yerleşim. */}
       <div className="tamga-section tamga-gutter py-4">
         <Steps steps={steps.map((s) => s.label)} current={activeIndex < 0 ? 0 : activeIndex} />
       </div>
@@ -80,13 +69,8 @@ export function WizardTemplate({
         </div>
       </div>
 
-      {/* ALT ŞERİT YAPIŞKAN. Uzun bir adım formunda "İleri" ekranın altına
-          kayıyordu: kullanıcı formu doldurup devam edemiyor, önce aşağı
-          kaydırması gerektiğini keşfetmesi gerekiyordu. Bir sihirbazın ileriye
-          götüren düğmesi her an erişilebilir olmalı — akışın kendisi o.
-
-          `bottom-0` + zemin: yapışkan bir şerit saydam olursa altından geçen
-          içerik okunuyor ve şerit kirli görünüyor. */}
+      {/* `bg-shell` SÜS DEĞİL: yapışkan şerit saydam olursa altından geçen
+          içerik okunur ve şerit kirlenir. */}
       {back || next ? (
         <div className="tamga-section tamga-gutter sticky bottom-0 z-10 flex items-center gap-2 bg-shell py-4">
           {back}

@@ -154,19 +154,8 @@ export function lightnessForContrast(
   return en;
 }
 
-/* ------------------------------------------------------------------ *
- * ESKİ TÜRKÇE ADLAR, BİR SÜRÜM BOYUNCA.
- *
- * ADR-0001: "Adlar İngilizce, yorumlar Türkçe" — bir ad tanımlayıcıdır ve
- * çevrilmez. Bu modül o kuralı çiğniyordu ve kuralı yazan bizdik; dışarıdan
- * bir tüketici fark etti. `gecerliHex` gören bir yabancı ne yaptığını
- * bilmiyor, ve bir kütüphanenin kamusal yüzeyi bakımcısının ana dilinde
- * olamaz.
- *
- * ESKİLERİ SİLMEDİM çünkü `0.1.1` npm'de yayında ve şu an bu adları KULLANAN
- * bir tüketici var. Sessizce kırmak, bir sürüm numarasının söylemesi gereken
- * şeyi söylemeden kırmaktır. Bir sürüm daha duruyorlar, sonra gidiyorlar.
- * ------------------------------------------------------------------ */
+/* Eski Türkçe adlar, 0.3.0'a kadar. SİLME: 0.1.1 npm'de yayında ve bu adları
+   kullanan bir tüketici var. Gerekçe: ADR-0001. */
 
 /** @deprecated `isHex` kullan. 0.3.0'da kaldırılacak. */
 export const gecerliHex = isHex;

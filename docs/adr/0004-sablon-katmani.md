@@ -64,6 +64,14 @@ bir iskelet, tam olarak engellemek için var olduğu şeyi yapar: sayfayı zıpl
   boşluksuz yığılan iki kart tek bir uzun kutu gibi okunuyordu.
 - **Sihirbaz · "bitti" konumsal.** Açık adımdan öncekilerin hepsinden geçilmiş; çağıranın taşıması
   gereken bir bayrak yok. Tek kaynak, kayma yok.
+- **Sihirbaz · adım şeridini şablon çizmez, `Steps` çizer.** Şablonun kendi elle yazılmış şeridi
+  vardı ve `Steps` bileşeni aynı fikri başka türlü çiziyordu: biri çıplak `01`, öteki 24px'lik bir
+  karo ve aralarında bir çizgi. Yani kit *"bir dizide neredeyim"* sorusuna iki farklı görsel dille
+  cevap veriyordu. Bunu kiti kendi uygulamasına çeviren bir tüketici fark etti. Bir tasarım
+  sisteminin tek sözü "aynı şey her yerde aynı görünür"; şerit artık tek yerde çizilir.
+- **Sihirbaz · alt şerit yapışkan.** Uzun bir adım formunda "İleri" ekranın altına kayıyordu ve
+  kullanıcı, devam edebilmek için önce aşağı kaydırması gerektiğini keşfetmek zorunda kalıyordu.
+  Bir sihirbazın ileriye götüren düğmesi akışın kendisidir; her an erişilebilir olmalı.
 - **Oturum · uygulama çerçevesi yok.** Gidilecek bir yer henüz yok, ve açamayacağın menüler sunan
   bir çerçeve yalan söyler. Kayıtta yan panel var, girişte yok: giriş yapan kişi acelesi olan dönen
   bir kullanıcı, kaydolan kişi hâlâ karar veriyor.

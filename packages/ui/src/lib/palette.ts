@@ -178,15 +178,7 @@ export { isHex };
 
 /* ---- doğrulama ---- */
 
-/**
- * Tek bir kontrast ölçümü.
- *
- * ALAN ADLARI DA İNGİLİZCE, ve bir ara değildi. Bu modülün kamusal yüzeyi
- * (`gecerliHex`, `paletiOlc`, `{ ad, tur, deger, esik, gecti }`) bakımcının
- * ana dilindeydi; ADR-0001 ise adların İngilizce olduğunu söylüyor. Kuralı
- * yazan bizdik ve tutmayan da bizdik. Bir kütüphaneyi kuran yabancı `gecti`
- * alanının ne olduğunu bilemez.
- */
+/** Tek bir kontrast ölçümü. */
 export type Measurement = {
   /** Neyin neye karşı ölçüldüğü: "ink · page". */
   name: string;
@@ -275,9 +267,8 @@ export function paletteCss(cift: PalettePair): string {
 
 export { lightness, deltaL, contrast };
 
-/* ------------------------------------------------------------------ *
- * ESKİ TÜRKÇE ADLAR, BİR SÜRÜM BOYUNCA. Gerekçe `lib/color.ts` sonunda.
- * ------------------------------------------------------------------ */
+/* Eski Türkçe adlar, 0.3.0'a kadar. SİLME: 0.1.1 npm'de yayında ve bu adları
+   kullanan bir tüketici var. */
 
 /** @deprecated `makePalette` kullan. 0.3.0'da kaldırılacak. */
 export const paletUret = makePalette;

@@ -310,13 +310,8 @@ export function SiteHeader({
   );
 }
 
-/**
- * MENÜNÜN GÖVDESİ TEK YERDE, İKİ KABIN İÇİNDE.
- *
- * Aynı liste hem geniş ekrandaki rayda hem dar ekrandaki çekmecede duruyor.
- * İki kez yazılsaydı, bir sayfa eklendiğinde telefonda eksik kalırdı ve bunu
- * kimse fark etmezdi: telefonda menüye bakan biri neyin eksik olduğunu bilmez.
- */
+/* Menünün gövdesi tek yerde: hem ray hem çekmece bunu çiziyor. İki kopya,
+   yeni bir sayfanın telefonda sessizce eksik kalması demek. */
 function MenuGovdesi({
   lang,
   dict,

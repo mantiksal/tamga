@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Button, Icon, Segmented, Switch } from "tamga-ui";
+import { Button, Icon, ScrollX, Segmented, Switch } from "tamga-ui";
 import { Check, Copy } from "tamga-ui/icons";
 
 /**
@@ -31,6 +31,8 @@ export type DemoLabels = {
   copy: string;
   copied: string;
   copyAria: string;
+  /** Kaydırılabilir kontrol şeridinin erişilebilir adı. */
+  controls: string;
 };
 
 export type ControlSpec = Record<string, readonly string[] | boolean>;
@@ -145,9 +147,23 @@ export function Demo({
           görünmesi bilinçli: değeri değiştirince kopyalanacak kodun da
           değiştiğini görmek, kontrollerin sahte olmadığının kanıtı. */}
       {controls ? (
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-[var(--color-line)] px-5 py-3">
+        /* KONTROL ŞERİDİ KAYIYOR, TAŞMIYOR.
+
+           390 pikselde bu şerit sayfayı 186 piksel taşırıyordu: `flex-wrap`
+           SATIRLARI sarıyor ama tek bir `Segmented`ı bölemiyor, ve altı
+           seçenekli bir segment tek başına ekrandan geniş. Taşan bir şerit
+           BÜTÜN SAYFAYI yatay kaydırılabilir yapıyor — okuyucu metni okurken
+           sayfa sağa sola oynuyor.
+
+           `ScrollX` taşmayı kendi içinde tutuyor: kaydırma şeride ait,
+           belgeye değil. Kitin kendi bileşeni, ve bu tam olarak var olduğu
+           durum. */
+        <ScrollX
+          label={labels.controls}
+          className="flex items-center gap-x-6 gap-y-3 border-t border-[var(--color-line)] px-5 py-3"
+        >
           {Object.entries(controls).map(([key, opt]) => (
-            <span key={key} className="flex items-center gap-2.5">
+            <span key={key} className="flex shrink-0 items-center gap-2.5">
               <span className="font-mono text-caption text-ink-faint">{key}</span>
               {Array.isArray(opt) ? (
                 <Segmented
@@ -165,7 +181,7 @@ export function Demo({
               )}
             </span>
           ))}
-        </div>
+        </ScrollX>
       ) : null}
     </div>
   );

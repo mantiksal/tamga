@@ -2,7 +2,9 @@
   "nav": {
     "home": "Home",
     "docs": "Documentation menu",
-    "toc": "On this page"
+    "toc": "On this page",
+    "menuAc": "Open menu",
+    "menuKapat": "Close menu"
   },
   "chrome": {
     "theme": {
@@ -17,6 +19,7 @@
     "code": "Code",
     "copy": "Copy",
     "copied": "Copied",
-    "copyAria": "Copy code"
+    "copyAria": "Copy code",
+    "controls": "Example controls"
   }
 }

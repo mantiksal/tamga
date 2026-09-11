@@ -228,10 +228,17 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
               bilgi. O yüzden en sessiz biçim: ince dikey kurallarla ayrılmış
               bir satır. Bir kutuya alsaydık üç bilgi, altındaki canlı
               bileşenlerle aynı ağırlığa çıkardı. */}
-          <ul className="mt-8 flex list-none flex-wrap items-center gap-x-4 gap-y-2 p-0 text-[length:var(--docs-small)] text-ink-faint">
+          {/* AYIRAÇLAR DAR EKRANDA YOK.
+              Kural çizgisi her öğenin ÖNÜNE giriyor (ilki hariç), ve liste
+              sarınca ikinci satır bir çizgiyle başlıyordu: havada asılı, neyi
+              neyden ayırdığı belirsiz bir işaret. Telefonda boşluk zaten
+              ayırmaya yetiyor; çizgi, üçü tek satıra sığdığı yerde anlamlı. */}
+          <ul className="mt-8 flex list-none flex-wrap items-center gap-x-5 gap-y-2 p-0 text-[length:var(--docs-small)] text-ink-faint sm:gap-x-4">
             {t.meta.map((m, i) => (
               <li key={m} className="flex items-center gap-4">
-                {i > 0 && <span aria-hidden className="h-3.5 w-px bg-[var(--color-line)]" />}
+                {i > 0 && (
+                  <span aria-hidden className="hidden h-3.5 w-px bg-[var(--color-line)] sm:block" />
+                )}
                 {m}
               </li>
             ))}

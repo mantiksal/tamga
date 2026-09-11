@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { Switch, ThemeToggle } from "tamga-ui";
+import { Icon, Sheet, Switch, ThemeToggle } from "tamga-ui";
+import { Menu } from "tamga-ui/icons";
 import { navGruplari } from "@/content/nav";
 import { icSlug, yol } from "@/content/yollar";
 import { Toc } from "@/components/toc";
@@ -59,7 +60,12 @@ function LogoMark() {
           kütüphane kod gönderir, bir tasarım sistemi kural da gönderir. Site
           on üç kapı, token referansı, blok kataloğu ve şablon katmanı
           taşıyorken adının "ui" demesi, taşıdığından azını söylüyordu. */}
-      <span className="ml-2.5 border-l border-[var(--color-edge)] pl-2.5 font-mono text-[length:var(--docs-small)] text-ink-faint">
+      {/* ALT BAŞLIK DAR EKRANDA GİZLİ. 390 pikselde logo tek başına 158 piksel
+          yer kaplıyordu ve sağdaki iki kontrolü ezdiriyordu. Amblem ve "tamga"
+          kalıyor: markayı taşıyan onlar, "design system" bir açıklama.
+          Erişilebilir ad (`aria-label`) değişmiyor, yani ekran okuyucu yine
+          tam adı duyuyor. */}
+      <span className="ml-2.5 hidden border-l border-[var(--color-edge)] pl-2.5 font-mono text-[length:var(--docs-small)] text-ink-faint sm:inline">
         design system
       </span>
     </span>
@@ -114,7 +120,10 @@ function LocaleSwitcher({ lang, dict }: { lang: Locale; dict: Dictionary }) {
   }
 
   return (
-    <span className="flex items-center gap-2">
+    /* DAR EKRANDA BOŞLUK 6px, 8 DEĞİL, ve harfler daha sıkı: şeridin sağ ucunda
+       iki anahtar yan yana duruyor ve 390 pikselde ikisi birlikte 173 piksel
+       istiyordu, oysa 136 piksel vardı. */
+    <span className="flex shrink-0 items-center gap-1.5 sm:gap-2">
       {locales.map((l) => (
         <span
           key={l}
@@ -159,11 +168,17 @@ function NavLink({
   slug,
   pathname,
   children,
+  onGit,
 }: {
   lang: Locale;
   slug: string;
   pathname: string;
   children: ReactNode;
+  /* ÇEKMECEDE TIKLAMA ÇEKMECEYİ KAPATIYOR. Next yönlendirmesi sayfayı
+     yeniden yüklemiyor, yani çekmece açık kalıyordu: kullanıcı bağlantıya
+     basıyor, hiçbir şey olmuyor sanıyor ve ikinci kez basıyor. Rayda bu geri
+     çağırma verilmiyor, çünkü orada kapanacak bir şey yok. */
+  onGit?: () => void;
 }) {
   /* Boş slug ana sayfa: `/tr`. Ayrı bir bileşen yazmak yerine tek satır,
      çünkü satırın geri kalanı — seçili hâli, `aria-current`, fiziği —
@@ -176,6 +191,7 @@ function NavLink({
       className="docs-nav-link no-underline"
       data-active={here}
       aria-current={here ? "page" : undefined}
+      onClick={onGit}
     >
       {children}
     </Link>
@@ -197,22 +213,47 @@ export function SiteHeader({
   lang,
   dict,
   cta,
+  onMenu,
 }: {
   lang: Locale;
   dict: Dictionary;
   cta?: ReactNode;
+  /** Verilirse dar ekranda bir menü düğmesi çıkıyor. Tanıtım sayfası vermiyor. */
+  onMenu?: () => void;
 }) {
   return (
     <header
       className="sticky top-0 z-20 border-b border-[var(--color-line)]"
       style={{ height: "var(--docs-top)", background: "var(--color-shell)" }}
     >
-      <div className="mx-auto flex h-full max-w-(--docs-wrap) items-center gap-4 px-5 sm:px-7">
-        <Link href={`/${lang}`} className="no-underline">
+      {/* DOLGU İÇERİKLE AYNI (`px-5 sm:px-7`), ve bir ara `px-4` denendi.
+          Şerit 390 pikselde sığıyordu ama logo, altındaki metinden dört piksel
+          sola kayıyordu: kazanılan yer, kaybedilen hizaya değmiyor. Yer
+          bunun yerine boşluklardan ve alt başlığı gizlemekten kazanıldı. */}
+      <div className="mx-auto flex h-full max-w-(--docs-wrap) items-center gap-2 px-5 sm:gap-4 sm:px-7">
+        {/* MENÜ DÜĞMESİ SOLDA, LOGONUN ÖNÜNDE. Telefonda gezinme aracı ilk
+            ulaşılan şey olmalı; sağ üst köşe başparmağın en uzak noktası. */}
+        {onMenu ? (
+          <button
+            type="button"
+            onClick={onMenu}
+            aria-label={dict.nav.menuAc}
+            className="tamga-icon-btn shrink-0 md:hidden"
+          >
+            <Icon icon={Menu} size="sm" />
+          </button>
+        ) : null}
+
+        <Link href={`/${lang}`} className="min-w-0 no-underline">
           <LogoMark />
         </Link>
-        <span className="ml-auto flex items-center gap-3">
-          {cta}
+
+        <span className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
+          {/* CTA DAR EKRANDA GİZLİ, VE KAYBOLMUYOR: tanıtım sayfasındaki
+              "Doküman" düğmesi, hemen altındaki kahramanın kendi düğmesiyle
+              aynı yere gidiyor. Şeritte tutmak, 390 pikselde üç kontrolü
+              birbirine yapıştırmak demekti. */}
+          {cta ? <span className="hidden sm:inline-flex">{cta}</span> : null}
           <span className="hidden font-mono text-body text-ink-faint sm:inline">v0.0.0</span>
           <LocaleSwitcher lang={lang} dict={dict} />
           <ThemeToggle variant="switch" labels={dict.chrome.theme} storageKey="docs-theme" />
@@ -223,37 +264,33 @@ export function SiteHeader({
 }
 
 /**
- * Doküman düzeni — üç sütun.
+ * MENÜNÜN GÖVDESİ TEK YERDE, İKİ KABIN İÇİNDE.
  *
- * Tanıtım sayfası bunu KULLANMIYOR: bir landing'in rayı olmaz, ve 81 satırlık
- * bir menü "bu nedir" diye gelen birine hiçbir şey anlatmaz. İkisi ayrı
- * `layout.tsx` altında yaşıyor — `/docs` bunu alıyor, `/` almıyor.
+ * Aynı liste hem geniş ekrandaki rayda hem dar ekrandaki çekmecede duruyor.
+ * İki kez yazılsaydı, bir sayfa eklendiğinde telefonda eksik kalırdı ve bunu
+ * kimse fark etmezdi: telefonda menüye bakan biri neyin eksik olduğunu bilmez.
  */
-export function DocsShell({ children, lang, dict }: { children: ReactNode; lang: Locale; dict: Dictionary }) {
-  const pathname = usePathname();
-
+function MenuGovdesi({
+  lang,
+  dict,
+  pathname,
+  onGit,
+}: {
+  lang: Locale;
+  dict: Dictionary;
+  pathname: string;
+  /** Çekmecede bir bağlantıya basılınca çekmeceyi kapatan geri çağırma. */
+  onGit?: () => void;
+}) {
   return (
-    <div className="min-h-dvh bg-page text-ink-soft">
-      <SiteHeader lang={lang} dict={dict} />
-
-      <div className="mx-auto flex max-w-(--docs-wrap) items-start gap-0 px-5 sm:px-7">
-        {/* ① Rail — kilitli menü, content/nav.ts'ten map'leniyor */}
-        <nav
-          className="sticky hidden shrink-0 overflow-y-auto py-9 pr-7 md:block"
-          style={{
-            width: "var(--docs-rail)",
-            top: "var(--docs-top)",
-            height: "calc(100dvh - var(--docs-top))",
-          }}
-          aria-label={dict.nav.docs}
-        >
+    <>
           {/* ANA SAYFA, menünün ilk satırı ve grupsuz.
 
               Logo zaten oraya gidiyor — ama bir logo bir MARKA işaretidir,
               gezinme öğesi değil; ve menüde karşılığı olmayan bir sayfa,
               menüye bakan biri için var olmayan bir sayfadır. */}
           <div className="mb-5">
-            <NavLink lang={lang} slug="" pathname={pathname}>
+            <NavLink lang={lang} slug="" pathname={pathname} onGit={onGit}>
               {dict.nav.home}
             </NavLink>
           </div>
@@ -279,7 +316,7 @@ export function DocsShell({ children, lang, dict }: { children: ReactNode; lang:
                     </summary>
                     <div className="mt-1">
                       {g.sayfalar.map((page) => (
-                        <NavLink key={page.slug} lang={lang} slug={page.slug} pathname={pathname}>
+                        <NavLink key={page.slug} lang={lang} slug={page.slug} pathname={pathname} onGit={onGit}>
                           {page.title[lang]}
                         </NavLink>
                       ))}
@@ -289,7 +326,7 @@ export function DocsShell({ children, lang, dict }: { children: ReactNode; lang:
                   <>
                     <p className="docs-nav-baslik">{g.baslik[lang]}</p>
                     {g.sayfalar.map((page) => (
-                      <NavLink key={page.slug} lang={lang} slug={page.slug} pathname={pathname}>
+                      <NavLink key={page.slug} lang={lang} slug={page.slug} pathname={pathname} onGit={onGit}>
                         {page.title[lang]}
                       </NavLink>
                     ))}
@@ -298,6 +335,52 @@ export function DocsShell({ children, lang, dict }: { children: ReactNode; lang:
               </div>
             );
           })}
+    </>
+  );
+}
+
+/**
+ * Doküman düzeni — üç sütun.
+ *
+ * Tanıtım sayfası bunu KULLANMIYOR: bir landing'in rayı olmaz, ve 81 satırlık
+ * bir menü "bu nedir" diye gelen birine hiçbir şey anlatmaz. İkisi ayrı
+ * `layout.tsx` altında yaşıyor — `/docs` bunu alıyor, `/` almıyor.
+ */
+export function DocsShell({ children, lang, dict }: { children: ReactNode; lang: Locale; dict: Dictionary }) {
+  const pathname = usePathname();
+  /* MENÜ DAR EKRANDA BİR ÇEKMECE. Ray `md:` altında gizliydi ve yerine hiçbir
+     şey konmamıştı: 92 sayfalık bir doküman sitesi telefonda GEZİLEMİYORDU.
+     Ne menü ne arama; okuyucu ancak dışarıdan bir bağlantıyla gelebiliyor,
+     geldiği sayfadan da hiçbir yere gidemiyordu. */
+  const [menuAcik, setMenuAcik] = useState(false);
+
+  return (
+    <div className="min-h-dvh bg-page text-ink-soft">
+      <SiteHeader lang={lang} dict={dict} onMenu={() => setMenuAcik(true)} />
+
+      {/* Kitin kendi `Sheet`i: doküman sitesi kitin bileşenini kullanmazsa
+          kitin o bileşeni gerçekten çalışıyor mu bilinmez. */}
+      <Sheet
+        open={menuAcik}
+        onClose={() => setMenuAcik(false)}
+        title={dict.nav.docs}
+        closeLabel={dict.nav.menuKapat}
+      >
+        <MenuGovdesi lang={lang} dict={dict} pathname={pathname} onGit={() => setMenuAcik(false)} />
+      </Sheet>
+
+      <div className="mx-auto flex max-w-(--docs-wrap) items-start gap-0 px-5 sm:px-7">
+        {/* ① Rail — kilitli menü, content/nav.ts'ten map'leniyor */}
+        <nav
+          className="sticky hidden shrink-0 overflow-y-auto py-9 pr-7 md:block"
+          style={{
+            width: "var(--docs-rail)",
+            top: "var(--docs-top)",
+            height: "calc(100dvh - var(--docs-top))",
+          }}
+          aria-label={dict.nav.docs}
+        >
+          <MenuGovdesi lang={lang} dict={dict} pathname={pathname} />
         </nav>
 
         {/* ② İçerik */}

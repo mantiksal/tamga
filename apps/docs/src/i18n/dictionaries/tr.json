@@ -2,7 +2,9 @@
   "nav": {
     "home": "Ana sayfa",
     "docs": "Doküman menüsü",
-    "toc": "İçindekiler"
+    "toc": "İçindekiler",
+    "menuAc": "Menüyü aç",
+    "menuKapat": "Menüyü kapat"
   },
   "chrome": {
     "theme": {
@@ -17,6 +19,7 @@
     "code": "Kod",
     "copy": "Kopyala",
     "copied": "Kopyalandı",
-    "copyAria": "Kodu kopyala"
+    "copyAria": "Kodu kopyala",
+    "controls": "Örnek ayarları"
   }
 }

@@ -63,7 +63,7 @@ export type FilterField = {
   key: string;
   label: string;
   kind: FilterFieldKind;
-  /** Verilmezse `optionSource[key]` kullanılır; ikisi de yoksa liste boş. */
+  /** Falls back to `optionSource[key]`; with neither, the list is empty. TR: Verilmezse `optionSource[key]` kullanılır; ikisi de yoksa liste boş. */
   options?: string[];
 };
 
@@ -75,10 +75,10 @@ export const rangeStart = (key: string) => `${key}Start`;
 export const rangeEnd = (key: string) => `${key}End`;
 
 export type FilterBarLabels = {
-  /** Arama kutusunun yer tutucusu. */
+  /** The search box's placeholder. TR: Arama kutusunun yer tutucusu. */
   search: string;
   /**
-   * "Hepsi" seçeneğinin adı, ve LİSTENİN İÇİNDE bir seçenek olarak duruyor.
+   * The name of the "All" option, and it sits INSIDE the list as an option. TR: "Hepsi" seçeneğinin adı, ve LİSTENİN İÇİNDE bir seçenek olarak duruyor.
    *
    * Kullanıcı bir değer seçtikten sonra tekrar hepsini görmek istediğinde,
    * geri dönüş yolunun GİDİŞ YOLUYLA AYNI YERDE olması gerekiyor. Kontrolün
@@ -91,14 +91,14 @@ export type FilterBarLabels = {
   clear: string;
   apply: string;
   noMatch: string;
-  /** "<alan> seç" gibi; kontrolü açan düğmenin erişilebilir adı. */
+  /** Like "Choose <field>"; the accessible name of the button that opens the control. TR: "<alan> seç" gibi; kontrolü açan düğmenin erişilebilir adı. */
   open: (label: string) => string;
-  /** "<filtre> filtresini kaldır". */
+  /** Like "Remove the <filter> filter". TR: "<filtre> filtresini kaldır". */
   remove: (label: string) => string;
   rangeStart: string;
   rangeEnd: string;
   calendar: { previousMonth: string; nextMonth: string; open: string; clear: string };
-  /** Dosyayla arama bölümü; `fileSearchKey` verilmezse hiç çizilmiyor. */
+  /** The search-by-file section; with no `fileSearchKey` it is not drawn at all. TR: Dosyayla arama bölümü; `fileSearchKey` verilmezse hiç çizilmiyor. */
   fileSearch?: { title: string; help: ReactNode; choose: string; remove: string; label: string };
 };
 
@@ -198,14 +198,14 @@ function FieldControl({
 export type FilterBarProps = {
   values: FilterValues;
   onChange: (next: FilterValues) => void;
-  /** Üstte duran alanlar. En çok dört tane; gerisi çekmeceye. */
+  /** The fields that stay on top. Four at most; the rest go to the drawer. TR: Üstte duran alanlar. En çok dört tane; gerisi çekmeceye. */
   top: readonly FilterField[];
-  /** Çekmecedeki gruplar. Düz bir yığın değil, gruplu. */
+  /** The groups inside the drawer. Grouped, not a flat pile. TR: Çekmecedeki gruplar. Düz bir yığın değil, gruplu. */
   drawer: readonly FilterGroup[];
-  /** Seçim listelerinin kaynağı; sunucudan gelecek. */
+  /** Where the option lists come from; this will arrive from the server. TR: Seçim listelerinin kaynağı; sunucudan gelecek. */
   optionSource?: Record<string, string[]>;
   /**
-   * ARAMA KUTUSUNUN YAZDIĞI ANAHTAR.
+   * THE KEY THE SEARCH BOX WRITES TO. TR: ARAMA KUTUSUNUN YAZDIĞI ANAHTAR.
    *
    * Prop, çünkü sunucunun beklediği ad ürünün kararı: kimi `q` diyor, kimi
    * `ara`, kimi `search`. Blok bir süre `q`yu sabitledi ve ilk tüketicide
@@ -213,11 +213,11 @@ export type FilterBarProps = {
    * ve arama hiçbir şey yapmıyordu. Hata vermeyen bir kırılma en pahalısı.
    */
   searchKey?: string;
-  /** Dosyayla arama bu ekranda varsa anahtarı; yoksa bölüm hiç çizilmiyor. */
+  /** The key for search-by-file if this screen has it; without it the section is not drawn. TR: Dosyayla arama bu ekranda varsa anahtarı; yoksa bölüm hiç çizilmiyor. */
   fileSearchKey?: string;
-  /** Filtre satırına, "Tüm filtreler"in yanına giren ekrana özel düğme. */
+  /** A screen-specific button on the filter row, beside "All filters". TR: Filtre satırına, "Tüm filtreler"in yanına giren ekrana özel düğme. */
   extra?: ReactNode;
-  /** `DatePicker`ın takvimi için: "tr-TR", "en-GB". */
+  /** For `DatePicker`'s calendar: "tr-TR", "en-GB". TR: `DatePicker`ın takvimi için: "tr-TR", "en-GB". */
   locale?: string;
   labels: FilterBarLabels;
 };

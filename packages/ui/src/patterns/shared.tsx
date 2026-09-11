@@ -23,11 +23,11 @@ export { PlainLink, type LinkComponent } from "../components/link.js";
  * çünkü teknik satırın biçimi (`code · request_id`) tek bir karar.
  */
 export type TemplateError = {
-  /** Zarfın makine tarafından okunan `code`u: kararlı, çevrilmez, desteğin dallandığı şey. */
+  /** The envelope's machine-read `code`: stable, never translated, the thing support branches on. TR: Zarfın makine tarafından okunan `code`u: kararlı, çevrilmez, desteğin dallandığı şey. */
   code?: string;
-  /** `meta.request_id`; sunucu günlüğüne giden tek iplik. */
+  /** `meta.request_id`; the one thread that leads to the server log. TR: `meta.request_id`; sunucu günlüğüne giden tek iplik. */
   requestId?: string;
-  /** Yalnız çağıran gerçekten yeniden deneyebiliyorsa; yoksa düğme hiç çizilmiyor. */
+  /** Only when the caller really can retry; without it the button is not drawn at all. TR: Yalnız çağıran gerçekten yeniden deneyebiliyorsa; yoksa düğme hiç çizilmiyor. */
   onRetry?: () => void;
 };
 

@@ -18,14 +18,14 @@ export type OverviewTemplateProps = {
   subtitle?: string;
   actions?: ReactNode;
 
-  /** Ekrandaki en önemli tek şey. Bir tane, asla iki. */
+  /** The single most important thing on the screen. One, never two. TR: Ekrandaki en önemli tek şey. Bir tane, asla iki. */
   hero?: ReactNode;
-  /** Destekleyen kartlar. Düzeni şablon veriyor ki iki özet ekranı ayrışamasın. */
+  /** The supporting cards. The template supplies the layout so two overview screens cannot drift apart. TR: Destekleyen kartlar. Düzeni şablon veriyor ki iki özet ekranı ayrışamasın. */
   children?: ReactNode;
 
   state?: OverviewState;
   error?: TemplateError;
-  /** Izgaranın kaç kart tutacağı, yükleme hâli doğru şekli ayırsın diye. */
+  /** How many cards the grid holds, so the loading state reserves the right shape. TR: Izgaranın kaç kart tutacağı, yükleme hâli doğru şekli ayırsın diye. */
   loadingCards?: number;
 
   labels: { loading: string } & ErrorLabels;

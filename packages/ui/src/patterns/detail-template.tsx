@@ -22,18 +22,18 @@ import {
 export type DetailState = "ready" | "loading" | "error";
 
 export type DetailTab = {
-  /** Kararlı kimlik; karşılaştırma ve testler bununla. */
+  /** A stable identity; comparisons and tests use this. TR: Kararlı kimlik; karşılaştırma ve testler bununla. */
   key: string;
-  /** Çevrilmiş etiket: şablon kendisine verilen sözcüğü çiziyor, aramıyor. */
+  /** The translated label: the template draws the word it is given, it does not look one up. TR: Çevrilmiş etiket: şablon kendisine verilen sözcüğü çiziyor, aramıyor. */
   label: string;
   href: string;
 };
 
 export type DetailTemplateProps = {
-  /** Başlığın üstündeki iz. Son öğe o anki nesnedir ve href almaz. */
+  /** The trail above the title. The last item is the current object and takes no href. TR: Başlığın üstündeki iz. Son öğe o anki nesnedir ve href almaz. */
   breadcrumb: { label: string; href?: string }[];
   title: string;
-  /** Başlığın altı: nesnenin kimlik satırı. */
+  /** Under the title: the object's identity line. TR: Başlığın altı: nesnenin kimlik satırı. */
   subtitle?: string;
   actions?: ReactNode;
 
@@ -57,7 +57,7 @@ export type DetailTemplateProps = {
   linkComponent?: LinkComponent;
   labels: { loading: string; breadcrumb: string; tabs: string } & ErrorLabels;
 
-  /** Açık sekmenin gövdesi. Şablon hangi sekme olduğunu bilmiyor, bilmemeli. */
+  /** The body of the open tab. The template does not know which tab it is, and must not. TR: Açık sekmenin gövdesi. Şablon hangi sekme olduğunu bilmiyor, bilmemeli. */
   children?: ReactNode;
 };
 

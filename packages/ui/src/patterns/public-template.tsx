@@ -15,13 +15,13 @@ import { Busy, ErrorSlot, type ErrorLabels, type TemplateError } from "./shared.
 export type PublicState = "ready" | "loading" | "error";
 
 export type PublicTemplateProps = {
-  /** Sahibin işareti. Verilmezse hiçbir şey çizilmiyor; varsayılanı ürün koyar. */
+  /** The owner's mark. With none, nothing is drawn; the product supplies the default. TR: Sahibin işareti. Verilmezse hiçbir şey çizilmiyor; varsayılanı ürün koyar. */
   brand?: ReactNode;
   title: string;
   subtitle?: string;
-  /** Başlığın sağı: abone ol kontrolü, dönem seçici, bir doğrulama damgası. */
+  /** The right of the title: a subscribe control, a period picker, a verification stamp. TR: Başlığın sağı: abone ol kontrolü, dönem seçici, bir doğrulama damgası. */
   headerAside?: ReactNode;
-  /** Alttaki satır. Beyaz etiketli sayfada sahibin; ne yazacağı bir plan sorusu. */
+  /** The bottom line. On a white-labelled page it belongs to the owner; what it says is a plan question. TR: Alttaki satır. Beyaz etiketli sayfada sahibin; ne yazacağı bir plan sorusu. */
   footer?: ReactNode;
 
   state?: PublicState;

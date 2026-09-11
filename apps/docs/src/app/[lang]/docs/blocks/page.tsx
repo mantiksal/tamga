@@ -2,6 +2,7 @@ import type { Locale } from "@/i18n/config";
 import { PageHead, H2, P, Note } from "@/components/prose";
 import { Xref } from "@/components/xref";
 import { findPage } from "@/content/nav";
+import { Props } from "@/components/props";
 import { BlokGalerisi } from "./ornekler";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }) {
@@ -164,12 +165,15 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <H2>{t.filtreH}</H2>
       <P>{t.filtreP}</P>
       <Note>{t.filtreN}</Note>
+      <Props of="FilterBar" lang={lang} />
 
       <H2>{t.seritH}</H2>
       <P>{t.seritP}</P>
+      <Props of="CountRow" lang={lang} />
 
       <H2>{t.kaydetH}</H2>
       <P>{t.kaydetP}</P>
+      <Props of="SaveBar" lang={lang} />
 
       <Note>{t.kararN}</Note>
     </>

@@ -126,7 +126,7 @@ export {
   PageBand,
   Link,
 } from "./components/layout.js";
-export { ThemeToggle, LocaleSwitcher, LogoTile } from "./components/chrome.js";
+export { ThemeToggle, LocaleSwitcher, LogoTile, AccountButton } from "./components/chrome.js";
 export { RailLink } from "./components/rail-link.js";
 export { Slider } from "./components/slider.js";
 

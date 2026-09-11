@@ -25,12 +25,12 @@ export function SaveBar({
   extra,
   labels,
 }: {
-  /** Değişiklik yoksa kaydet kapalı. */
+  /** With no change, save is disabled. TR: Değişiklik yoksa kaydet kapalı. */
   changed?: boolean;
-  /** Kaydetme sürüyor: iki düğme de kilitli, kaydet spinner gösteriyor. */
+  /** Saving is in progress: both buttons are locked and save shows a spinner. TR: Kaydetme sürüyor: iki düğme de kilitli, kaydet spinner gösteriyor. */
   busy?: boolean;
   onCancel?: () => void;
-  /** Şeridin sağında duran ekrana özel şey: bir sayaç, bir uyarı satırı. */
+  /** Whatever the screen puts on the right of the bar: a counter, a warning line. TR: Şeridin sağında duran ekrana özel şey: bir sayaç, bir uyarı satırı. */
   extra?: ReactNode;
   labels: { save: string; cancel: string; saving?: string };
 }) {

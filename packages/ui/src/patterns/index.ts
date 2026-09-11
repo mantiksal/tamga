@@ -6,10 +6,12 @@
  * dayatıyor, çünkü işleri o. Ayrı bir giriş, bir ürünün "yalnız bileşenleri
  * alayım" diyebilmesi demek.
  */
+/* `ErrorSlot` ve `Busy` DIŞA VURULMUYOR: şablonların iç makinesi. Hata ve
+   yükleme hâllerini şablonlar zaten kendileri çiziyor, ve ikisini ayrıca
+   sunmak "aynı hâli iki farklı yoldan çizme" davetiydi. Bir tüketici o
+   görünümü istiyorsa şablonu kullanıyor. */
 export {
   PlainLink,
-  ErrorSlot,
-  Busy,
   errorDetail,
   type ErrorLabels,
   type LinkComponent,

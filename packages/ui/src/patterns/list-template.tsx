@@ -16,21 +16,21 @@ export type ListState = "ready" | "loading" | "empty" | "error";
 
 export type ListTemplateProps = {
   title: string;
-  /** Başlığın altındaki satır: sayı, kapsam, tazelik. Çağıran çevirmiş olarak veriyor. */
+  /** The line under the title: a count, a scope, a freshness. The caller supplies it translated. TR: Başlığın altındaki satır: sayı, kapsam, tazelik. Çağıran çevirmiş olarak veriyor. */
   subtitle?: string;
-  /** Bu listenin birincil eylemleri. Şeridin sağında. */
+  /** This list's primary actions. On the right of the bar. TR: Bu listenin birincil eylemleri. Şeridin sağında. */
   actions?: ReactNode;
-  /** Filtre satırı: arama, kırılımlar, aralıklar. Şeridin altında, içeriğin üstünde. */
+  /** The filter row: search, breakdowns, ranges. Below the bar, above the content. TR: Filtre satırı: arama, kırılımlar, aralıklar. Şeridin altında, içeriğin üstünde. */
   filters?: ReactNode;
 
   state?: ListState;
 
-  /** Yüklenirken tutulacak satır sayısı: gerçekten kaç kayıt geliyorsa o. */
+  /** How many rows to hold while loading: however many records are actually coming. TR: Yüklenirken tutulacak satır sayısı: gerçekten kaç kayıt geliyorsa o. */
   loadingRows?: number;
-  /** İskeletin sütun genişlikleri, yerini tuttuğu tablonun şekline uysun diye. */
+  /** The skeleton's column widths, so it holds the shape of the table it stands in for. TR: İskeletin sütun genişlikleri, yerini tuttuğu tablonun şekline uysun diye. */
   loadingColumns?: string[];
 
-  /** `state === "empty"` iken görünen. Ekrana özel, o yüzden ekran yazıyor. */
+  /** What shows when `state === "empty"`. Screen-specific, so the screen writes it. TR: `state === "empty"` iken görünen. Ekrana özel, o yüzden ekran yazıyor. */
   empty?: ReactNode;
   error?: TemplateError;
 

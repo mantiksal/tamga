@@ -2,6 +2,7 @@ import type { Locale } from "@/i18n/config";
 import { PageHead, H2, P, Note } from "@/components/prose";
 import { Xref } from "@/components/xref";
 import { findPage } from "@/content/nav";
+import { Props } from "@/components/props";
 import { SablonGalerisi } from "./ornekler";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }) {
@@ -16,6 +17,16 @@ const T = {
         Bir bileşen bir <strong>nesnedir</strong>: düğme, tablo, çip. Bir şablon bir{" "}
         <strong>ekranın şeklidir</strong>: başlık nerede durur, filtre nereye girer, yüklenirken ne
         görünür. Sekiz tane var ve <code>tamga-ui/patterns</code>&apos;ten geliyorlar.
+      </>
+    ),
+    propsH: "Sekiz şablonun propları",
+    propsP: (
+      <>
+        Bu tablolar bir süre <strong>hiç yoktu</strong>: prop çıkarıcı yalnız{" "}
+        <code>components/</code> klasörüne bakıyordu, yani kitin en üst seviyedeki ve en çok
+        sonuç doğuran API&apos;si doküman sitesinde görünmüyordu. Kiti kuran biri{" "}
+        <code>AppShell</code>&apos;in geniş de olabileceğini öğrenemedi ve dar&apos;a mahkûm
+        sandı. Eksiklik sessizdi çünkü kapı da aynı listeye bakıyordu.
       </>
     ),
     nedenH: "Neden ayrı bir katman",
@@ -127,6 +138,16 @@ const T = {
         A component is an <strong>object</strong>: a button, a table, a chip. A template is the{" "}
         <strong>shape of a screen</strong>: where the title sits, where the filter goes, what shows
         while it loads. There are eight, and they come from <code>tamga-ui/patterns</code>.
+      </>
+    ),
+    propsH: "Props of the eight templates",
+    propsP: (
+      <>
+        These tables did not exist for a while: the prop extractor only looked at{" "}
+        <code>components/</code>, so the kit&apos;s highest-level and most consequential API was
+        invisible on the docs site. Someone setting the kit up never learned that{" "}
+        <code>AppShell</code> can also be wide, and assumed it was narrow-only. The gap was
+        silent because the gate read the same list.
       </>
     ),
     nedenH: "Why a separate layer",
@@ -264,6 +285,26 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
           "ne var ne yok"; bir süre sekiz şablon sekiz başlığın altına
           dağılmıştı ve cevap ancak sonuna kadar kaydırınca çıkıyordu. */}
       <SablonGalerisi lang={lang} />
+
+      <H2>{t.propsH}</H2>
+      <P>{t.propsP}</P>
+      {(
+        [
+          "AppShell",
+          "ListTemplate",
+          "OverviewTemplate",
+          "DetailTemplate",
+          "SettingsTemplate",
+          "WizardTemplate",
+          "AuthTemplate",
+          "PublicTemplate",
+        ] as const
+      ).map((ad) => (
+        <div key={ad} className="mt-8">
+          <h3 className="text-subhead font-semibold text-ink">{ad}</h3>
+          <Props of={ad} lang={lang} />
+        </div>
+      ))}
 
       <H2>{t.nedenH}</H2>
       <P>{t.nedenP}</P>

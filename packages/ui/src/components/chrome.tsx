@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { cn } from "../lib/cn.js";
+import { Avatar } from "./avatar.js";
 import { Icon } from "./icon.js";
 import { Select } from "./primitives.js";
 import { Switch } from "./switch.js";
@@ -260,5 +261,67 @@ export function LogoTile({
         </span>
       )}
     </span>
+  );
+}
+
+/**
+ * Şeridin sağ ucundaki hesap düğmesi.
+ *
+ * NEDEN BİR BİLEŞEN, VE SAYARAK. İki panelde de aynı şey elle kuruldu:
+ * `<button className="tamga-icon-btn"><Avatar bare …/></button>`. `Avatar`ın
+ * `bare` prop'u tam bu iş için var ve JSDoc'u bunu anlatıyor, ama bulunmadı;
+ * ikinci kurulumda avatar kendi çerçevesiyle kondu ve şeritteki öteki
+ * kontrollerden farklı boyda durdu. Bulunmayan bir prop, olmayan proptur.
+ *
+ * ÖLÇÜ ŞERİDİN ÖLÇÜSÜ. Kare `--control` (40px), yani tema anahtarı ve öteki
+ * simge düğmeleriyle birebir aynı. Bir araç çubuğunda yükseklik tek karardır;
+ * tek bir kontrolün farklı durması bütün şeridi hizasız gösteriyor.
+ *
+ * FOTOĞRAF YOKSA BAŞ HARFLER: `Avatar` zaten öyle davranıyor, ve bir hesabın
+ * fotoğrafı olmaması normal hâl.
+ */
+export function AccountButton({
+  name,
+  src,
+  label,
+  onClick,
+  href,
+  linkComponent: Link,
+  className,
+}: {
+  /** The name initials are taken from; shown when there is no photo. TR: Baş harflerin çıkarıldığı ad; fotoğraf yoksa görünen bu. */
+  name: string;
+  src?: string;
+  /** Accessible name: "Account menu", "Profile". The caller translates it. TR: Erişilebilir ad: "Hesap menüsü", "Profil". Çağıran çeviriyor. */
+  label: string;
+  onClick?: () => void;
+  /** Makes the control a link instead of a button; not used together with `onClick`. TR: Verilirse düğme bir bağlantı olur; `onClick` ile birlikte kullanılmaz. */
+  href?: string;
+  linkComponent?: ComponentType<{ href: string; className?: string; children?: ReactNode; [k: string]: unknown }>;
+  className?: string;
+}) {
+  const ic = (
+    <Avatar name={name} src={src} size={38} bare />
+  );
+  const sinif = cn("tamga-icon-btn overflow-hidden p-0", className);
+
+  if (href && Link) {
+    return (
+      <Link href={href} aria-label={label} className={sinif}>
+        {ic}
+      </Link>
+    );
+  }
+  if (href) {
+    return (
+      <a href={href} aria-label={label} className={sinif}>
+        {ic}
+      </a>
+    );
+  }
+  return (
+    <button type="button" onClick={onClick} aria-label={label} className={sinif}>
+      {ic}
+    </button>
   );
 }

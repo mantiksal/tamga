@@ -32,11 +32,11 @@ export type SettingsSection = {
 
 export type SettingsTemplateProps = {
   sections: readonly SettingsSection[];
-  /** Şu an açık bölüm, `key` ile. */
+  /** The section currently open, by `key`. TR: Şu an açık bölüm, `key` ile. */
   activeSection: string;
   title: string;
   subtitle?: string;
-  /** Bölüm düzeyindeki eylemler; genelde tek bir "Kaydet". */
+  /** Section-level actions; usually a single "Save". TR: Bölüm düzeyindeki eylemler; genelde tek bir "Kaydet". */
   actions?: ReactNode;
   state?: SettingsState;
   error?: TemplateError;
@@ -154,7 +154,7 @@ export function SettingsPanel({
 }: {
   title: string;
   description?: string;
-  /** "çalışma alanından geliyor" gibi, çağıran tarafından yazılmış tam cümle. */
+  /** Like "inherited from the workspace": a full sentence written by the caller. TR: "çalışma alanından geliyor" gibi, çağıran tarafından yazılmış tam cümle. */
   inheritedFrom?: string;
   children: ReactNode;
 }) {

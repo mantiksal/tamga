@@ -17,17 +17,20 @@ export function AuthTemplate({
   footer,
   aside,
 }: {
-  /** Markanın işareti. Sözcük markası değil işaret: bu ekranın işi tek alan ve tek düğme. */
+  /** The brand's mark. The mark, not the wordmark: this screen's job is one field and one button. TR: Markanın işareti. Sözcük markası değil işaret: bu ekranın işi tek alan ve tek düğme. */
   brand?: ReactNode;
   title: string;
   subtitle?: string;
   children: ReactNode;
   footer?: ReactNode;
   /**
-   * Ekranın öteki yarısındaki panel. Kayıtta var, girişte yok, ve asimetri
-   * kasıtlı: giriş yapan kişi acelesi olan, dönen bir kullanıcı; kaydolan kişi
-   * hâlâ karar veriyor. Birinciye bir şey satmak gürültü, ikinciye hiçbir şey
-   * dememek ekranı ziyan etmek.
+   * The panel on the screen's other half. Present on sign-up, absent on sign-in, and the
+   * asymmetry is deliberate: the person signing in is a returning user in a hurry; the person
+   * signing up is still deciding. Selling something to the first is noise; saying nothing to
+   * the second wastes the screen. TR: Ekranın öteki yarısındaki panel. Kayıtta var, girişte
+   * yok, ve asimetri kasıtlı: giriş yapan kişi acelesi olan, dönen bir kullanıcı; kaydolan kişi
+   * hâlâ karar veriyor. Birinciye bir şey satmak gürültü, ikinciye hiçbir şey dememek ekranı
+   * ziyan etmek.
    */
   aside?: ReactNode;
 }) {
@@ -102,7 +105,7 @@ export function AuthProviders({
   dividerLabel,
 }: {
   children: ReactNode;
-  /** Ayıracın üstündeki sözcük. */
+  /** The word sitting on the divider. TR: Ayıracın üstündeki sözcük. */
   dividerLabel: string;
 }) {
   return (

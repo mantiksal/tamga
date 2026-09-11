@@ -37,7 +37,21 @@ import { dirname, join } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
-const compDir = join(root, "packages", "ui", "src", "components");
+/* ÜÇ KLASÖR, BİRİ DEĞİL.
+   Bu betik uzun süre yalnız `components/`e bakıyordu, ve sonucu ölçüldü:
+   dokuz ŞABLONUN ve on dört BLOĞUN hiçbirinin prop tablosu yoktu. Kitin en
+   üst seviyedeki, en çok sonuç doğuran API'si doküman sitesinde hiç
+   görünmüyordu. Kiti kuran biri `AppShell`in dar mı geniş mi olabileceğini
+   öğrenemedi ve dar'a mahkûm sandı.
+
+   Eksiklik sessizdi çünkü kapı da aynı listeye bakıyordu: belgelenmemiş bir
+   dışa vurum aranıyordu ama şablonların propları hiç çıkarılmadığı için
+   karşılaştırılacak bir şey yoktu. */
+const srcDirs = [
+  join(root, "packages", "ui", "src", "components"),
+  join(root, "packages", "ui", "src", "patterns"),
+  join(root, "packages", "ui", "src", "blocks"),
+];
 const out = join(root, "apps", "docs", "src", "content", "props.json");
 
 /* ------------------------------------------------------------------ *
@@ -199,7 +213,35 @@ function typeLiterals(text, seen = new Set()) {
 
 /* ------------------------------------------------------------------ */
 
-const files = readdirSync(compDir).filter((f) => /\.tsx?$/.test(f));
+/* KAMUSAL YÜZEY, KAYNAKTAKİ `export` DEĞİL.
+   `shared.tsx` içindeki `ErrorSlot` ve `Busy` şablonların iç makinesi ama
+   dosya düzeyinde `export` edilmek zorundalar (komşu dosyalar import ediyor).
+   Tablo onları da listeleyince, tüketicinin hiç ulaşamayacağı iki bileşen
+   doküman sitesine girmeye çalıştı. Ölçüt: giriş dosyalarından yeniden dışa
+   vurulmuş mu. */
+const girisler = [
+  join(root, "packages", "ui", "src", "index.ts"),
+  join(root, "packages", "ui", "src", "patterns", "index.ts"),
+  join(root, "packages", "ui", "src", "blocks", "index.ts"),
+];
+const kamusal = new Set();
+for (const g of girisler) {
+  /* YORUMLAR AYIKLANIYOR, ve ayıklanmadığı için bir kez yanlış sonuç verdi:
+     giriş dosyasındaki "`ErrorSlot` dışa vurulmuyor" açıklaması, adı kamusal
+     kümeye sokuyordu. Bir listeyi kaynaktan çıkarırken kaynağın ANLATISI da
+     eşleşiyor. */
+  const src = readFileSync(g, "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "");
+  for (const m of src.matchAll(/\b([A-Z][A-Za-z0-9_]*)\b/g)) kamusal.add(m[1]);
+}
+
+/** `[klasör, dosya]` çiftleri: aynı ad iki klasörde olabilir. */
+const files = srcDirs.flatMap((d) =>
+  readdirSync(d)
+    .filter((f) => /\.tsx?$/.test(f) && f !== "index.ts")
+    .map((f) => join(d, f)),
+);
 const result = {};
 /** `buttonVariants` → { variant: {...}, defaults: {...} } */
 const cvaTables = new Map();
@@ -209,7 +251,7 @@ const aliases = new Map();
 /* 1 · Önce cva tabloları ve tip takma adları toplanıyor: bir bileşen kendi
       dosyasındaki bir takma ada ya da bir cva tablosuna atıfta bulunabilir. */
 for (const f of files) {
-  const src = readFileSync(join(compDir, f), "utf8");
+  const src = readFileSync(f, "utf8");
 
   for (const m of src.matchAll(/(?:export\s+)?const\s+([A-Za-z_$][\w$]*)\s*=\s*cva\(/g)) {
     const openArgs = src.indexOf("(", m.index + m[0].length - 1);
@@ -266,7 +308,7 @@ for (const f of files) {
 
 /* 2 · Sonra bileşenler. */
 for (const f of files) {
-  const src = readFileSync(join(compDir, f), "utf8");
+  const src = readFileSync(f, "utf8");
 
   /* Jenerik bileşenler de yakalanmalı: `export function Tabs<T extends string>(`.
      Tip parametresi listesi atlanmazsa dört bileşen (Combobox · RadioGroup ·
@@ -334,7 +376,8 @@ for (const f of files) {
 
     /* Zorunlular önce: okuyucunun ilk sorusu "en az ne vermem gerekiyor". */
     props.sort((a, b) => Number(b.required) - Number(a.required) || a.name.localeCompare(b.name));
-    result[name] = props;
+    /* Kamusal olmayan (giriş dosyasından vurulmayan) bileşen tabloya girmiyor. */
+    if (kamusal.has(name)) result[name] = props;
   }
 }
 

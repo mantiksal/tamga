@@ -1676,6 +1676,10 @@
     color: var(--color-accent-line);
     font-weight: 500;
     text-underline-offset: 3px;
+    /* `<a href>` pointer'ı tarayıcıdan alır; `href`siz bir `<a>`, bir `<span>`
+       ya da link gibi görünen bir `<button>` almaz ve imleç `auto` kalır. Sınıf
+       kendi imlecini söylemeli. */
+    cursor: pointer;
   }
   .tamga-link:hover {
     text-decoration: underline;

@@ -25,14 +25,14 @@ export function CountRow({
   labels,
 }: {
   count: number;
-  /** "sipariş", "müşteri": sayının yanında ne yazacağı. */
+  /** "orders", "customers": what stands beside the number. TR: "sipariş", "müşteri": sayının yanında ne yazacağı. */
   unit: string;
-  /** Ekrana özel ikinci okuma. */
+  /** A second reading, specific to the screen. TR: Ekrana özel ikinci okuma. */
   aside?: ReactNode;
   pageSize?: number;
   pageSizeOptions?: number[];
   onPageSize?: (n: number) => void;
-  /** Sayının biçimi çağıranın: binlik ayıracı dile bağlı. */
+  /** The number's format belongs to the caller: the thousands separator depends on the language. TR: Sayının biçimi çağıranın: binlik ayıracı dile bağlı. */
   labels?: { format?: (n: number) => string; perPage?: string; records?: string };
 }) {
   const format = labels?.format ?? ((n: number) => String(n));

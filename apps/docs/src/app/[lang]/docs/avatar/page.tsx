@@ -37,6 +37,17 @@ const T = {
       </>
     ),
     withImage: "Görselle",
+    hesapH: "Şeritteki hesap düğmesi",
+    hesapP: (
+      <>
+        <code>AccountButton</code> avatarı şeridin ölçüsüne oturtuyor: kare, <code>--control</code>{" "}
+        (40px), yani tema anahtarıyla ve öteki simge düğmeleriyle birebir aynı. Bir araç
+        çubuğunda yükseklik tek karardır; tek bir kontrolün farklı durması bütün şeridi hizasız
+        gösteriyor. İki panelde de bu elle kuruldu (<code>tamga-icon-btn</code> içine{" "}
+        <code>bare</code> bir avatar) ve ikincisinde <code>bare</code> bulunamadığı için avatar
+        kendi çerçevesiyle kondu: kutu içinde kutu. Bulunmayan bir prop, olmayan proptur.
+      </>
+    ),
     rules: "Kurallar",
     name: (
       <>
@@ -61,6 +72,18 @@ const T = {
       </>
     ),
     withImage: "With an image",
+    hesapH: "The account button in the top bar",
+    hesapP: (
+      <>
+        <code>AccountButton</code> fits the avatar to the bar&apos;s measure: a square at{" "}
+        <code>--control</code> (40px), exactly like the theme toggle and every other icon button.
+        On a toolbar, height is one decision; a single control standing at a different size makes
+        the whole strip look misaligned. Both panels built this by hand (a <code>bare</code>{" "}
+        avatar inside <code>tamga-icon-btn</code>) and in the second one <code>bare</code> was
+        never found, so the avatar arrived with its own frame: a box inside a box. A prop nobody
+        finds is a prop that does not exist.
+      </>
+    ),
     rules: "Rules",
     name: (
       <>
@@ -101,6 +124,10 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         <Avatar name="Deniz Kara" size={40} />
         <Avatar name="Ayşe Yıldız" size={40} />
       </Demo>
+
+      <H2>{t.hesapH}</H2>
+      <P>{t.hesapP}</P>
+      <Props of="AccountButton" lang={lang} />
 
       <H2>{t.rules}</H2>
       <Note>{t.name}</Note>

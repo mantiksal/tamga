@@ -13,7 +13,7 @@ import { ErrorSlot, type ErrorLabels, type TemplateError } from "./shared.js";
 
 export type WizardStep = {
   key: string;
-  /** Çevrilmiş etiket. */
+  /** The translated label. TR: Çevrilmiş etiket. */
   label: string;
 };
 

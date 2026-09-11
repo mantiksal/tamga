@@ -999,7 +999,7 @@
     min-width: 28px;
     height: 28px;
     padding: 0 6px;
-    border-radius: var(--radius-mark);
+    border-radius: var(--radius-sm);
     color: var(--color-ink-soft);
     font-size: var(--text-caption);
     cursor: pointer;
@@ -1283,9 +1283,14 @@
     color: var(--color-accent-line);
     box-shadow: 2px 2px 0 0 var(--color-accent-line);
   }
+  /* DOLGU `accent`, KENAR `accent-shadow` — düğmenin sözleşmesinin aynısı.
+     Burada dolgu `accent-line` idi: o bir METİN token'ı, sayfaya karşı 4.5
+     arayarak üretiliyor, yani yüzden hep daha koyu. Sonuç ekranda şuydu: biten
+     adımlar koyu, aynı ekrandaki her düğme ve rozet açık. Üstündeki mürekkep de
+     `accent`e göre ölçülüyordu, `accent-line`a göre değil. */
   .tamga-step-mark[data-state="done"] {
-    border-color: var(--color-accent-line);
-    background: var(--color-accent-line);
+    border-color: var(--color-accent-shadow);
+    background: var(--color-accent);
     color: var(--color-accent-ink);
   }
   .tamga-step-line {
@@ -1296,7 +1301,7 @@
     background: var(--color-edge);
   }
   .tamga-step-line[data-done="true"] {
-    background: var(--color-accent-line);
+    background: var(--color-accent);
   }
 
   .tamga-scrim {
@@ -1810,6 +1815,209 @@
   }
   .tamga-sheet-end {
     animation: tamga-sheet-end var(--duration-base) var(--ease-standard);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * GÖRÜNÜM AYARLARININ PARÇALARI.
+   *
+   * Üçü de bir üründe doğdu ve kite AYNI GEREKÇEYLE taşındı: her panelin bir
+   * görünüm ayarı oluyor, ve kit onu vermediğinde her ürün kendi hex kutusunu
+   * çiziyor. Kiti kuran bir ekip "renk seçimi" deyince altı hazır
+   * kutuyu değil, çıplak bir metin girdisi elde ediyordu.
+   * ------------------------------------------------------------------ */
+
+  /* Marka rengi kutusu. Seçili olan kitin fiziğiyle işaretli: 1px kenar artı
+     2px sert kaydırma. Kutunun İÇİNE çentik konmuyor, çentiğin kontrastı
+     seçilen renge göre değişiyor ve açık bir renkte kayboluyor. */
+  .tamga-swatch {
+    display: inline-flex;
+    width: var(--control);
+    height: var(--control);
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-ctl);
+    background: var(--color-shell);
+    cursor: pointer;
+    transition:
+      transform var(--duration-press) var(--ease-standard),
+      box-shadow var(--duration-press) var(--ease-standard);
+  }
+  .tamga-swatch > span {
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-mark);
+  }
+  .tamga-swatch:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--color-edge);
+  }
+  .tamga-swatch[data-selected="true"] {
+    border-color: var(--color-accent-line);
+    box-shadow: 2px 2px 0 var(--color-accent-line);
+  }
+  .tamga-swatch:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--color-edge);
+  }
+
+  /* Tarayıcının kendi renk kutusu, kitin kenarlığıyla. */
+  .tamga-color-input {
+    width: 36px;
+    height: 36px;
+    padding: 2px;
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-ctl);
+    background: var(--color-shell);
+    cursor: pointer;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * TEMA KARTI — panelin minyatürü.
+   *
+   * "Açık · Koyu · Sistem" üç kelimeydi, ve bir tema seçimi kelimeyle
+   * yapılmıyor: kullanıcı sonucu görmek istiyor. Her seçenek panelin
+   * minyatürünü çiziyor (ray, gövde, satırlar) ve "Sistem" ikisini bir karede
+   * yan yana gösteriyor, çünkü anlamı tam olarak bu.
+   *
+   * MİNYATÜR SABİT RENKLERLE, ve kitin tek istisnası bu. Seçenekler o an
+   * yürürlükteki temayı değil SEÇİLİRSE ne olacağını gösteriyor; token
+   * kullanılsaydı üçü de aynı görünürdü. Tek token: marka vurgusu, çünkü
+   * önizlemenin yarısı o.
+   * ------------------------------------------------------------------ */
+  .tamga-theme-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    text-align: center;
+  }
+  .tamga-theme-box {
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    width: 112px;
+    height: 72px;
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-card);
+    box-shadow: 2px 2px 0 var(--color-edge);
+    transition:
+      transform var(--duration-press) var(--ease-standard),
+      box-shadow var(--duration-press) var(--ease-standard),
+      border-color var(--duration-press) var(--ease-standard);
+  }
+  .tamga-theme-card:hover .tamga-theme-box {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--color-edge);
+  }
+  .tamga-theme-card:active .tamga-theme-box {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--color-edge);
+  }
+  .tamga-theme-card[data-selected="true"] .tamga-theme-box {
+    border-color: var(--color-accent-line);
+    box-shadow: 2px 2px 0 var(--color-accent-line);
+  }
+  .tamga-theme-name {
+    font-size: var(--text-small);
+    color: var(--color-ink-faint);
+  }
+  .tamga-theme-card[data-selected="true"] .tamga-theme-name {
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+
+  .tamga-theme-half {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    gap: 4px;
+    padding: 6px;
+  }
+  .tamga-theme-half[data-theme="light"] { background: #f4f2ee; }
+  .tamga-theme-half[data-theme="dark"] { background: #16161a; }
+
+  .tamga-theme-rail {
+    display: flex;
+    width: 12px;
+    flex-shrink: 0;
+    flex-direction: column;
+    gap: 3px;
+    border-radius: 3px;
+    padding: 3px;
+  }
+  .tamga-theme-half[data-theme="light"] .tamga-theme-rail { background: #fcfcfc; }
+  .tamga-theme-half[data-theme="dark"] .tamga-theme-rail { background: #232327; }
+
+  .tamga-theme-body {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 3px;
+    border-radius: 3px;
+    padding: 4px;
+  }
+  .tamga-theme-half[data-theme="light"] .tamga-theme-body { background: #fcfcfc; }
+  .tamga-theme-half[data-theme="dark"] .tamga-theme-body { background: #232327; }
+
+  .tamga-theme-line {
+    height: 3px;
+    border-radius: 2px;
+  }
+  .tamga-theme-half[data-theme="light"] .tamga-theme-line { background: #d8d4cf; }
+  .tamga-theme-half[data-theme="dark"] .tamga-theme-line { background: #3a3a42; }
+  /* Vurgu tema kuralını YENMEK ZORUNDA: daha düşük özgüllükte yazıldığında
+     `[data-theme] .tamga-theme-line` onu eziyor ve marka rengi önizlemede hiç
+     görünmüyor. */
+  .tamga-theme-half .tamga-theme-line[data-accent="true"] {
+    background: var(--color-accent);
+  }
+
+  .tamga-theme-dot {
+    height: 5px;
+    width: 5px;
+    border-radius: 2px;
+  }
+  .tamga-theme-half[data-theme="light"] .tamga-theme-dot { background: #d8d4cf; }
+  .tamga-theme-half[data-theme="dark"] .tamga-theme-dot { background: #3a3a42; }
+  .tamga-theme-half .tamga-theme-dot[data-accent="true"] {
+    background: var(--color-accent);
+  }
+
+  /* Yüklenen görselin durduğu kutu. Çıplak duran bir logo "buraya yüklendi"
+     demiyor, "burada unutulmuş" diyor. Yükseklik sabit: logo geniş, amblem
+     kare, ve ikisi farklı yükseklikte kutularda dursaydı bloklar hizasız
+     görünürdü. */
+  .tamga-image-field {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 72px;
+    min-width: 96px;
+    padding: 10px 14px;
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-card);
+    background: var(--color-shell);
+    box-shadow: 2px 2px 0 var(--color-edge);
+  }
+  /* Boş hâl: kesik çizgi "burası dolabilir" diyor, düz kenar "burası boş
+     kaldı" diyor. */
+  .tamga-image-field[data-empty] {
+    border-style: dashed;
+    box-shadow: none;
+    color: var(--color-ink-faint);
+    font-size: var(--text-small);
+  }
+
+  /* Ayar bölümü, sol kenarında marka rengi. `SettingsPanel`in `accent`
+     varyantı: bir görünüm ekranında bloklar birbirinden ayrılmalı ve ayıran
+     şey rengin kendisi olmalı, çünkü ekranın konusu o. */
+  .tamga-settings-panel-accent {
+    border-left: 4px solid var(--color-accent);
   }
 
   .tamga-label {

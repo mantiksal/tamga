@@ -29,6 +29,7 @@ export const YOLLAR: Record<string, Partial<Record<Locale, string>>> = {
   blocks: { tr: "bloklar" },
   templates: { tr: "sablonlar" },
   "new-panel": { tr: "yeni-panel" },
+  appearance: { tr: "gorunum" },
   "list-screen": { tr: "liste-ekrani" },
 };
 

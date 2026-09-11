@@ -150,10 +150,22 @@ export function SettingsPanel({
   title,
   description,
   inheritedFrom,
+  accent = false,
   children,
 }: {
   title: string;
   description?: string;
+  /**
+   * A brand-coloured edge down the left of the panel. TR: Panelin sol kenarında marka renginde
+   * bir şerit.
+   *
+   * For screens whose SUBJECT is the brand: on an appearance screen the blocks have to separate
+   * from one another, and the thing that separates them should be the colour itself. Elsewhere
+   * it would be decoration. TR: Konusu MARKANIN KENDİSİ olan ekranlar için: bir görünüm
+   * ekranında bloklar birbirinden ayrılmalı ve ayıran şey rengin kendisi olmalı. Başka yerde
+   * süs olurdu.
+   */
+  accent?: boolean;
   /** Like "inherited from the workspace": a full sentence written by the caller. TR: "çalışma alanından geliyor" gibi, çağıran tarafından yazılmış tam cümle. */
   inheritedFrom?: string;
   children: ReactNode;
@@ -164,7 +176,10 @@ export function SettingsPanel({
        kesiyordu — seçili bir segment ya da bir renk kutusu kenardan eksik
        görünüyor, hover'da 3px'e çıkınca daha da eksiliyordu. Bir ayar panelinin
        içinde tablo yok, yani kırpmaya ihtiyacı da yok. */
-    <section className="tamga-card tamga-card-open tamga-gutter py-4" data-panel={title}>
+    <section
+      className={`tamga-card tamga-card-open tamga-gutter py-4${accent ? " tamga-settings-panel-accent" : ""}`}
+      data-panel={title}
+    >
       {/* BAŞLIK BİR BASAMAK BÜYÜK. `text-body` idi ve panelin gövde metniyle
           aynı boydaydı: bir ayar bloğunun başlığı, altındaki açıklamadan
           ayrılmıyordu. Açıklama da `text-caption`tan `text-small`a çıktı —

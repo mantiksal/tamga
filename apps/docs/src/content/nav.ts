@@ -100,6 +100,11 @@ const START: DocPage[] = [
     ["A new panel", "What you change for a customer"],
   ),
   k(
+    "appearance",
+    ["Görünüm ekranı", "Logo, amblem, renk, tema, menü"],
+    ["Appearance screen", "Logo, mark, colour, theme, menu"],
+  ),
+  k(
     "blocks",
     ["Bloklar", "Bileşenden büyük, şablondan küçük"],
     ["Blocks", "Bigger than a component, smaller than a template"],
@@ -177,7 +182,7 @@ export function navGruplari(lang: Locale): NavGrubu[] {
       bul("templates"),
     ]),
     /* KILAVUZ: bir işi baştan sona anlatan sayfalar. */
-    grup("kilavuz", "Kılavuz", "Guides", [bul("new-panel"), bul("list-screen")]),
+    grup("kilavuz", "Kılavuz", "Guides", [bul("new-panel"), bul("appearance"), bul("list-screen")]),
     /* BİLEŞENLER: 78 satır, tek akordeonun içinde, alfabetik. */
     grup("bilesenler", "Bileşenler", "Components", navFor(lang), true),
   ];

@@ -59,6 +59,7 @@ export const TRANSLATED: readonly string[] = [
   "tailwind",
   "icons",
   "new-panel",
+  "appearance",
   "blocks",
   "templates",
   "list-screen",

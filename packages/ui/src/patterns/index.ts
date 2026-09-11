@@ -41,3 +41,8 @@ export { AuthTemplate, AuthProviders } from "./auth-template.js";
 export { WizardTemplate, type WizardStep, type WizardTemplateProps } from "./wizard-template.js";
 export { PublicTemplate, type PublicState, type PublicTemplateProps } from "./public-template.js";
 export { AppShell, type NavEntry, type AppShellProps } from "./app-shell.js";
+export {
+  AppearanceTemplate,
+  type Appearance,
+  type AppearanceLabels,
+} from "./appearance-template.js";

@@ -1,7 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { cn } from "../lib/cn.js";
+import { Tooltip } from "./overlay.js";
 
 /**
  * Kendi dosyasında, çünkü YENİ BİR KONTROL.
@@ -18,6 +19,7 @@ export function RailLink({
   className,
   children,
   showLabel = false,
+  linkComponent: Link,
 }: {
   label: string;
   active?: boolean;
@@ -33,28 +35,56 @@ export function RailLink({
    * çubuğunda `true`.
    */
   showLabel?: boolean;
+  /**
+   * The router's link, so the rail does not force a full page load. Without it this component
+   * can only draw a plain `<a>`, and a shell that needs client routing ends up writing its own
+   * rail link instead of using this one. TR: Yönlendiricinin bağlantısı, ray tam sayfa
+   * yüklemeye zorlamasın diye. Olmadığında bu bileşen yalnız düz bir `<a>` çizebiliyor, ve
+   * istemci yönlendirmesi isteyen bir kabuk bunu kullanmak yerine kendi ray bağlantısını
+   * yazıyor.
+   */
+  linkComponent?: ComponentType<{ href: string; children?: ReactNode; [k: string]: unknown }>;
 }) {
   const shared = {
     className: cn("tamga-rail-link", showLabel && "tamga-rail-link-wide", className),
     "data-active": active,
     "aria-label": label,
-    /* Etiket görünürken `title` yoktur: görünen bir metnin üstünde beliren
-       ipucu aynı şeyi ikinci kez söyler ve imleci geciktirir. */
-    title: showLabel ? undefined : label,
     "aria-current": active ? ("page" as const) : undefined,
   };
-  if (href) {
-    return (
-      <a href={href} {...shared}>
-        {children}
-        {showLabel && <span className="truncate">{label}</span>}
-      </a>
-    );
-  }
-  return (
-    <button type="button" onClick={onClick} {...shared}>
+
+  const govde = (
+    <>
       {children}
-      {showLabel && <span className="truncate">{label}</span>}
+      {showLabel && <span className="min-w-0 truncate">{label}</span>}
+    </>
+  );
+
+  const kontrol = href ? (
+    Link ? (
+      <Link href={href} {...shared}>
+        {govde}
+      </Link>
+    ) : (
+      <a href={href} {...shared}>
+        {govde}
+      </a>
+    )
+  ) : (
+    <button type="button" onClick={onClick} {...shared}>
+      {govde}
     </button>
+  );
+
+  /* İPUCU BİLEŞENİN KENDİ İŞİ, ÇAĞIRANIN DEĞİL.
+     Burada `title={label}` vardı: tarayıcının gecikmeli gri balonu, kitin her
+     yerdeki ipucundan başka türlü görünüyor. Çağıranlar bu yüzden bir de elle
+     `Tooltip` sarıyordu ve ikisi üst üste biniyordu. Etiket görünürken ipucu
+     yok: görünen bir metnin üstünde beliren ipucu aynı şeyi ikinci kez söyler. */
+  return showLabel ? (
+    kontrol
+  ) : (
+    <Tooltip label={label} placement="right">
+      {kontrol}
+    </Tooltip>
   );
 }

@@ -2,7 +2,7 @@
 
 import type { ComponentProps, ReactNode } from "react";
 import { Icon } from "../components/icon.js";
-import { Tooltip } from "../components/overlay.js";
+import { RailLink } from "../components/rail-link.js";
 import { PlainLink, type LinkComponent } from "./shared.js";
 
 /**
@@ -98,37 +98,26 @@ export function AppShell({
           aria-label={labels.primaryNav}
           className={`tamga-rail-scroll flex w-full flex-1 flex-col gap-2 py-1 ${wide ? "" : "items-center"}`}
         >
-          {nav.map((entry) => {
-            const current = isCurrent(entry.href);
-            const link = (
-              <Link
-                key={entry.key}
-                href={entry.href}
-                aria-label={wide ? undefined : entry.label}
-                aria-current={current ? "page" : undefined}
-                data-active={current}
-                data-nav={entry.key}
-                className="tamga-rail-link"
-              >
-                <Icon icon={entry.icon} size="base" />
-                {wide ? <span className="min-w-0 truncate">{entry.label}</span> : null}
-              </Link>
-            );
-
-            /* DAR RAYDA KİTİN İPUCU, `title` DEĞİL.
-               Burada `title={entry.label}` vardı: tarayıcının kendi gecikmeli
-               gri balonu. Kullanan kişi bunu "ipucu yok" diye okuyor, çünkü
-               kitin her yerdeki ipucu başka türlü görünüyor ve hemen çıkıyor.
-               Geniş rayda etiket zaten yazılı; orada ipucu aynı sözcüğü ikinci
-               kez söylemek olurdu. */
-            return wide ? (
-              link
-            ) : (
-              <Tooltip key={entry.key} label={entry.label} placement="right">
-                {link}
-              </Tooltip>
-            );
-          })}
+          {nav.map((entry) => (
+            /* RAY BAĞLANTISI KİTİN `RailLink`İ, ELLE ÇİZİLMİYOR.
+               Burada elle bir `<Link className="tamga-rail-link">` vardı ve
+               geniş rayda `tamga-rail-link-wide` sınıfını atlıyordu: etiket
+               40 piksellik kutuda "İ..." diye kırpılıyordu. Aynı kontrolün iki
+               uygulaması vardı ve yenisi eksikti. `RailLink` artık
+               `linkComponent` de aldığı için elle çizmenin sebebi kalmadı; dar
+               raydaki ipucu da onun kendi işi. */
+            <RailLink
+              key={entry.key}
+              href={entry.href}
+              label={entry.label}
+              active={isCurrent(entry.href)}
+              showLabel={wide}
+              linkComponent={Link}
+              data-nav={entry.key}
+            >
+              <Icon icon={entry.icon} size="base" />
+            </RailLink>
+          ))}
         </nav>
 
         {railFooter ? <div className="shrink-0">{railFooter}</div> : null}

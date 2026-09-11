@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { cn, Icon, Select, Sheet, Switch, ThemeToggle } from "tamga-ui";
 import { Menu } from "tamga-ui/icons";
+import sayilar from "@/content/counts.json";
 import { navGruplari } from "@/content/nav";
 import { icSlug, yol } from "@/content/yollar";
 import { Toc } from "@/components/toc";
@@ -285,7 +286,7 @@ export function SiteHeader({
               aynı yere gidiyor. Şeritte tutmak, 390 pikselde üç kontrolü
               birbirine yapıştırmak demekti. */}
           {cta ? <span className="hidden sm:inline-flex">{cta}</span> : null}
-          <span className="hidden font-mono text-body text-ink-faint sm:inline">v0.0.0</span>
+          <span className="hidden font-mono text-body text-ink-faint sm:inline">v{sayilar.surum}</span>
           <LocaleSwitcher lang={lang} dict={dict} />
           {/* TELEFONDA KUTU, MASAÜSTÜNDE ANAHTAR.
               Dil kutu, tema anahtar olunca ikisi yan yana iki ayrı dilden

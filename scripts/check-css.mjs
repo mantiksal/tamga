@@ -14,8 +14,16 @@
  * hatayı yaptı: açıklamanın içine konan bir yorum kapatması JSDoc'u erken
  * bitirdi ve Node dosyayı ayrıştıramadı.)
  *
- * NE BAKIYOR: yorumların dengesi ve süslü parantezlerin dengesi. İkisi de
- * ucuz, ve ikisi de bozulduğunda sessiz.
+ * NE BAKIYOR: yorumların dengesi, süslü parantezlerin dengesi, ve bir METİN
+ * token'ının DOLGU olarak kullanılmaması.
+ *
+ * ÜÇÜNCÜSÜ NEDEN. `--color-accent-line` sayfaya karşı 4.5 kontrast ARANARAK
+ * üretiliyor: yüzden hep daha koyu, çünkü işi metin ve saç teli çizgi olmak.
+ * Dolgu olarak kullanıldığında o nesne aynı ekrandaki her düğmeden koyu çıkıyor
+ * ve marka rengi seçilince fark büyüyor. 2026-09-11'de adım şeridinde tam olarak
+ * bu vardı, ve hiçbir şey hata vermiyordu: renkler geçerli, kontrast yeterli,
+ * yalnız bütünlük yok. Gözle bakmadan görünmeyen, bakınca da "neden acaba"
+ * dedirten bir hata — yani tam bir kapı işi.
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -55,6 +63,18 @@ for (const base of SCAN) {
 
     /* Süslü parantez dengesi, yorumlar çıkarıldıktan sonra. */
     const kod = s.replace(/\/\*[\s\S]*?\*\//g, "");
+
+    /* `--color-edge`, `--color-line`, `--color-tick` DOLGU OLABİLİR: bir saç
+       teli çizgi, kendi zemini boyanmış 1 piksellik bir kutudur. Aksanın metin
+       sürümü olamaz — onun ölçülmüş eşi yok. */
+    for (const [n, satirIcerik] of kod.split("\n").entries()) {
+      const m = satirIcerik.match(/\bbackground(?:-color)?\s*:\s*var\(\s*(--color-accent-line)\s*\)/);
+      if (m) {
+        hatalar.push(
+          `  ${rel}:${n + 1}  \`${m[1]}\` dolgu olarak kullanılmış; o bir metin/çizgi token'ı, zemin için \`--color-accent\` ya da bir yüzey token'ı kullan`,
+        );
+      }
+    }
     const ac = (kod.match(/\{/g) || []).length;
     const kapa = (kod.match(/\}/g) || []).length;
     if (ac !== kapa) hatalar.push(`  ${rel}  süslü parantez dengesiz: ${ac} açık, ${kapa} kapalı`);
@@ -70,4 +90,4 @@ if (hatalar.length) {
   );
   process.exit(1);
 }
-console.log("✓ CSS yapısı sağlam — yorumlar ve bloklar dengeli.");
+console.log("✓ CSS yapısı sağlam — yorumlar, bloklar ve token rolleri yerinde.");

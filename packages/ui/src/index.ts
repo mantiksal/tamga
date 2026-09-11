@@ -127,6 +127,15 @@ export {
   Link,
 } from "./components/layout.js";
 export { ThemeToggle, LocaleSwitcher, LogoTile, AccountButton } from "./components/chrome.js";
+export {
+  ColorSwatches,
+  ThemeCards,
+  ImageField,
+  type SwatchOption,
+  type ThemeChoice,
+} from "./components/appearance.js";
+export { SquarePicker } from "./components/square-picker.js";
+export { prepareImage, cropSquare, IMAGE_ACCEPT, type ImageError } from "./lib/image.js";
 export { RailLink } from "./components/rail-link.js";
 export { Slider } from "./components/slider.js";
 

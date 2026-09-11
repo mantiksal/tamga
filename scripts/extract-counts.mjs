@@ -34,6 +34,11 @@ const siniflar = new Set(
 const pkg = JSON.parse(oku("package.json"));
 const kapilar = pkg.scripts.verify.split("&&").filter((s) => s.trim()).length;
 
+/* SÜRÜM DE BİR SAYI, ve elle yazılınca yanlış olan ilk şey o oldu: npm'de
+   0.2.0 dururken doküman sitesinin şeridi "v0.0.0" diyordu. Kaynağı kitin
+   kendi `package.json`ı; iki yerde tutulmuyor. */
+const ui = JSON.parse(oku("packages", "ui", "package.json"));
+
 /* Doküman sayfaları: nav'daki bileşen + kavram sayfaları. */
 const nav = oku("apps", "docs", "src", "content", "nav.ts");
 const sayfalar =
@@ -47,10 +52,12 @@ const sayilar = {
   ikon: icons.length,
   kapi: kapilar,
   sayfa: sayfalar,
+  surum: ui.version,
 };
 
 writeFileSync(out, JSON.stringify(sayilar, null, 2) + "\n");
 console.log(
   `✓ Sayılar sayıldı — ${sayilar.bilesen} bileşen · ${sayilar.sinif} sınıf · ` +
-    `${sayilar.token} token · ${sayilar.ikon} ikon · ${sayilar.kapi} kapı · ${sayilar.sayfa} sayfa.`,
+    `${sayilar.token} token · ${sayilar.ikon} ikon · ${sayilar.kapi} kapı · ` +
+    `${sayilar.sayfa} sayfa · v${sayilar.surum}.`,
 );

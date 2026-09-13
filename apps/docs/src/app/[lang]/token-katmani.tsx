@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { paletStili, paletUret } from "tamga-ui/palette";
+import { paletteVars, makePalette } from "tamga-ui/palette";
 import type { Locale } from "@/i18n/config";
 
 /**
@@ -25,7 +25,7 @@ import type { Locale } from "@/i18n/config";
  * TANITMAK. Kitin köşesi tek: `--radius-ctl` 4px, `--radius-card` 6px, ve
  * önizleme de onu gösteriyor.
  *
- * PALET TEK HEX'TEN ÜRETİLİYOR (`paletUret`), elle yazılmış üç tondan değil.
+ * PALET TEK HEX'TEN ÜRETİLİYOR (`makePalette`), elle yazılmış üç tondan değil.
  * Sayfa böylece kitin kendi üretecini de gösteriyor; elle seçilmiş renkler
  * koysaydık sayfa üreteci anlatıp kullanmamış olurdu.
  *
@@ -100,9 +100,9 @@ export function TokenKatmani({
     return () => gozcu.disconnect();
   }, []);
 
-  const cift = paletUret(secili.marka);
+  const cift = makePalette(secili.marka);
   const stil: Record<string, string> = {
-    ...paletStili(koyu ? cift.dark : cift.light),
+    ...paletteVars(koyu ? cift.dark : cift.light),
     "--font-sans": secili.yazi,
     "--font-display": secili.yazi,
     "--font-mono": SISTEM_MONO,

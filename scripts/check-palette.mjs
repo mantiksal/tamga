@@ -12,11 +12,11 @@
  * elle kurulmuş palet ile üretilen palet farklı kurallara tabi olurdu.
  */
 import { makePalette, measurePalette } from "../packages/ui/dist/lib/palette.js";
-import { oklchHex } from "../packages/ui/dist/lib/color.js";
+import { oklchToHex } from "../packages/ui/dist/lib/color.js";
 
 const tonlar = Array.from({ length: 36 }, (_, i) => ({
   ad: `${i * 10}°`,
-  hex: oklchHex({ l: 0.58, c: 0.15, h: i * 10 }),
+  hex: oklchToHex({ l: 0.58, c: 0.15, h: i * 10 }),
 }));
 /* Gerçek markalar da listede: doygunluğu düşük ve çok yüksek uçlar. */
 tonlar.push(

@@ -56,6 +56,8 @@ export function ThemeToggle({
   labels,
   variant = "icon",
   storageKey = "tamga-theme",
+  dark: controlled,
+  onChange,
   className,
 }: {
   /**
@@ -73,6 +75,16 @@ export function ThemeToggle({
    */
   labels: { toLight: string; toDark: string } | { light: string; dark: string };
   /**
+   * The current theme, when the PRODUCT owns it. TR: O anki tema, temayı ÜRÜN tutuyorsa.
+   *
+   * Verildiğinde bu kontrol hafızasını bırakıyor: `localStorage`a yazmıyor, `.dark` sınıfına
+   * dokunmuyor, yalnız gösteriyor ve `onChange` ile bildiriyor. Verilmediğinde tercihi kendi
+   * saklıyor. Temayı zaten tutan bir uygulamada VER: yoksa iki yazar tek sınıf için yarışır.
+   */
+  dark?: boolean;
+  /** Called when the reader asks for the other theme. TR: Okuyucu öteki temayı istediğinde çağrılıyor. */
+  onChange?: (dark: boolean) => void;
+  /**
    * `icon` a square button · `switch` the same shape as a language toggle · `select` a box that
    * says the current theme in words. TR: `icon` kare düğme · `switch` bir dil anahtarıyla aynı
    * şekil · `select` o anki temayı sözcükle yazan bir kutu.
@@ -81,20 +93,25 @@ export function ThemeToggle({
   storageKey?: string;
   className?: string;
 }) {
-  const [dark, setDark] = useState(false);
+  const owned = controlled === undefined;
+  const [self, setSelf] = useState(false);
+  const dark = owned ? self : controlled;
 
   useEffect(() => {
+    if (!owned) return;
     const saved = read(storageKey);
     const initial = saved
       ? saved === "dark"
       : window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setDark(initial);
+    setSelf(initial);
     document.documentElement.classList.toggle("dark", initial);
-  }, [storageKey]);
+  }, [owned, storageKey]);
 
   function toggle() {
     const next = !dark;
-    setDark(next);
+    onChange?.(next);
+    if (!owned) return;
+    setSelf(next);
     document.documentElement.classList.toggle("dark", next);
     write(storageKey, next ? "dark" : "light");
   }
@@ -146,6 +163,12 @@ export function ThemeToggle({
     );
   }
 
+  /* HANGİ GLİFİN GÖRÜNECEĞİNE CSS KARAR VERİYOR, React durumu değil.
+     Sunucuda çizilen ilk kare temayı bilmiyor: durumla seçilen bir glif, tema
+     çözülene kadar YANLIŞ olanı gösterip sonra takla atıyor. `dark:` yardımcısı
+     kök sınıfla birlikte anında doğru olanı gösteriyor, hidrasyon beklemeden.
+     Erişilebilir ad bunu yapamıyor (bir düğmenin tek bir adı olur), o yüzden o
+     duruma bağlı kalıyor — ve kontrollü kullanımda ürün doğru değeri veriyor. */
   return (
     <button
       type="button"
@@ -153,7 +176,8 @@ export function ThemeToggle({
       className={cn("tamga-icon-btn", className)}
       aria-label={"toLight" in labels ? (dark ? labels.toLight : labels.toDark) : undefined}
     >
-      <Icon icon={dark ? ThemeLight : ThemeDark} size="sm" />
+      <Icon icon={ThemeDark} size="sm" className="dark:hidden" />
+      <Icon icon={ThemeLight} size="sm" className="hidden dark:block" />
     </button>
   );
 }

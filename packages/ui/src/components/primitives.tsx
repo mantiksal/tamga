@@ -172,22 +172,13 @@ export function Select({
    */
   loading?: boolean;
   /**
-   * How many skeleton rows to hold while `loading`. SETTLED 2026-08-19 (open question 4): this
-   * is never a taste value; it is the number of records that are actually coming, because the
-   * whole point of the skeleton is that the panel does not resize when they land. Where that
-   * number comes from (api-kontrati.html A7, KİLİTLİ): · paginated list → the request's
-   * `page_size` (DRF default 25, max 100) · last page → `meta.count - (page - 1) * page_size` ·
-   * cursor list → `page_size` (no `count` is returned, by design) · known-size menu → the item
-   * count the caller already knows The default of 4 fits a menu, not a list. A list that leaves
-   * it at 4 is a bug that looks like a design choice. TR: `loading` sürerken kaç iskelet satırı
-   * tutulacağı. 2026-08-19'da KARARA BAĞLANDI (açık soru 4): bu asla bir zevk değeri değil;
-   * gerçekten gelmekte olan kayıt sayısı, çünkü iskeletin bütün amacı kayıtlar geldiğinde
-   * panelin yeniden boyutlanmaması. O sayının nereden geldiği (api-kontrati.html A7, KİLİTLİ):
-   * · sayfalı liste → isteğin `page_size` değeri (DRF varsayılanı 25, en çok 100) · son sayfa →
-   * `meta.count - (page - 1) * page_size` · imleçli liste → `page_size` (tasarım gereği `count`
-   * dönmüyor) · boyu bilinen menü → çağıranın zaten bildiği öğe sayısı Varsayılan 4 bir menüye
-   * uyuyor, bir listeye değil. 4'te bırakılmış bir liste, tasarım kararı gibi görünen bir
-   * hatadır.
+   * How many skeleton rows to hold while `loading`. TR: `loading` sürerken kaç iskelet satırı
+   * tutulacağı.
+   *
+   * ZEVK DEĞERİ DEĞİL: gerçekten gelmekte olan kayıt sayısı, çünkü iskeletin bütün amacı kayıtlar
+   * indiğinde panelin yeniden boyutlanmaması. Sayı çağıranın elinde: sayfa boyu, son sayfanın
+   * kalanı, ya da menünün zaten bilinen öğe sayısı. Varsayılan 4 bir menüye uyuyor, bir listeye
+   * değil; 4'te bırakılmış bir liste, tasarım kararı gibi görünen bir hatadır.
    */
   loadingRows?: number;
   /**

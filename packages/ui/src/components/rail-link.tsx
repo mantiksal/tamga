@@ -20,6 +20,7 @@ export function RailLink({
   children,
   showLabel = false,
   linkComponent: Link,
+  ...rest
 }: {
   label: string;
   active?: boolean;
@@ -44,8 +45,16 @@ export function RailLink({
    * yazıyor.
    */
   linkComponent?: ComponentType<{ href: string; children?: ReactNode; [k: string]: unknown }>;
+  /**
+   * Anything else lands on the control: a `data-*` hook a test or a style needs. TR: Geri kalan
+   * her şey kontrolün üstüne iniyor: bir testin ya da stilin ihtiyaç duyduğu `data-*` kancası.
+   *
+   * SİLME: bu yayma olmadan `AppShell`in geçtiği `data-nav` sessizce düşüyor.
+   */
+  [k: string]: unknown;
 }) {
   const shared = {
+    ...rest,
     className: cn("tamga-rail-link", showLabel && "tamga-rail-link-wide", className),
     "data-active": active,
     "aria-label": label,

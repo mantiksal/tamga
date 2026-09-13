@@ -266,23 +266,3 @@ export function paletteCss(cift: PalettePair): string {
 }
 
 export { lightness, deltaL, contrast };
-
-/* Eski Türkçe adlar, 0.3.0'a kadar. SİLME: 0.1.1 npm'de yayında ve bu adları
-   kullanan bir tüketici var. */
-
-/** @deprecated `makePalette` kullan. 0.3.0'da kaldırılacak. */
-export const paletUret = makePalette;
-/** @deprecated `measurePalette` kullan. 0.3.0'da kaldırılacak. */
-export const paletiOlc = measurePalette;
-/** @deprecated `paletteVars` kullan. 0.3.0'da kaldırılacak. */
-export const paletStili = paletteVars;
-/** @deprecated `paletteCss` kullan. 0.3.0'da kaldırılacak. */
-export const paletCss = paletteCss;
-/** @deprecated `Palette` kullan. 0.3.0'da kaldırılacak. */
-export type Palet = Palette;
-/** @deprecated `PalettePair` kullan. 0.3.0'da kaldırılacak. */
-export type PaletCifti = PalettePair;
-/** @deprecated `Measurement` kullan. 0.3.0'da kaldırılacak. */
-export type Olcum = Measurement;
-/** @deprecated `isHex` kullan (tamga-ui/palette üzerinden). 0.3.0'da kaldırılacak. */
-export { gecerliHex, hexRgb, rgbHex, parlaklik, oran, acikligi, dL, hexOklch, oklchHex, oranaGoreAcikligi } from "./color.js";

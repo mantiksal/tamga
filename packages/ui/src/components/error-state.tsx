@@ -22,20 +22,13 @@ export function ErrorState({
    */
   description?: string;
   /**
-   * The technical line. SETTLED 2026-08-19 (Ercüment, open question 5) by the locked envelope
-   * (api-kontrati.html A4): print `code` and `meta.request_id`, in that order, e.g.
-   * `quota_exceeded · req_8f2a…`. Why those two and not the HTTP status: `code` is the stable
-   * machine name for what went wrong (it never localises, and it is what support and the
-   * programmatic client both branch on), and `request_id` is what matches this failure to a
-   * server log; the contract makes it mandatory on 500 and mirrors it in `X-Request-Id`. The
-   * human sentence belongs in `description`, from the envelope's already-localised `message`.
-   * TR: Teknik satır. 2026-08-19'da KARARA BAĞLANDI (Ercüment, açık soru 5): kilitli zarf
-   * (api-kontrati.html A4) uyarınca `code` ve `meta.request_id`, bu sırayla, örneğin
-   * `quota_exceeded · req_8f2a…`. Neden bu ikisi ve HTTP durumu değil: `code` neyin
-   * bozulduğunun kararlı makine adı (hiç yerelleşmiyor, ve hem destek hem programatik istemci
-   * ona bakarak dallanıyor), `request_id` ise bu hatayı bir sunucu kaydıyla eşleştiren şey;
-   * kontrat onu 500'de zorunlu kılıyor ve `X-Request-Id` başlığında aynalıyor. İnsan cümlesi
-   * zarfın zaten yerelleşmiş `message` alanından `description`'a ait.
+   * The technical line: what support and a programmatic client can act on. TR: Teknik satır:
+   * desteğin ve programatik istemcinin üzerinde işlem yapabileceği şey.
+   *
+   * İki parça bekliyor, bu sırayla: neyin bozulduğunun KARARLI MAKİNE ADI ve hatayı bir sunucu
+   * kaydıyla eşleştiren KİMLİK, örneğin `quota_exceeded · req_8f2a…`. İkisinin de yerelleşmemesi
+   * gerekiyor; insan cümlesi `description`a ait. Alanların adı ve hangi yanıtta zorunlu olduğu
+   * ürünün API sözleşmesinin kararı, bu bileşenin değil.
    */
   detail?: string;
   onRetry?: () => void;

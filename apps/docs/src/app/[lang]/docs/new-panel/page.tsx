@@ -305,12 +305,12 @@ function Kumeler({ rows }: { rows: string[][] }) {
   );
 }
 
-const PALET = `import { paletUret, paletCss } from "tamga-ui/palette";
+const PALET = `import { makePalette, paletteCss } from "tamga-ui/palette";
 
-const { light, dark } = paletUret("#7c3aed");
+const { light, dark } = makePalette("#7c3aed");
 
 // derleme zamanında: CSS olarak yaz
-paletCss({ light, dark });   // :root { … }  .dark { … }
+paletteCss({ light, dark });   // :root { … }  .dark { … }
 
 // çalışma zamanında: köke yaz, panel anında döner
 for (const [alan, deger] of Object.entries(light)) {

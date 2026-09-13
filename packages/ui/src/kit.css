@@ -1347,9 +1347,14 @@
     border-color: var(--color-accent-line);
     box-shadow: 1px 1px 0 var(--color-accent-line);
   }
+  /* İşaretli kutu DOLU bir nesnedir, yani düğmenin sözleşmesi: dolgu `accent`,
+     kenar ve gölge `accent-shadow`. Kenar `accent` idi, yani kendi dolgusunun
+     içinde kayboluyordu ve kutu tabansız duruyordu. Radyo düğmesi bunun
+     istisnası DEĞİL, başka bir nesne: dolgusu yok, noktası `::before`ten
+     geliyor, o yüzden kenarı ve gölgesi `accent` kalıyor. */
   .tamga-check[data-checked="true"] {
     background: var(--color-accent);
-    border-color: var(--color-accent);
+    border-color: var(--color-accent-shadow);
     box-shadow: 1px 1px 0 var(--color-accent-shadow);
   }
   .tamga-radio[data-checked="true"] {
@@ -2270,9 +2275,12 @@
       box-shadow var(--duration-press) var(--ease-standard),
       border-color var(--duration-press) var(--ease-standard);
   }
+  /* Kenar hover'da aksana dönüyor, gölge de dönüyor: yasa "1px kenar + N px
+     sert offset, AYNI RENKTE" diyor ve ikisinin ayrı renge gitmesi yüksekliği
+     nesneden koparıyordu. */
   .tamga-art-tile:hover {
     transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0 var(--color-edge);
+    box-shadow: 3px 3px 0 var(--color-accent-line);
     border-color: var(--color-accent-line);
   }
   .tamga-art-tile:active {

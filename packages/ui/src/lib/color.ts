@@ -153,27 +153,3 @@ export function lightnessForContrast(
   }
   return en;
 }
-
-/* Eski Türkçe adlar, 0.3.0'a kadar. SİLME: 0.1.1 npm'de yayında ve bu adları
-   kullanan bir tüketici var. Gerekçe: ADR-0001. */
-
-/** @deprecated `isHex` kullan. 0.3.0'da kaldırılacak. */
-export const gecerliHex = isHex;
-/** @deprecated `hexToRgb` kullan. 0.3.0'da kaldırılacak. */
-export const hexRgb = hexToRgb;
-/** @deprecated `rgbToHex` kullan. 0.3.0'da kaldırılacak. */
-export const rgbHex = rgbToHex;
-/** @deprecated `luminance` kullan. 0.3.0'da kaldırılacak. */
-export const parlaklik = luminance;
-/** @deprecated `contrast` kullan. 0.3.0'da kaldırılacak. */
-export const oran = contrast;
-/** @deprecated `lightness` kullan. 0.3.0'da kaldırılacak. */
-export const acikligi = lightness;
-/** @deprecated `deltaL` kullan. 0.3.0'da kaldırılacak. */
-export const dL = deltaL;
-/** @deprecated `hexToOklch` kullan. 0.3.0'da kaldırılacak. */
-export const hexOklch = hexToOklch;
-/** @deprecated `oklchToHex` kullan. 0.3.0'da kaldırılacak. */
-export const oklchHex = oklchToHex;
-/** @deprecated `lightnessForContrast` kullan. 0.3.0'da kaldırılacak. */
-export const oranaGoreAcikligi = lightnessForContrast;

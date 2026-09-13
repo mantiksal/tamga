@@ -5,6 +5,54 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.3.0
+
+### Breaking
+
+- **The Turkish aliases in `tamga-ui/palette` and the colour helpers are gone.** They were
+  `@deprecated` through 0.2.x with the removal booked for this release; the mapping is the table
+  under 0.2.0. Nothing in the two products that consume this kit still used them, and the kit's own
+  documentation site did — which is the whole reason a deprecation window has an end.
+  **Migration:** `paletUret` → `makePalette`, `paletStili` → `paletteVars`, `gecerliHex` → `isHex`,
+  and so on down that table.
+
+### Added
+
+- **`ThemeToggle` can be driven from outside.** New optional `dark` and `onChange`. With them the
+  control stops owning the preference: it writes no storage, touches no class, only shows and
+  reports. Without them nothing changes.
+
+  **You were affected if** your app already tracks the theme itself and also mounts this control.
+  Two writers then fight over one `.dark` class: whichever runs last wins, and the two can disagree
+  — token-driven colour saying one thing, `dark:`-driven utilities saying the other. Nothing errors.
+  Pass `dark` and `onChange` and the control stops being the second writer.
+
+### Fixed
+
+- **`RailLink` dropped every extra prop.** `AppShell` passes `data-nav` to each rail entry and the
+  attribute never reached the DOM — the passing side thought it had passed it, the receiving side
+  never drew it, and nothing errored. Anyone hanging a test or a style on `[data-nav]` was hanging
+  it on nothing. `RailLink` now spreads what it is given.
+- **`ThemeToggle`'s icon variant no longer flashes the wrong glyph.** Which icon shows is decided
+  by CSS rather than React state, so the first frame is right without waiting for hydration.
+- **A checked checkbox drew its edge in its own fill colour**, so a filled control had no base under
+  it. Filled accent objects follow the button's contract everywhere now: `accent` fill,
+  `accent-shadow` edge, `accent-ink` ink.
+- **An image tile's hover turned its border to the accent and left its shadow neutral**, which
+  detaches the height from the object. Law 1 asks for one colour on both.
+
+### Internal
+
+- **`check-physics`** — a 16th gate. It reads `kit.css` and holds Law 1 against its written form:
+  blur zero, offset diagonal, offset on the ladder (0 · 1 · 2 · 3 · 4 · 6), edge and shadow the same
+  colour, a press that travels exactly the resting offset, a hover that rises exactly one step. It
+  covers 61 elevations across 37 families.
+
+  The law is the kit's, so its proof belongs here too. It used to be measured downstream, against a
+  gallery the kit does not own.
+- **The pattern layer has tests.** 35 of them. Until now the kit had 32 tests and not one of them
+  rendered a component, while every consumer of `tamga-ui/patterns` depended on that layer.
+
 ## 0.2.1
 
 ### Added

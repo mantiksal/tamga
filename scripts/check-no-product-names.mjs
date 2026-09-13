@@ -23,13 +23,22 @@
  * 3 · DÜRÜSTLÜK. "Kit nötrdür" bir iddia olarak kolay, kanıt olarak zordur.
  *     Bu dosya onu iddia olmaktan çıkarıp CI'ın koruduğu bir gerçeğe çevirir.
  *
+ * DÖRDÜNCÜ TÜR: ürün BAĞLAMI. Ad değil, ATIF. `api-kontrati.html A7`, "açık soru 4",
+ * "2026-08-19'da karara bağlandı", bir kişinin adı, bir backend'in varsayılanı. Bunlar
+ * `props.json` üzerinden doküman sitesinin PROP TABLOSUNA basılıyor, yani kiti npm'den
+ * kuran biri göremeyeceği bir belgeye yapılan atfı okuyor. Üç prop'ta bu vardı ve biri
+ * "Ercüment, açık soru 5" diyordu — kiti kuran o kişiyi hiç duymamış.
+ *
+ * Bir prop açıklaması MEKANİZMAYI anlatır: değerin ne işe yaradığını ve yanlış verilirse
+ * ne olacağını. Değerin nereden geleceği ürünün sözleşmesinin kararıdır ve orada yaşar.
+ *
  * NE YAPMALI, bir eşleşme çıkarsa: kelimeyi silme, ne olduğunu sor.
  *   · Bir MEKANİZMA mı? Nötr adıyla kalır — `HealthScore` → `Gauge` gibi.
  *   · Bir SÖZLÜK mü ("benim durumlarım şunlar")? Ürüne taşınır.
  *   · Bir KİMLİK mi (maskot, logo, marka)? Ürüne taşınır.
  */
 import { execFileSync } from "node:child_process";
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -145,6 +154,19 @@ function yoksayilanlar(dosyalar) {
   }
 }
 
+/* Ürün BAĞLAMI: bir belgeye, bir karar kaydına ya da bir tarihe yapılan atıf.
+   KAYNAKTA DEĞİL, YAYINLANAN METİNDE aranıyor. İlk hâli kaynağı tarıyordu ve
+   `date-picker`ın biçim örneğini (`2026-04-15`) ürün atfı sandı — bir tarih
+   koddayken bir olgu, prop tablosundayken bir sürüm notudur. `props.json`
+   tam olarak doküman sitesine basılan metin, yani doğru özne o. */
+const BAGLAM = [
+  [/api-kontrati|api-kontrat/i, "ürünün API sözleşmesine atıf"],
+  [/açık soru \d|acik soru \d|open question \d/i, "ürünün karar kaydına atıf"],
+  [/Karar #\d|KİLİTLİ|SETTLED 20\d\d/i, "ürünün kilitli kararına atıf"],
+  [/\b20\d\d-\d\d-\d\d\b/, "tarih — bir sürüm notu, prop açıklaması değil"],
+  [/\bDRF\b|Django|meta\.request_id|meta\.count|X-Request-Id/i, "belirli bir backend'in sözleşmesi"],
+];
+
 const tumu = [...hedefler()];
 const elenen = yoksayilanlar(tumu.map((f) => relative(root, f)));
 
@@ -159,6 +181,23 @@ const hits = [];
   }
 }
 
+/* Yayınlanan prop metni: `pnpm run props` bunu `verify`de bu kapıdan ÖNCE üretiyor. */
+{
+  const propsYolu = join(root, "apps", "docs", "src", "content", "props.json");
+  if (existsSync(propsYolu)) {
+    const props = JSON.parse(readFileSync(propsYolu, "utf8"));
+    for (const [bilesen, liste] of Object.entries(props)) {
+      for (const pr of liste) {
+        const metin = `${pr.doc ?? ""} ${pr.docTr ?? ""}`;
+        for (const [desen, ne] of BAGLAM) {
+          const m = metin.match(desen);
+          if (m) hits.push([`props.json → ${bilesen}.${pr.name}`, "", m[0], ne, ""]);
+        }
+      }
+    }
+  }
+}
+
 if (hits.length) {
   console.error(`✗ Kütüphane bir ürünü tanıyor — ${hits.length} yerde:\n`);
   for (const [file, line, word, kind] of hits) {
@@ -168,7 +207,8 @@ if (hits.length) {
     "\n  Kelimeyi silmeden önce ne olduğunu sor:\n" +
       "    mekanizma → nötr adıyla kalır      (HealthScore → Gauge)\n" +
       "    sözlük    → ürüne taşınır          (down · warn · resolved)\n" +
-      "    kimlik    → ürüne taşınır          (maskot, logo, marka)\n",
+      "    kimlik    → ürüne taşınır          (maskot, logo, marka)\n" +
+      "    bağlam    → ürünün dokümanına       (sözleşme atfı, karar kaydı, tarih)\n",
   );
   process.exit(1);
 }

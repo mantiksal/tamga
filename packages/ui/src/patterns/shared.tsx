@@ -25,7 +25,7 @@ export { PlainLink, type LinkComponent } from "../components/link.js";
 export type TemplateError = {
   /** The envelope's machine-read `code`: stable, never translated, the thing support branches on. TR: Zarfın makine tarafından okunan `code`u: kararlı, çevrilmez, desteğin dallandığı şey. */
   code?: string;
-  /** `meta.request_id`; the one thread that leads to the server log. TR: `meta.request_id`; sunucu günlüğüne giden tek iplik. */
+  /** The id that leads to the server log for this one failure. TR: Bu tek hatayı sunucu kaydına götüren kimlik. */
   requestId?: string;
   /** Only when the caller really can retry; without it the button is not drawn at all. TR: Yalnız çağıran gerçekten yeniden deneyebiliyorsa; yoksa düğme hiç çizilmiyor. */
   onRetry?: () => void;

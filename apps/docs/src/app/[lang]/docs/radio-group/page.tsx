@@ -1,4 +1,4 @@
-import { RadioDemo } from "@/components/interactive";
+import { LookDemo, RadioDemo } from "@/components/interactive";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -30,6 +30,39 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: Loc
 const T = {
   tr: {
     rules: "Kurallar",
+    lookH: "Üç biçim, tek anlam",
+    lookP: (
+      <>
+        <code>look</code> seçeneğin çizildiği kabuğu değiştiriyor: <strong>list</strong> alt alta,{" "}
+        <strong>chip</strong> yan yana sarılan küçük kabuklar, <strong>card</strong> ikinci bir
+        satır taşıyacak kadar yer veren bir kart yüzeyi. Değişen yalnız kabuk:{" "}
+        <code>role=&quot;radiogroup&quot;</code>, <code>role=&quot;radio&quot;</code>,{" "}
+        <code>aria-checked</code> ve klavye davranışı üçünde de aynı.
+      </>
+    ),
+    lookN: (
+      <>
+        <strong>Bu varyant bir kolaylık değil, bir kapı.</strong> Kart biçimi kitte yokken ürünler
+        onu ham <code>&lt;button&gt;</code> yığınlarıyla çiziyordu: görüntü doğru, anlam eksik.
+        Ekran okuyucu &laquo;üç ayrı düğme&raquo; duyuruyordu, &laquo;üç seçenekten biri&raquo;
+        değil. Rolü ve klavyeyi her çağrı yerinde yeniden kurmak gereken bir iş, ve her seferinde
+        eksik yapılıyor.
+      </>
+    ),
+    lookSecim: (
+      <>
+        Seçili kabuk <strong>çerçeve ve sert offset</strong> alıyor, dolgu değil (Yasa 2): dolgu
+        eylem demek, &laquo;bu seçildi&raquo; bir eylem değil bir durumdur. İşaret üç biçimde de
+        duruyor, çünkü kenar rengi tek başına bir sinyal olamaz.
+      </>
+    ),
+    lookIkinci: (
+      <>
+        İkinci satır <code>label</code>&apos;in içinde: ayrı bir <code>hint</code> alanı yok. Etiket
+        zaten <code>ReactNode</code>, ve yalnız tek bir biçimde anlamı olan bir prop, props
+        tablosunda herkese gösterilen bir yalan olurdu.
+      </>
+    ),
     roles: (
       <>
         Grup <code>role=&quot;radiogroup&quot;</code>, satırlar <code>role=&quot;radio&quot;</code>.
@@ -53,6 +86,39 @@ const T = {
   },
   en: {
     rules: "Rules",
+    lookH: "Three shells, one meaning",
+    lookP: (
+      <>
+        <code>look</code> changes the shell each option is drawn in: <strong>list</strong> stacks
+        them, <strong>chip</strong> wraps small shells inline, <strong>card</strong> gives a card
+        surface with room for a second line. Only the shell changes:{" "}
+        <code>role=&quot;radiogroup&quot;</code>, <code>role=&quot;radio&quot;</code>,{" "}
+        <code>aria-checked</code> and the keyboard behaviour are the same in all three.
+      </>
+    ),
+    lookN: (
+      <>
+        <strong>This variant is a gate rather than a convenience.</strong> While the card shape was
+        missing from the kit, products drew it with stacks of bare <code>&lt;button&gt;</code>s: the
+        picture was right, the meaning was not. A screen reader announced &ldquo;three separate
+        buttons&rdquo;, not &ldquo;one of three options&rdquo;. Rebuilding the role and the keyboard
+        at every call site is work, and it is done incompletely every time.
+      </>
+    ),
+    lookSecim: (
+      <>
+        The selected shell takes <strong>an outline and a hard offset</strong>, never a fill (Law 2):
+        a fill means an action, and &ldquo;this one is chosen&rdquo; is a state rather than an
+        action. The mark stays in all three shells, because an edge colour cannot be the only signal.
+      </>
+    ),
+    lookIkinci: (
+      <>
+        The second line goes inside <code>label</code>: there is no separate <code>hint</code>
+        field. The label is already a <code>ReactNode</code>, and a prop that only means something in
+        one shell would be a lie told to everyone in the props table.
+      </>
+    ),
     roles: (
       <>
         The group is <code>role=&quot;radiogroup&quot;</code>, the rows are{" "}
@@ -97,6 +163,16 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 />`}>
         <RadioDemo lang={lang} />
       </Demo>
+
+      <H2>{t.lookH}</H2>
+      <P>{t.lookP}</P>
+      <Demo labels={dict.demo} align="start" grid={false} code={`<RadioGroup look="card" … />
+<RadioGroup look="chip" … />`}>
+        <LookDemo lang={lang} />
+      </Demo>
+      <P>{t.lookSecim}</P>
+      <Note>{t.lookN}</Note>
+      <P>{t.lookIkinci}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.roles}</Note>

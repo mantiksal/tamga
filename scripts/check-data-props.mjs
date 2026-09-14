@@ -34,13 +34,15 @@ const KOK = new URL("..", import.meta.url).pathname;
 const DIZIN = join(KOK, "packages/ui/src/components");
 const HOST = /<(div|span|button|a|section|table|ul|li|td|th|p|h[1-6]|aside|nav|header|footer|form|ol)[\s>]/;
 
-/* Bu üçü sunan eleman çiziyor ama `data-*` almıyor, ve sebebi yazılı:
+/* Sunan eleman çizip de `data-*` ALMAYAN tek bileşen, ve sebebi yazılı:
    çağıranın kancası ÖĞEYE ait, sarmalayıcıya değil. Öğe başına geçiş
-   `options`/`items` üzerinden zaten var. */
-const MUAF = new Map([
-  ["Segmented", "kanca seçeneğin kendisine iniyor (`options[].data-*`)"],
-  ["Steps", "adım listesi düz metin alıyor, öğe başına kanca taşımıyor"],
-]);
+   `options` üzerinden zaten var.
+
+   `Steps` BU LİSTEDEN ÇIKTI. Gerekçesi "adım listesi düz metin alıyor"du,
+   yani muafiyetin dayanağı kısıtın kendisiydi: kanca taşıyamıyordu, çünkü
+   adımların kimliği yoktu. Kısıt kalkınca muafiyet de kalktı — bir guard'ın
+   muafiyeti, düzeltilmesi gereken şeyin gerekçesi olamaz. */
+const MUAF = new Map([["Segmented", "kanca seçeneğin kendisine iniyor (`options[].data-*`)"]]);
 
 const hatalar = [];
 for (const dosya of readdirSync(DIZIN).filter((f) => f.endsWith(".tsx") && !f.includes(".test."))) {

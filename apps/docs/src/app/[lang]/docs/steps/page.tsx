@@ -50,6 +50,15 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    kimlik: (
+      <>
+        <strong>Bir adımın kimliği etiketi değildir.</strong> Her adım çevrilmeyen bir{" "}
+        <code>key</code> taşıyor, ve etiketten ayrı olması şart: etiket çevriliyor, yani dil
+        değiştiğinde aynı adım başka bir dizgiyle anılıyor olurdu. <code>key</code> ve{" "}
+        <code>label</code> dışındaki her şey o adımın <code>&lt;li&gt;</code>sine iniyor, yani bir
+        adım testin ya da stilin ihtiyaç duyduğu kancayı taşıyabiliyor.
+      </>
+    ),
     related: "İlgili",
     rel: (
       <>
@@ -81,6 +90,15 @@ const T = {
       </>
     ),
     rules: "Rules",
+    kimlik: (
+      <>
+        <strong>A step&rsquo;s identity is not its label.</strong> Every step carries an untranslated{" "}
+        <code>key</code>, and it has to be separate from the label: the label is translated, so the
+        same step would be known by a different string in each language. Anything beyond{" "}
+        <code>key</code> and <code>label</code> lands on that step&rsquo;s <code>&lt;li&gt;</code>,
+        so a step can carry the hook a test or a style needs.
+      </>
+    ),
     related: "Related",
     rel: (
       <>
@@ -100,7 +118,14 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
-      <Demo labels={dict.demo} align="start" code={`<Steps steps={["…", "…", "…"]} current={1} />`}>
+      <Demo labels={dict.demo} align="start" code={`<Steps
+  steps={[
+    { key: "details", label: "…" },
+    { key: "connection", label: "…" },
+    { key: "verify", label: "…" },
+  ]}
+  current={1}
+/>`}>
         <div className="w-full">
           <StepsDemo lang={lang} />
         </div>
@@ -109,6 +134,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.rules}</H2>
       <Note>{t.ol}</Note>
+      <P>{t.kimlik}</P>
 
       <H2>Props</H2>
       <Props of="Steps" lang={lang} />

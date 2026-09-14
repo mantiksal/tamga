@@ -1368,6 +1368,58 @@
     margin-top: calc((1lh - 18px) / 2);
   }
 
+  /* ------------------------------------------------------------------ *
+   * Seçenek KABUKLARI: aynı radyo grubunun iki başka biçimi.
+   *
+   * Değişen tek şey kabuk. Rol de (`radiogroup`/`radio`), işaret de, klavye
+   * davranışı da aynı kalıyor — çünkü değişen görünüm, anlam değil. Bir
+   * tüketici "N'den biri"ni çip ya da kart olarak çizmek istediğinde elinde
+   * yalnız sınıflar olsaydı rolü de klavyeyi de kendi kurmak zorunda kalırdı,
+   * ve o iş her seferinde eksik yapılıyor.
+   *
+   * SEÇİM ÇERÇEVEYLE, DOLGUYLA DEĞİL (Yasa 2). Seçili kabuk `accent-line`
+   * kenarı ve aynı renkte 2px sert offset alıyor — kitin tema kartlarının
+   * zaten yaptığı şeyin aynısı; iki yerde iki ayrı seçim dili olmasın diye.
+   * ------------------------------------------------------------------ */
+  .tamga-choice-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: auto;
+    min-height: 32px;
+    padding: 4px 10px;
+    border-radius: var(--radius-ctl);
+    border: 1px solid var(--color-edge);
+    background: var(--color-shell);
+    font-size: var(--text-small);
+    cursor: pointer;
+  }
+  .tamga-choice-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    text-align: left;
+    padding: 16px;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-edge);
+    background: var(--color-shell);
+    cursor: pointer;
+  }
+  .tamga-choice-chip[aria-checked="true"],
+  .tamga-choice-card[aria-checked="true"] {
+    border-color: var(--color-accent-line);
+    box-shadow: 2px 2px 0 var(--color-accent-line);
+  }
+  /* Seçili olan yerinde duruyor; seçili OLMAYANA basmak onu bir kademe
+     indiriyor. Basılabilir olan o çünkü: seçili bir seçeneğe basmak hiçbir
+     şey değiştirmiyor. */
+  .tamga-choice-chip:not([aria-checked="true"]):active,
+  .tamga-choice-card:not([aria-checked="true"]):active {
+    transform: translate(1px, 1px);
+    transition-duration: 0s;
+  }
 
   .tamga-check, .tamga-radio {
     display: inline-flex;

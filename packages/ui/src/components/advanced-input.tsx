@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { cn } from "../lib/cn.js";
+import { inputVariants } from "./input.js";
 import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
 import { Check, Close, Customize, Eye, EyeSlash, Search } from "./icons.js";
@@ -20,22 +21,34 @@ import { Check, Close, Customize, Eye, EyeSlash, Search } from "./icons.js";
  */
 export function PasswordInput({
   labels,
+  invalid = false,
   className,
   ...props
 }: Omit<React.ComponentProps<"input">, "type"> & {
   labels: { show: string; hide: string };
+  /**
+   * The field failed validation: it takes the error edge and sets `aria-invalid`, so the failure is
+   * announced as well as shown. TR: Alan doğrulamadan geçemedi: hata kenarını alıyor ve
+   * `aria-invalid` koyuyor, yani hata görünmekle kalmıyor duyuruluyor da.
+   */
+  invalid?: boolean;
 }) {
   const [shown, setShown] = useState(false);
   return (
     <span className="relative flex items-center">
+      {/* SINIF TABLOSU KİTİN KENDİ TABLOSU. Burada `tamga-input` elle yazılıydı,
+          yani `inputVariants`a bir kural eklendiği gün parola alanı onu almazdı:
+          aynı kontrolün iki uygulaması. Genişlik kabuğun kendi kararı — alanın
+          içinde bir düğme duruyor ve daralan bir alan onu metnin üstüne bindirir. */}
       <input
-        {...props}
         type={shown ? "text" : "password"}
-        className={cn("tamga-input w-full pr-10", className)}
+        aria-invalid={invalid || undefined}
+        className={cn(inputVariants({ invalid }), "w-full pr-11", className)}
+        {...props}
       />
       <button
         type="button"
-        className="tamga-mini-btn absolute right-1.5"
+        className="tamga-field-btn"
         aria-label={shown ? labels.hide : labels.show}
         aria-pressed={shown}
         onClick={() => setShown((v) => !v)}

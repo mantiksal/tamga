@@ -5,6 +5,73 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.4.0
+
+**A step now has an identity of its own.** `Steps` took a plain `readonly string[]`, so a step was
+nothing but its translated label. Two consequences followed, and both were silent.
+
+The React key was the label. Change the language and every step becomes, to React, a different
+element: the old node is torn down and a new one built in its place. Nothing looks wrong, but
+anything holding on to that node goes with it. Two steps sharing a label collided the same way.
+
+And there was no way to reach a single step. A caller who needed to point at one, to test it or to
+style it, had nothing to point with; the only thing in the DOM that told steps apart was the
+translated text, which is the one thing that changes underneath a test. The sibling component for
+picking one of several options had carried per-option hooks since 0.3.1. The step strip had not,
+and a gate exemption recorded that gap as though it were a decision.
+
+### Breaking
+
+- **`Steps.steps`** is now `readonly Step[]` instead of `readonly string[]`, where
+  `Step = { key: string; label: string } & Record<string, unknown>`. Anything beyond `key` and
+  `label` lands on that step's `<li>`.
+
+  ```diff
+  - <Steps steps={["Details", "Connection", "Done"]} current={1} />
+  + <Steps
+  +   steps={[
+  +     { key: "details", label: "Details" },
+  +     { key: "connection", label: "Connection" },
+  +     { key: "done", label: "Done" },
+  +   ]}
+  +   current={1}
+  + />
+  ```
+
+  The key is an identifier, so it is not translated; the label is. A caller that already had keys
+  for its steps passes them straight through.
+
+- **`WizardStep` is now an alias of `Step`.** It was a second declaration of the same shape, and
+  the template flattened it to labels before drawing the strip, which is exactly where the identity
+  was being dropped. Code that already builds `{ key, label }` objects needs no change.
+
+### Added
+
+- **`RadioGroup.look`** — `list` (default), `chip` or `card`. Only the shell changes: the role, the
+  mark, the keyboard behaviour and `aria-checked` are identical in all three, and the selected shell
+  takes an outline and a hard offset rather than a fill.
+
+  The card shape was missing, so a product that wanted "one of N, drawn as cards" built it from a
+  stack of bare buttons. The picture came out right and the meaning did not: a screen reader
+  announced three separate buttons instead of one choice among three. Rebuilding the role and the
+  keyboard at every call site is work, and it is done incompletely every time.
+
+  A second line goes inside `label`, which is already a `ReactNode`. There is no separate `hint`
+  field, because a prop that means something in only one shell is a lie told to everyone reading the
+  props table.
+
+- **`PasswordInput.invalid`** — the sibling text field had it, this one did not, so a caller marking
+  a wrong password had to write the kit's class by hand. The class is only half of it: the hand-written
+  route never carried `aria-invalid`, so the error was visible and never announced.
+
+### Fixed
+
+- The step strip no longer remounts its list items when labels change.
+
+- **`PasswordInput` now reads the kit's own class table** instead of writing `tamga-input` by hand.
+  A rule added to the table reached every text field except this one, which is the same defect the
+  library asks its consumers not to introduce.
+
 ## 0.3.2
 
 **Every component that draws a host element now accepts `data-*`.** 98 of them; before this, 79 did

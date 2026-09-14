@@ -383,11 +383,25 @@ export function Badge({
 }
 
 /**
+ * Bir adım: kimliği ve çevrilmiş etiketi.
+ *
+ * KİMLİK ETİKETTEN AYRI, ve bu bir kolaylık değil bir düzeltme. Adım listesi
+ * bir zamanlar düz `string[]` idi: kimlik yoktu, React anahtarı ÇEVRİLMİŞ
+ * ETİKETTİ, ve iki adım aynı etiketi taşıdığında ya da dil değiştiğinde
+ * düğümler yeniden kuruluyordu. Kitin kendi kuralı bunu zaten söylüyor:
+ * bir öğenin adı etiketi değildir, çünkü etiket çevrilir ve değişir.
+ *
+ * `key` ve `label` DIŞINDAKİ her şey o adımın `<li>`sine iniyor, yani bir
+ * adım testin ya da stilin ihtiyaç duyduğu kancayı taşıyabiliyor. Kardeşi
+ * `Segmented` ile aynı sözleşme; ikisinin farklı olması bir asimetriydi.
+ */
+export type Step = { key: string; label: string } & Record<string, unknown>;
+
+/**
  * Adım göstergesi.
  *
- * Üründe bir sihirbaz şablonu vardı ve adım göstergesi yoktu — yani kullanıcı
- * kaçıncı adımda olduğunu ve kaç adım kaldığını bilmiyordu. Bir sihirbazın
- * varlık sebebi tam olarak budur.
+ * Bir sihirbazın adım göstergesi yoksa kullanıcı kaçıncı adımda olduğunu ve
+ * kaç adım kaldığını bilmiyor; sihirbazın varlık sebebi tam olarak budur.
  *
  * `<ol>` kullanılıyor: adımlar SIRALI ve sıra bilgi taşıyor. Ekran okuyucu
  * "3 öğeli liste, öğe 2" der; `<div>`'lerle bu bilgi kaybolur.
@@ -402,7 +416,13 @@ export function Steps({
   className,
   ...rest
 }: {
-  steps: readonly string[];
+  /**
+   * The steps, in order. Anything beyond `key` and `label` lands on that step's `<li>`, so a step
+   * can carry the hook a test or a style needs. TR: Adımlar, sırasıyla. `key` ve `label` dışındaki
+   * her şey o adımın `<li>`sine iniyor, yani bir adım testin ya da stilin ihtiyaç duyduğu kancayı
+   * taşıyabiliyor.
+   */
+  steps: readonly Step[];
   /** The active step, counting from zero. TR: Sıfırdan sayan aktif adım. */
   current: number;
   className?: string;
@@ -411,11 +431,16 @@ export function Steps({
 }) {
   return (
     <ol {...dataProps(rest)} className={cn("flex flex-wrap items-center gap-x-3 gap-y-2", className)}>
-      {steps.map((s, i) => {
+      {steps.map(({ key, label, ...adimRest }, i) => {
         const done = i < current;
         const active = i === current;
         return (
-          <li key={s} className="flex items-center gap-3">
+          /* KANCA ADIMIN KENDİ ELEMANINDA. Sarmalayıcıya konsaydı "hangi adım"
+             sorusunun cevabı olmazdı; `<li>` o adımın ta kendisi, ve içindeki
+             `aria-current` ile birlikte "şu adım, ve şu an açık olan o" diye
+             ölçülebiliyor. Kitin kendi nitelikleri sonra yazılıyor: çağıran
+             `aria-current`i kazara ezemesin. */
+          <li key={key} {...adimRest} className="flex items-center gap-3">
             {/* ÜÇ DURUM ÜÇ FİZİKLE, renkle değil: gelecek düz, şimdiki
                 yükselir, biten oturur. Ölçü üçünde de aynı — `min-w` artı
                 dolgu, genişliği içeriğe bırakıyordu ve `Check` glifi rakamdan
@@ -433,7 +458,7 @@ export function Steps({
               className={cn("text-small", active ? "font-medium text-ink" : "text-ink-faint")}
               aria-current={active ? "step" : undefined}
             >
-              {s}
+              {label}
             </span>
             {/* ÇİZGİ DE BİLGİ: geçilen aralık aksan, kalanı kenar rengi. */}
             {i < steps.length - 1 ? (

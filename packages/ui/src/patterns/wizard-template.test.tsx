@@ -98,3 +98,69 @@ describe("WizardTemplate · gezinme çağıranın", () => {
     expect(screen.getByText("4 / 4")).toBeInTheDocument();
   });
 });
+
+/**
+ * KİMLİK ŞERİDE KADAR İNİYOR.
+ *
+ * Şablon bir zamanlar `steps.map((s) => s.label)` yapıyordu: `key` tam bu
+ * sınırda çöpe gidiyordu, yani bir adıma kanca takmanın yolu yoktu ve tüketen
+ * taraf ölçümü etikete bağlamak zorunda kalıyordu. Etiket çevriliyor; dil
+ * değiştiği an o ölçüm kırılır.
+ *
+ * Bu test o sınırı tutuyor: adımın kendi elemanı kimliğini taşıyor, ve
+ * kancayla `aria-current` aynı adımda buluşuyor — "şu adım, ve şu an açık
+ * olan o" ancak ikisi birlikte ölçülebiliyor.
+ */
+describe("Steps'in kimliği", () => {
+  it("adımın kancası kendi <li>sine iniyor", () => {
+    render(
+      <WizardTemplate
+        steps={steps.map((s) => ({ ...s, "data-step": s.key }))}
+        activeStep="notify"
+        title="Sihirbaz"
+        labels={LABELS}
+      >
+        <p>gövde</p>
+      </WizardTemplate>,
+    );
+    const notify = document.querySelector('[data-step="notify"]');
+    expect(notify).not.toBeNull();
+    /* Açık adım kancanın İÇİNDE: ikisi aynı adımda buluşmuyorsa kanca hangi
+       adımın açık olduğunu söyleyemez, yani ilerlemeyi ölçmez. */
+    expect(notify!.querySelector('[aria-current="step"]')).not.toBeNull();
+    expect(document.querySelector('[data-step="target"]')!.querySelector('[aria-current="step"]')).toBeNull();
+  });
+
+  it("dil değişince adım düğümü yeniden kurulmuyor: React anahtarı etiket değil", () => {
+    /* ASIL KUSUR BURADAYDI. Anahtar çevrilmiş etiketti, yani dil değiştiğinde
+       React her adımı BAŞKA bir öğe sanıyor: eskisini söküp yenisini kuruyor.
+       Görünen sonucu yok, ama odak, animasyon ve DOM'a tutunan her şey o anda
+       kayboluyor. Kimlik etiketten ayrıldığı için düğüm artık yerinde kalıyor,
+       yalnız metni değişiyor. */
+    const tr = [
+      { key: "target", label: "Hedef", "data-step": "target" },
+      { key: "notify", label: "Bildirim", "data-step": "notify" },
+    ];
+    const en = [
+      { key: "target", label: "Target", "data-step": "target" },
+      { key: "notify", label: "Notify", "data-step": "notify" },
+    ];
+    const { rerender } = render(
+      <WizardTemplate steps={tr} activeStep="notify" title="Sihirbaz" labels={LABELS}>
+        <p>gövde</p>
+      </WizardTemplate>,
+    );
+    const once = document.querySelector('[data-step="notify"]');
+    /* Boşta geçmesin: kanca hiç inmeseydi iki taraf da null olurdu ve
+       `null === null` bu testi yalancı bir yeşille geçirirdi. */
+    expect(once).not.toBeNull();
+    rerender(
+      <WizardTemplate steps={en} activeStep="notify" title="Sihirbaz" labels={LABELS}>
+        <p>gövde</p>
+      </WizardTemplate>,
+    );
+    const sonra = document.querySelector('[data-step="notify"]');
+    expect(sonra).toBe(once);
+    expect(screen.getByText("Notify")).toBeTruthy();
+  });
+});

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Steps } from "../components/display.js";
+import { Steps, type Step } from "../components/display.js";
 import { ErrorSlot, type ErrorLabels, type TemplateError } from "./shared.js";
 
 /**
@@ -11,11 +11,16 @@ import { ErrorSlot, type ErrorLabels, type TemplateError } from "./shared.js";
  * Gerekçe: docs/adr/0004-sablon-katmani.md
  */
 
-export type WizardStep = {
-  key: string;
-  /** The translated label. TR: Çevrilmiş etiket. */
-  label: string;
-};
+/**
+ * Bir sihirbaz adımı: kitin `Step`inin ta kendisi.
+ *
+ * AYRI BİR TİP DEĞİL, ve bir süre öyleydi: burada `{ key, label }` diye ikinci
+ * kez tanımlıydı ve şerit çizilirken `steps.map((s) => s.label)` yapılıyordu,
+ * yani KİMLİK TAM SINIRDA ÇÖPE GİDİYORDU. Şeridi çizen `Steps` kimliği hiç
+ * görmediği için bir adıma kanca takmanın yolu yoktu, ve React anahtarı
+ * çevrilmiş etiketti. İki tip tek tipe indi; kimlik artık aşağı akıyor.
+ */
+export type WizardStep = Step;
 
 export type WizardState = "ready" | "error";
 
@@ -56,7 +61,7 @@ export function WizardTemplate({
           görsel dili olmasın diye (ADR-0004). `Steps` kendi `<ol>`unu ve
           `aria-current`ini taşıyor; buradaki sarmalayıcı yalnız yerleşim. */}
       <div className="tamga-section tamga-gutter py-4">
-        <Steps steps={steps.map((s) => s.label)} current={activeIndex < 0 ? 0 : activeIndex} />
+        <Steps steps={steps} current={activeIndex < 0 ? 0 : activeIndex} />
       </div>
 
       <div className="tamga-gutter min-h-0 flex-1 py-6">

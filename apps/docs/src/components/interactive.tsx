@@ -101,6 +101,13 @@ const D = {
     onSale: "İndirimdekiler",
     disabled: "Devre dışı",
     orderState: "Sipariş durumu",
+    lookPlan: "Plan",
+    lookBasic: "Başlangıç",
+    lookBasicHint: "Tek kullanıcı, aylık rapor",
+    lookTeam: "Takım",
+    lookTeamHint: "On kullanıcıya kadar, haftalık rapor",
+    lookScale: "Kurumsal",
+    lookScaleHint: "Sınırsız kullanıcı, günlük rapor",
     pending: "Beklemede",
     shipping: "Kargoda",
     delivered: "Teslim edildi",
@@ -172,6 +179,13 @@ const D = {
     onSale: "On sale",
     disabled: "Disabled",
     orderState: "Order status",
+    lookPlan: "Plan",
+    lookBasic: "Starter",
+    lookBasicHint: "One seat, a monthly report",
+    lookTeam: "Team",
+    lookTeamHint: "Up to ten seats, a weekly report",
+    lookScale: "Scale",
+    lookScaleHint: "Unlimited seats, a daily report",
     pending: "Pending",
     shipping: "Shipping",
     delivered: "Delivered",
@@ -494,6 +508,49 @@ export function RadioDemo({ lang }: L) {
         { value: "delivered", label: d.delivered },
       ]}
     />
+  );
+}
+
+/**
+ * Aynı gruba iki kabuk.
+ *
+ * İkisi yan yana duruyor çünkü fark ancak öyle okunuyor: kart ikinci bir satır
+ * taşıyor, çip taşımıyor. Seçim ikisinde de çerçeveyle, işaret ikisinde de
+ * yerinde.
+ */
+export function LookDemo({ lang }: L) {
+  const d = D[lang];
+  const [v, setV] = useState("team");
+  const secenekler = [
+    { value: "basic", ad: d.lookBasic, ipucu: d.lookBasicHint },
+    { value: "team", ad: d.lookTeam, ipucu: d.lookTeamHint },
+    { value: "scale", ad: d.lookScale, ipucu: d.lookScaleHint },
+  ];
+  return (
+    <div className="flex w-full flex-col gap-5">
+      <RadioGroup
+        look="card"
+        label={d.lookPlan}
+        value={v}
+        onChange={setV}
+        options={secenekler.map((o) => ({
+          value: o.value,
+          label: (
+            <>
+              <span className="text-body text-ink block font-medium">{o.ad}</span>
+              <span className="text-caption text-ink-faint mt-1 block">{o.ipucu}</span>
+            </>
+          ),
+        }))}
+      />
+      <RadioGroup
+        look="chip"
+        label={d.lookPlan}
+        value={v}
+        onChange={setV}
+        options={secenekler.map((o) => ({ value: o.value, label: o.ad }))}
+      />
+    </div>
   );
 }
 
@@ -889,12 +946,21 @@ export function CodeDemo({ lang }: L) {
   );
 }
 
+
+/** Adım kimlikleri: dilden bağımsız, `stepNames` ile aynı sırada. */
+const ADIM_ANAHTARLARI = ["details", "connection", "verify", "done"] as const;
+
 export function StepsDemo({ lang }: L) {
   const n = N[lang];
   const [i, setI] = useState(1);
   return (
     <div className="flex flex-col gap-5">
-      <Steps steps={n.stepNames} current={i} />
+      {/* ANAHTARLAR ÇEVRİLMİYOR, etiketler çevriliyor. Gösterimin kendisi de
+          bunu anlatıyor: bir adımın kimliği dile bağlı olamaz. */}
+      <Steps
+        steps={n.stepNames.map((label, j) => ({ key: ADIM_ANAHTARLARI[j] ?? label, label }))}
+        current={i}
+      />
       <span className="flex gap-2">
         <Button size="sm" onClick={() => setI((v) => Math.max(0, v - 1))}>
           ←

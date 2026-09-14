@@ -51,6 +51,14 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    invalid: (
+      <>
+        <strong>Doğrulama <code>invalid</code> ile söyleniyor,</strong> sınıfla değil. Alan kenarını
+        kırmızıya çeviriyor <em>ve</em> <code>aria-invalid</code> koyuyor: ikisi birlikte olmazsa
+        hata yalnız görünür, duyurulmaz. Sınıfı elle yazan bir çağrı yeri ikincisini hiç almıyordu,
+        ve bu tam olarak sessizce eksik kalan cinsten bir şey.
+      </>
+    ),
     related: "İlgili",
     rel: (
       <>
@@ -82,6 +90,14 @@ const T = {
       </>
     ),
     rules: "Rules",
+    invalid: (
+      <>
+        <strong>Validation is expressed with <code>invalid</code>,</strong> never with a class. It
+        turns the field&rsquo;s edge red <em>and</em> sets <code>aria-invalid</code>: without both,
+        the error is only visible, never announced. A call site writing the class by hand never got
+        the second half, which is exactly the kind of thing that stays missing in silence.
+      </>
+    ),
     related: "Related",
     rel: (
       <>
@@ -110,6 +126,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <P>{t.lead}</P>
 
       <H2>{t.rules}</H2>
+      <Note>{t.invalid}</Note>
       <Note>{t.type}</Note>
       <Note>{t.autocomplete}</Note>
 

@@ -143,7 +143,7 @@ export { Slider } from "./components/slider.js";
 export { Accordion, Collapsible } from "./components/disclosure.js";
 
 /* --- okunacak şeyler --------------------------------------------------- */
-export { Descriptions, Kpi, KpiGrid, Code, Kbd, Badge, Steps } from "./components/display.js";
+export { Descriptions, Kpi, KpiGrid, Code, Kbd, Badge, Steps, type Step } from "./components/display.js";
 
 /* --- gelişmiş girdiler ------------------------------------------------- */
 export {

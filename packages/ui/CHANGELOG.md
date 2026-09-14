@@ -12,6 +12,16 @@ hand-write a kit class. Each one had pushed a caller off the component entirely.
 
 ### Added
 
+- **An accessibility invariant suite.** Twenty-three renders, three invariants: every interactive
+  element has an accessible name, no `aria-hidden` subtree hides something focusable, and role pairs
+  are complete (`radio` inside `radiogroup`, `tab` inside `tablist`, `option` inside `listbox`).
+
+  This is not an axe sweep and does not claim to be. The previous sweep ran over a consuming
+  product's stories and disappeared with them, which was the wrong home for it: a promise the
+  library makes has to be measured in the library. What is not covered is written at the top of the
+  file — contrast (a separate gate already measures it), focus order, live-region behaviour, and any
+  component the suite does not render.
+
 - **`RadioGroup` options carry their own attributes.** Anything beyond `value` and `label` lands on
   that option's button. The sibling components for picking one of several things had carried
   per-option hooks since 0.3.1 and 0.4.0; this one had not, so a caller who needed to point at a

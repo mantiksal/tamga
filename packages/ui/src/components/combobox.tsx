@@ -15,9 +15,9 @@ import { CaretDown, Close, Search } from "./icons.js";
 export type ComboOption<T extends string> = {
   value: T;
   label: string;
-  /** Etiketin altındaki ikinci satır — SKU, e-posta, kategori. */
+  /** Etiketin altındaki ikinci satır: SKU, e-posta, kategori. */
   hint?: string;
-};
+} & Record<string, unknown>;
 
 export function Combobox<T extends string>({
   options,
@@ -158,22 +158,23 @@ export function Combobox<T extends string>({
           {shown.length === 0 ? (
             <p className="px-3 py-2.5 text-body text-ink-faint">{labels.empty}</p>
           ) : (
-            shown.map((o, i) => (
+            shown.map(({ value: v, label: etiket, hint, ...rest }, i) => (
               <button
-                key={o.value}
+                key={v}
+                {...rest}
                 id={`${id}-opt-${i}`}
                 type="button"
                 role="option"
-                aria-selected={o.value === value}
-                data-selected={o.value === value}
+                aria-selected={v === value}
+                data-selected={v === value}
                 data-active={i === active}
                 className="tamga-option w-full text-left"
                 onMouseEnter={() => setActive(i)}
-                onClick={() => commit(o)}
+                onClick={() => commit(shown[i]!)}
               >
-                <span className="block truncate">{o.label}</span>
-                {o.hint ? (
-                  <span className="block truncate font-mono text-caption text-ink-faint">{o.hint}</span>
+                <span className="block truncate">{etiket}</span>
+                {hint ? (
+                  <span className="block truncate font-mono text-caption text-ink-faint">{hint}</span>
                 ) : null}
               </button>
             ))

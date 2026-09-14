@@ -7,7 +7,28 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ## 0.4.2
 
+### Added
+
+- **Every list-taking component now passes per-item attributes.** Anything an item object carries
+  beyond its known fields lands on that item's own element: `Tabs`, `Combobox`, `MultiSelect`,
+  `ColorSwatches`, `FileUpload`, `Descriptions`, `ScheduleInput`. Three components already did;
+  these seven did not.
+
+  This is not a convenience. Without the hook a caller leaves the component and hand-writes the
+  class, and leaves the role, the keyboard and the wrapper behind with it. The asymmetry was found
+  three separate times and cost three separate releases, each time because the fix was applied to
+  the one component that hurt rather than to the family. A gate now asks the question when a new
+  list-taking component is added.
+
+  The three chart series are exempt with a reason: their items are drawn marks rather than elements,
+  and those props already carry data arrays, where a free-form key would be ambiguous.
+
 ### Fixed
+
+- **`Descriptions` put the caller's `data-*` on every row instead of on the list.** The spread sat
+  inside the item loop, so one hook became N copies and the `<dl>` itself carried none. The gate that
+  checks a component accepts `data-*` had passed it, because that gate asks whether the attribute is
+  accepted, not where it lands.
 
 - **`AppShell`'s content surface is positioned.** It scrolls, and it was not `relative`, so any
   absolutely positioned element inside it — `sr-only` text is exactly that — looked for its

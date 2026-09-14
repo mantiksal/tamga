@@ -20,7 +20,7 @@ export type SwatchOption = {
   hex: string;
   /** Its name, translated, used as the accessible label. TR: Çevrilmiş adı; erişilebilir ad olarak kullanılıyor. */
   label: string;
-};
+} & Record<string, unknown>;
 
 /**
  * Brand colour chosen from a few squares, or written by hand.
@@ -51,17 +51,18 @@ export function ColorSwatches({
 
   return (
     <span {...dataProps(rest)} className={cn("flex flex-wrap items-center gap-3", className)}>
-      {options.map((o) => (
+      {options.map(({ hex, label: etiket, ...rest }) => (
         <button
-          key={o.hex}
+          key={hex}
+          {...rest}
           type="button"
           className="tamga-swatch"
-          data-selected={secili(o.hex)}
-          aria-label={o.label}
-          title={o.label}
-          onClick={() => onChange(o.hex)}
+          data-selected={secili(hex)}
+          aria-label={etiket}
+          title={etiket}
+          onClick={() => onChange(hex)}
         >
-          <span aria-hidden style={{ background: o.hex }} />
+          <span aria-hidden style={{ background: hex }} />
         </button>
       ))}
 

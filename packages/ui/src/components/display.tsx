@@ -28,7 +28,7 @@ export function Descriptions({
   className,
   ...rest
 }: {
-  items: readonly { term: string; value: ReactNode; mono?: boolean }[];
+  items: readonly ({ term: string; value: ReactNode; mono?: boolean } & Record<string, unknown>)[];
   /**
    * `wide` at page width, `compact` inside a card. TR: `wide` sayfa genişliğinde, `compact` bir
    * kartın içinde.
@@ -40,6 +40,7 @@ export function Descriptions({
 }) {
   return (
     <dl
+      {...dataProps(rest)}
       className={cn(
         "grid",
         layout === "wide"
@@ -48,11 +49,15 @@ export function Descriptions({
         className,
       )}
     >
-      {items.map((it) => (
-        <div {...dataProps(rest)} key={it.term} className="contents">
-          <dt className="text-small text-ink-faint">{it.term}</dt>
-          <dd className={cn("min-w-0 text-body text-ink", it.mono && "font-mono tabular-nums")}>
-            {it.value}
+      {/* KANCA KABIN ÜSTÜNDE, SATIRIN DEĞİL — ve bir süre tersiydi.
+          `dataProps(rest)` bu `map`in içindeydi, yani çağıranın TEK kancası her
+          satıra kopyalanıyor ve `<dl>`e hiç inmiyordu. `check-data-props` bunu
+          geçirdi çünkü o kapı niteliğin VARLIĞINA bakıyor, YERİNE değil. */}
+      {items.map(({ term, value: deger, mono, ...rest }) => (
+        <div {...rest} key={term} className="contents">
+          <dt className="text-small text-ink-faint">{term}</dt>
+          <dd className={cn("min-w-0 text-body text-ink", mono && "font-mono tabular-nums")}>
+            {deger}
           </dd>
         </div>
       ))}

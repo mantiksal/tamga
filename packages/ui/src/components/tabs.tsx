@@ -30,7 +30,7 @@ export type TabItem<T extends string> = {
    * yeni sekmede açılabilen ölü bir adres de bırakmıyor.
    */
   disabled?: boolean;
-};
+} & Record<string, unknown>;
 
 export function Tabs<T extends string>({
   items,
@@ -73,27 +73,29 @@ export function Tabs<T extends string>({
   if (bagliMi) {
     return (
       <nav {...dataProps(rest)} aria-label={label} className={kap}>
-        {items.map((t) =>
-          t.disabled ? (
+        {items.map(({ value: v, label: etiket, icon, href, disabled, ...rest }) =>
+          disabled ? (
             <span
-              key={t.value}
+              key={v}
+              {...rest}
               aria-disabled="true"
               className={cn("tamga-tab", scroll && "shrink-0")}
               data-disabled="true"
             >
-              {t.icon}
-              {t.label}
+              {icon}
+              {etiket}
             </span>
           ) : (
             <A
-              key={t.value}
-              href={t.href}
+              key={v}
+              {...rest}
+              href={href}
               className={cn("tamga-tab", scroll && "shrink-0")}
-              data-active={value === t.value}
-              aria-current={value === t.value ? "page" : undefined}
+              data-active={value === v}
+              aria-current={value === v ? "page" : undefined}
             >
-              {t.icon}
-              {t.label}
+              {icon}
+              {etiket}
             </A>
           ),
         )}
@@ -103,20 +105,21 @@ export function Tabs<T extends string>({
 
   return (
     <div role="tablist" aria-label={label} className={kap}>
-      {items.map((t) => (
+      {items.map(({ value: v, label: etiket, icon, href: _href, disabled, ...rest }) => (
         <button
-          key={t.value}
+          key={v}
+          {...rest}
           type="button"
           role="tab"
-          aria-selected={value === t.value}
-          disabled={t.disabled}
+          aria-selected={value === v}
+          disabled={disabled}
           className={cn("tamga-tab", scroll && "shrink-0")}
-          data-active={value === t.value}
-          data-disabled={t.disabled || undefined}
-          onClick={() => onChange?.(t.value)}
+          data-active={value === v}
+          data-disabled={disabled || undefined}
+          onClick={() => onChange?.(v)}
         >
-          {t.icon}
-          {t.label}
+          {icon}
+          {etiket}
         </button>
       ))}
     </div>

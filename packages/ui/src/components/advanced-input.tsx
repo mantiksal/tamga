@@ -253,7 +253,7 @@ export function MultiSelect({
   className,
   ...rest
 }: {
-  options: readonly { value: string; label: string; hint?: string }[];
+  options: readonly ({ value: string; label: string; hint?: string } & Record<string, unknown>)[];
   value: readonly string[];
   onChange: (next: string[]) => void;
   placeholder: string;
@@ -386,11 +386,12 @@ export function MultiSelect({
           {shown.length === 0 ? (
             <p className="px-4 py-3 text-small text-ink-faint">{labels.empty}</p>
           ) : (
-            shown.map((o, i) => {
-              const on = value.includes(o.value);
+            shown.map(({ value: v, label: etiket, hint, ...rest }, i) => {
+              const on = value.includes(v);
               return (
                 <button
-                  key={o.value}
+                  key={v}
+                  {...rest}
                   type="button"
                   role="option"
                   aria-selected={on}
@@ -400,10 +401,10 @@ export function MultiSelect({
                   data-active={i === active || undefined}
                   className="tamga-option w-full"
                   onMouseEnter={() => setActive(i)}
-                  onClick={() => toggle(o.value)}
+                  onClick={() => toggle(v)}
                 >
-                  <span className="flex-1 text-left">{o.label}</span>
-                  {o.hint ? <span className="font-mono text-caption text-ink-faint">{o.hint}</span> : null}
+                  <span className="flex-1 text-left">{etiket}</span>
+                  {hint ? <span className="font-mono text-caption text-ink-faint">{hint}</span> : null}
                   {on ? <Icon icon={Check} size="xs" /> : null}
                 </button>
               );
@@ -441,7 +442,7 @@ export function ScheduleInput({
    * `[{ minutes: 5, label: "5 minutes" }, …]`: ordered and curated. TR: `[{ minutes: 5, label:
    * "5 dakika" }, …]`: sıralı ve kürasyonlu.
    */
-  options: readonly { minutes: number; label: string }[];
+  options: readonly ({ minutes: number; label: string } & Record<string, unknown>)[];
   label: string;
   className?: string;
 }) {
@@ -452,9 +453,9 @@ export function ScheduleInput({
       value={value}
       onChange={(e) => onChange(Number(e.target.value))}
     >
-      {options.map((o) => (
-        <option key={o.minutes} value={o.minutes}>
-          {o.label}
+      {options.map(({ minutes, label: etiket, ...rest }) => (
+        <option key={minutes} {...rest} value={minutes}>
+          {etiket}
         </option>
       ))}
     </select>

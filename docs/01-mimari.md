@@ -120,7 +120,25 @@ dokümanı okuyan sürüm ayrıştığı gün hangisinin doğru olduğu belli ol
 `props.json` **üretilen bir dosya**: `.gitignore`'da, her `dev`/`build`/`verify`'de yeniden
 yazılıyor. Elle düzenleme.
 
-## 7 · Sürüm
+## 7 · Öğeye inen kanca
+
+Liste alan bir bileşenin öğe nesnesi, bilinen alanları dışında ne taşırsa o öğenin **kendi
+elemanına** iniyor. Kitin kendi nitelikleri **sonra** yazılıyor, yani bir kanca `aria-selected` gibi
+bir şeyi ezemiyor.
+
+**Bu bir kolaylık değil, ADR-0012 ihlallerinin kaynağı.** Kanca olmayınca tüketici bileşeni
+BIRAKIP sınıfı elle yazıyor, ve rolü, klavyeyi, sarmalayıcıyı da bırakıyor. Üç kez ayrı ayrı bulundu
+ve üçü de ayrı bir sürüme mal oldu: `Segmented` taşıyordu, `Steps` taşımıyordu; `RadioGroup` da
+taşımıyordu ama o sırada kimse sormadı; sonra bir tarama kalan yediyi birden gösterdi.
+
+`check:item-hooks` artık soruyu bizim yerimize soruyor: liste alan yeni bir bileşen eklendiğinde
+cevap zorunlu.
+
+**Muaf olan üç liste** ve sebebi: `LineChart.series`, `PieChart.slices`, `StackedBarChart.series`.
+Öğeleri bir eleman değil bir çizim (eğri, dilim), ve `series`/`slices` zaten veri dizileri taşıyor:
+oraya serbest bir anahtar koymak, veri mi kanca mı olduğunu belirsiz yapardı.
+
+## 8 · Sürüm
 
 Changesets. `pnpm release` derler ve yayınlar. Tüketiciler **tam sürüm sabitlemesi** kullanıyor
 (`"tamga-ui": "1.4.2"`, `^` yok), bir yamanın on projeye habersizce girmemesi için; Renovate

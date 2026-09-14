@@ -20,7 +20,7 @@ export type UploadItem = {
    */
   url: string;
   name: string;
-};
+} & Record<string, unknown>;
 
 export function FileUpload({
   items,
@@ -116,10 +116,10 @@ export function FileUpload({
 
       {items.length > 0 ? (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {items.map((it, i) => (
-            <li key={it.id} className="tamga-card relative overflow-hidden">
+          {items.map(({ id: oge, url, name, ...rest }, i) => (
+            <li key={oge} {...rest} className="tamga-card relative overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={it.url} alt={it.name} className="aspect-square w-full object-cover" />
+              <img src={url} alt={name} className="aspect-square w-full object-cover" />
 
               {i === 0 ? (
                 <span className="tamga-chip absolute top-1.5 left-1.5">{labels.primary}</span>
@@ -131,7 +131,7 @@ export function FileUpload({
                   className="tamga-mini-btn"
                   aria-label={labels.moveLeft}
                   disabled={i === 0}
-                  onClick={() => onReorder?.(it.id, -1)}
+                  onClick={() => onReorder?.(oge, -1)}
                 >
                   <Icon icon={CaretLeft} size="xs" />
                 </button>
@@ -140,7 +140,7 @@ export function FileUpload({
                   className="tamga-mini-btn"
                   aria-label={labels.moveRight}
                   disabled={i === items.length - 1}
-                  onClick={() => onReorder?.(it.id, 1)}
+                  onClick={() => onReorder?.(oge, 1)}
                 >
                   <Icon icon={CaretRight} size="xs" />
                 </button>
@@ -148,7 +148,7 @@ export function FileUpload({
                   type="button"
                   className="tamga-mini-btn ml-auto"
                   aria-label={labels.remove}
-                  onClick={() => onRemove?.(it.id)}
+                  onClick={() => onRemove?.(oge)}
                 >
                   <Icon icon={Close} size="xs" />
                 </button>

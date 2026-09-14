@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { OFF } from "./control-base.js";
 
 /* ---------------------------------------------------------------- *
@@ -15,6 +16,7 @@ export function Switch({
   label,
   disabled = false,
   className,
+  ...rest
 }: {
   on: boolean;
   onChange?: (next: boolean) => void;
@@ -25,9 +27,12 @@ export function Switch({
   label: string;
   disabled?: boolean;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
     <button
+{...dataProps(rest)}
       type="button"
       role="switch"
       aria-checked={on}

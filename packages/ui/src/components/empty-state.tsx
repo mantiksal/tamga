@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Icon } from "./icon.js";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { CaretRight } from "./icons.js";
 
 /**
@@ -58,15 +59,18 @@ export function SaysBubble({
   size = 168,
   float = true,
   className,
+  ...rest
 }: {
   children: React.ReactNode;
   art: Art;
   size?: number;
   float?: boolean;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <div className={cn("relative shrink-0 pt-11", float && "tamga-float", className)}>
+    <div {...dataProps(rest)} className={cn("relative shrink-0 pt-11", float && "tamga-float", className)}>
       {/* centred over the figure’s head, tail pointing straight down at him */}
       <div className="absolute top-0 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap">
         <div
@@ -112,15 +116,18 @@ export function EmptyNote({
   children,
   action,
   className,
+  ...rest
 }: {
   art: Art;
   title: string;
   children?: React.ReactNode;
   action?: React.ReactNode;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <div className={cn("tamga-gutter flex items-center gap-4 py-6", className)}>
+    <div {...dataProps(rest)} className={cn("tamga-gutter flex items-center gap-4 py-6", className)}>
       <span className="tamga-art-port tamga-art-well">
         <ArtFigure art={art} size={56} ground={false} />
       </span>
@@ -173,6 +180,7 @@ export function EmptyState({
   routes,
   size = 150,
   className,
+  ...rest
 }: {
   layout?: EmptyLayout;
   art: Art;
@@ -198,6 +206,8 @@ export function EmptyState({
   routes?: EmptyRoute[];
   size?: number;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const figure =
     says !== undefined ? (
@@ -211,7 +221,7 @@ export function EmptyState({
   const words = (
     <>
       {kicker ? <p className="tamga-kicker mb-2">{kicker}</p> : null}
-      <h3 className="text-display-sm font-semibold tracking-tight text-ink">{title}</h3>
+      <h3 {...dataProps(rest)} className="text-display-sm font-semibold tracking-tight text-ink">{title}</h3>
       {children ? (
         <p className="mt-3 max-w-[var(--measure)] text-control leading-relaxed text-ink-soft">
           {children}
@@ -335,6 +345,7 @@ export function EmptyBlank({
   says,
   size = 230,
   className,
+  ...rest
 }: {
   art: Art;
   kicker?: string;
@@ -344,9 +355,12 @@ export function EmptyBlank({
   says?: React.ReactNode;
   size?: number;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
     <div
+{...dataProps(rest)}
       className={cn(
         "flex w-full flex-col items-center justify-center px-6 py-16 text-center",
         className,
@@ -395,6 +409,7 @@ export function EmptyTile({
   tone = 1,
   onClick,
   className,
+  ...rest
 }: {
   art: Art;
   /** the identifier-shaped line above the title TR: başlığın üstündeki tanımlayıcı biçimli satır */
@@ -408,9 +423,11 @@ export function EmptyTile({
   tone?: 1 | 2 | 3 | 4 | 5;
   onClick?: () => void;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <button type="button" onClick={onClick} className={cn("tamga-art-tile", className)}>
+    <button {...dataProps(rest)} type="button" onClick={onClick} className={cn("tamga-art-tile", className)}>
       <span className="tamga-art-well flex h-28 items-end justify-center pt-4">
         <ArtFigure art={art} size={86} />
       </span>

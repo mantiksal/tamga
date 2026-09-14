@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState, type ReactNode } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { IMAGE_ACCEPT, prepareImage } from "../lib/image.js";
 import { Alert } from "./primitives.js";
 import { Button } from "./button.js";
@@ -32,6 +33,7 @@ export function ColorSwatches({
   customLabel,
   custom = true,
   className,
+  ...rest
 }: {
   options: readonly SwatchOption[];
   value: string;
@@ -41,12 +43,14 @@ export function ColorSwatches({
   /** Whether a free colour is offered at all. TR: Serbest rengin hiç sunulup sunulmadığı. */
   custom?: boolean;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const secili = (hex: string) => hex.toLowerCase() === value.toLowerCase();
   const hazirMi = options.some((o) => secili(o.hex));
 
   return (
-    <span className={cn("flex flex-wrap items-center gap-3", className)}>
+    <span {...dataProps(rest)} className={cn("flex flex-wrap items-center gap-3", className)}>
       {options.map((o) => (
         <button
           key={o.hex}
@@ -116,12 +120,15 @@ export function ThemeCards({
   onChange,
   labels,
   className,
+  ...rest
 }: {
   value: ThemeChoice;
   onChange: (next: ThemeChoice) => void;
   /** The three names and the group's accessible name. TR: Üç ad ve kümenin erişilebilir adı. */
   labels: { light: string; dark: string; system: string; group: string };
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const secenekler: { deger: ThemeChoice; ad: string }[] = [
     { deger: "light", ad: labels.light },
@@ -130,7 +137,7 @@ export function ThemeCards({
   ];
 
   return (
-    <div role="radiogroup" aria-label={labels.group} className={cn("flex flex-wrap gap-3", className)}>
+    <div {...dataProps(rest)} role="radiogroup" aria-label={labels.group} className={cn("flex flex-wrap gap-3", className)}>
       {secenekler.map((s) => (
         <button
           key={s.deger}
@@ -171,6 +178,7 @@ export function ImageField({
   preview,
   extra,
   className,
+  ...rest
 }: {
   value: string | null;
   onChange: (next: string | null) => void;
@@ -192,6 +200,8 @@ export function ImageField({
   /** An extra control beside the buttons. TR: Düğmelerin yanına giren ek kontrol. */
   extra?: ReactNode;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const id = useId();
   const girdi = useRef<HTMLInputElement>(null);
@@ -216,7 +226,7 @@ export function ImageField({
   }
 
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
+    <div {...dataProps(rest)} className={cn("flex flex-col gap-3", className)}>
       <input
         ref={girdi}
         id={id}

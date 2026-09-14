@@ -5,6 +5,38 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.3.2
+
+**Every component that draws a host element now accepts `data-*`.** 98 of them; before this, 79 did
+not.
+
+A `data-*` attribute is inert: it binds to no behaviour, it only carries a hook for a test, a style
+or an analytics reader. Refusing it cannot protect a component from anything. What it does instead
+is push the caller off the component entirely — a hook is needed, the component will not take it,
+so the class goes on a hand-written element and every guard that came with the component stays
+behind: the clip that keeps a menu whole inside a card, the wrapper that lets a table scroll on a
+narrow screen, the button that a keyboard can reach. None of it errors. The attribute is simply
+absent, and so is the behaviour.
+
+`aria-*` is deliberately not in this passthrough. It is not inert: an `aria-label` from outside
+silently overrides the accessible name a component computed for itself. Accessibility is asked for
+by an explicit prop.
+
+`Segmented` and `Steps` are the two exceptions, and the reason is written into the gate: their hooks
+belong to the individual option, not the wrapper, and `options[]` already carries them.
+
+### Added
+
+- **`Card.as`** — `div` (default), `section`, `article` or `ul`. A card is usually a *section*, and
+  the element is document structure rather than a presentation choice.
+
+### Internal
+
+- **`check-data-props`** — a 17th gate. It reads every exported component that renders a host
+  element and fails if it cannot take `data-*`. The five fixes that preceded this release were five
+  separate discoveries of one defect, found one call site at a time; this gate finds all of them in
+  one pass.
+
 ## 0.3.1
 
 Three components refused something a consumer legitimately needed, and in each case the way out was

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
 import { CaretDown, Close } from "./icons.js";
 import { Checkbox } from "./checkbox.js";
@@ -80,14 +81,18 @@ export function SelectAll({
   indeterminate,
   onChange,
   label,
+  ...rest
 }: {
   checked: boolean;
   indeterminate: boolean;
   onChange?: (next: boolean) => void;
   label: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
     <span
+{...dataProps(rest)}
       /* `aria-checked="mixed"` üçüncü durumun standart karşılığı. */
       role="checkbox"
       aria-checked={indeterminate ? "mixed" : checked}
@@ -119,12 +124,15 @@ export function SelectRow({
   checked,
   onChange,
   label,
+  ...rest
 }: {
   checked: boolean;
   onChange?: (next: boolean) => void;
   label: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
-  return <Checkbox label={<span className="sr-only">{label}</span>} checked={checked} onChange={onChange} />;
+  return <Checkbox label={<span {...dataProps(rest)} className="sr-only">{label}</span>} checked={checked} onChange={onChange} />;
 }
 
 /**
@@ -140,6 +148,7 @@ export function SelectionBar({
   children,
   labels,
   className,
+  ...rest
 }: {
   count: number;
   onClear?: () => void;
@@ -155,10 +164,13 @@ export function SelectionBar({
    */
   labels: { selected: (n: number) => ReactNode; clear: string };
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   if (count === 0) return null;
   return (
     <div
+{...dataProps(rest)}
       role="status"
       className={cn(
         "tamga-gutter flex flex-wrap items-center gap-3 border-b border-[var(--color-line)] py-3",

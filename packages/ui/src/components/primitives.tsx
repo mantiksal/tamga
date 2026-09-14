@@ -8,6 +8,7 @@ import { CaretRight, Check, Close } from "./icons.js";
 import { SkeletonOptions, SkeletonPanel } from "./skeleton.js";
 import { useScrollLock } from "../lib/scroll-lock.js";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { useFocusTrap, useListKeys } from "./a11y.js";
 import { useLiveClaim } from "./live-scope.js";
 import { Button, MiniButton } from "./button.js";
@@ -20,8 +21,8 @@ export { Spinner } from "./spinner.js";
  * already state, the rule is missing, not the component.
  * ------------------------------------------------------------------ */
 
-export function Separator({ vertical = false }: { vertical?: boolean }) {
-  return <span className={vertical ? "tamga-rule-v" : "tamga-rule-h"} role="separator" />;
+export function Separator({ vertical = false, ...rest }: { vertical?: boolean; [k: `data-${string}`]: unknown }) {
+  return <span {...dataProps(rest)} className={vertical ? "tamga-rule-v" : "tamga-rule-h"} role="separator" />;
 }
 
 /** Running is not a deviation, so the live mark stays neutral — the pulse carries it. */
@@ -29,6 +30,7 @@ export function Beacon({
   live = true,
   label,
   severity = 50,
+  ...rest
 }: {
   live?: boolean;
   label?: string;
@@ -37,10 +39,12 @@ export function Beacon({
    * işaret hiçbir şeye üstün gelmez; yarışması için ona bir sıra verin
    */
   severity?: number | null;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const pulses = useLiveClaim(live ? severity : null);
   return (
-    <span className="inline-flex items-center gap-2">
+    <span {...dataProps(rest)} className="inline-flex items-center gap-2">
       <span className="tamga-beacon" data-live={pulses} />
       {label ? <span className="text-small text-ink-faint">{label}</span> : null}
     </span>
@@ -52,15 +56,18 @@ export function Alert({
   title,
   children,
   action,
+  ...rest
 }: {
   state?: Tone;
   title: string;
   children?: React.ReactNode;
   action?: React.ReactNode;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const h = toneOf(state);
   return (
-    <div className="tamga-alert" style={{ borderLeftColor: h.mark }} role="status">
+    <div {...dataProps(rest)} className="tamga-alert" style={{ borderLeftColor: h.mark }} role="status">
       <div className="min-w-0 flex-1">
         <p className="text-body font-medium text-ink">{title}</p>
         {/* GÖVDE BİR `div`, `p` DEĞİL. Bir uyarının gövdesi çoğu zaman tek bir
@@ -82,6 +89,7 @@ export function Alert({
 export function Breadcrumb({
   items,
   label,
+  ...rest
 }: {
   items: { label: string; href?: string }[];
   /**
@@ -89,9 +97,11 @@ export function Breadcrumb({
    * Spinner'daki nota bakın.
    */
   label: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <nav aria-label={label}>
+    <nav {...dataProps(rest)} aria-label={label}>
       <ol className="flex flex-wrap items-center gap-2 text-body">
         {items.map((item, i) => {
           const last = i === items.length - 1;
@@ -123,15 +133,18 @@ export function Field({
   error,
   children,
   htmlFor,
+  ...rest
 }: {
   label: string;
   description?: string;
   error?: string;
   children: React.ReactNode;
   htmlFor?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div {...dataProps(rest)} className="flex flex-col gap-2">
       <label htmlFor={htmlFor} className="text-small font-medium text-ink">
         {label}
       </label>
@@ -157,6 +170,7 @@ export function Select({
   loadingRows = 4,
   "aria-label": ariaLabel,
   className,
+  ...rest
 }: {
   options: string[];
   value?: string;
@@ -200,6 +214,8 @@ export function Select({
   /** Genişlik ve konum çağıranın. Varsayılan `w-56`; `w-full` verildiğinde
    *  tailwind-merge onu ezer, yani kontrol kabına uyar. */
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const [open, setOpen] = useState(false);
   const [inner, setInner] = useState(value ?? "");
@@ -223,7 +239,7 @@ export function Select({
        alınmıyordu; sonuç, kontrolün hiçbir ızgaraya ya da filtre çubuğuna
        sığmaması ve kabından taşarak yatay kaydırma açması. Bir form kontrolü
        kendi genişliğine karar veremez; kabı karar verir. */
-    <div ref={box} className={cn("relative w-56", className)}>
+    <div {...dataProps(rest)} ref={box} className={cn("relative w-56", className)}>
       <Button full className="justify-between"
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -286,6 +302,7 @@ export function Sheet({
   loading = false,
   closeLabel,
   side = "end",
+  ...rest
 }: {
   open: boolean;
   onClose: () => void;
@@ -316,6 +333,8 @@ export function Sheet({
    * henüz gelmedi; panel bir dönen simge göstermek yerine şeklini koruyor
    */
   loading?: boolean;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   /* the trap has to be called before any early return, so the hook lives here
      and the null is returned after it */
@@ -330,7 +349,7 @@ export function Sheet({
 
   if (!open) return null;
   return (
-    <div className={cn("fixed inset-0 z-50 flex", side === "start" ? "justify-start" : "justify-end")}>
+    <div {...dataProps(rest)} className={cn("fixed inset-0 z-50 flex", side === "start" ? "justify-start" : "justify-end")}>
       {/* mouse affordance only: Escape and the Close button already cover the
             keyboard, and leaving this in the a11y tree gave the panel two
             controls both announced as "Close" */}

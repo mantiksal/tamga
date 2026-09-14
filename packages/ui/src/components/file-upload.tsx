@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState, type DragEvent } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
 import { Upload, Close, CaretLeft, CaretRight } from "./icons.js";
 
@@ -31,6 +32,7 @@ export function FileUpload({
   disabled = false,
   labels,
   className,
+  ...rest
 }: {
   items: readonly UploadItem[];
   onAdd?: (files: File[]) => void;
@@ -49,6 +51,8 @@ export function FileUpload({
     primary: string;
   };
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const id = useId();
   const input = useRef<HTMLInputElement>(null);
@@ -66,7 +70,7 @@ export function FileUpload({
   }
 
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
+    <div {...dataProps(rest)} className={cn("flex flex-col gap-4", className)}>
       {/* Bırakma alanı: kesikli kenar bu kitte "henüz gerçek içerik değil"
           demektir — burada tam olarak doğru anlam. */}
       <div

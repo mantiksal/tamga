@@ -1,3 +1,4 @@
+import { dataProps } from "../lib/data-props.js";
 import { toneOf, type Tone } from "./tone.js";
 
 /**
@@ -14,6 +15,7 @@ export function TimelineStrip({
   labels,
   /** Her kovanın erişilebilir açıklaması. Kit çeviri çekmez. */
   describe,
+  ...rest
 }: {
   data: readonly Tone[];
   height?: number;
@@ -21,9 +23,11 @@ export function TimelineStrip({
   minWidth?: number;
   labels?: [string, string];
   describe?: (index: number, tone: Tone) => string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <div>
+    <div {...dataProps(rest)}>
       <div className="flex items-end" style={{ gap }}>
         {data.map((tone, i) => (
           <span

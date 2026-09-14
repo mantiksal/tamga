@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { toneOf, type Tone } from "./tone.js";
 
 /**
@@ -50,6 +51,7 @@ export function LineChart({
   height = 200,
   formatValue = String,
   className,
+  ...rest
 }: {
   series: readonly Series[];
   /**
@@ -64,6 +66,8 @@ export function LineChart({
    */
   formatValue?: (v: number) => string;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const id = useId();
   const [hover, setHover] = useState<number | null>(null);
@@ -85,7 +89,7 @@ export function LineChart({
 
   return (
     <figure className={cn("tamga-surface p-4", className)}>
-      <div className="flex gap-3">
+      <div {...dataProps(rest)} className="flex gap-3">
         {/* Y ekseni ETİKETLERİ SVG'nin DIŞINDA. İçine konsaydı viewBox
             ölçeklendikçe yazı da ölçeklenir ve dar ekranda okunmaz olurdu. */}
         <div

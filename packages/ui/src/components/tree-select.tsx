@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { Checkbox } from "./checkbox.js";
 import { Icon } from "./icon.js";
 import { CaretDown, CaretRight, Search } from "./icons.js";
@@ -44,6 +45,7 @@ export function TreeSelect({
   searchable = true,
   height = 320,
   className,
+  ...rest
 }: {
   nodes: readonly TreeNode[];
   /** The ids of the selected nodes. TR: Seçili düğüm id'leri. */
@@ -53,6 +55,8 @@ export function TreeSelect({
   searchable?: boolean;
   height?: number;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const [q, setQ] = useState("");
   /* Kapalı olanlar tutuluyor, açık olanlar değil: varsayılan AÇIK.
@@ -78,7 +82,7 @@ export function TreeSelect({
     const acik = !kapali.has(node.id);
     const isaretli = secili.has(node.id);
     return (
-      <li role="none">
+      <li {...dataProps(rest)} role="none">
         <div
           className="flex items-center gap-1.5 rounded-(--radius-mark) py-1 hover:bg-[var(--color-hover)]"
           style={{ paddingLeft: `${derinlik * 18}px` }}

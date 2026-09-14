@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 
 /**
  * Pasta / halka grafik — PARÇA-BÜTÜN, ve yalnız o.
@@ -30,6 +31,7 @@ export function PieChart({
   inner = 0.58,
   size = 200,
   className,
+  ...rest
 }: {
   /**
    * Five slices at most: more does not read, and a chart that does not read is wrong
@@ -59,6 +61,8 @@ export function PieChart({
   inner?: number;
   size?: number;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const id = useId();
   /* Üzerinde durulan dilimin indeksi. Grafik ile legend AYNI durumu paylaşıyor:
@@ -79,7 +83,7 @@ export function PieChart({
   });
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-6", className)}>
+    <div {...dataProps(rest)} className={cn("flex flex-wrap items-center gap-6", className)}>
       <svg
         /* `viewBox` dilimin dışarı taşan halini de kapsıyor: üzerine gelinen
            dilim 6 birim dışarı kayıyor, ve kutu büyümezse kırpılıyor. */

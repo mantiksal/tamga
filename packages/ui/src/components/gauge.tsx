@@ -1,3 +1,4 @@
+import { dataProps } from "../lib/data-props.js";
 import { toneOf, neutral, type Tone } from "./tone.js";
 
 /*
@@ -159,13 +160,14 @@ export function ScoreMeter({
   delta,
   segments = 40,
   tone,
-}: ScoreProps & { target?: number; delta?: number; segments?: number }) {
+  ...rest
+}: ScoreProps & { target?: number; delta?: number; segments?: number; [k: `data-${string}`]: unknown }) {
   const v = Math.min(100, Math.max(0, value));
   const c = toneOf(tone ?? band(v));
   const filled = Math.round((v / 100) * segments);
 
   return (
-    <div className="w-full max-w-sm" role="group" aria-label={label}>
+    <div {...dataProps(rest)} className="w-full max-w-sm" role="group" aria-label={label}>
       <div className="flex items-end gap-4">
         <span className="font-mono text-display-lg font-bold leading-none tabular-nums text-ink">
           {Math.round(v)}
@@ -216,13 +218,14 @@ export function ScoreMatrix({
   bandLabel,
   delta,
   size = 176,
-}: ScoreProps & { delta?: number }) {
+  ...rest
+}: ScoreProps & { delta?: number; [k: `data-${string}`]: unknown }) {
   const v = Math.round(Math.min(100, Math.max(0, value)));
   const c = toneOf(band(v));
   const cell = (size - 9 * 2) / 10;
 
   return (
-    <div style={{ width: size }} role="group" aria-label={label}>
+    <div {...dataProps(rest)} style={{ width: size }} role="group" aria-label={label}>
       <div className="flex items-end gap-2">
         <span className="font-mono text-display font-bold leading-none tabular-nums text-ink">
           {v}

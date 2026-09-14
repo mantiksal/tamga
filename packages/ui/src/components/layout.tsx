@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 
 /**
  * Sınıfı olan ama bileşeni olmayan şeyler.
@@ -101,15 +102,18 @@ export function Swap({
   a,
   b,
   className,
+  ...rest
 }: {
   /** Which side is visible: `"a"` or `"b"`. TR: Hangi taraf görünür: `"a"` ya da `"b"`. */
   showing: "a" | "b";
   a: ReactNode;
   b: ReactNode;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <span className={cn("tamga-swap", className)}>
+    <span {...dataProps(rest)} className={cn("tamga-swap", className)}>
       <span data-hidden={showing !== "a"} aria-hidden={showing !== "a"}>
         {a}
       </span>
@@ -137,17 +141,20 @@ export function ListRow({
   onClick,
   className,
   children,
+  ...rest
 }: {
   size?: "base" | "sm";
   href?: string;
   onClick?: () => void;
   className?: string;
   children: ReactNode;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const cls = cn("tamga-list-row", size === "sm" && "tamga-list-row-sm", className);
   if (href) {
     return (
-      <a href={href} className={cls}>
+      <a {...dataProps(rest)} href={href} className={cls}>
         {children}
       </a>
     );
@@ -211,14 +218,17 @@ export function PageBand({
   subtitle,
   actions,
   className,
+  ...rest
 }: {
   title: string;
   subtitle?: string;
   actions?: ReactNode;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <div className={cn("tamga-section tamga-gutter flex flex-wrap items-center gap-4 py-4", className)}>
+    <div {...dataProps(rest)} className={cn("tamga-section tamga-gutter flex flex-wrap items-center gap-4 py-4", className)}>
       <div className="min-w-0">
         <h2 className="text-title font-semibold text-ink">{title}</h2>
         {subtitle ? <p className="text-small text-ink-faint">{subtitle}</p> : null}
@@ -248,6 +258,7 @@ export function Link({
   external = false,
   className,
   children,
+  href,
   linkComponent: Router,
   ...props
 }: React.ComponentProps<"a"> & {
@@ -259,7 +270,7 @@ export function Link({
    * Verilmezse düz bir `<a>` çiziliyor. `external` ile birlikte yok sayılıyor: uygulamanın
    * dışına çıkan bir adres istemci yönlendirmesiyle açılamaz.
    */
-  linkComponent?: ComponentType<{ href?: string; className?: string; children?: ReactNode; [k: string]: unknown }>;
+  linkComponent?: ComponentType<{ href: string; className?: string; children?: ReactNode; [k: string]: unknown }>;
 }) {
   const shared = {
     className: cn("tamga-link", className),
@@ -267,7 +278,16 @@ export function Link({
     rel: external ? ("noopener noreferrer" as const) : undefined,
     ...props,
   };
-  /* Dış bağlantı yönlendiriciden geçmiyor: uygulamanın dışına çıkan bir adres
-     istemci yönlendirmesiyle açılamaz, ve denemek sessizce bir sekme kaybettirir. */
-  return Router && !external ? <Router {...shared}>{children}</Router> : <a {...shared}>{children}</a>;
+  /* YÖNLENDİRİCİ İKİ DURUMDA DEVREDE DEĞİL. Dış bağlantıda, çünkü uygulamanın dışına çıkan bir
+     adres istemci yönlendirmesiyle açılamaz ve denemek sessizce bir sekme kaybettirir. Ve adres
+     hiç yokken, çünkü yönlendiricinin bağlantısı adressiz çağrılamaz — `<a>` çağrılabilir. */
+  return Router && !external && href !== undefined ? (
+    <Router {...shared} href={href}>
+      {children}
+    </Router>
+  ) : (
+    <a {...shared} href={href}>
+      {children}
+    </a>
+  );
 }

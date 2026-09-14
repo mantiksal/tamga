@@ -2,6 +2,7 @@
 
 import { useId } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
 import { CaretDown } from "./icons.js";
 
@@ -25,6 +26,7 @@ export function NumberInput({
   /** Artır/azalt düğmelerinin erişilebilir adları. Kit çeviri çekmez. */
   labels,
   className,
+  ...rest
 }: {
   value: number | null;
   onChange?: (next: number | null) => void;
@@ -37,6 +39,8 @@ export function NumberInput({
   full?: boolean;
   labels: { increase: string; decrease: string };
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const id = useId();
 
@@ -59,7 +63,7 @@ export function NumberInput({
   const atMax = max !== undefined && value !== null && value >= max;
 
   return (
-    <span className={cn("relative inline-flex items-center", full && "w-full", className)}>
+    <span {...dataProps(rest)} className={cn("relative inline-flex items-center", full && "w-full", className)}>
       <input
         id={id}
         type="text"

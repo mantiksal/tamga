@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
 import { Bold, BulletList, Check, Close, Italic, Link, NumberedList } from "./icons.js";
 
@@ -42,6 +43,7 @@ export function RichText({
   rows = 10,
   disabled,
   className,
+  ...rest
 }: {
   /**
    * HTML. The kit does not sanitise it: which tags are valid is the product's rule. TR: HTML.
@@ -85,6 +87,8 @@ export function RichText({
   rows?: number;
   disabled?: boolean;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const alan = useRef<HTMLDivElement>(null);
   const [aktif, setAktif] = useState<Record<string, boolean>>({});
@@ -189,7 +193,7 @@ export function RichText({
   }
 
   return (
-    <div className={cn("tamga-editor", disabled && "tamga-editor-disabled", className)}>
+    <div {...dataProps(rest)} className={cn("tamga-editor", disabled && "tamga-editor-disabled", className)}>
       <div className="tamga-editor-bar" role="toolbar" aria-label={ariaLabel}>
         {allow.map((f) => {
           const simge = SIMGELER[f];

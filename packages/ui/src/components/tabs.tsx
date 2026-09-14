@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 
 /**
  * Sekme şeridi.
@@ -39,6 +40,7 @@ export function Tabs<T extends string>({
   scroll = false,
   linkAs,
   className,
+  ...rest
 }: {
   items: readonly TabItem<T>[];
   value: T;
@@ -57,6 +59,8 @@ export function Tabs<T extends string>({
    */
   linkAs?: React.ElementType;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const kap = cn(
     "flex gap-6 border-b border-[var(--color-line)]",
@@ -68,7 +72,7 @@ export function Tabs<T extends string>({
 
   if (bagliMi) {
     return (
-      <nav aria-label={label} className={kap}>
+      <nav {...dataProps(rest)} aria-label={label} className={kap}>
         {items.map((t) =>
           t.disabled ? (
             <span

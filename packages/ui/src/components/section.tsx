@@ -1,3 +1,4 @@
+import { dataProps } from "../lib/data-props.js";
 /**
  * A card header. It carries the card's own left line and is closed by the
  * single rule weight used everywhere else.
@@ -7,6 +8,7 @@ export function SectionHead({
   meta,
   mono = false,
   action,
+  ...rest
 }: {
   title: string;
   meta?: string;
@@ -16,9 +18,11 @@ export function SectionHead({
    */
   mono?: boolean;
   action?: React.ReactNode;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <div className="tamga-head tamga-gutter tamga-section">
+    <div {...dataProps(rest)} className="tamga-head tamga-gutter tamga-section">
       <h3 className={`text-subhead font-semibold ${mono ? "font-mono text-control font-bold" : ""}`}>
         {title}
       </h3>

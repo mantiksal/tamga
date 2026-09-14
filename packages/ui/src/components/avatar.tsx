@@ -1,4 +1,5 @@
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 function initials(name: string, count: 1 | 2) {
   return name
     .split(" ")
@@ -15,6 +16,7 @@ export function Avatar({
   src,
   bare = false,
   letters = 2,
+  ...rest
 }: {
   name: string;
   size?: number;
@@ -44,6 +46,8 @@ export function Avatar({
    * harf ise yarım okunamaz. `AvatarStack` bu yüzden 1 geçiyor.
    */
   letters?: 1 | 2;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const box = {
     width: size,
@@ -67,6 +71,7 @@ export function Avatar({
   }
   return (
     <span
+{...dataProps(rest)}
       className={cn(
         "inline-flex shrink-0 items-center justify-center font-semibold text-ink",
         !bare && "rounded-[var(--radius-mark)] border border-edge bg-hover",
@@ -105,6 +110,7 @@ export function AvatarStack({
   extra,
   size = 24,
   surface = "var(--color-shell)",
+  ...rest
 }: {
   names: string[];
   extra?: number;
@@ -114,6 +120,8 @@ export function AvatarStack({
    * arkasındaki zeminin rengi; ayırıcı halka bu renkte çizilir.
    */
   surface?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const overlap = Math.round(size / 4);
   const ring = { boxShadow: `0 0 0 2px ${surface}` };
@@ -122,7 +130,7 @@ export function AvatarStack({
      veriliyor: "Berika Sultan, Deniz Kara ve 7 kişi daha". */
   const spoken = [...names, extra ? `+${extra}` : null].filter(Boolean).join(", ");
   return (
-    <div className="flex items-center" role="img" aria-label={spoken}>
+    <div {...dataProps(rest)} className="flex items-center" role="img" aria-label={spoken}>
       {names.map((n, i) => (
         <span
           key={n + i}

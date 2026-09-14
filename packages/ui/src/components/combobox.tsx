@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
 import { CaretDown, Close, Search } from "./icons.js";
 
@@ -28,6 +29,7 @@ export function Combobox<T extends string>({
   disabled = false,
   invalid = false,
   className,
+  ...rest
 }: {
   options: readonly ComboOption<T>[];
   value?: T;
@@ -42,6 +44,8 @@ export function Combobox<T extends string>({
   disabled?: boolean;
   invalid?: boolean;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -78,7 +82,7 @@ export function Combobox<T extends string>({
   }
 
   return (
-    <div ref={box} className={cn("relative", className)}>
+    <div {...dataProps(rest)} ref={box} className={cn("relative", className)}>
       <span className="relative flex items-center">
         <Icon icon={Search} size="xs" className="pointer-events-none absolute left-3 text-ink-faint" />
         <input

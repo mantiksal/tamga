@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
 import { Check, Close, Customize, Eye, EyeSlash, Search } from "./icons.js";
 
@@ -65,6 +66,7 @@ export function SecretField({
   labels,
   visibleChars = 4,
   className,
+  ...rest
 }: {
   value: string;
   labels: { reveal: string; hide: string; copy: string; copied: string; failed: string };
@@ -74,6 +76,8 @@ export function SecretField({
    */
   visibleChars?: number;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const [shown, setShown] = useState(false);
   const [copied, setCopied] = useState<"idle" | "done" | "failed">("idle");
@@ -104,7 +108,7 @@ export function SecretField({
   }
 
   return (
-    <span className={cn("relative flex items-center", className)}>
+    <span {...dataProps(rest)} className={cn("relative flex items-center", className)}>
       <input
         readOnly
         value={shown ? value : masked}
@@ -154,6 +158,7 @@ export function TagsInput({
   labels,
   max,
   className,
+  ...rest
 }: {
   value: readonly string[];
   onChange: (next: string[]) => void;
@@ -162,6 +167,8 @@ export function TagsInput({
   /** The ceiling; the input closes once it is full. TR: Üst sınır; dolduğunda girdi kapanır. */
   max?: number;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const [draft, setDraft] = useState("");
   const full = max !== undefined && value.length >= max;
@@ -175,6 +182,7 @@ export function TagsInput({
 
   return (
     <span
+{...dataProps(rest)}
       className={cn("tamga-input h-auto min-h-10 w-full flex-wrap items-center gap-1.5 py-1.5", className)}
       style={{ display: "flex" }}
     >
@@ -230,6 +238,7 @@ export function MultiSelect({
   placeholder,
   labels,
   className,
+  ...rest
 }: {
   options: readonly { value: string; label: string; hint?: string }[];
   value: readonly string[];
@@ -237,6 +246,8 @@ export function MultiSelect({
   placeholder: string;
   labels: { empty: string; remove: (label: string) => string; open: string };
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -299,6 +310,7 @@ export function MultiSelect({
 
   return (
     <div
+{...dataProps(rest)}
       ref={box}
       className={cn("relative", className)}
       /* Odak kutunun DIŞINA çıkınca kapanıyor — tıklama dinleyicisiyle değil.

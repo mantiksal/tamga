@@ -1,4 +1,5 @@
 "use client";
+import { dataProps } from "../lib/data-props.js";
 
 import type { Tone } from "./tone.js";
 import { toneOf, rankOf } from "./tone.js";
@@ -16,6 +17,7 @@ export function StatusChip({
   live = false,
   mono = false,
   severity,
+  ...rest
 }: {
   label: string;
   state: Tone;
@@ -31,11 +33,14 @@ export function StatusChip({
    * taşıdığında açık sıra; yoksa durumdan türetiliyor
    */
   severity?: number | null;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const h = toneOf(state);
   const pulses = useLiveClaim(live ? rankOf(state, severity) : null);
   return (
     <span
+{...dataProps(rest)}
       className={`tamga-chip ${mono ? "tamga-chip-mono" : ""}`}
       style={{ background: h.bg, color: h.fg }}
     >
@@ -54,16 +59,20 @@ export function Delta({
   value,
   better,
   mono = true,
+  ...rest
 }: {
   value: string;
   better: boolean;
   mono?: boolean;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   /* good movement stays neutral — color is reserved for deviation */
   const color = better ? "var(--color-ink-faint)" : "var(--color-critical)";
   const rising = !value.trimStart().startsWith("-");
   return (
     <span
+{...dataProps(rest)}
       className={`inline-flex items-center gap-1 text-small font-bold ${mono ? "font-mono" : ""}`}
       style={{ color }}
     >
@@ -84,6 +93,7 @@ export function Dot({
   state,
   live = false,
   severity,
+  ...rest
 }: {
   state: Tone;
   live?: boolean;
@@ -92,11 +102,14 @@ export function Dot({
    * taşıdığında açık sıra; yoksa durumdan türetiliyor
    */
   severity?: number | null;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const h = toneOf(state);
   const pulses = useLiveClaim(live ? rankOf(state, severity) : null);
   return (
     <span
+{...dataProps(rest)}
       className={`inline-block size-2.5 shrink-0 ${pulses ? "tamga-live" : ""}`}
       style={{ background: h.fg }}
       aria-hidden

@@ -1,3 +1,4 @@
+import { dataProps } from "../lib/data-props.js";
 /**
  * Skeletons.
  *
@@ -15,13 +16,16 @@ export function Skeleton({
   className = "",
   index = 0,
   style,
+  ...rest
 }: {
   className?: string;
   index?: number;
   style?: React.CSSProperties;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <span className={`tamga-skeleton block ${className}`} style={{ ...delay(index), ...style }} />
+    <span {...dataProps(rest)} className={`tamga-skeleton block ${className}`} style={{ ...delay(index), ...style }} />
   );
 }
 
@@ -29,13 +33,16 @@ export function Skeleton({
 export function SkeletonText({
   lines = 3,
   className = "",
+  ...rest
 }: {
   lines?: number;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const widths = ["100%", "96%", "92%", "98%"];
   return (
-    <span className={`flex flex-col gap-2 ${className}`}>
+    <span {...dataProps(rest)} className={`flex flex-col gap-2 ${className}`}>
       {Array.from({ length: lines }, (_, i) => (
         <Skeleton
           key={i}
@@ -55,14 +62,18 @@ export function SkeletonText({
 export function SkeletonRows({
   rows = 5,
   dense = false,
+  ...rest
 }: {
   rows?: number;
   dense?: boolean;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
     <>
       {Array.from({ length: rows }, (_, i) => (
         <div
+{...dataProps(rest)}
           key={i}
           className={`tamga-list-row ${dense ? "tamga-list-row-sm" : ""}`}
           aria-hidden
@@ -85,9 +96,9 @@ export function SkeletonRows({
  * bir iskeletin tek işi o zıplamayı önlemek. Bu yüzden ikisi aynı sınıfı
  * (`tamga-kpi`) paylaşıyor: kalıp bir yerde değişince ikisi birden değişiyor.
  */
-export function SkeletonKpi({ index = 0 }: { index?: number }) {
+export function SkeletonKpi({ index = 0, ...rest }: { index?: number; [k: `data-${string}`]: unknown }) {
   return (
-    <section className="tamga-kpi" aria-hidden>
+    <section {...dataProps(rest)} className="tamga-kpi" aria-hidden>
       <Skeleton index={index} className="size-10 shrink-0" />
       <div className="flex min-w-0 flex-1 flex-col">
         <Skeleton index={index + 1} className="h-2.5 w-20" />
@@ -101,12 +112,15 @@ export function SkeletonKpi({ index = 0 }: { index?: number }) {
 export function SkeletonCard({
   height = 220,
   title = true,
+  ...rest
 }: {
   height?: number;
   title?: boolean;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <section className="tamga-card flex min-w-0 flex-col" aria-hidden>
+    <section {...dataProps(rest)} className="tamga-card flex min-w-0 flex-col" aria-hidden>
       {title ? (
         /* tamga-section, not just tamga-head — the closing rule lives on tamga-section,
            which is what the real SectionHead pairs them for. */
@@ -127,12 +141,15 @@ export function SkeletonCard({
 export function SkeletonTable({
   rows = 6,
   cols = ["12rem", "5rem", "6rem", "4rem", "5rem"],
+  ...rest
 }: {
   rows?: number;
   cols?: string[];
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <div className="tamga-card overflow-hidden" aria-hidden>
+    <div {...dataProps(rest)} className="tamga-card overflow-hidden" aria-hidden>
       {/* Cells are flexible with the column width as a CEILING, not a fixed size.
           Fixed rem widths overflow the row — or wrap the header, since tamga-head
           wraps — the moment the card is narrower than their sum. */}
@@ -172,10 +189,10 @@ export function SkeletonTable({
  *
  * Matches `.tamga-option` — 40px tall, 16px side padding, icon slot then label.
  */
-export function SkeletonOptions({ rows = 4 }: { rows?: number }) {
+export function SkeletonOptions({ rows = 4, ...rest }: { rows?: number; [k: `data-${string}`]: unknown }) {
   const widths = ["68%", "84%", "56%", "76%", "64%"];
   return (
-    <div className="py-1" aria-hidden>
+    <div {...dataProps(rest)} className="py-1" aria-hidden>
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} className="flex h-10 items-center gap-2 px-4">
           <Skeleton index={i} className="size-4 shrink-0" />
@@ -194,6 +211,7 @@ export function SkeletonOptions({ rows = 4 }: { rows?: number }) {
 export function SkeletonPanel({
   lines = 3,
   block,
+  ...rest
 }: {
   lines?: number;
   /**
@@ -201,9 +219,11 @@ export function SkeletonPanel({
    * varsa baştaki bloğun (bir grafik, bir harita, bir avatar satırı) yüksekliği
    */
   block?: number;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <div className="flex flex-col gap-3" aria-hidden>
+    <div {...dataProps(rest)} className="flex flex-col gap-3" aria-hidden>
       {block ? <Skeleton className="w-full" style={{ height: block }} /> : null}
       <SkeletonText lines={lines} />
     </div>
@@ -211,9 +231,9 @@ export function SkeletonPanel({
 }
 
 /** Page band: title, subtitle, and the actions that sit on the right. */
-export function SkeletonPageBand() {
+export function SkeletonPageBand({ ...rest }: { [k: `data-${string}`]: unknown }) {
   return (
-    <div className="tamga-section tamga-gutter flex flex-wrap items-center gap-4 py-4" aria-hidden>
+    <div {...dataProps(rest)} className="tamga-section tamga-gutter flex flex-wrap items-center gap-4 py-4" aria-hidden>
       <div className="min-w-0">
         <Skeleton className="h-4 w-40" />
         <Skeleton index={1} className="mt-2 h-2.5 w-64" />

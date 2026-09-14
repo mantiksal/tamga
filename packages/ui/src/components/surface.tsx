@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 
 /**
  * YÜZEYLER — kart, tablo, sessiz etiket.
@@ -18,6 +19,7 @@ export function Card({
   overflow = "clip",
   children,
   className,
+  ...rest
 }: {
   /**
    * The element the card is drawn as. TR: Kartın hangi eleman olarak çizileceği.
@@ -43,9 +45,14 @@ export function Card({
   overflow?: "clip" | "visible";
   children: ReactNode;
   className?: string;
+  /** `data-*` hooks pass through; nothing else does. TR: `data-*` kancaları geçiyor, başkası değil. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <Tag className={cn("tamga-card", overflow === "visible" && "tamga-card-open", className)}>
+    <Tag
+      {...dataProps(rest)}
+      className={cn("tamga-card", overflow === "visible" && "tamga-card-open", className)}
+    >
       {children}
     </Tag>
   );
@@ -61,13 +68,16 @@ export function CardHead({
   children,
   action,
   className,
+  ...rest
 }: {
   children: ReactNode;
   action?: ReactNode;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <div className={cn("tamga-head tamga-gutter tamga-section", className)}>
+    <div {...dataProps(rest)} className={cn("tamga-head tamga-gutter tamga-section", className)}>
       {children}
       {action ? <span className="ml-auto">{action}</span> : null}
     </div>
@@ -75,8 +85,8 @@ export function CardHead({
 }
 
 /** Kart gövdesi — başlıkla aynı yatay ritim, kendi dikey nefesi. */
-export function CardBody({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("tamga-gutter py-6", className)}>{children}</div>;
+export function CardBody({ children, className, ...rest }: { children: ReactNode; className?: string; [k: `data-${string}`]: unknown }) {
+  return <div {...dataProps(rest)} className={cn("tamga-gutter py-6", className)}>{children}</div>;
 }
 
 /**
@@ -86,9 +96,9 @@ export function CardBody({ children, className }: { children: ReactNode; classNa
  * tablo tüm sayfayı yana kaydırır — ve bunu unutmak, unutulduğu yerde fark
  * edilmeyen bir hatadır.
  */
-export function Table({ children, className }: { children: ReactNode; className?: string }) {
+export function Table({ children, className, ...rest }: { children: ReactNode; className?: string; [k: `data-${string}`]: unknown }) {
   return (
-    <div className="w-full overflow-x-auto">
+    <div {...dataProps(rest)} className="w-full overflow-x-auto">
       <table className={cn("tamga-table", className)}>{children}</table>
     </div>
   );
@@ -105,6 +115,7 @@ export function Label({
   children,
   mono = false,
   className,
+  ...rest
 }: {
   children: ReactNode;
   /**
@@ -113,6 +124,8 @@ export function Label({
    */
   mono?: boolean;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
-  return <span className={cn("tamga-label", mono && "font-mono", className)}>{children}</span>;
+  return <span {...dataProps(rest)} className={cn("tamga-label", mono && "font-mono", className)}>{children}</span>;
 }

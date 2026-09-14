@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { Avatar } from "./avatar.js";
 import { Icon } from "./icon.js";
 import { Select } from "./primitives.js";
@@ -59,6 +60,7 @@ export function ThemeToggle({
   dark: controlled,
   onChange,
   className,
+  ...rest
 }: {
   /**
    * `icon` and `switch` need ACTION words, `select` needs STATE words. TR: `icon` ve `switch`
@@ -92,6 +94,8 @@ export function ThemeToggle({
   variant?: "icon" | "switch" | "select";
   storageKey?: string;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const owned = controlled === undefined;
   const [self, setSelf] = useState(false);
@@ -139,7 +143,7 @@ export function ThemeToggle({
 
   if (variant === "switch") {
     return (
-      <span className={cn("flex items-center gap-2", className)}>
+      <span {...dataProps(rest)} className={cn("flex items-center gap-2", className)}>
         {/* Simgeler `aria-hidden`: anahtarın kendi adı zaten durumu söylüyor,
             ve üç şeyi birden okutmak aynı bilgiyi üç kez tekrarlardı. */}
         <Icon
@@ -203,6 +207,7 @@ export function LocaleSwitcher({
   onChange,
   label,
   className,
+  ...rest
 }: {
   /**
    * `[{ value: "tr", label: "Türkçe" }, …]`: the labels are endonyms. TR: `[{ value: "tr",
@@ -214,10 +219,12 @@ export function LocaleSwitcher({
   /** The control's name: "Dil", "Language". TR: Kontrolün adı: "Dil", "Language". */
   label: string;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   if (locales.length <= 2) {
     return (
-      <span className={cn("tamga-segment", className)} role="group" aria-label={label}>
+      <span {...dataProps(rest)} className={cn("tamga-segment", className)} role="group" aria-label={label}>
         {locales.map((l) => (
           <button
             key={l.value}
@@ -264,6 +271,7 @@ export function LogoTile({
   src,
   size = "base",
   className,
+  ...rest
 }: {
   /**
    * The initial is built from it, and it is what shows when the image does not load. TR: Baş
@@ -273,9 +281,11 @@ export function LogoTile({
   src?: string;
   size?: "base" | "sm";
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <span className={cn("tamga-logo-tile", size === "sm" && "tamga-logo-tile-sm", className)}>
+    <span {...dataProps(rest)} className={cn("tamga-logo-tile", size === "sm" && "tamga-logo-tile-sm", className)}>
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt="" className="h-full w-full object-contain p-1.5" />
@@ -312,6 +322,7 @@ export function AccountButton({
   href,
   linkComponent: Link,
   className,
+  ...rest
 }: {
   /** The name initials are taken from; shown when there is no photo. TR: Baş harflerin çıkarıldığı ad; fotoğraf yoksa görünen bu. */
   name: string;
@@ -323,6 +334,8 @@ export function AccountButton({
   href?: string;
   linkComponent?: ComponentType<{ href: string; className?: string; children?: ReactNode; [k: string]: unknown }>;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const ic = (
     <Avatar name={name} src={src} size={38} bare />
@@ -338,7 +351,7 @@ export function AccountButton({
   }
   if (href) {
     return (
-      <a href={href} aria-label={label} className={sinif}>
+      <a {...dataProps(rest)} href={href} aria-label={label} className={sinif}>
         {ic}
       </a>
     );

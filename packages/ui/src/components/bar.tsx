@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 
 /**
  * Yatay çubuk grafik — SIRALAMA ve KARŞILAŞTIRMA.
@@ -38,6 +39,7 @@ export function BarChart({
   formatValue = String,
   labelWidth = "10rem",
   className,
+  ...rest
 }: {
   bars: readonly Bar[];
   formatValue?: (v: number) => string;
@@ -47,6 +49,8 @@ export function BarChart({
    */
   labelWidth?: string;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const enBuyuk = niceMax(Math.max(0, ...bars.map((b) => b.value)));
   /* SATIRIN TAMAMI VURGULANIYOR, yalnız çubuk değil: uzun bir listede gözün
@@ -56,7 +60,7 @@ export function BarChart({
   const [uzerinde, setUzerinde] = useState<string | null>(null);
 
   return (
-    <div className={cn("flex flex-col gap-0.5", className)} onMouseLeave={() => setUzerinde(null)}>
+    <div {...dataProps(rest)} className={cn("flex flex-col gap-0.5", className)} onMouseLeave={() => setUzerinde(null)}>
       {bars.map((b) => {
         const oran = enBuyuk > 0 ? b.value / enBuyuk : 0;
         const secili = uzerinde === b.label;

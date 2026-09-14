@@ -2,6 +2,7 @@
 
 import { Children, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 import { Icon } from "./icon.js";
 import { PlainLink as PlainAnchor, type LinkComponent } from "./link.js";
@@ -25,6 +26,7 @@ export function Descriptions({
   items,
   layout = "wide",
   className,
+  ...rest
 }: {
   items: readonly { term: string; value: ReactNode; mono?: boolean }[];
   /**
@@ -33,6 +35,8 @@ export function Descriptions({
    */
   layout?: "wide" | "compact";
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
     <dl
@@ -45,7 +49,7 @@ export function Descriptions({
       )}
     >
       {items.map((it) => (
-        <div key={it.term} className="contents">
+        <div {...dataProps(rest)} key={it.term} className="contents">
           <dt className="text-small text-ink-faint">{it.term}</dt>
           <dd className={cn("min-w-0 text-body text-ink", it.mono && "font-mono tabular-nums")}>
             {it.value}
@@ -117,6 +121,7 @@ export function Kpi({
   pressed,
   linkComponent: Link = PlainAnchor,
   className,
+  ...rest
 }: {
   label: string;
   value: string | number;
@@ -140,6 +145,8 @@ export function Kpi({
   /** The router's link, so the tile does not force a full page load. TR: Yönlendiricinin bağlantısı, karo tam sayfa yüklemeye zorlamasın diye. */
   linkComponent?: LinkComponent;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const tone: Tone =
     delta === undefined || delta === 0
@@ -152,7 +159,7 @@ export function Kpi({
   const govde = (
     <>
       {icon ? (
-        <span className="tamga-kpi-tile" aria-hidden>
+        <span {...dataProps(rest)} className="tamga-kpi-tile" aria-hidden>
           <Icon icon={icon} size="base" />
         </span>
       ) : null}
@@ -218,10 +225,11 @@ export function Kpi({
  * altı). Elle verilen bir sütun sayısı, karo eklenince yalnız o ekranda
  * güncelleniyor ve tek başına kalan bir karo tam satırı kaplıyor.
  */
-export function KpiGrid({ children, className }: { children: ReactNode; className?: string }) {
+export function KpiGrid({ children, className, ...rest }: { children: ReactNode; className?: string; [k: `data-${string}`]: unknown }) {
   const sayi = Math.min(Children.count(children), 6);
   return (
     <div
+{...dataProps(rest)}
       className={cn("tamga-kpi-grid", className)}
       style={{ "--tamga-kpi-cols": sayi } as CSSProperties}
     >
@@ -245,11 +253,14 @@ export function Code({
   children,
   labels,
   className,
+  ...rest
 }: {
   /** The text to be copied itself. TR: Kopyalanacak metnin kendisi. */
   children: string;
   labels: { copy: string; copied: string; failed: string };
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const [state, setState] = useState<"idle" | "done" | "failed">("idle");
   const timer = useRef<number>(undefined);
@@ -274,7 +285,7 @@ export function Code({
   }
 
   return (
-    <div className={cn("tamga-code-block tamga-surface relative overflow-hidden", className)}>
+    <div {...dataProps(rest)} className={cn("tamga-code-block tamga-surface relative overflow-hidden", className)}>
       <pre className="tamga-scroll-x px-4 py-3 font-mono text-caption text-ink">{children}</pre>
       <button
         type="button"
@@ -328,6 +339,7 @@ export function Badge({
   label,
   className,
   children,
+  ...rest
 }: {
   count: number;
   max?: number;
@@ -343,12 +355,15 @@ export function Badge({
    * üstüne oturacağı şey (ikon, avatar). Yoksa rozet tek başına durur.
    */
   children?: ReactNode;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   if (count <= 0) return <>{children}</>;
   const c = toneOf(tone);
   const shown = count > max ? `${max}+` : String(count);
   const dot = (
     <span
+{...dataProps(rest)}
       className="inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-mono text-micro leading-none font-semibold tabular-nums"
       style={{ background: c.mark, color: "var(--color-page)" }}
     >
@@ -385,14 +400,17 @@ export function Steps({
   steps,
   current,
   className,
+  ...rest
 }: {
   steps: readonly string[];
   /** The active step, counting from zero. TR: Sıfırdan sayan aktif adım. */
   current: number;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <ol className={cn("flex flex-wrap items-center gap-x-3 gap-y-2", className)}>
+    <ol {...dataProps(rest)} className={cn("flex flex-wrap items-center gap-x-3 gap-y-2", className)}>
       {steps.map((s, i) => {
         const done = i < current;
         const active = i === current;

@@ -2,6 +2,7 @@
 
 import { useId, useState, type ReactNode } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
 import { CaretRight } from "./icons.js";
 
@@ -18,6 +19,7 @@ export function Collapsible({
   meta,
   className,
   children,
+  ...rest
 }: {
   title: string;
   defaultOpen?: boolean;
@@ -28,13 +30,15 @@ export function Collapsible({
   meta?: ReactNode;
   className?: string;
   children: ReactNode;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const id = useId();
   const [open, setOpen] = useState(defaultOpen);
   return (
     /* Son bölümün alt kuralı kalkıyor: kabın kendi kenarıyla üst üste binip
        çift çizgi oluşturuyordu. */
-    <div className={cn("border-b border-[var(--color-line)] last:border-b-0", className)}>
+    <div {...dataProps(rest)} className={cn("border-b border-[var(--color-line)] last:border-b-0", className)}>
       <button
         type="button"
         /* `tamga-gutter` şart: `.tamga-head` yalnız DİKEY boşluk taşıyor.
@@ -72,6 +76,6 @@ export function Collapsible({
  * karşılaştırmak yaygın bir iş, ve otomatik kapanma onu imkânsız kılar.
  * Gerekiyorsa çağıran kendi durumunu tutar.
  */
-export function Accordion({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn("tamga-surface overflow-hidden", className)}>{children}</div>;
+export function Accordion({ className, children, ...rest }: { className?: string; children: ReactNode; [k: `data-${string}`]: unknown }) {
+  return <div {...dataProps(rest)} className={cn("tamga-surface overflow-hidden", className)}>{children}</div>;
 }

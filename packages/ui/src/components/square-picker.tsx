@@ -1,4 +1,5 @@
 "use client";
+import { dataProps } from "../lib/data-props.js";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "./button.js";
@@ -37,6 +38,7 @@ export function SquarePicker({
   onPick,
   maxEdge = 256,
   labels,
+  ...rest
 }: {
   open: boolean;
   /** The image the square is cut out of. TR: Üzerinden kesilecek görsel. */
@@ -53,6 +55,8 @@ export function SquarePicker({
     confirm: string;
     close: string;
   };
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const sahne = useRef<HTMLDivElement>(null);
   const [olcu, setOlcu] = useState({ en: 0, boy: 0 });
@@ -122,7 +126,7 @@ export function SquarePicker({
         </>
       }
     >
-      <div className="flex flex-col gap-4">
+      <div {...dataProps(rest)} className="flex flex-col gap-4">
         <Label>{labels.hint}</Label>
 
         {/* DOLGU DIŞARIDA, SAHNE İÇERİDE. Konumlandırma bağlamı dolgusuz bir

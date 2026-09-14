@@ -1,3 +1,4 @@
+import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
 import { Refresh, Warning } from "./icons.js";
 import { Button } from "./button.js";
@@ -14,6 +15,7 @@ export function ErrorState({
   onRetry,
   retryLabel = "Try again",
   compact = false,
+  ...rest
 }: {
   title?: string;
   /**
@@ -38,9 +40,12 @@ export function ErrorState({
    * da panelin içinde
    */
   compact?: boolean;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
     <div
+{...dataProps(rest)}
       role="alert"
       aria-live="polite"
       className={`tamga-gutter flex flex-col items-start gap-4 ${compact ? "py-6" : "py-12"}`}

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
 import { Check } from "./icons.js";
 import { OFF } from "./control-base.js";
@@ -19,6 +20,7 @@ export function Checkbox({
   onChange,
   disabled = false,
   className,
+  ...rest
 }: {
   /**
    * The visible label. The kit does not translate; the caller passes ready text. TR: Görünen
@@ -29,9 +31,12 @@ export function Checkbox({
   onChange?: (next: boolean) => void;
   disabled?: boolean;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
     <button
+{...dataProps(rest)}
       type="button"
       role="checkbox"
       aria-checked={checked}

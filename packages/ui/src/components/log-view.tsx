@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { toneOf, type Tone } from "./tone.js";
 
 /**
@@ -28,6 +29,7 @@ export function LogView({
   follow = true,
   wrap = false,
   className,
+  ...rest
 }: {
   lines: readonly LogLine[];
   /**
@@ -44,6 +46,8 @@ export function LogView({
    */
   wrap?: boolean;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const box = useRef<HTMLDivElement>(null);
 
@@ -61,6 +65,7 @@ export function LogView({
 
   return (
     <div
+{...dataProps(rest)}
       ref={box}
       className={cn("tamga-surface overflow-y-auto p-3 font-mono text-caption", className)}
       style={{ height }}

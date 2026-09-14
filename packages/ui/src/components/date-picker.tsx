@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
 import { CaretLeft, CaretRight, CalendarPlus, Close } from "./icons.js";
 
@@ -53,6 +54,7 @@ export function Calendar({
   onSelect,
   labels,
   className,
+  ...rest
 }: {
   /**
    * `"tr-TR"`, `"en-US"`; month names and the first day of the week come from it. TR:
@@ -68,6 +70,8 @@ export function Calendar({
   onSelect?: (date: DateISO) => void;
   labels: { previousMonth: string; nextMonth: string };
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const today = new Date();
   const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() });
@@ -93,7 +97,7 @@ export function Calendar({
   return (
     /* 17.5rem = 280px = yedi sutun x 40px. Uydurulmus bir genislik degil,
          satir olceginin toplami. */
-    <div className={cn("w-70", className)}>
+    <div {...dataProps(rest)} className={cn("w-70", className)}>
       <div className="mb-3 flex items-center gap-2">
         <button
           type="button"
@@ -159,6 +163,7 @@ export function DatePicker({
   labels,
   disabled = false,
   className,
+  ...rest
 }: {
   locale: string;
   value?: DateISO;
@@ -167,6 +172,8 @@ export function DatePicker({
   labels: { previousMonth: string; nextMonth: string; open: string; clear: string };
   disabled?: boolean;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const [open, setOpen] = useState(false);
   const shown = value
@@ -174,7 +181,7 @@ export function DatePicker({
     : "";
 
   return (
-    <div className={cn("relative", className)}>
+    <div {...dataProps(rest)} className={cn("relative", className)}>
       <span className="relative flex items-center">
         <Icon icon={CalendarPlus} size="xs" className="pointer-events-none absolute left-3 text-ink-faint" />
         <input

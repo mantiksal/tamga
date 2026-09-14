@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
 import { CaretLeft, CaretRight } from "./icons.js";
 
@@ -38,6 +39,7 @@ export function Pagination({
   labels,
   span = 1,
   className,
+  ...rest
 }: {
   /** Starts at 1. TR: 1'den başlar. */
   page: number;
@@ -67,6 +69,8 @@ export function Pagination({
     summary?: (from: number, to: number, total: number) => string;
   };
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const pages = total !== undefined ? Math.max(1, Math.ceil(total / pageSize)) : undefined;
   const canPrev = page > 1;
@@ -76,7 +80,7 @@ export function Pagination({
   const to = total !== undefined ? Math.min(page * pageSize, total) : page * pageSize;
 
   return (
-    <nav className={cn("flex flex-wrap items-center gap-3", className)} aria-label={labels.page(page)}>
+    <nav {...dataProps(rest)} className={cn("flex flex-wrap items-center gap-3", className)} aria-label={labels.page(page)}>
       {total !== undefined && labels.summary ? (
         <span className="tamga-label tabular-nums">{labels.summary(from, to, total)}</span>
       ) : null}

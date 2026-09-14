@@ -1,4 +1,5 @@
 "use client";
+import { dataProps } from "../lib/data-props.js";
 
 /**
  * Bars — three uprights marching, echoing the stems in the wordmark and
@@ -10,10 +11,11 @@
  * worst of both worlds: it satisfies the compiler and ships English into every other language,
  * silently, because nobody sees an aria-label until they are already using a screen reader.
  */
-export function Spinner({ size = 16, label }: { size?: number; label: string }) {
+export function Spinner({ size = 16, label, ...rest }: { size?: number; label: string; [k: `data-${string}`]: unknown }) {
   const w = Math.max(2.5, size * 0.22);
   return (
     <span
+{...dataProps(rest)}
       role="status"
       aria-label={label}
       className="inline-flex items-end justify-between"

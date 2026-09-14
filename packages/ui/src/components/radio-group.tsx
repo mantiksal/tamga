@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { OFF } from "./control-base.js";
 
 /* ---------------------------------------------------------------- *
@@ -17,6 +18,7 @@ export function RadioGroup<T extends string>({
   label,
   disabled = false,
   className,
+  ...rest
 }: {
   options: readonly { value: T; label: ReactNode }[];
   value: T;
@@ -28,9 +30,11 @@ export function RadioGroup<T extends string>({
   label: string;
   disabled?: boolean;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className={cn("flex flex-col gap-2", className)}>
+    <div {...dataProps(rest)} role="radiogroup" aria-label={label} className={cn("flex flex-col gap-2", className)}>
       {options.map((o) => (
         <button
           key={o.value}

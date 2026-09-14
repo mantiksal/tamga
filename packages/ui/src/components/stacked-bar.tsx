@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 
 /**
  * Yığılmış sütun grafiği — HER GÜN İÇİN HEM TOPLAM HEM KIRILIM.
@@ -27,6 +28,7 @@ export function StackedBarChart({
   height = 260,
   formatValue = String,
   className,
+  ...rest
 }: {
   series: readonly StackSeries[];
   /**
@@ -37,6 +39,8 @@ export function StackedBarChart({
   height?: number;
   formatValue?: (v: number) => string;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const [uzerinde, setUzerinde] = useState<number | null>(null);
 
@@ -48,7 +52,7 @@ export function StackedBarChart({
 
   return (
     <figure className={cn("flex flex-col", className)}>
-      <div className="flex gap-3" style={{ height }}>
+      <div {...dataProps(rest)} className="flex gap-3" style={{ height }}>
         {/* Y ekseni etiketleri: en üstte en büyük. */}
         <div className="flex shrink-0 flex-col justify-between py-1 text-right text-micro tabular-nums text-ink-faint">
           {[...cizgiler].reverse().map((v) => (

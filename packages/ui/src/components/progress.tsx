@@ -1,3 +1,4 @@
+import { dataProps } from "../lib/data-props.js";
 /**
  * Progress — an instrument scale.
  *
@@ -12,6 +13,7 @@ export function Progress({
   showScale = false,
   ariaLabel,
   className = "",
+  ...rest
 }: {
   /**
    * 0–100; clamped, so a bad number cannot paint outside the track TR: 0–100; sınırlanıyor,
@@ -34,11 +36,13 @@ export function Progress({
    */
   ariaLabel?: string;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const pct = Math.max(0, Math.min(100, value));
 
   return (
-    <div className={className}>
+    <div {...dataProps(rest)} className={className}>
       <div
         className="tamga-progress"
         role="progressbar"

@@ -5,6 +5,7 @@ import type { Tone } from "./tone.js";
 import { toneOf } from "./tone.js";
 import { Icon } from "./icon.js";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 import { Close } from "./icons.js";
 import { SkeletonOptions, SkeletonPanel } from "./skeleton.js";
 import { Button } from "./button.js";
@@ -70,6 +71,7 @@ export function DropdownMenu({
   loading = false,
   loadingRows = 4,
   openOnHover = false,
+  ...rest
 }: {
   trigger: React.ReactNode;
   items: MenuItem[];
@@ -104,6 +106,8 @@ export function DropdownMenu({
    * değil; 4'te bırakılmış bir liste, tasarım kararı gibi görünen bir hatadır.
    */
   loadingRows?: number;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const [open, setOpen] = useState(false);
   const box = useDismiss(open, () => setOpen(false));
@@ -130,6 +134,7 @@ export function DropdownMenu({
 
   return (
     <div
+{...dataProps(rest)}
       ref={box}
       className="relative inline-flex"
       onPointerEnter={
@@ -209,6 +214,7 @@ export function Popover({
   loading = false,
   loadingBlock,
   closeLabel,
+  ...rest
 }: {
   trigger: React.ReactNode;
   title?: string;
@@ -231,12 +237,14 @@ export function Popover({
    * gövdesi bir blokla açılıyorsa o baştaki bloğun yüksekliği
    */
   loadingBlock?: number;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const [open, setOpen] = useState(false);
   const box = useDismiss(open, () => setOpen(false));
 
   return (
-    <div ref={box} className="relative inline-flex">
+    <div {...dataProps(rest)} ref={box} className="relative inline-flex">
       <span onClick={() => setOpen((o) => !o)}>{trigger}</span>
       {open && (
         <div
@@ -320,10 +328,13 @@ export function Tooltip({
   label,
   placement = "bottom",
   children,
+  ...rest
 }: {
   label: string;
   placement?: keyof typeof placements;
   children: React.ReactNode;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const sarmal = useRef<HTMLSpanElement>(null);
   const [konum, setKonum] = useState<{ left: number; top: number } | null>(null);
@@ -365,6 +376,7 @@ export function Tooltip({
 
   return (
     <span
+{...dataProps(rest)}
       ref={sarmal}
       className="relative inline-flex"
       onPointerEnter={olc}
@@ -409,6 +421,7 @@ export function Toast({
   action,
   onDismiss,
   dismissLabel,
+  ...rest
 }: {
   tone?: ToastTone;
   title: string;
@@ -420,10 +433,13 @@ export function Toast({
    * Kapatma kontrolünün erişilebilir adı, çağıran veriyor (docs/08 kural 5).
    */
   dismissLabel: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const mark = tone === "neutral" ? "var(--color-ink)" : toneOf(tone).mark;
   return (
     <div
+{...dataProps(rest)}
       role="status"
       className="tamga-toast tamga-overlay flex w-80 items-start gap-4 p-4"
       style={{ animation: "tamga-toast-in var(--duration-base) var(--ease-standard) both" }}
@@ -459,12 +475,15 @@ const corners = {
 export function ToastViewport({
   position = "top-right",
   children,
+  ...rest
 }: {
   position?: keyof typeof corners;
   children: React.ReactNode;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
-    <div className={`pointer-events-none fixed z-50 flex flex-col gap-2 ${corners[position]}`}>
+    <div {...dataProps(rest)} className={`pointer-events-none fixed z-50 flex flex-col gap-2 ${corners[position]}`}>
       <div className="pointer-events-auto flex flex-col gap-2">{children}</div>
     </div>
   );
@@ -661,6 +680,7 @@ export function Dialog({
   loading = false,
   closeLabel,
   size = "md",
+  ...rest
 }: {
   open: boolean;
   onClose: () => void;
@@ -684,10 +704,12 @@ export function Dialog({
    * tuval).
    */
   size?: DialogSize;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   return (
     <DialogShell open={open} onClose={onClose} loading={loading} label={title} size={size}>
-      <div className="tamga-head tamga-gutter tamga-section">
+      <div {...dataProps(rest)} className="tamga-head tamga-gutter tamga-section">
         <h3 className="text-subhead font-semibold">{title}</h3>
         <MiniButton onClick={onClose} aria-label={closeLabel} className="ml-auto">
           <Icon icon={Close} size="xs" />

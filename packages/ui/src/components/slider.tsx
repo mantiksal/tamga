@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 
 /**
  * Kendi dosyasında, çünkü YENİ BİR KONTROL.
@@ -18,6 +19,7 @@ export function Slider({
   label,
   suffix,
   className,
+  ...rest
 }: {
   value: number;
   onChange: (next: number) => void;
@@ -28,10 +30,12 @@ export function Slider({
   /** The unit beside the value: "%", "ms", "₺". TR: Değerin yanındaki birim: "%", "ms", "₺". */
   suffix?: string;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
   const pct = ((value - min) / (max - min)) * 100;
   return (
-    <span className={cn("flex items-center gap-4", className)}>
+    <span {...dataProps(rest)} className={cn("flex items-center gap-4", className)}>
       <input
         type="range"
         value={value}

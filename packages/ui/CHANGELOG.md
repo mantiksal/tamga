@@ -5,7 +5,20 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
-## 0.4.1
+## 0.4.2
+
+### Fixed
+
+- **`AppShell`'s content surface is positioned.** It scrolls, and it was not `relative`, so any
+  absolutely positioned element inside it — `sr-only` text is exactly that — looked for its
+  containing block on `html`, landed in document coordinates and stretched the document. The page
+  itself then scrolled despite `h-dvh overflow-hidden`, leaving an empty band under the body.
+
+  A consumer hit this twice and found it by eye both times; in neither case was the first suspect
+  the right one, because at rest nothing looks wrong. Positioning the surface closes the whole class:
+  an escaping element can now travel no further than the surface it lives in.
+
+
 
 Two gaps that products had been paying for, both found by a gate that asks a product not to
 hand-write a kit class. Each one had pushed a caller off the component entirely.

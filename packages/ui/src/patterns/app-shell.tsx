@@ -154,7 +154,19 @@ export function AppShell({
 
         {/* Sağ ve alt boşluk kartın kendi ofsetine yer bırakıyor: kırpma tuzağı. */}
         <div className="min-h-0 flex-1 overflow-hidden pr-4 pb-4">
-          <main className="tamga-surface h-full min-h-0 overflow-y-auto">{children}</main>
+          {/* `relative` BİR SÜS DEĞİL, BİR SİGORTA.
+
+              Kaydırılan yüzey KONUMLU DEĞİLSE, içindeki her `position: absolute`
+              eleman kapsayıcı bloğunu `html`de arıyor — ve `sr-only` tam olarak
+              öyle bir eleman. Bulduğu an belge koordinatlarına yerleşiyor,
+              belgeyi uzatıyor, ve `h-dvh overflow-hidden` olmasına rağmen
+              SAYFANIN KENDİSİ kayıyor: gövdenin altında boş bir alan beliriyor.
+
+              Bir tüketicide iki kez çıktı, ikisi de gözle bulundu ve ikisinde de
+              ilk şüpheli yanlış yerdeydi. Yüzeyi konumlu yapmak sınıfın tamamını
+              kapatıyor: içeride kaçan bir mutlak eleman artık en fazla bu yüzeyin
+              içinde kayıyor. */}
+          <main className="tamga-surface relative h-full min-h-0 overflow-y-auto">{children}</main>
         </div>
       </div>
     </div>

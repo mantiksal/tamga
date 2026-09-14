@@ -97,3 +97,24 @@ describe("AppShell · bölüm başlıkları", () => {
     expect(screen.getAllByRole("link")).toHaveLength(3);
   });
 });
+
+/**
+ * KAÇAN MUTLAK ELEMAN.
+ *
+ * Kaydırılan yüzey konumlu değilse içindeki `sr-only` gibi mutlak bir eleman
+ * kapsayıcısını `html`de bulur, belgeyi uzatır ve `h-dvh overflow-hidden`
+ * olmasına rağmen sayfanın kendisi kayar. Duruş hâlinde hiçbir şey yanlış
+ * görünmüyor, o yüzden bu ancak kazara fark ediliyor.
+ */
+describe("AppShell · yüzey konumlu", () => {
+  it("içerik yüzeyi `relative`, yani içeride kaçan mutlak bir eleman belgeyi uzatamıyor", () => {
+    const { container } = render(
+      <AppShell nav={nav} activePath="/" labels={LABELS}>
+        <p>gövde</p>
+      </AppShell>,
+    );
+    const yuzey = container.querySelector("main");
+    expect(yuzey).not.toBeNull();
+    expect(yuzey!.className).toContain("relative");
+  });
+});

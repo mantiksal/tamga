@@ -50,7 +50,7 @@ const T = {
       </>
     ),
     rules: "Kurallar",
-    etiket: (
+    element: (
       <>
         Kart varsayılan olarak bir <code>div</code>, ama <code>as</code> ile{" "}
         <code>section</code>, <code>article</code> ya da <code>ul</code> olabiliyor. Etiket bir
@@ -97,7 +97,7 @@ const T = {
       </>
     ),
     rules: "Rules",
-    etiket: (
+    element: (
       <>
         A card is a <code>div</code> by default, and <code>as</code> makes it a{" "}
         <code>section</code>, an <code>article</code> or a <code>ul</code>. The element is
@@ -154,7 +154,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <H2>{t.rules}</H2>
       <Note>{t.head}</Note>
       <Note>{t.overflow}</Note>
-      <Note>{t.etiket}</Note>
+      <Note>{t.element}</Note>
 
       <H2>Props</H2>
       <Props of="Card" lang={lang} />

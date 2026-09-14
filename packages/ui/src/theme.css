@@ -44,8 +44,7 @@
   /* Raw brand ramp. Nothing consumes it directly: the semantic tokens below are
      the interface, and a component reaching for --color-brand-500 is skipping the
      layer that makes theming work. Kept in step with the accent so that if anyone
-     ever does reach for it they get this product's blue, not the placeholder v2
-     shipped with.
+     ever does reach for it they get this kit's blue, not a stale placeholder.
      TR: Ham marka rampası. Hiçbir şey doğrudan tüketmiyor: arayüz aşağıdaki anlamsal
      token'lar, ve --color-brand-500'e uzanan bir bileşen temalandırmayı çalıştıran
      katmanı atlıyor. */
@@ -59,17 +58,17 @@
 
   --breakpoint-xs: 30rem;
 
-  /* Motion (docs/13-design-soul §1) — theme-invariant, defined once here and read through the
+  /* Motion (docs/motion) — theme-invariant, defined once here and read through the
      ease/duration custom properties below. Components never write raw curves/durations (§10).
      (Spelled out rather than written with a wildcard: Tailwind scans this file for class
      candidates and read the glob form as an arbitrary utility, warning on every build.) */
   --ease-instrument: cubic-bezier(0.22, 1, 0.36, 1); /* THE signature: everything that enters or moves TR: İMZA: giren ya da hareket eden her şey */
   --ease-press: cubic-bezier(0.22, 1, 0.36, 1); /* the same curve: a press is not a different physics TR: aynı eğri: basmak farklı bir fizik değil */
-  /* --ease-settle removed (13 §1): the only curve with overshoot, and nothing in this
+  /* --ease-settle removed (docs/motion): the only curve with overshoot, and nothing in this
      product bounces. An overshoot placed anywhere leaks everywhere. */
   --ease-breath: ease-in-out; /* the two loops: beacon and skeleton TR: iki döngü: işaret ve iskelet */
 
-  --duration-instant: 100ms; /* press, hover, focus: every control (13 §1 --duration-press) TR: basma, üzerine gelme, odak: her kontrol (13 §1 --duration-press) */
+  --duration-instant: 100ms; /* press, hover, focus: every control (docs/motion) TR: basma, üzerine gelme, odak: her kontrol (docs/motion) */
   --duration-quick: 160ms; /* colour and tone shifts TR: renk ve ton geçişleri */
   --duration-base: 240ms; /* panels, popovers, toasts, value changes TR: paneller, balonlar, bildirimler, değer değişimleri */
   --duration-slow: 340ms; /* route-level reveals TR: rota düzeyinde açılışlar */
@@ -84,9 +83,9 @@
    bu yüzden açık bloğu kendisiyle karşılaştırıp sessizce geçiyordu.
    tamga:tema-acik */
 :root {
-  --radius: 6px; /* 13 §5: instrument sharpness, a knowing DNA §12 deviation (ADR pending) TR: 13 §5: gösterge keskinliği, DNA §12'den bilerek yapılan bir sapma (ADR bekliyor) */
+  --radius: 6px; /* the one knob: every other radius derives from it (docs/measure). Sharp on purpose: a dense row list scans faster against edges that stop than against corners that curl. TR: tek düğme: öteki yarıçapların hepsi ondan türüyor (docs/olcu). Bilerek keskin: yoğun bir satır listesi, kıvrılan köşelerden çok duran kenarlarla hızlı taranıyor. */
 
-  /* Elevation — hard, blurless, offset shadows (docs/13-design-soul §2). Blur only on the
+  /* Elevation — hard, blurless, offset shadows (docs/physics). Blur only on the
      overlay's ambient second layer. Parity-checked in both :root and .dark (docs/03).
      Every formula carries the SAME two layers in every theme (bottom shadow + inset top rim) so the
      structure is parallel — light just holds the rim transparent; dark's rim is the load-bearing
@@ -98,7 +97,7 @@
   --shadow-hover: 3px 3px 0 0 var(--shadow-color);
   --shadow-pressed: 0 0 0 0 var(--shadow-color);
   --shadow-overlay: 6px 6px 0 0 var(--shadow-color); /* the overlay plane: 6px, past anything the page can reach TR: katman düzlemi: 6px, sayfanın ulaşabileceği her şeyin ötesinde */
-  --shadow-seated-pressed: inset 0 0 0 0 transparent; /* seated never lifts, so it has nothing to collapse (13 §2) TR: oturmuş olan hiç kalkmaz, yani çökecek bir şeyi yok (13 §2) */
+  --shadow-seated-pressed: inset 0 0 0 0 transparent; /* seated never lifts, so it has nothing to collapse (docs/physics) TR: oturmuş olan hiç kalkmaz, yani çökecek bir şeyi yok (docs/physics) */
 
   --background: #f5f2ec; /* warm paper TR: sıcak kâğıt */
   --foreground: #26221a;
@@ -107,7 +106,7 @@
   --popover: #fdfcfa;
   --popover-foreground: #26221a;
 
-  --primary: #2069c9; /* the FACE: L* 45, carries white ink at 5.22:1 (13 §2) TR: YÜZ: L* 45, beyaz mürekkebi 5.22:1 ile taşıyor (13 §2) */
+  --primary: #2069c9; /* the FACE: L* 45, carries white ink at 5.22:1 (docs/physics) TR: YÜZ: L* 45, beyaz mürekkebi 5.22:1 ile taşıyor (docs/physics) */
   --primary-foreground: #fdfcfa;
   --secondary: #eceae6;
   --secondary-foreground: #453f34;
@@ -125,10 +124,10 @@
   --beacon-foreground: #fdfcfa;
 
   --border: #e2ded6; /* the single rule colour TR: tek çizgi rengi */
-  /* Instrument scale marks (13 §4). NOT a border: a gauge's ticks are how the dial is READ, so they
+  /* Instrument scale marks. NOT a border: a gauge's ticks are how the dial is READ, so they
      answer to a FLOOR (be visible on every surface the dial can sit on), never to the border band's
      deliberate softness. Kept warm-taupe in family, several steps darker than --border. */
-  --tick: #bdb8ae; /* scale marks answer to a FLOOR, not to the border's softness: they must read on card, page AND muted (13 §4) TR: ölçek işaretleri kenarın yumuşaklığına değil bir TABANA cevap verir: kartta, sayfada VE soluk zeminde okunmalı (13 §4) */
+  --tick: #bdb8ae; /* scale marks answer to a FLOOR, not to the border's softness: they must read on card, page AND muted TR: ölçek işaretleri kenarın yumuşaklığına değil bir TABANA cevap verir: kartta, sayfada VE soluk zeminde okunmalı */
   --input: #d2cec8; /* = --shadow-color. Yasa 1: the edge and the offset are one colour TR: = --shadow-color. Yasa 1: kenar ile kaydırma tek renktir */
   --ring: #12245c;
 
@@ -151,7 +150,7 @@
 /* tamga:tema-koyu */
 .dark {
   /* Night field station — warm charcoal, not cold navy. */
-  /* Elevation (docs/13-design-soul §2 "night edge"): a darkening bottom shadow can't read on a
+  /* Elevation (docs/physics): a darkening bottom shadow can't read on a
      near-black ground (measured ceiling ΔL* ~8 vs light's ~16-20), so dark pushes --shadow-color to
      near-black for max bottom separation AND adds the load-bearing cue — a 1px warm-white inset TOP
      rim (light catches the raised top edge at night). Same two-layer formulas as light; on press the
@@ -245,7 +244,7 @@
      and a legend stops helping. */
   --color-chart-5: var(--chart-5);
 
-  /* Typographic lock (docs/13-design-soul §6) — DECISION CHANGED 2026-08-16 (Berika).
+  /* Typographic lock (docs/type) — DECISION CHANGED 2026-08-16 (Berika).
      The product runs on the SYSTEM UI stack. Outfit and JetBrains Mono were the earlier lock, but
      the prototype everyone judged the design against had a broken variable chain and was silently
      rendering system UI the whole time — that is the typography the design was actually approved
@@ -255,19 +254,19 @@
   --font-sans: -apple-system, "system-ui", "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   /* Measure — how long a line is allowed to get before the eye loses the start
      of the next one. A typographic decision, so it lives with the tokens rather
-     than as an invented number in a className (13 §6). */
+     than as an invented number in a className (docs/type). */
   --measure-tight: 36ch; /* a note under a control */
   --measure: 54ch; /* body copy in a card */
   --measure-wide: 70ch; /* documentation prose */
 
-  --font-display: -apple-system, "system-ui", "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* headings are the same face, heavier — never a separate display cut (13 §6) */
+  --font-display: -apple-system, "system-ui", "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* headings are the same face, heavier — never a separate display cut (docs/type) */
   /* Mono is the same face too — this is what the prototype did, and it is the shape the design was
      approved in. The cost is real and worth stating: digits are no longer tabular by default, so a
      column of numbers stops aligning on its own. `tabular-nums` is still available where a column
      needs it. */
   --font-mono: -apple-system, "system-ui", "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
-  /* Shape rhythm (docs/13-design-soul §5), base --radius = 0.75rem. Kept as a single-knob
+  /* Shape rhythm (docs/measure), base --radius = 0.75rem. Kept as a single-knob
      calc scale: sm = 0.5rem and lg = 1rem land exactly on §5; md stays a shadcn-compat step. */
   --radius-sm: calc(var(--radius) - 4px); /* 0.5rem — badges, tags, inline chips (§5) */
   --radius-md: calc(var(--radius) - 2px); /* 0.625rem — shadcn default step */
@@ -293,7 +292,7 @@
     letter-spacing: -0.01em;
   }
 
-  /* Skeleton breath — an opacity breath, never a shimmer sweep (13 §8, §10).
+  /* Skeleton breath — an opacity breath, never a shimmer sweep.
      Deep and quick on purpose: it started shallow and slow, which was right in
      principle and useless in practice — at a glance you could not tell a loading
      panel from a settled one, and that is its only job. */
@@ -312,7 +311,7 @@
   }
 
   /* The live mark. Brightness only — never a transform, or it starts competing
-     with the mascot's channel and Yasa 4 stops being enforceable (13 §3). */
+     with the mascot's channel and Yasa 4 stops being enforceable. */
   @keyframes beacon-breath {
     0%,
     100% {
@@ -341,7 +340,7 @@
 }
 
 /* ============================================================
-   Press choreography (docs/13-design-soul §2) — THE single source for every raised interactive
+   Press choreography (docs/physics) — THE single source for every raised interactive
    surface (buttons, clickable cards). Apply the `press-surface` class; never re-implement it per
    component (no second copy). Decorative, non-clickable surfaces must NOT use it (Law 2).
    No transition-all — the property list is explicit.
@@ -355,7 +354,7 @@
   transition-duration: var(--duration-quick);
   transition-timing-function: var(--ease-instrument);
 }
-/* The working surface: one card that holds a whole screen (13 §4b).
+/* The working surface: one card that holds a whole screen.
    The chrome around it — rail, header, ground — is all --card with no dividing
    line, so it reads as one continuous frame. This is the only thing on top of
    that frame, which is why it takes the CONTROL radius rather than the card
@@ -372,7 +371,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* Functional feedback (lift, press travel, focus ring) stays — just shortened (13 §11). */
+  /* Functional feedback (lift, press travel, focus ring) stays — just shortened (docs/motion). */
   .press-surface {
     transition-duration: var(--duration-instant);
   }
@@ -380,7 +379,7 @@
 .press-surface:hover:not(:disabled):not([aria-disabled="true"]):not([data-loading="true"]) {
   transform: translate(-1px, -1px);
   box-shadow: var(--shadow-hover);
-  /* Hover is carried by HEIGHT alone (13 §2). The inherited rule also turned the
+  /* Hover is carried by HEIGHT alone (docs/physics). The inherited rule also turned the
      border to the signature colour; that was dropped deliberately. One event
      should produce one signal, and in this system an accent border already means
      "selected or focused" — spending it on "the pointer is here" would blunt it. */
@@ -397,7 +396,7 @@
   transition-timing-function: var(--ease-press);
 }
 .press-surface:focus-visible {
-  /* 2px beacon ring @2px offset; box-shadow + transform untouched — focus NEVER flattens (13 §2). */
+  /* 2px beacon ring @2px offset; box-shadow + transform untouched — focus NEVER flattens (docs/physics). */
   outline-color: var(--beacon);
 }
 .press-surface:disabled,
@@ -412,7 +411,7 @@
 }
 
 /* ============================================================
-   Surfaces (docs/13 §5) — the raised panel, defined once.
+   Surfaces (docs/docs/measure) — the raised panel, defined once.
 
    §5 is explicit and was not being followed: surfaces take --radius-card (6px), the edge is 1px in
    the SHADOW colour (Yasa 1: the edge and the offset are one colour), and emphasis comes from a
@@ -477,7 +476,7 @@
 }
 
 /* ============================================================
-   Seated choreography (docs/13-design-soul §2) — THE single source for controls that sit IN a track
+   Seated choreography (docs/physics) — THE single source for controls that sit IN a track
    (tabs trigger, switch, checkbox, radio, segmented). Sibling of .press-surface, SAME grammar
    (beacon focus ring, beacon hover warm, same tokens, same reduced-motion) — but the seated physics:
    flat at rest, presses INTO the track on active (inset mirror of the raised bottom-out). No translate,
@@ -507,14 +506,14 @@
   transition: background-color var(--duration-quick) var(--ease-instrument);
 }
 @media (prefers-reduced-motion: reduce) {
-  /* functional feedback kept, shortened (13 §11) */
+  /* functional feedback kept, shortened (docs/motion) */
   .seated-surface,
   .seated-surface::after {
     transition-duration: var(--duration-instant);
   }
 }
 .seated-surface:hover:not(:disabled):not([aria-disabled="true"]) {
-  /* seated answers by FILLING, not by recolouring its edge (13 §2) */
+  /* seated answers by FILLING, not by recolouring its edge (docs/physics) */
 }
 .seated-surface:hover:not(:disabled):not([aria-disabled="true"])::after {
   background-color: var(--accent);
@@ -536,8 +535,8 @@
 /* ==============================================================
    TASLAK tokens (src/taslak) — here rather than in taslak.css because Tailwind generates utilities
    only for the entry that imports it, and the draft needs `bg-shell`, `text-ink`, `text-body`.
-   Names are additive: v5 speaks --background/--card and Tailwind's own text scale, so nothing is
-   overwritten. `static` because a token reached only through var() in a TSX inline style is
+   Names are additive: the consuming app speaks its own names and Tailwind's own text scale, so
+   nothing is overwritten. `static` because a token reached only through var() in a TSX inline style is
    invisible to the tree-shaker. Dark overrides and the tamga-* classes stay in taslak.css.
    ============================================================== */
 /* Kitin kendi ad ailesi (--color-page, --color-ink …). Koyu karşılıkları
@@ -580,11 +579,11 @@
   /* the single rule colour: dividers and card edges
      TR: tek çizgi rengi: ayraçlar ve kart kenarları */
   --color-line: #e2ded6;
-  /* Darkened from #d9d6d1 after v5's contrast gate measured it at ΔL* 9.8 against
+  /* Darkened from #d9d6d1 after a contrast gate measured it at ΔL* 9.8 against
      the page, just under the floor of 10 where a raised surface stops reading as
      raised. check-token-contrast now measures it here too, and reproduces that
      same 9.8, which is how we know the two gates share one arithmetic.
-     TR: #d9d6d1'den koyulaştırıldı: v5'in kontrast kapısı sayfaya karşı ΔL* 9.8
+     TR: #d9d6d1'den koyulaştırıldı: bir ürünün kontrast kapısı sayfaya karşı ΔL* 9.8
      ölçmüştü, yükseltilmiş bir yüzeyin yükseltilmiş okunmayı bıraktığı 10 tabanının
      hemen altında. check-token-contrast artık burada da ölçüyor ve aynı 9.8'i üretiyor;
      iki kapının tek bir aritmetiği paylaştığını böyle biliyoruz. */
@@ -773,16 +772,14 @@
    * Shape. One knob, and everything derives from it.
    *
    * Written as a calc scale rather than two loose numbers so "make the
-   * product a little softer" stays a one-line edit — v5 inherits the
-   * same single-knob structure, and matching it means the values port
-   * without redesigning anything.
+   * product a little softer" stays a one-line edit rather than a number
+   * hunted across ten files.
    *
-   * The VALUE is a deliberate departure. v5 carries --radius: 12px with
-   * a note pointing at the brand DNA's "soft corners"; this product went
-   * the other way on purpose. It is an instrument read at 3am, and a
-   * dense table of rows reads faster with corners that stop rather than
-   * curve. Recorded as a knowing deviation, not an oversight — the same
-   * way v5 records its own amber beacon as one.
+   * The VALUE is sharp on purpose. This is an instrument read at 3am, and
+   * a dense table of rows reads faster with corners that stop rather than
+   * curve. A consuming product does not pick its own radius: moving it one
+   * step on the product side turns the single knob into two, and two knobs
+   * eventually become three. The reasoning lives in docs/measure.
    * ---------------------------------------------------------------- */
 
   /* aliases kept so call sites read by ROLE rather than by size */
@@ -805,7 +802,7 @@
 
   /* Loops. Long by design, and the only things allowed past --duration-slow.
      `--duration-spin` and `--ease-linear` lived here for the old CSS `.tamga-spinner`, a rotating
-     ring. The kit's spinner is three marching bars (ui/spinner.tsx) — nothing in this product
+     ring. The kit's spinner is three marching bars (ui/spinner.tsx) — nothing in this kit
      rotates any more, so both went with it.
      TR: Döngüler. Bilerek uzun, ve --duration-slow'u geçmesine izin verilen tek şeyler. */
   --duration-bar: 900ms;

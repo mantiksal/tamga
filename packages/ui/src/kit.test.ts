@@ -3,24 +3,23 @@ import { pageWindow } from "./components/pagination.js";
 import { toneOf, rankOf, tones, TONE_RANK, type Tone } from "./components/tone.js";
 
 /**
- * Kitin ilk testleri.
+ * Kitin testleri.
  *
- * NEDEN ŞİMDİYE KADAR YOKTU VE NEDEN ARTIK VAR. On projenin bağlı olduğu bir
- * kütüphanenin sıfır testi vardı — üstelik onu tüketen ürünün (dashboard-v5)
- * kendi test paketi varken. Bir bileşenin görünüşü gözle ve story'lerle
- * yakalanıyordu; ama kitte GÖRÜNMEYEN mantık da var, ve o mantık sessizce
- * yanlış olabiliyor.
+ * NEDEN BİR SÜRE YOKTU VE NEDEN ARTIK VAR. On projenin bağlı olduğu bir
+ * kütüphanenin sıfır testi vardı, üstelik onu tüketen ürünün kendi test paketi
+ * varken. Bir bileşenin görünüşü gözle yakalanıyordu; ama kitte GÖRÜNMEYEN
+ * mantık da var, ve o mantık sessizce yanlış olabiliyor.
  *
  * NE TEST EDİLİYOR: saf fonksiyonlar. Bir sayfalayıcının hangi numaraları
  * göstereceği, bir skorun hangi tona düşeceği, bir nabzın hangi rütbeyi
- * kazanacağı. Üçü de DOM'suz, üçü de yanlış olduğunda hiçbir hata vermiyor —
+ * kazanacağı. Üçü de DOM'suz, üçü de yanlış olduğunda hiçbir hata vermiyor:
  * yalnız yanlış çiziyor.
  *
- * NE TEST EDİLMİYOR: render. Bileşenlerin görsel davranışı
- * `dashboard-v5/src/stories`'teki states story'leriyle GERÇEK TARAYICIDA
- * kanıtlanıyor; aynı şeyi jsdom'da ikinci kez taklit etmek, iki yerde iki
- * farklı gerçek üretme riskini getirir ve karşılığında bir şey kazandırmaz.
- * Bu bir eksiklik değil, bir iş bölümü.
+ * RENDER AYRI DOSYALARDA. Şablonların davranışı `src/patterns/*.test.tsx`
+ * içinde jsdom ile ölçülüyor. Bir zamanlar burada "render tüketen ürünün
+ * story'lerinde kanıtlanıyor" yazıyordu; o story'ler kaldırıldı ve ölçüm
+ * kite taşındı. Yasanın GÖRSEL tarafını `scripts/check-physics.mjs` kitin
+ * kendi CSS'ini okuyarak, ilişkisel olarak ölçüyor.
  */
 
 describe("pageWindow — sayfalayıcının aritmetiği", () => {

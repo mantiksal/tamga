@@ -67,6 +67,15 @@ const START: DocPage[] = [
   k("installation", ["Kurulum", "Üç satırda başla"], ["Installation", "Start in three lines"]),
   k("theme", ["Tema", "Markanın tamamı bir blokta"], ["Theme", "A whole brand in one block"]),
   k("physics", ["Fizik", "Yükselme, basılma, dört yasa"], ["Physics", "Lift, press, four laws"]),
+  /* FİZİĞİN ÜÇ BOYUTU, hemen ardında ve bu sırayla: yasalar neyin yasak
+     olduğunu söylüyor, bu üçü neyin hangi ölçüde olduğunu. Sıra okuma
+     sırası — bir arayüz önce hareket eder, sonra bir ölçüsü olur, en son
+     harfleri. Üçü de değer LİSTESİ vermiyor; adların tam listesi tek yerde,
+     Token'lar sayfasında. Bir değeri iki yerde yazmak, bir gün birinin
+     yalan söylemesi demek. */
+  k("motion", ["Hareket", "Dört süre, üç eğri, beş döngü"], ["Motion", "Four durations, three curves, five loops"]),
+  k("measure", ["Ölçü", "İki yarıçap, 8 piksel ritmi, sabit yükseklikler"], ["Measure", "Two radii, an 8px rhythm, fixed heights"]),
+  k("type", ["Tipografi", "On kademe, tek yüz"], ["Typography", "Ten steps, one face"]),
   /* DÖRDÜNCÜ SAYFA BİR KALIP, bileşen değil: kitin parçaları bir EKRANDA nasıl
      bir araya geliyor. Buraya girdi çünkü okuma sırası bozulmuyor — kur,
      markanı geçir, fiziği anla, bir ekran kur — ve alfabetik bileşen
@@ -166,11 +175,17 @@ const bul = (slug: string) => {
 
 export function navGruplari(lang: Locale): NavGrubu[] {
   return [
-    /* BAŞLANGIÇ: okuma sırası, alfabe değil. Kur, markanı geçir, fiziği anla. */
+    /* BAŞLANGIÇ: okuma sırası, alfabe değil. Kur, markanı geçir, sonra dili
+       öğren. Son dördü aynı cinsten şey: dilin yasaları. Fizik neyin yasak
+       olduğunu söylüyor, ötekiler neyin hangi ölçüde olduğunu — o yüzden
+       envanterin (Çekirdek) değil, buranın parçası. */
     grup("baslangic", "Başlangıç", "Getting started", [
       bul("installation"),
       bul("theme"),
       bul("physics"),
+      bul("motion"),
+      bul("measure"),
+      bul("type"),
     ]),
     /* ÇEKİRDEK: sistemin kendisi. Nord'un "Core"u ile aynı ayrım, ve aynı
        sebeple: bunlar bir kılavuz değil bir ENVANTER. */

@@ -1,4 +1,4 @@
-import { Button, StatusChip, LiveScope } from "tamga-ui";
+import { Button, Checkbox, StatusChip, LiveScope } from "tamga-ui";
 import { OffsetLadder } from "@/components/interactive";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
@@ -135,10 +135,44 @@ const T = {
         atar, diğerleri atmaz).
       </>
     ),
+    grammar: "İki fizik, tek gramer: yükselen ve oturan",
+    grammarP: (
+      <>
+        Kitte her kontrol iki fizikten birine ait. <strong>Yükselen</strong> yüzeyin üstünde durur ve
+        basılınca yerine iner: düğme, tıklanabilir kart, ray öğesi, segment.{" "}
+        <strong>Oturan</strong> yüzeyin bir parçasıdır ve <em>hiç</em> yükselmez: sekme, anahtar,
+        onay kutusu, radyo.
+      </>
+    ),
+    grammarSeated: (
+      <>
+        Oturan bir kontrol cevabını <strong>dolarak ya da çizgi çizerek</strong> veriyor: sekme alt
+        çizgiyle, anahtar dolu izle, onay kutusu dolu kutuyla. Bir sekme sayfanın üstünde duran bir
+        nesne değil, çubuğun kendisinin bir parçası; onu &laquo;aşağı itmek&raquo; ne olduğu
+        hakkında yalan söylemek olurdu.
+      </>
+    ),
+    grammarRule: (
+      <>
+        Buradan tek bir kural çıkıyor ve kitin her yerinde geçerli:{" "}
+        <strong>derinlik basılabilir demektir.</strong> Basılamayan hiçbir şey offset almaz. Bir
+        durum çipi iki gün offset taşıdı ve tam bu yüzden geri alındı: bir durum etiketi asla
+        basılamaz, ve yükselmiş duran bir şey tıklanmayı bekliyor demektir.
+      </>
+    ),
+    grammarSilent: (
+      <>
+        <strong>Oturan tarafın yasası bir YOKLUK yasası</strong> (hiç yükselmez), yani tam da
+        sessizce çürüyen cins: duruş hâlinde doğru göründüğü için hiçbir ekran görüntüsü incelemesi
+        yakalamıyor. Kitin fizik kapısı bu yüzden sayıyı değil <em>ilişkiyi</em> ölçüyor.
+      </>
+    ),
     notUs: (
       <>
         <strong>Ne değiliz:</strong> gradyan yok · bulanık gölge yok · cam efekti yok · süpüren
-        shimmer yok · yuvarlak hap rozet yok · yarım piksel yok.
+        shimmer yok · yuvarlak hap rozet yok · yarım piksel yok · overshoot&apos;lu eğri yok · büyük
+        harf dönüşümü yok · ham renk, ham süre, ham ölçü yok · basılamayan bir şeye offset yok ·
+        ekranda ikinci bir parlaklık nabzı yok.
       </>
     ),
   },
@@ -251,10 +285,45 @@ const T = {
         (<code>danger</code> pulses, the others do not).
       </>
     ),
+    grammar: "Two physics, one grammar: raised and seated",
+    grammarP: (
+      <>
+        Every control in the kit belongs to one of two physics. <strong>Raised</strong> sits above
+        the surface and goes down to its base when pressed: buttons, clickable cards, rail entries,
+        segments. <strong>Seated</strong> is part of the surface and <em>never</em> lifts: tabs,
+        switches, checkboxes, radios.
+      </>
+    ),
+    grammarSeated: (
+      <>
+        A seated control answers by <strong>filling or drawing a line</strong>: a tab with an
+        underline, a switch with a filled track, a checkbox with a filled box. A tab is not an
+        object resting on the page, it is part of the bar itself; pushing it &ldquo;down&rdquo;
+        would lie about what it is.
+      </>
+    ),
+    grammarRule: (
+      <>
+        One rule falls out of this and holds everywhere in the kit:{" "}
+        <strong>depth means pressable.</strong> Nothing that cannot be pressed gets an offset. A
+        status chip carried one for two days and was reverted for exactly this reason: a status
+        label can never be pressed, and something standing lifted is something waiting for a click.
+      </>
+    ),
+    grammarSilent: (
+      <>
+        <strong>The seated law is a law of ABSENCE</strong> (it never lifts), which is precisely the
+        kind that rots in silence: it looks correct at rest, so no screenshot review catches it.
+        That is why the kit&rsquo;s physics gate measures the <em>relationship</em> rather than the
+        number.
+      </>
+    ),
     notUs: (
       <>
         <strong>What we are not:</strong> no gradients · no blurred shadows · no glass effects · no
-        sweeping shimmer · no pill-shaped badges · no half pixels.
+        sweeping shimmer · no pill-shaped badges · no half pixels · no overshooting curve · no
+        uppercase transform · no raw colours, durations or measurements · no offset on anything
+        unpressable · no second brightness pulse on a screen.
       </>
     ),
   },
@@ -356,6 +425,24 @@ ${t.ladderLegend}`}>
       </Demo>
       <P>{t.l4demo}</P>
       <P>{t.l4after}</P>
+
+      <H2>{t.grammar}</H2>
+      <P>{t.grammarP}</P>
+      {/* YAN YANA: yükselen ile oturan arasındaki fark ancak ikisi aynı satırda
+          dururken okunuyor. Tek başına bir sekme doğru görünüyor. */}
+      <Demo
+        labels={dict.demo}
+        code={`<Button variant="primary">${t.save}</Button>
+<Checkbox label="${t.confirm}" checked />`}
+      >
+        <span className="flex flex-wrap items-center gap-6">
+          <Button variant="primary">{t.save}</Button>
+          <Checkbox label={t.confirm} checked />
+        </span>
+      </Demo>
+      <P>{t.grammarSeated}</P>
+      <Note>{t.grammarRule}</Note>
+      <P>{t.grammarSilent}</P>
     </>
   );
 }

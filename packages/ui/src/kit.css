@@ -531,8 +531,8 @@
    *
    * The split is not decoration. A tab is not an object lying on the page,
    * it is part of the bar; pushing it "down" would be a lie about what it is.
-   * v5 inherits the same two-physics idea under the names .press-surface and
-   * .seated-surface — the grammar matches even though the surfaces differ.
+   * A consuming product may name the two physics differently; what has to
+   * match is the grammar, not the class names.
    *
    * The rule that follows from it: DEPTH MEANS PRESSABLE. Anything that
    * cannot be pressed does not get an offset, which is exactly why the chip
@@ -790,6 +790,46 @@
   }
   .tamga-page[aria-current="page"]:hover {
     background: var(--color-shell);
+    color: var(--color-accent-line);
+  }
+
+  /* ALANIN İÇİNDEKİ KONTROL — parola gözü, temizle, kopyala.
+   *
+   * YÜKSELMİYOR, ve sebebi Yasa 1: yükselen bir nesne KÂĞIDIN üstünde durur, başka bir
+   * yükseltinin üstünde değil. Buraya `tamga-mini-btn` konmuştu (1px kenar + 1px sert offset) ve
+   * zaten yükselmiş bir alanın içinde ikinci bir yükselen nesne oluyordu: kendi zemini olmayan,
+   * üstüne cıvatalanmış gibi duran bir kutu.
+   *
+   * Çözüm ŞEKLİ DEĞİŞTİRMEK değil, İLİŞKİYİ düzeltmek: bu düğme alanın yanında değil, alanın
+   * PARÇASI. O yüzden `.tamga-stepper`in dilini konuşuyor — sağ kenara yapışıyor, çerçevesi
+   * yok, yalnız soldan bir ayraç, ve alanın köşe yarıçapını sürdürüyor.
+   *
+   * Yasa 2 de aynı yöne çıkıyor: sayfada tek dolu/yükselen şey birincil eylem olur. Parolayı
+   * göstermek birincil eylem değil. */
+  .tamga-field-btn {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    bottom: 1px;
+    display: inline-flex;
+    width: 34px;
+    align-items: center;
+    justify-content: center;
+    border-left: 1px solid var(--color-line);
+    border-radius: 0 var(--radius-ctl) var(--radius-ctl) 0;
+    background: transparent;
+    color: var(--color-ink-faint);
+    cursor: pointer;
+    transition: color var(--duration-press) var(--ease-standard),
+      background var(--duration-press) var(--ease-standard);
+  }
+  .tamga-field-btn:hover {
+    background: var(--color-hover);
+    color: var(--color-ink);
+  }
+  /* Basılı hâl RENKLE söyleniyor, kaymayla değil: kayan bir parça alanın içinde
+     kendi kenarından taşardı. */
+  .tamga-field-btn[aria-pressed="true"] {
     color: var(--color-accent-line);
   }
 
@@ -1327,6 +1367,7 @@
     align-self: flex-start;
     margin-top: calc((1lh - 18px) / 2);
   }
+
 
   .tamga-check, .tamga-radio {
     display: inline-flex;
@@ -2190,7 +2231,7 @@
   }
 
   /* The ticket's divider. It was drawn as a PERFORATION — a dashed rule meaning
-     "tear here" — and v5 proved that wrong on contact: dashed already means
+     "tear here" — and that proved wrong on contact: dashed already means
      "not real content yet" (the logo bounding box,
      the logo bounding box). A second meaning for the same mark makes a finished
      empty state read as a placeholder, which is the opposite of what it says.

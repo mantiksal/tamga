@@ -28,6 +28,30 @@ const T = {
         değil.
       </>
     ),
+    agirlikH: "Varsayılan ağırlık duotone, ve iki istisnası",
+    agirlikP: (
+      <>
+        Varsayılan ağırlık <strong>duotone</strong>, çünkü ikinci katmanı aksanı miras alıyor:
+        ikonlar markanın rengini, ikon başına bir renk kodu yazılmadan taşıyor. Bir ikonun rengi
+        metinden yalnız <strong>durum</strong> taşıdığında ayrışıyor; süs için asla.
+      </>
+    ),
+    agirlikN: (
+      <>
+        <strong>Satır içi eylem ikonları bunun dışında ve kalın basılıyor.</strong> Duotone bir onay
+        işareti kutu gibi render oluyor: bir onay işaretinin iç alanı yok, dolayısıyla ikinci katman
+        dolduracak bir şey bulamıyor ve glifin tamamını boyuyor. Bu bir zevk kararı değil, glifin
+        geometrisinin dayattığı bir istisna.
+      </>
+    ),
+    boyutH: "Altı boyut, ve boyut da rolle seçiliyor",
+    boyutP: (
+      <>
+        Boyutlar bir merdiven, ve aradaki değerler yok: bir ikon &laquo;biraz daha büyük&raquo;
+        olamaz. Yanına konduğu şeyin kademesi hangisiyse ikon da onu alıyor, çünkü bir ikonun işi
+        metnin yanında durmak; kendi başına bir ölçüsü yok.
+      </>
+    ),
     disariH: "Setinde olmayan bir glif",
     disariP: (
       <>
@@ -88,6 +112,31 @@ const IKON: Record<string, IconGlyph> = { siparis: SiparisIkon };`,
         <code>Trash</code>. <code>Main</code>, not <code>Star</code>. Roughly half the roles carry a
         name of ours. One reason: if the library changes, no call site should, and a star glyph
         should mean &ldquo;the main one&rdquo; in every product rather than &ldquo;star&rdquo;.
+      </>
+    ),
+    agirlikH: "Duotone by default, with two exceptions",
+    agirlikP: (
+      <>
+        The default weight is <strong>duotone</strong>, because its second layer inherits the
+        accent: icons carry the brand colour without a colour written per icon. An icon&rsquo;s
+        colour diverges from the text only when it carries <strong>state</strong>; never for
+        decoration.
+      </>
+    ),
+    agirlikN: (
+      <>
+        <strong>Inline action icons are the exception and render bold.</strong> A duotone check mark
+        renders as a box: a check has no interior, so the second layer finds nothing to fill and
+        paints the whole glyph. This is not a taste decision but an exception the glyph&rsquo;s
+        geometry forces.
+      </>
+    ),
+    boyutH: "Six sizes, and size is chosen by role too",
+    boyutP: (
+      <>
+        The sizes are a ladder with nothing in between: an icon cannot be &ldquo;a bit bigger&rdquo;.
+        It takes the step of whatever it sits next to, because an icon&rsquo;s job is to stand
+        beside text; it has no measurement of its own.
       </>
     ),
     disariH: "A glyph the set does not have",
@@ -153,6 +202,13 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.adH}</H2>
       <P>{t.adP}</P>
+
+      <H2>{t.agirlikH}</H2>
+      <P>{t.agirlikP}</P>
+      <Note>{t.agirlikN}</Note>
+
+      <H2>{t.boyutH}</H2>
+      <P>{t.boyutP}</P>
 
       <H2>{t.disariH}</H2>
       <P>{t.disariP}</P>

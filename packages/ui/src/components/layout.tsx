@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { cn } from "../lib/cn.js";
 
 /**
@@ -248,16 +248,26 @@ export function Link({
   external = false,
   className,
   children,
+  linkComponent: Router,
   ...props
-}: React.ComponentProps<"a"> & { external?: boolean }) {
-  return (
-    <a
-      className={cn("tamga-link", className)}
-      target={external ? "_blank" : undefined}
-      rel={external ? "noopener noreferrer" : undefined}
-      {...props}
-    >
-      {children}
-    </a>
-  );
+}: React.ComponentProps<"a"> & {
+  external?: boolean;
+  /**
+   * The router's link, so an in-app link does not reload the page. TR: Yönlendiricinin
+   * bağlantısı, uygulama içi bir bağlantı sayfayı yeniden yüklemesin diye.
+   *
+   * Verilmezse düz bir `<a>` çiziliyor. `external` ile birlikte yok sayılıyor: uygulamanın
+   * dışına çıkan bir adres istemci yönlendirmesiyle açılamaz.
+   */
+  linkComponent?: ComponentType<{ href?: string; className?: string; children?: ReactNode; [k: string]: unknown }>;
+}) {
+  const shared = {
+    className: cn("tamga-link", className),
+    target: external ? ("_blank" as const) : undefined,
+    rel: external ? ("noopener noreferrer" as const) : undefined,
+    ...props,
+  };
+  /* Dış bağlantı yönlendiriciden geçmiyor: uygulamanın dışına çıkan bir adres
+     istemci yönlendirmesiyle açılamaz, ve denemek sessizce bir sekme kaybettirir. */
+  return Router && !external ? <Router {...shared}>{children}</Router> : <a {...shared}>{children}</a>;
 }

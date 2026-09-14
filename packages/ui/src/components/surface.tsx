@@ -14,10 +14,17 @@ import { cn } from "../lib/cn.js";
  * paylaşır, böylece iki kart yan yana geldiğinde iç boşlukları hizalanır.
  */
 export function Card({
+  as: Tag = "div",
   overflow = "clip",
   children,
   className,
 }: {
+  /**
+   * The element the card is drawn as. TR: Kartın hangi eleman olarak çizileceği.
+   *
+   * Belge yapısı, sunum değil: bir kart çoğu zaman bir `section`dır. Varsayılan `div`.
+   */
+  as?: "div" | "section" | "article" | "ul";
   /**
    * Whether the card's content may spill past its edge. `clip` by default, because the card's
    * rounded corners depend on it: a table inside would run out of the corners without clipping.
@@ -38,9 +45,9 @@ export function Card({
   className?: string;
 }) {
   return (
-    <div className={cn("tamga-card", overflow === "visible" && "tamga-card-open", className)}>
+    <Tag className={cn("tamga-card", overflow === "visible" && "tamga-card-open", className)}>
       {children}
-    </div>
+    </Tag>
   );
 }
 

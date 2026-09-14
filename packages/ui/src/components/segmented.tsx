@@ -16,7 +16,13 @@ export function Segmented<T extends string>({
   label,
   className,
 }: {
-  options: readonly { value: T; label: ReactNode }[];
+  /**
+   * The choices. Anything beyond `value` and `label` lands on that option's button, so a choice
+   * can carry the hook a test or a style needs. TR: Seçenekler. `value` ve `label` dışındaki her
+   * şey o seçeneğin düğmesine iniyor, yani bir seçenek testin ya da stilin ihtiyaç duyduğu
+   * kancayı taşıyabiliyor.
+   */
+  options: readonly ({ value: T; label: ReactNode } & Record<string, unknown>)[];
   value: T;
   onChange?: (next: T) => void;
   /** The group's accessible name. TR: Grubun erişilebilir adı. */
@@ -25,15 +31,16 @@ export function Segmented<T extends string>({
 }) {
   return (
     <div role="group" aria-label={label} className={cn("tamga-segment", className)}>
-      {options.map((o) => (
+      {options.map(({ value: v, label: etiket, ...rest }) => (
         <button
-          key={o.value}
+          key={v}
           type="button"
-          aria-pressed={value === o.value}
-          data-active={value === o.value}
-          onClick={() => onChange?.(o.value)}
+          {...rest}
+          aria-pressed={value === v}
+          data-active={value === v}
+          onClick={() => onChange?.(v)}
         >
-          {o.label}
+          {etiket}
         </button>
       ))}
     </div>

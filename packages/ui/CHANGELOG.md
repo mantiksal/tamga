@@ -5,6 +5,29 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.3.1
+
+Three components refused something a consumer legitimately needed, and in each case the way out was
+to drop the component and write its class by hand. A class without its component is the same paint
+with none of the behaviour, so this release is about closing the reasons to reach for it.
+
+### Added
+
+- **`Link.linkComponent`** — the router's link, so an in-app link does not reload the page. Without
+  it the component could only draw a plain `<a>`, and anything with client-side routing had to hand
+  write `tamga-link` on its own link, taking the class and leaving behind the `rel="noopener
+  noreferrer"` that `external` brings. `RailLink` and `AppShell` already solved this the same way;
+  `Link` was the one that had not.
+- **`Card.as`** — `div` (default), `section`, `article` or `ul`. A card is usually a *section*, and
+  a component that refuses the element pushes the caller to write `tamga-card` by hand. That trade
+  is worse than it looks: the hand-written version also loses `overflow="visible"`, which is the
+  guard against a menu or a calendar being clipped at the card's edge. Nothing errors when that
+  happens; the panel is simply half invisible and the first suspect is z-index, which cannot fix it.
+- **`Segmented` options carry their own attributes.** Anything beyond `value` and `label` now lands
+  on that option's button, so a filter strip can tag each choice with the hook a test or a style
+  needs. Without it the whole control had to be hand-rolled, losing `aria-pressed` and the keyboard
+  behaviour with it.
+
 ## 0.3.0
 
 ### Breaking

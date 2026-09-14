@@ -50,6 +50,15 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    etiket: (
+      <>
+        Kart varsayılan olarak bir <code>div</code>, ama <code>as</code> ile{" "}
+        <code>section</code>, <code>article</code> ya da <code>ul</code> olabiliyor. Etiket bir
+        sunum tercihi değil belge yapısı: bir kart çoğu zaman bir <strong>bölümdür</strong>.
+        Doğru etiketi bileşene söyle; sınıfı elle yazmak <code>overflow</code> korumasını
+        birlikte götürür.
+      </>
+    ),
     head: (
       <>
         <code>CardHead</code> üç sınıfı birden ister (<code>head</code> · <code>gutter</code> ·{" "}
@@ -88,6 +97,15 @@ const T = {
       </>
     ),
     rules: "Rules",
+    etiket: (
+      <>
+        A card is a <code>div</code> by default, and <code>as</code> makes it a{" "}
+        <code>section</code>, an <code>article</code> or a <code>ul</code>. The element is
+        document structure, not a presentation choice: a card is usually a{" "}
+        <strong>section</strong>. Tell the component which element you need; writing the class
+        by hand takes the <code>overflow</code> guard away with it.
+      </>
+    ),
     head: (
       <>
         <code>CardHead</code> needs three classes at once (<code>head</code> · <code>gutter</code>{" "}
@@ -136,6 +154,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <H2>{t.rules}</H2>
       <Note>{t.head}</Note>
       <Note>{t.overflow}</Note>
+      <Note>{t.etiket}</Note>
 
       <H2>Props</H2>
       <Props of="Card" lang={lang} />

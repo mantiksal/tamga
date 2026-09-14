@@ -21,7 +21,13 @@ export function RadioGroup<T extends string>({
   className,
   ...rest
 }: {
-  options: readonly { value: T; label: ReactNode }[];
+  /**
+   * The choices. Anything beyond `value` and `label` lands on that option's button, so a choice can
+   * carry the hook a test or a style needs. TR: Seçenekler. `value` ve `label` dışındaki her şey o
+   * seçeneğin düğmesine iniyor, yani bir seçenek testin ya da stilin ihtiyaç duyduğu kancayı
+   * taşıyabiliyor.
+   */
+  options: readonly ({ value: T; label: ReactNode } & Record<string, unknown>)[];
   value: T;
   onChange?: (next: T) => void;
   /**
@@ -59,14 +65,15 @@ export function RadioGroup<T extends string>({
         className,
       )}
     >
-      {options.map((o) => (
+      {options.map(({ value: v, label: etiket, ...rest }) => (
         <button
-          key={o.value}
+          key={v}
           type="button"
+          {...rest}
           role="radio"
-          aria-checked={value === o.value}
+          aria-checked={value === v}
           aria-disabled={disabled || undefined}
-          onClick={() => !disabled && onChange?.(o.value)}
+          onClick={() => !disabled && onChange?.(v)}
           /* ÜSTTEN HİZALI VE TAM GENİŞLİK, ve ikisi de iki satırlık bir
              seçenek yüzünden değişti.
              `items-center` tek satırlık etiketlerde doğru duruyordu; altına
@@ -89,9 +96,9 @@ export function RadioGroup<T extends string>({
               aynı kural işareti aşağı kaydırırdı. */}
           <span
             className={cn("tamga-radio", look !== "chip" && "tamga-choice-mark")}
-            data-checked={value === o.value}
+            data-checked={value === v}
           />
-          <span className="min-w-0 flex-1">{o.label}</span>
+          <span className="min-w-0 flex-1">{etiket}</span>
         </button>
       ))}
     </div>

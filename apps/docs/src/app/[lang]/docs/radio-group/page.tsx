@@ -56,6 +56,14 @@ const T = {
         duruyor, çünkü kenar rengi tek başına bir sinyal olamaz.
       </>
     ),
+    kanca: (
+      <>
+        <strong>Seçenekler kendi kancalarını taşıyor.</strong> <code>value</code> ve{" "}
+        <code>label</code> dışındaki her şey o seçeneğin düğmesine iniyor, yani bir seçenek testin ya
+        da stilin ihtiyaç duyduğu niteliği taşıyabiliyor. Kitin kendi nitelikleri sonra yazılıyor:
+        bir kanca <code>aria-checked</code>&apos;i kazara ezemez.
+      </>
+    ),
     lookIkinci: (
       <>
         İkinci satır <code>label</code>&apos;in içinde: ayrı bir <code>hint</code> alanı yok. Etiket
@@ -110,6 +118,14 @@ const T = {
         The selected shell takes <strong>an outline and a hard offset</strong>, never a fill (Law 2):
         a fill means an action, and &ldquo;this one is chosen&rdquo; is a state rather than an
         action. The mark stays in all three shells, because an edge colour cannot be the only signal.
+      </>
+    ),
+    kanca: (
+      <>
+        <strong>Options carry their own hooks.</strong> Anything beyond <code>value</code> and{" "}
+        <code>label</code> lands on that option&rsquo;s button, so a choice can carry the attribute a
+        test or a style needs. The kit&rsquo;s own attributes are written after it, so a hook cannot
+        accidentally overwrite <code>aria-checked</code>.
       </>
     ),
     lookIkinci: (
@@ -173,6 +189,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <P>{t.lookSecim}</P>
       <Note>{t.lookN}</Note>
       <P>{t.lookIkinci}</P>
+      <P>{t.kanca}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.roles}</Note>

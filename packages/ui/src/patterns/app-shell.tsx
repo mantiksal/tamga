@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import { Icon } from "../components/icon.js";
 import { RailLink } from "../components/rail-link.js";
@@ -18,6 +19,21 @@ export type NavEntry = {
   /** The translated label. In the tooltip on a narrow rail, on the row itself on a wide one. TR: Çevrilmiş etiket. Dar rayda ipucunda, geniş rayda satırın kendisinde. */
   label: string;
   icon: ComponentProps<typeof Icon>["icon"];
+  /**
+   * The group this entry belongs to, already translated. TR: Bu girişin ait olduğu grup, çevrilmiş
+   * hâliyle.
+   *
+   * Ray, ardışık girişleri bu ada göre kümeliyor ve grup değiştiğinde bir başlık çiziyor. Verilmezse
+   * giriş başlıksız kalıyor; hiçbiri vermezse ray tek bir liste olarak çiziliyor, yani eski davranış.
+   *
+   * ALAN DÜZ, VERİ İÇ İÇE DEĞİL. `nav` bir gruplar dizisi olsaydı bu kırıcı bir değişiklik olurdu,
+   * ve boş bir grup kurmak mümkün hâle gelirdi. Düz listede o iki sorun da yok: grup başlığı
+   * verinin bir alanı, ve başlık ancak bir girişi varsa görünüyor.
+   *
+   * YALNIZ GENİŞ RAYDA ÇİZİLİYOR. Dar rayda 40 piksellik bir kutuda başlık okunmuyor; orada
+   * gruplama boşlukla anlatılıyor.
+   */
+  section?: string;
 };
 
 export type AppShellProps = {
@@ -98,16 +114,25 @@ export function AppShell({
           aria-label={labels.primaryNav}
           className={`tamga-rail-scroll flex w-full flex-1 flex-col gap-2 py-1 ${wide ? "" : "items-center"}`}
         >
-          {nav.map((entry) => (
-            /* RAY BAĞLANTISI KİTİN `RailLink`İ, ELLE ÇİZİLMİYOR.
+          {nav.map((entry, i) => (
+            <Fragment key={entry.key}>
+              {/* BAŞLIK GRUP DEĞİŞTİĞİNDE. Ardışık girişler aynı adı taşıdığı sürece tek grup;
+                  ad değişince yeni bir başlık çıkıyor. Tıklanmaz ve tıklanır GÖRÜNMEZ: bir
+                  gezinme listesinde tıklanamayan bir şeyin bağlantıya benzemesi, kullanıcıya
+                  çalışmayan bir hedef gösterir. */}
+              {wide && entry.section && entry.section !== nav[i - 1]?.section ? (
+                <p className={`px-2.5 text-micro font-semibold uppercase tracking-wide text-ink-faint ${i > 0 ? "mt-4 pb-1" : "pb-1"}`}>
+                  {entry.section}
+                </p>
+              ) : null}
+            {/* RAY BAĞLANTISI KİTİN `RailLink`İ, ELLE ÇİZİLMİYOR.
                Burada elle bir `<Link className="tamga-rail-link">` vardı ve
                geniş rayda `tamga-rail-link-wide` sınıfını atlıyordu: etiket
                40 piksellik kutuda "İ..." diye kırpılıyordu. Aynı kontrolün iki
                uygulaması vardı ve yenisi eksikti. `RailLink` artık
                `linkComponent` de aldığı için elle çizmenin sebebi kalmadı; dar
-               raydaki ipucu da onun kendi işi. */
+               raydaki ipucu da onun kendi işi. */}
             <RailLink
-              key={entry.key}
               href={entry.href}
               label={entry.label}
               active={isCurrent(entry.href)}
@@ -117,6 +142,7 @@ export function AppShell({
             >
               <Icon icon={entry.icon} size="base" />
             </RailLink>
+            </Fragment>
           ))}
         </nav>
 

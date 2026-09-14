@@ -49,3 +49,51 @@ describe("AppShell · açık giriş", () => {
     expect(screen.getByRole("main")).toHaveTextContent("gövde");
   });
 });
+
+/**
+ * BÖLÜM BAŞLIKLARI.
+ *
+ * Kit bunu vermiyorken bir panel kabuğu kendi rayını elle çiziyordu: menüsü yedi
+ * bölüme ayrılmıştı ("Siparişler", "Ürünler", "Raporlar") ve başlıklar bilgi
+ * taşıyordu, şablonun düz listesi ise taşıyamıyordu. Elle çizilen ray `AppShell`in
+ * getirdiği her şeyi de dışarıda bırakıyor.
+ */
+describe("AppShell · bölüm başlıkları", () => {
+  const bolumlu = [
+    { key: "orders", href: "/orders", label: "Siparişler", icon: Search, section: "Satış" },
+    { key: "returns", href: "/returns", label: "İadeler", icon: Search, section: "Satış" },
+    { key: "products", href: "/products", label: "Ürünler", icon: Search, section: "Katalog" },
+  ];
+
+  it("geniş rayda grup başına BİR başlık çiziyor, giriş başına değil", () => {
+    render(
+      <AppShell nav={bolumlu} activePath="/orders" rail="wide" labels={LABELS}>
+        <p>gövde</p>
+      </AppShell>,
+    );
+    expect(screen.getAllByText("Satış")).toHaveLength(1);
+    expect(screen.getAllByText("Katalog")).toHaveLength(1);
+    expect(screen.getAllByRole("link")).toHaveLength(3);
+  });
+
+  it("dar rayda başlık çizilmiyor: 40 piksellik kutuda okunmuyor", () => {
+    render(
+      <AppShell nav={bolumlu} activePath="/orders" rail="narrow" labels={LABELS}>
+        <p>gövde</p>
+      </AppShell>,
+    );
+    expect(screen.queryByText("Satış")).toBeNull();
+    expect(screen.getAllByRole("link")).toHaveLength(3);
+  });
+
+  it("`section` verilmeyen menü eskisi gibi tek liste", () => {
+    const duz = bolumlu.map(({ section: _s, ...g }) => g);
+    render(
+      <AppShell nav={duz} activePath="/orders" rail="wide" labels={LABELS}>
+        <p>gövde</p>
+      </AppShell>,
+    );
+    expect(screen.queryByText("Satış")).toBeNull();
+    expect(screen.getAllByRole("link")).toHaveLength(3);
+  });
+});

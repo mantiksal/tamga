@@ -37,6 +37,26 @@ describe("RadioGroup · biçim varyantı", () => {
     expect(screen.getByRole("radio", { name: "Site" }).className).toContain("tamga-choice-chip");
   });
 
+  it("seçeneğin kancası kendi düğmesine iniyor", () => {
+    /* KARDEŞLERİYLE AYNI SÖZLEŞME. `Segmented` ve `Steps` seçenek başına
+       öznitelik taşıyordu, `RadioGroup` taşımıyordu — ve bunu tüketen taraf
+       ödüyordu: bir seçeneğe kanca takmak için bileşen BIRAKILIP sınıf elle
+       yazılıyordu, yani rol ve klavye de bırakılıyordu. */
+    render(
+      <RadioGroup
+        label="Tür"
+        value="api"
+        options={SECENEKLER.map((o) => ({ ...o, "data-tur": o.value }))}
+      />,
+    );
+    const api = document.querySelector('[data-tur="api"]');
+    expect(api).not.toBeNull();
+    expect(api!.getAttribute("role")).toBe("radio");
+    /* Kitin kendi nitelikleri çağıranınkinden SONRA yazılıyor: bir kanca
+       `aria-checked`i kazara ezemez. */
+    expect(api!.getAttribute("aria-checked")).toBe("true");
+  });
+
   it("varsayılan biçim `list` ve kabuk sınıfı almıyor", () => {
     render(<RadioGroup options={SECENEKLER} value="site" label="Tür" />);
     const s = screen.getByRole("radio", { name: "Site" }).className;

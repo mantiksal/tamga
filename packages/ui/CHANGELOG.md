@@ -5,7 +5,30 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
-## 0.4.0
+## 0.4.1
+
+Two gaps that products had been paying for, both found by a gate that asks a product not to
+hand-write a kit class. Each one had pushed a caller off the component entirely.
+
+### Added
+
+- **`RadioGroup` options carry their own attributes.** Anything beyond `value` and `label` lands on
+  that option's button. The sibling components for picking one of several things had carried
+  per-option hooks since 0.3.1 and 0.4.0; this one had not, so a caller who needed to point at a
+  single choice left the component behind and hand-wrote the class, which meant leaving the role and
+  the keyboard behind with it. The kit's own attributes are written after the caller's, so a hook
+  cannot overwrite `aria-checked`.
+
+- **`AppShell` draws section headings.** `NavEntry` takes an optional `section`; the rail groups
+  consecutive entries by it and draws a heading when the group changes. Wide rails only: in a 40px
+  box a heading does not read, and there grouping is carried by spacing.
+
+  A panel whose menu is split into seven named groups could not express that, so it drew its own
+  rail and left behind everything the template brings. The field is flat rather than a nested list
+  of groups, for two reasons: nesting would have been a breaking change, and a nested shape makes an
+  empty group possible. Here a heading exists only if an entry has one.
+
+
 
 **A step now has an identity of its own.** `Steps` took a plain `readonly string[]`, so a step was
 nothing but its translated label. Two consequences followed, and both were silent.

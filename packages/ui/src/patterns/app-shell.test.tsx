@@ -118,3 +118,40 @@ describe("AppShell · yüzey konumlu", () => {
     expect(yuzey!.className).toContain("relative");
   });
 });
+
+/**
+ * EN ÖZEL GİRİŞ AÇIK, EN KISASI DEĞİL.
+ *
+ * Kökün `/` olmadığı bir panelde (`/panel`) kök giriş altındaki her rotayı
+ * yutuyordu: sipariş detayında hem "Pano" hem "Siparişler" açık görünüyordu.
+ * Yanlış cevabı sinsi, çünkü doğru satır DA açık — yani ekranda bir şey eksik
+ * görünmüyor, fazla görünüyor.
+ */
+describe("AppShell · en özel giriş", () => {
+  const ic = [
+    { key: "pano", href: "/panel", label: "Pano", icon: Search },
+    { key: "siparisler", href: "/panel/siparisler", label: "Siparişler", icon: Search },
+  ];
+
+  it("derin bir yolda yalnız EN ÖZEL giriş açık", () => {
+    render(
+      <AppShell nav={ic} activePath="/panel/siparisler/2426460" labels={LABELS}>
+        <p>gövde</p>
+      </AppShell>,
+    );
+    /* ETİKETE DEĞİL KANCAYA BAKILIYOR: dar rayda etiket metin olarak yok,
+       ipucunda. `data-nav` iki genişlikte de aynı. */
+    const acik = screen.getAllByRole("link").filter((a) => a.dataset.active === "true");
+    expect(acik.map((a) => a.dataset.nav)).toEqual(["siparisler"]);
+  });
+
+  it("kökün kendisindeyken kök açık", () => {
+    render(
+      <AppShell nav={ic} activePath="/panel" labels={LABELS}>
+        <p>gövde</p>
+      </AppShell>,
+    );
+    const acik = screen.getAllByRole("link").filter((a) => a.dataset.active === "true");
+    expect(acik.map((a) => a.dataset.nav)).toEqual(["pano"]);
+  });
+});

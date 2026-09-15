@@ -5,7 +5,22 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
-## 0.4.2
+## 0.4.3
+
+### Fixed
+
+- **`AppShell` marks the most specific entry, not every entry above it.** The rule was "an entry
+  owns its subtree, except `/`, which matches exactly". That holds only when the root really is
+  `/`. In a panel mounted under `/panel`, the root entry swallowed every route beneath it: on an
+  order's detail page both "Dashboard" and "Orders" showed as current. The wrong answer was the
+  sneaky kind, because the right entry was lit too, so nothing looked missing.
+
+  Which path is the root is the product's knowledge, not the library's, so this did not become a
+  new prop. The rule was generalised instead: of the entries containing the path, the longest one
+  wins. `/` is now an instance of that rule rather than an exception to it, and the special case is
+  gone.
+
+
 
 ### Added
 

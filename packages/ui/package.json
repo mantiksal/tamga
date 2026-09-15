@@ -1,6 +1,6 @@
 {
   "name": "tamga-ui",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Mantıksal's shared interface library: tokens, physics and components.",
   "license": "MIT",
   "type": "module",

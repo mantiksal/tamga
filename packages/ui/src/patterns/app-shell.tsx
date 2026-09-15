@@ -80,10 +80,26 @@ export function AppShell({
   children,
 }: AppShellProps) {
   /* Bir giriş kendi alt ağacına sahip: `/urunler`, `/urunler/42/fotograflar`
-     üzerinde de açık giriştir. Tam eşleşme yalnız kök yol için, yoksa kısa href
-     altındaki her rotayı yutar. */
-  const isCurrent = (href: string) =>
-    href === "/" ? activePath === href : activePath === href || activePath.startsWith(`${href}/`);
+     üzerinde de açık giriştir.
+
+     AMA EN UZUN EŞLEŞEN KAZANIR, ve bu bir özel durumu ortadan kaldırdı. Önce
+     kural "tam eşleşme yalnız `/` için" diye yazılıydı: kökün `/` olmadığı bir
+     panelde (`/panel`) kök giriş altındaki HER rotayı yutuyordu, yani sipariş
+     detayında hem "Pano" hem "Siparişler" açık görünüyordu. Ölçüldü.
+
+     Kökün hangi yol olduğu ürünün bilgisi, kitin değil — o yüzden kite yeni bir
+     prop eklemek yerine kural genelleştirildi: yolu kapsayan girişlerden EN
+     ÖZELİ açık. `/` de bu kuralın kendiliğinden bir örneği, artık ayrıca
+     yazılmıyor. */
+  const kapsiyor = (href: string) => activePath === href || activePath.startsWith(`${href}/`);
+  const enOzel = nav.reduce<string | null>(
+    (kazanan, entry) =>
+      kapsiyor(entry.href) && (kazanan === null || entry.href.length > kazanan.length)
+        ? entry.href
+        : kazanan,
+    null,
+  );
+  const isCurrent = (href: string) => href === enOzel;
 
   const wide = rail === "wide";
 

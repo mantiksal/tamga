@@ -15,7 +15,7 @@
  * her kurulumda indiriliyorlardı. Kaynakta duruyorlar; indirilen dosya yalnız
  * kuralları taşıyor.
  */
-import { readdir, readFile, writeFile, mkdir, rm } from "node:fs/promises";
+import { readdir, readFile, writeFile, mkdir, rm, stat } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -23,8 +23,68 @@ const here = dirname(fileURLToPath(import.meta.url));
 const src = join(here, "src");
 const dist = join(here, "dist");
 
-await rm(dist, { recursive: true, force: true });
+/* ------------------------------------------------------------------ *
+ * `dist` SİLİNMİYOR, ÜSTÜNE YAZILIYOR — ve bunun somut bir sebebi var.
+ *
+ * Eskiden ilk satır `rm -rf dist` idi. Doğru görünüyordu: eski çıktı gider,
+ * yenisi gelir. Ama `dist` yalnız yayınlanan bir klasör değil, AYAKTA DURAN
+ * BİR SUNUCUNUN OKUDUĞU klasör: doküman sitesinin CSS'i oradan geliyor
+ * (`@import ".../dist/styles.css"`). Silme ile yeniden yazma arasındaki
+ * pencere `tsc`yi de kapsıyordu, yani saniyeler.
+ *
+ * Sonuç iki kez aynı gün yaşandı: `verify` koşarken doküman sitesi
+ * "Can't resolve './theme.css'" diye patladı, ve turbopack o hatayı
+ * ÖNBELLEĞE ALDIĞI için dosya geri geldiğinde bile 500 vermeye devam etti.
+ * Hata koda benziyordu, oysa yarış durumuydu.
+ *
+ * Şimdi her dosya yerinde değiştiriliyor: pencere tek bir dosyanın yazılma
+ * süresi kadar. Silmenin asıl işi (kaynaktan kalkan bir dosyanın çıktıda
+ * kalmaması) kayboldu mu? Hayır: aşağıda BEKLENEN çıktı kümesi kaynaktan
+ * hesaplanıp fazlası temizleniyor. Ve o temizlik `tsc`den ÖNCE yapılıyor,
+ * çünkü tsc'nin ne üreteceği kaynak ağacından zaten biliniyor.
+ * ------------------------------------------------------------------ */
 await mkdir(dist, { recursive: true });
+
+/** `src` altındaki her dosya; test dosyaları tsconfig'te zaten hariç. */
+async function* kaynaklar(d) {
+  for (const n of await readdir(d, { withFileTypes: true })) {
+    const p = join(d, n.name);
+    if (n.isDirectory()) yield* kaynaklar(p);
+    else yield p;
+  }
+}
+async function* ciktilar(d) {
+  try {
+    for (const n of await readdir(d, { withFileTypes: true })) {
+      const p = join(d, n.name);
+      if (n.isDirectory()) yield* ciktilar(p);
+      else yield p;
+    }
+  } catch {
+    /* dist henüz yok */
+  }
+}
+
+const beklenen = new Set();
+for await (const yol of kaynaklar(src)) {
+  const bagil = yol.slice(src.length + 1);
+  if (bagil.endsWith(".css")) {
+    beklenen.add(join(dist, bagil));
+  } else if (/\.tsx?$/.test(bagil) && !/\.test\.tsx?$/.test(bagil)) {
+    const govde = bagil.replace(/\.tsx?$/, "");
+    beklenen.add(join(dist, `${govde}.js`));
+    beklenen.add(join(dist, `${govde}.d.ts`));
+    beklenen.add(join(dist, `${govde}.d.ts.map`));
+  }
+}
+
+let bayat = 0;
+for await (const yol of ciktilar(dist)) {
+  if (!beklenen.has(yol)) {
+    await rm(yol, { force: true });
+    bayat++;
+  }
+}
 
 const { version } = JSON.parse(await readFile(join(here, "package.json"), "utf8"));
 const banner = `/*! tamga-ui ${version} · MIT · https://tamga.org.tr */\n`;
@@ -55,6 +115,8 @@ for (const f of files) {
   sonra += cikti.length;
   await writeFile(join(dist, f), cikti);
 }
+
+if (bayat) console.log(`  ${bayat} bayat çıktı silindi (kaynağı kalmamış).`);
 
 const kb = (n) => `${Math.round(n / 1024)} kB`;
 console.log(

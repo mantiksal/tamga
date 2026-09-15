@@ -70,17 +70,36 @@ const T = {
     whatTitle: "İçinde ne var",
     whatLead: "Kütüphaneler kod gönderir. Tamga kuralı da gönderiyor.",
     whatItems: [
-      ["Token'lar", `Renk, tipografi, boşluk ve süre tek dosyada tanımlı. Bileşenler kendi değerlerini uydurmuyor, buradan okuyor: ${S.token} token, ${S.sinif} sınıf.`],
-      [`Bileşenler`, `Her bileşenin kendi sayfası var: çalışan örnek, ne zaman kullanılacağı ve tipinden üretilmiş props tablosu. ${S.bilesen} bileşen, ${S.sayfa} sayfa.`],
-      ["Desenler", "Form düzeni, doğrulama, boş durum, onay isteme. Bileşenlerin bir arada nasıl davrandığını anlatan katman."],
-      ["Temalar", "Her marka bir token bloğu. Yeni bir marka eklemek için kod dalı açılmıyor, dosya yazılıyor."],
-      ["Erişilebilirlik", "Klavye gezinmesi, görünür odak ve kontrast eşiği bileşenin kabul kriteri. Sonradan eklenen bir katman değil."],
-      ["Değişiklik günlüğü", "Her sürümde neyin değiştiği ve kırıcı değişikliklerde nasıl geçileceği yazılı duruyor."],
+      [
+        "Token'lar",
+        `Renk, tipografi, boşluk ve süre tek dosyada tanımlı. Bileşenler kendi değerlerini uydurmuyor, buradan okuyor: ${S.token} token, ${S.sinif} sınıf.`,
+      ],
+      [
+        `Bileşenler`,
+        `Her bileşenin kendi sayfası var: çalışan örnek, ne zaman kullanılacağı ve tipinden üretilmiş props tablosu. ${S.bilesen} bileşen, ${S.sayfa} sayfa.`,
+      ],
+      [
+        "Desenler",
+        "Form düzeni, doğrulama, boş durum, onay isteme. Bileşenlerin bir arada nasıl davrandığını anlatan katman.",
+      ],
+      [
+        "Temalar",
+        "Her marka bir token bloğu. Yeni bir marka eklemek için kod dalı açılmıyor, dosya yazılıyor.",
+      ],
+      [
+        "Erişilebilirlik",
+        "Klavye gezinmesi, görünür odak ve kontrast eşiği bileşenin kabul kriteri. Sonradan eklenen bir katman değil.",
+      ],
+      [
+        "Değişiklik günlüğü",
+        "Her sürümde neyin değiştiği ve kırıcı değişikliklerde nasıl geçileceği yazılı duruyor.",
+      ],
     ],
     gatesNote: `${S.kapi} kapı bunları derleme anında denetliyor: ürün adı sızarsa, ölçek dışına çıkılırsa, bir prop belgelenmeden kalırsa ya da bir renk okunmazsa build duruyor.`,
 
     startTitle: "Üç satırda başla",
-    startBody: "Sistem sıradan bir npm paketi olarak geliyor. React 19 bir peer dependency, yani kendi React'ini getirmiyor.",
+    startBody:
+      "Sistem sıradan bir npm paketi olarak geliyor. React 19 bir peer dependency, yani kendi React'ini getirmiyor.",
     startCta: "Kurulumun tamamı",
 
     componentsTitle: `${S.bilesen} bileşen, ${S.sayfa} sayfa`,
@@ -90,9 +109,12 @@ const T = {
 
     nameEyebrow: "Adı nereden geliyor",
     nameTitle: "Bir damganın işi, her yüzeyde aynı kalmaktı.",
-    nameP1: "Tamga, bozkır halklarının hayvana, eşyaya ve taşa vurduğu mühürdü; bir şeyin kime ait olduğunu tek bakışta söylerdi. Kaşgarlı Mahmud, on birinci yüzyılda Oğuz boylarını sayarken yirmi birinin damgasını da çizmişti.",
-    nameP2: "Bu işaretler süslü olsun diye değil, tanınsın diye çizildi. Kayaya kazınırken de sikkeye basılırken de kendisi kalması gerekiyordu.",
-    nameP3: "Bir bileşenden beklediğimiz de bu. Hangi üründe, hangi ölçekte kullanılırsa kullanılsın kendisi kalması.",
+    nameP1:
+      "Tamga, bozkır halklarının hayvana, eşyaya ve taşa vurduğu mühürdü; bir şeyin kime ait olduğunu tek bakışta söylerdi. Kaşgarlı Mahmud, on birinci yüzyılda Oğuz boylarını sayarken yirmi birinin damgasını da çizmişti.",
+    nameP2:
+      "Bu işaretler süslü olsun diye değil, tanınsın diye çizildi. Kayaya kazınırken de sikkeye basılırken de kendisi kalması gerekiyordu.",
+    nameP3:
+      "Bir bileşenden beklediğimiz de bu. Hangi üründe, hangi ölçekte kullanılırsa kullanılsın kendisi kalması.",
 
     save: "Kaydet",
     cancel: "Vazgeç",
@@ -127,22 +149,36 @@ const T = {
     tokenBody:
       "Spacing, scale and behavior hold steady across every product. The only thing that changes is the token file: color and typeface. Pick a product below and watch the same components come out different.",
     tokenGroup: "Product type",
-    proofNote: "None of this is a screenshot. Every button, tag and card comes out of the package, and gets redrawn when the theme changes.",
+    proofNote:
+      "None of this is a screenshot. Every button, tag and card comes out of the package, and gets redrawn when the theme changes.",
 
     whatTitle: "What's inside",
     whatLead: "Libraries ship code. Tamga ships the rules too.",
     whatItems: [
-      ["Tokens", `Color, type, spacing and duration live in one file. Components read from it instead of inventing their own values: ${S.token} tokens, ${S.sinif} classes.`],
-      ["Components", `Each one has its own page: a working example, when to reach for it, and a props table generated from the types. ${S.bilesen} components, ${S.sayfa} pages.`],
-      ["Patterns", "Form layout, validation, empty states, asking for confirmation. The layer that says how components behave together."],
+      [
+        "Tokens",
+        `Color, type, spacing and duration live in one file. Components read from it instead of inventing their own values: ${S.token} tokens, ${S.sinif} classes.`,
+      ],
+      [
+        "Components",
+        `Each one has its own page: a working example, when to reach for it, and a props table generated from the types. ${S.bilesen} components, ${S.sayfa} pages.`,
+      ],
+      [
+        "Patterns",
+        "Form layout, validation, empty states, asking for confirmation. The layer that says how components behave together.",
+      ],
       ["Themes", "A brand is a token file. Adding one takes a file, not a branch."],
-      ["Accessibility", "Keyboard navigation, visible focus and contrast are acceptance criteria, not a pass we make later."],
+      [
+        "Accessibility",
+        "Keyboard navigation, visible focus and contrast are acceptance criteria, not a pass we make later.",
+      ],
       ["Changelog", "What changed in every release, and how to move across a breaking one."],
     ],
     gatesNote: `${S.kapi} gates enforce this at build time: if a product name leaks, if something goes off scale, if a prop is left undocumented or if a colour fails contrast, the build stops.`,
 
     startTitle: "Start in three lines",
-    startBody: "The system arrives as an ordinary npm package. React 19 is a peer dependency, so it does not bring its own.",
+    startBody:
+      "The system arrives as an ordinary npm package. React 19 is a peer dependency, so it does not bring its own.",
     startCta: "Full installation",
 
     componentsTitle: `${S.bilesen} components, ${S.sayfa} pages`,
@@ -152,9 +188,12 @@ const T = {
 
     nameEyebrow: "Where the name comes from",
     nameTitle: "A tamga had one job: to stay itself on any surface.",
-    nameP1: "A tamga was the mark steppe peoples burned into livestock, pressed onto goods and cut into stone. It said at a glance whose something was. Writing in the eleventh century, Mahmud al-Kashgari listed the Oghuz tribes and drew twenty-one of their marks.",
-    nameP2: "These signs were not drawn to be admired. They were drawn to be recognized, and to survive being cut into rock or struck onto a coin.",
-    nameP3: "That is what we want from a component. Whatever product it lands in and whatever size it runs at, it stays itself.",
+    nameP1:
+      "A tamga was the mark steppe peoples burned into livestock, pressed onto goods and cut into stone. It said at a glance whose something was. Writing in the eleventh century, Mahmud al-Kashgari listed the Oghuz tribes and drew twenty-one of their marks.",
+    nameP2:
+      "These signs were not drawn to be admired. They were drawn to be recognized, and to survive being cut into rock or struck onto a coin.",
+    nameP3:
+      "That is what we want from a component. Whatever product it lands in and whatever size it runs at, it stays itself.",
 
     save: "Save",
     cancel: "Cancel",
@@ -259,54 +298,16 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
           </p>
 
           <div className="mt-9">
-          <TokenKatmani lang={lang} labels={{ group: t.tokenGroup }}>
-          <div className="tamga-card docs-grid grid gap-8 p-8 sm:p-10 lg:grid-cols-[1.1fr_1fr]">
-            <div className="flex flex-col gap-6">
-              <span className="flex flex-wrap items-center gap-3">
-                <Button variant="primary">{t.save}</Button>
-                <Button>{t.cancel}</Button>
-                <Button variant="danger">{t.delete}</Button>
-              </span>
-              <span className="flex flex-wrap items-center gap-3">
-                <StatusChip label={t.live} state="positive" dot />
-                <StatusChip label={t.waiting} state="caution" dot />
-                <StatusChip label="EVT-2481" state="danger" mono live />
-                <span className="flex items-center gap-2 text-small">
-                  <Dot state="neutral" /> {t.quiet}
-                </span>
-              </span>
-              <span className="flex flex-wrap items-center gap-8">
-                <ScoreRing value={87} size={96} label={t.score} bandLabel={t.good} />
-                <Kpi
-                  label={t.orders}
-                  value={248}
-                  delta={12}
-                  chart={
-                    <Sparkline
-                      values={[42, 38, 45, 51, 47, 60, 58, 66, 61, 72, 68, 80]}
-                      tone="positive"
-                    />
-                  }
-                  className="min-w-52"
-                />
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-6">
-              <Card>
-                <CardHead action={<Button size="sm">{t.edit}</Button>}>
-                  <h3 className="text-subhead font-semibold text-ink">{t.stock}</h3>
-                  <Label>{t.stockMeta}</Label>
-                </CardHead>
-                <CardBody>{t.cardBody}</CardBody>
-              </Card>
-              <span className="flex items-center gap-4">
-                <Switch on label={t.notify} />
-                <span className="text-body">{t.notify}</span>
-              </span>
-            </div>
-          </div>
-          </TokenKatmani>
+            <TokenKatmani
+              lang={lang}
+              labels={{
+                group: t.tokenGroup,
+                save: t.save,
+                cancel: t.cancel,
+                delete: t.delete,
+                edit: t.edit,
+              }}
+            />
           </div>
           <p className="mt-4 text-[length:var(--docs-small)] text-ink-faint">{t.proofNote}</p>
         </section>

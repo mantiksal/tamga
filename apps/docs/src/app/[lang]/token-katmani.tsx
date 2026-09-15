@@ -2,6 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { paletteVars, makePalette } from "tamga-ui/palette";
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHead,
+  Dot,
+  Kpi,
+  Label,
+  ScoreRing,
+  Sparkline,
+  StatusChip,
+  Switch,
+} from "tamga-ui";
 import type { Locale } from "@/i18n/config";
 
 /**
@@ -45,11 +58,40 @@ const SISTEM_SERIF = 'ui-serif, Georgia, Cambria, "Times New Roman", Times, seri
 const SISTEM_MONO =
   'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace';
 
+type Iki = { tr: string; en: string };
+
+/**
+ * Bir ürünün kendi SÖZLÜĞÜ.
+ *
+ * ÖNCE YOKTU VE BU DEMOYU ÇÜRÜTÜYORDU. Üç düğme yalnız rengi değiştiriyordu:
+ * fotoğraf uygulamasında "Stok · 48 kalem" yazıyordu, takım panosunda
+ * "Sipariş 248". Bu bölümün iddiası "aynı sistem, başka ürün"; içerik tek bir
+ * ürünün kaldığı sürece sayfa tam tersini kanıtlıyordu.
+ *
+ * Eylem adları (Kaydet · Vazgeç · Sil) üçünde de aynı, çünkü onlar ürünün değil
+ * ARAYÜZÜN sözcükleri. Değişen şey neyin sayıldığı, neyin listelendiği ve
+ * durumların adı.
+ */
+type Sozluk = {
+  skor: Iki;
+  bant: Iki;
+  sayac: Iki;
+  kartBaslik: Iki;
+  kartMeta: Iki;
+  kartGovde: Iki;
+  acik: Iki;
+  bekleyen: Iki;
+  sessiz: Iki;
+  kod: string;
+  anahtarAd: Iki;
+};
+
 type Urun = {
   anahtar: string;
-  ad: { tr: string; en: string };
+  ad: Iki;
   marka: string;
   yazi: string;
+  sozluk: Sozluk;
 };
 
 const URUNLER: Urun[] = [
@@ -58,30 +100,79 @@ const URUNLER: Urun[] = [
     ad: { tr: "Fotoğraf uygulaması", en: "Photo editor" },
     marka: "#6d4aff",
     yazi: SISTEM_SANS,
+    sozluk: {
+      skor: { tr: "Kalite", en: "Quality" },
+      bant: { tr: "iyi", en: "good" },
+      sayac: { tr: "Dışa aktarım", en: "Exports" },
+      kartBaslik: { tr: "Albüm", en: "Album" },
+      kartMeta: { tr: "48 fotoğraf", en: "48 photos" },
+      kartGovde: {
+        tr: "Ham dosyalar yüklendikleri sırayla işleniyor.",
+        en: "Raw files are processed in the order they arrive.",
+      },
+      acik: { tr: "İşlendi", en: "Processed" },
+      bekleyen: { tr: "Kuyrukta", en: "Queued" },
+      sessiz: { tr: "Taslak", en: "Draft" },
+      kod: "IMG-2481",
+      anahtarAd: { tr: "Otomatik yedekleme", en: "Auto backup" },
+    },
   },
   {
     anahtar: "ticaret",
     ad: { tr: "E-ticaret paneli", en: "Commerce dashboard" },
     marka: "#e02938",
     yazi: SISTEM_SANS,
+    sozluk: {
+      skor: { tr: "Sağlık", en: "Health" },
+      bant: { tr: "iyi", en: "good" },
+      sayac: { tr: "Sipariş", en: "Orders" },
+      kartBaslik: { tr: "Stok", en: "Stock" },
+      kartMeta: { tr: "48 kalem", en: "48 items" },
+      kartGovde: {
+        tr: "Depodan düşen her kalem aynı akşam sayılıyor.",
+        en: "Every item leaving the warehouse is counted the same evening.",
+      },
+      acik: { tr: "Yayında", en: "Live" },
+      bekleyen: { tr: "Bekliyor", en: "Waiting" },
+      sessiz: { tr: "Sessiz", en: "Quiet" },
+      kod: "SIP-2481",
+      anahtarAd: { tr: "Bildirimler", en: "Notifications" },
+    },
   },
   {
     anahtar: "gorev",
     ad: { tr: "Takım görev panosu", en: "Team task board" },
     marka: "#0a7a5f",
     yazi: SISTEM_SERIF,
+    sozluk: {
+      skor: { tr: "Tamamlanma", en: "Completion" },
+      bant: { tr: "iyi", en: "good" },
+      sayac: { tr: "Kapanan görev", en: "Closed tasks" },
+      kartBaslik: { tr: "Sprint", en: "Sprint" },
+      kartMeta: { tr: "48 görev", en: "48 tasks" },
+      kartGovde: {
+        tr: "Devralınan her görev sahibiyle birlikte taşınıyor.",
+        en: "Every task that moves carries its owner with it.",
+      },
+      acik: { tr: "Devam ediyor", en: "In progress" },
+      bekleyen: { tr: "İncelemede", en: "In review" },
+      sessiz: { tr: "Arşiv", en: "Archived" },
+      kod: "GRV-2481",
+      anahtarAd: { tr: "Günlük özet", en: "Daily digest" },
+    },
   },
 ];
 
 export function TokenKatmani({
   lang,
-  children,
   labels,
 }: {
   lang: Locale;
-  /** Yeniden boyanacak canlı bileşenler. */
-  children: React.ReactNode;
-  labels: { group: string };
+  /**
+   * Arayüzün kendi sözcükleri: üç üründe de aynı, çünkü bir eylem adı ürünün
+   * değil ARAYÜZÜN kelimesidir.
+   */
+  labels: { group: string; save: string; cancel: string; delete: string; edit: string };
 }) {
   const [secili, setSecili] = useState(URUNLER[1]!);
 
@@ -100,6 +191,7 @@ export function TokenKatmani({
     return () => gozcu.disconnect();
   }, []);
 
+  const s = secili.sozluk;
   const cift = makePalette(secili.marka);
   const stil: Record<string, string> = {
     ...paletteVars(koyu ? cift.dark : cift.light),
@@ -148,8 +240,57 @@ export function TokenKatmani({
         })}
       </div>
 
+      {/* ÖNİZLEME BU BİLEŞENİN İÇİNDE, dışarıdan `children` olarak gelmiyor.
+          Gelseydi sözcükler seçimden bağımsız kalırdı — ve bir süre öyleydi:
+          fotoğraf uygulaması "Stok · 48 kalem" gösteriyordu. Renk ve sözlük
+          aynı seçimin iki yüzü, o yüzden aynı yerde duruyorlar. */}
       <div style={stil} className="rounded-[var(--radius-card)]">
-        {children}
+        <div className="tamga-card docs-grid grid gap-8 p-8 sm:p-10 lg:grid-cols-[1.1fr_1fr]">
+          <div className="flex flex-col gap-6">
+            <span className="flex flex-wrap items-center gap-3">
+              <Button variant="primary">{labels.save}</Button>
+              <Button>{labels.cancel}</Button>
+              <Button variant="danger">{labels.delete}</Button>
+            </span>
+            <span className="flex flex-wrap items-center gap-3">
+              <StatusChip label={s.acik[lang]} state="positive" dot />
+              <StatusChip label={s.bekleyen[lang]} state="caution" dot />
+              <StatusChip label={s.kod} state="danger" mono live />
+              <span className="flex items-center gap-2 text-small">
+                <Dot state="neutral" /> {s.sessiz[lang]}
+              </span>
+            </span>
+            <span className="flex flex-wrap items-center gap-8">
+              <ScoreRing value={87} size={96} label={s.skor[lang]} bandLabel={s.bant[lang]} />
+              <Kpi
+                label={s.sayac[lang]}
+                value={248}
+                delta={12}
+                chart={
+                  <Sparkline
+                    values={[42, 38, 45, 51, 47, 60, 58, 66, 61, 72, 68, 80]}
+                    tone="positive"
+                  />
+                }
+                className="min-w-52"
+              />
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            <Card>
+              <CardHead action={<Button size="sm">{labels.edit}</Button>}>
+                <h3 className="text-subhead font-semibold text-ink">{s.kartBaslik[lang]}</h3>
+                <Label>{s.kartMeta[lang]}</Label>
+              </CardHead>
+              <CardBody>{s.kartGovde[lang]}</CardBody>
+            </Card>
+            <span className="flex items-center gap-4">
+              <Switch on label={s.anahtarAd[lang]} />
+              <span className="text-body">{s.anahtarAd[lang]}</span>
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );

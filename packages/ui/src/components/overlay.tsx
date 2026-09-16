@@ -436,19 +436,30 @@ export function Toast({
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
-  const mark = tone === "neutral" ? "var(--color-ink)" : toneOf(tone).mark;
+  /* NÖTR RENK ALMIYOR, VE BU ÖLÇEĞİN KURALI: renk taşımayarak anlam taşıyan tek
+     ton o. Renkli değişkenler tanımsız bırakılıyor, CSS yedeğe düşüyor. */
+  const t = tone === "neutral" ? null : toneOf(tone);
+  const mark = t ? t.mark : "var(--color-ink)";
   return (
     <div
 {...dataProps(rest)}
       role="status"
-      className="tamga-toast tamga-overlay flex w-80 items-start gap-4 p-4"
-      style={{ animation: "tamga-toast-in var(--duration-base) var(--ease-standard) both" }}
+      className="tamga-toast flex w-full max-w-80 items-start gap-4 p-4"
+      style={
+        {
+          animation: "tamga-toast-in var(--duration-base) var(--ease-standard) both",
+          ...(t ? { "--toast-wash": t.bg } : null),
+        } as React.CSSProperties
+      }
     >
-      <span className="mt-1 size-2.5 shrink-0" style={{ background: mark }} />
+      <span className="tamga-toast-mark mt-1 size-2.5 shrink-0" style={{ background: mark }} />
       <div className="min-w-0 flex-1">
         <p className="text-body font-medium text-ink">{title}</p>
+        {/* GÖVDE `ink-soft`, `ink-faint` DEĞİL. Faint, kartın beyazı için
+            seçilmişti; bir tonun yıkaması ondan koyu ve aradaki fark AA'yı
+            zorluyordu. Soft ikisinde de okunuyor. */}
         {description ? (
-          <p className="mt-1 text-small leading-relaxed text-ink-faint">{description}</p>
+          <p className="mt-1 text-small leading-relaxed text-ink-soft">{description}</p>
         ) : null}
         {action ? <div className="mt-3">{action}</div> : null}
       </div>
@@ -484,7 +495,13 @@ export function ToastViewport({
 }) {
   return (
     <div {...dataProps(rest)} className={`pointer-events-none fixed z-50 flex flex-col gap-2 ${corners[position]}`}>
-      <div className="pointer-events-auto flex flex-col gap-2">{children}</div>
+      {/* GENİŞLİK KABIN KARARI, BİLDİRİMİN DEĞİL.
+          `Toast` sabit `w-80`di ve dar bir kapta taşıyordu; `w-full max-w-80`e
+          çevrilince bu sefer TERS kırıldı: kap içeriğe göre daralan bir sütun
+          olduğu için `w-full` çöküyor ve bildirim 146 piksele iniyordu. Ölçü
+          burada veriliyor — 320 piksel, ve ekran ondan darsa kenar boşluğu
+          kadar küçülüyor (bir telefonda 320 + 2×24 zaten sığmıyordu). */}
+      <div className="tamga-toast-stack pointer-events-auto flex flex-col gap-2">{children}</div>
     </div>
   );
 }

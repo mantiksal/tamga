@@ -664,6 +664,17 @@
   /* The wash behind a healthy or resolved chip.
      TR: Sağlıklı ya da çözülmüş bir çipin arkasındaki yıkama. */
   --color-resolved-bg: #e3f3ec;
+  /* Something happened and it is worth knowing, but nobody has to act. The tone
+     the other three leave uncovered: not broken, not heading there, not solved.
+     Blue because it is the one hue with no urgency attached to it anywhere in
+     this palette, and it never decorates either.
+     TR: Bir şey oldu ve bilinmesi iyi olur, ama kimsenin harekete geçmesi gerekmiyor.
+     Öbür üçünün boş bıraktığı ton: bozuk değil, o yöne gitmiyor, çözülmüş de değil.
+     Mavi, çünkü bu palette hiçbir yere aciliyet bağlanmamış tek renk o. */
+  --color-info: #23648f;
+  /* The wash behind an informational chip or row.
+     TR: Bilgi çipinin ya da satırının arkasındaki yıkama. */
+  --color-info-bg: #e2eef6;
   /* Was #716b5d, the same value as ink-faint, and it failed on the one ground it
      is documented against: silent on chart-fill measured 4.41:1, under AA. It
      passed on the card (5.17:1), which is why it went unnoticed: the healthy

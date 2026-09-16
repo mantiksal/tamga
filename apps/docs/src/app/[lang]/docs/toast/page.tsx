@@ -1,5 +1,5 @@
 import { ToastDemo } from "@/components/interactive";
-import { Toast, ToastViewport } from "tamga-ui";
+import { Toast } from "tamga-ui";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -47,6 +47,21 @@ const T = {
         düşer, çünkü dört bildirim aynı anda okunmaz, yalnız üst üste birikir.
       </>
     ),
+    tones: "Beş ton",
+    tonesWhy: (
+      <>
+        Bildirimin kendisi tona boyanıyor, kenarındaki işaret değil: bir toast ekranda iki saniye
+        duruyor ve o sürede okunan şey kutunun rengi oluyor. <code>neutral</code> bilerek renksiz:
+        bu ölçekte anlamı renk TAŞIMAYARAK taşıyan tek ton o.
+      </>
+    ),
+    toneTitle: {
+      positive: "Kaydedildi",
+      info: "Dışa aktarma sıraya alındı",
+      caution: "İki satır atlandı",
+      danger: "Gönderilemedi",
+      neutral: "Taslak güncellendi",
+    },
     rules: "Kurallar",
     notError: (
       <>
@@ -82,6 +97,22 @@ const T = {
         oldest, because four notifications are not read at once, they only pile up.
       </>
     ),
+    tones: "Five tones",
+    tonesWhy: (
+      <>
+        The notification itself takes the tone, not a mark on its edge: a toast is on screen for
+        about two seconds, and what gets read in that time is the colour of the box.{" "}
+        <code>neutral</code> stays uncoloured on purpose: on this scale it is the one tone that
+        carries meaning by NOT carrying colour.
+      </>
+    ),
+    toneTitle: {
+      positive: "Saved",
+      info: "Export queued",
+      caution: "Two rows skipped",
+      danger: "Could not send",
+      neutral: "Draft updated",
+    },
     rules: "Rules",
     notError: (
       <>
@@ -121,33 +152,21 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.corners}</H2>
       <P>{t.cornersWhy}</P>
+      <H2>{t.tones}</H2>
+      <P>{t.tonesWhy}</P>
       <Demo
         labels={dict.demo}
         align="start"
         grid={false}
-        code={`<ToastViewport position="top-left">…</ToastViewport>
-<ToastViewport position="top-right">…</ToastViewport>
-<ToastViewport position="bottom-left">…</ToastViewport>
-<ToastViewport position="bottom-right">…</ToastViewport>`}
+        code={`<Toast tone="positive" title="…" dismissLabel="…" />
+<Toast tone="info"     title="…" dismissLabel="…" />
+<Toast tone="caution"  title="…" dismissLabel="…" />
+<Toast tone="danger"   title="…" dismissLabel="…" />
+<Toast tone="neutral"  title="…" dismissLabel="…" />`}
       >
-        {/* Gerçek `ToastViewport` sabit konumlu (`fixed`) — sayfanın köşesine
-            yapışır. Bir örnekte onu kullanmak dört kutuyu ekranın gerçek
-            köşelerine fırlatırdı, o yüzden burada yerleşim şeması var. */}
-        <div className="relative h-56 w-full">
-          {(
-            [
-              ["top-left", "top-2 left-2"],
-              ["top-right", "top-2 right-2"],
-              ["bottom-left", "bottom-2 left-2"],
-              ["bottom-right", "bottom-2 right-2"],
-            ] as const
-          ).map(([pos, cls]) => (
-            <span key={pos} className={`absolute w-52 ${cls}`}>
-              <Toast tone="positive" title={t.saved} dismissLabel="✕" />
-              <span className="mt-1 block text-center font-mono text-caption text-ink-faint">
-                {pos}
-              </span>
-            </span>
+        <div className="flex w-full flex-col gap-3">
+          {(["positive", "info", "caution", "danger", "neutral"] as const).map((ton) => (
+            <Toast key={ton} tone={ton} title={t.toneTitle[ton]} dismissLabel="✕" />
           ))}
         </div>
       </Demo>

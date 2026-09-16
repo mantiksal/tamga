@@ -15,14 +15,19 @@ export type ToneStyle = {
 };
 
 /**
- * Four roles, and nothing outside them.
+ * Five roles, and nothing outside them.
  *
  * `neutral` is the one that carries meaning by NOT carrying colour: a grey row
  * says "this is not reporting" on its own. That only works while it stays the
  * single uncoloured state — which is why healthy is green here rather than
  * neutral, a deliberate reversal recorded in the product's design notes.
+ *
+ * `info` is the newest and it fills a real hole rather than adding a shade:
+ * the other four answer "is something wrong", and a product that only wants to
+ * SAY something had to pick between a grey that reads as "not reporting" and a
+ * green that reads as "solved". Both are a lie about the same sentence.
  */
-export type Tone = "neutral" | "positive" | "caution" | "danger";
+export type Tone = "neutral" | "positive" | "caution" | "danger" | "info";
 
 export const tones: Record<Tone, ToneStyle> = {
   positive: {
@@ -40,6 +45,11 @@ export const tones: Record<Tone, ToneStyle> = {
     fg: "var(--color-critical)",
     mark: "var(--color-critical)",
     bg: "var(--color-critical-bg)",
+  },
+  info: {
+    fg: "var(--color-info)",
+    mark: "var(--color-info)",
+    bg: "var(--color-info-bg)",
   },
   neutral: {
     fg: "var(--color-silent)",
@@ -67,6 +77,9 @@ export const TONE_RANK: Record<Tone, number | null> = {
   danger: 90,
   caution: null,
   positive: null,
+  /* Bir bilgi asla nabız atmıyor: "bilinmesi iyi olur" ile "şimdi buraya bak"
+     aynı cümle değil, ve nabzı ikincisi için saklı tutmak bu ölçeğin kuralı. */
+  info: null,
   neutral: null,
 };
 

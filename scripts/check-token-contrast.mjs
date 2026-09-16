@@ -44,6 +44,18 @@ const CIFTLER = [
   ["--color-nav-idle", "--color-rail"],
   ["--color-nav-hover", "--color-nav-hover-bg"],
   ["--color-critical", "--color-shell"],
+  /* DURUM RENGİ KENDİ YIKAMASININ ÜSTÜNDE. Buraya kadar denetlenmiyordu ve bir
+     ton eklendiğinde kapı sessizce geçiyordu: tek denetlenen durum çifti
+     critical/shell'di. Oysa bir çip, bir satır ve bir bildirim tonu kendi
+     yıkamasının üstüne koyuyor — okunması gereken asıl zemin o. */
+  ["--color-critical", "--color-critical-bg"],
+  ["--color-warn", "--color-warn-bg"],
+  ["--color-resolved", "--color-resolved-bg"],
+  ["--color-info", "--color-info-bg"],
+  /* Bu çift zaten `--color-silent`in yorumunda ölçülmüş ve bir kez düşmüştü
+     (4.41). Ölçümün yorumda durup kapıda durmaması, aynı düşüşün ikinci kez
+     sessizce olabileceği anlamına geliyordu. */
+  ["--color-silent", "--color-chart-fill"],
 ];
 
 const { kitAcik, kitKoyu } = bloklar();

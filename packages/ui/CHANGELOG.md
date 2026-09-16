@@ -5,6 +5,51 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.4.4
+
+### Added
+
+- **A fifth tone: `info`.** The scale answered one question — is something wrong — in four ways:
+  solved, heading there, broken, or not reporting. A product that only wants to SAY something had
+  to choose between a grey that reads as "not reporting" and a green that reads as "solved". Both
+  are a lie about the same sentence. `info` is blue because blue is the one hue this palette has
+  never attached urgency to, and like the other three it never decorates. It never pulses either:
+  "worth knowing" and "look here, now" are not the same sentence, and the pulse stays with the
+  second.
+
+  New tokens: `--color-info` and `--color-info-bg`, in both themes. The dark value leans toward
+  cyan rather than the brand's navy, for the same reason the other statuses stay warm there — a
+  navy signal sinks into a navy ground.
+
+### Changed
+
+- **`Toast` takes its tone as the surface, not as a mark on its edge.** It was a white box with a
+  ten-pixel square in the corner. A toast is on screen for about two seconds, and what gets read in
+  that time is the colour of the box, not a square beside the text. The wash was already designed
+  for this — `--color-*-bg` is documented as "a tint, not a fill" — so the tone now paints the
+  surface and the square stays as the secondary cue. `neutral` is unchanged and stays uncoloured,
+  which is its whole job on this scale.
+
+  The edge and the drop stay neutral on purpose: painting them in the tone as well put a hard frame
+  around a soft wash, and the box ended up shouting in the exact way the wash exists to prevent.
+
+  **This changes how every existing toast looks without any change at the call site.** Nothing to
+  migrate; if a product wants the old white box, `tone="neutral"` is it.
+
+### Fixed
+
+- **A toast no longer overflows a container narrower than itself.** Its width was fixed at 320px,
+  so a narrow parent got a toast hanging out of it, and a 360px phone got one hanging off the
+  screen (320 plus two 24px gutters does not fit). The measurement moved to `ToastViewport`, which
+  is the thing that knows how much room there is: the column is 20rem and shrinks by the gutters
+  when the screen is narrower.
+
+- **The contrast gate now measures a status colour on its own wash.** It only ever checked
+  `critical` against the shell, so the pair that a chip, a row and a toast actually put on screen
+  was never measured — and a new tone could be added without anything looking. The five pairs are
+  gated now, including `silent` on `chart-fill`, which had already failed once and was recorded in
+  a comment rather than a gate.
+
 ## 0.4.3
 
 ### Fixed

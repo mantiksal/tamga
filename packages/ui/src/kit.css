@@ -196,6 +196,12 @@
   --color-resolved: #4fd4ac;
   /* The wash behind a healthy or resolved chip. */
   --color-resolved-bg: #0f2a22;
+  /* Worth knowing, nobody has to act. Pushed toward cyan rather than the brand's
+     navy: the dark ground is already blue, and a navy info would sink into it
+     exactly the way the warm statuses above are kept warm to avoid. */
+  --color-info: #6fc9e8;
+  /* The wash behind an informational chip or row. */
+  --color-info-bg: #0d2733;
   --color-silent: #9494a8;
   --color-tick: #3f4880;
   --color-chart-1: #ada072;
@@ -1270,6 +1276,46 @@
        yaslanıyordu. Bir yüzey başladığı yerde metin akışı da yeniden başlar. */
     text-align: start;
   }
+  /* BİLDİRİM KENDİ YÜZEYİNİ TONDAN ALIYOR.
+     Önce `.tamga-overlay` ile çiziliyordu, yani her bildirim beyaz bir kutuydu
+     ve tonu yalnız 10 piksellik bir kare söylüyordu. Bir bildirim ekranda
+     ortalama iki saniye duruyor: o sürede okunan şey kutunun RENGİ, kenarındaki
+     işaret değil. Yıkama zaten "bir dolgu değil bir ton" diye tasarlanmıştı
+     (`--color-*-bg`), ve metin okunurluğu artık kapıda ölçülüyor.
+
+     Yasa 1 çiğnenmiyor: kenar ile offset aynı değişken, bulanıklık yok, offset
+     merdivende. Değişkenler bileşenden geliyor; TANIMSIZ kaldığında (nötr ton)
+     yedek değerler eski görünümün ta kendisi. */
+  .tamga-toast {
+    /* KENAR TONA BOYANMIYOR, YALNIZ YÜZEY BOYANIYOR. Kenar da tonun tam gücünü
+       alınca yumuşak yıkamanın etrafında koyu bir çerçeve oluşuyor ve kutu,
+       susturmak için tonlandığı hâlde bağırıyor. Kenar nötr kalınca ton tek bir
+       şeyden okunuyor: yüzeyin kendisinden. */
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-card);
+    background: var(--toast-wash, var(--color-shell));
+    box-shadow: 4px 4px 0 var(--color-edge);
+    /* Kendi yüzeyi, kendi hizası — `.tamga-overlay`deki sebebin aynısı. */
+    text-align: start;
+  }
+  /* BİLDİRİM SÜTUNU: ölçüyü KAP veriyor, bildirim değil.
+     `Toast` sabit genişlikteydi ve dar bir kapta taşıyordu; genişliği ona
+     bırakınca bu sefer ters kırıldı, çünkü içeriğe göre daralan bir sütunun
+     içinde `width:100%` çöküyor. Ölçü burada: 20rem, ve ekran ondan darsa iki
+     yandaki oluk kadar küçülüyor. Oluk `--gutter`dan geliyor, uydurulmuyor —
+     bir telefonda 320 + 2×24 zaten sığmıyordu ve bildirim ekrandan taşıyordu. */
+  .tamga-toast-stack {
+    width: 20rem;
+    max-width: calc(100vw - 2 * var(--gutter));
+  }
+
+  /* İŞARET YIKAMANIN ÜSTÜNDE DURMAK ZORUNDA, ve artık zemin beyaz değil.
+     Köşesi yumuşatılıyor: sert bir kare bu boyutta kirli bir piksel gibi
+     okunuyordu, yuvarlatılmış hâli bir işaret gibi okunuyor. */
+  .tamga-toast-mark {
+    border-radius: 2px;
+  }
+
   /* TAM EKRAN PANEL: bir çalışma yüzeyi, bir kutu değil.
      Kenar, yarıçap ve kaydırma gölgesi kalkıyor — üçü de "bu şey sayfanın
      üstünde duruyor" demek için var, ve sayfanın tamamını kaplayan bir şeyin

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Chakra_Petch } from "next/font/google";
 import { notFound } from "next/navigation";
 import { isLocale, locales, type Locale } from "@/i18n/config";
+import SAYILAR from "@/content/counts.json";
 import "../globals.css";
 
 /**
@@ -42,6 +43,20 @@ export async function generateStaticParams() {
   return locales.map((lang) => ({ lang }));
 }
 
+/**
+ * AÇIKLAMADAKİ SAYI ELLE YAZILMIYOR.
+ *
+ * Bu cümle "doksan altı bileşen" diyordu; gerçek sayı 122, ve 96 bileşenin
+ * değil SAYFANIN sayısı. Ana sayfa aynı hatayı bir kez yapıp `counts.json`a
+ * geçmişti, bu satır geride kalmıştı. Arama sonucunda ve link önizlemesinde
+ * görünen tek cümlenin yanlış olması, kapılarla tutarlılık satan bir sistemin
+ * verebileceği en kötü ilk izlenim.
+ *
+ * "DÖRT YASA" BURADAN ÇIKARILDI, ve sebebi üslup değil: yasalar tanıtım
+ * sayfasında geçmiyor. Arama sonucunda verilen söz, tıklayanın indiği sayfada
+ * karşılanmıyordu. Kural: bu cümle yalnız `/` üzerinde görünen şeyi vaat eder.
+ * Yasalar tanıtım sayfasına çıkarsa bu satır geri gelebilir; yeri `docs/physics`.
+ */
 export async function generateMetadata({
   params,
 }: {
@@ -52,8 +67,8 @@ export async function generateMetadata({
   return {
     title: { default: "Tamga Design System", template: "%s · Tamga Design System" },
     description: tr
-      ? "Mantıksal'ın tasarım sistemi. Token'lar, dört yasa ve doksan altı bileşen; on panel tek karakterde."
-      : "A design system by Mantıksal. Tokens, four laws and ninety six components, so ten panels keep one character.",
+      ? `Mantıksal'ın tasarım sistemi. Token'lar ve ${SAYILAR.bilesen} bileşen; on panel tek karakterde.`
+      : `A design system by Mantıksal. Tokens and ${SAYILAR.bilesen} components, so ten panels keep one character.`,
     alternates: { languages: Object.fromEntries(locales.map((l) => [l, `/${l}`])) },
   };
 }

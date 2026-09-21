@@ -1,4 +1,4 @@
-<img src="https://tamga.org.tr/tamga-logo.svg" alt="Tamga" width="280">
+<img src="https://tamga.org.tr/tamga-logo.png" alt="Tamga" width="280">
 
 # tamga-ui
 

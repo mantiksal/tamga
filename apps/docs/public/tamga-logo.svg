@@ -2,13 +2,18 @@
 <!--
   TEK DOSYA, KENDİ KENDİNE DÖNEN. Sitede iki ayrı dosya var ve orası doğru:
   site kendi tema anahtarını taşıyor, `.dark` sınıfıyla seçim yapılıyor.
-  Burası farklı — bu dosya README, npm ve depo gibi tema anahtarı OLMAYAN
-  yerlerde kullanılıyor, ve oralarda tek referans işletim sisteminin şeması.
+  Bu dosya farklı: tema anahtarı OLMAYAN yerler için, ve oralarda tek referans
+  işletim sisteminin şeması.
 
   `<img>` içindeki bir SVG'ye sayfanın CSS değişkenleri geçmez, ama dosyanın
   KENDİ `prefers-color-scheme` kuralı çalışır. `<picture>` + `<source>` ile
-  aynı işi yapmayı denemek npm'in HTML süzgecine bağımlı olmak demekti; tek
-  dosya o bağımlılığı kaldırıyor.
+  aynı işi yapmayı denemek süzgece bağımlı olmak demekti; tek dosya o
+  bağımlılığı kaldırıyor.
+
+  NPM BUNU KULLANMIYOR, `tamga-logo.png` kullanıyor. npmjs.com'un dış SVG'yi
+  gösterdiği doğrulanamadı (sayfa istemcide oluşuyor, kaynaktan okunamıyor) ve
+  paket sayfası duyuruda ilk açılan yer. Doğrulanamayan bir davranışa
+  bırakılmayacak kadar görünür bir yer; PNG'nin görüneceği kesin.
 
   Koyu şemadaki değerler `tamga-dark.svg`in paletinden: kelime işareti ve dış
   halka beyaz, iç halka açık mavi, merkez lacivert.

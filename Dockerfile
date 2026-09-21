@@ -37,6 +37,15 @@ RUN addgroup -g 1001 -S nodejs && adduser -u 1001 -S nextjs -G nodejs
 
 COPY --from=builder --chown=nextjs:nodejs /app/apps/docs/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/docs/.next/static ./apps/docs/.next/static
+# PUBLIC'I STANDALONE KOPYALAMIYOR, ve bu satır bir kesintiden doğdu.
+# `output: "standalone"` minimal bir `server.js` üretiyor; Next'in kendi
+# dokümanı (`output.md`) açıkça söylüyor: bu sunucu `public` ve `.next/static`
+# klasörlerini VARSAYILAN OLARAK KOPYALAMIYOR, ikisi de elle taşınacak.
+# `.next/static` üstteki satırda zaten taşınıyordu; `public` yoktu çünkü
+# klasörün kendisi yoktu. Logolar oraya konunca canlıda üçü de 500 döndü:
+# HTML doğruydu, dosya sunucuda yoktu. `public/` altına yeni bir dosya
+# eklerken bu satırın durduğunu kontrol et.
+COPY --from=builder --chown=nextjs:nodejs /app/apps/docs/public ./apps/docs/public
 
 RUN mkdir -p ./apps/docs/.next/cache && chown -R nextjs:nodejs ./apps/docs/.next
 

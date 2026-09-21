@@ -29,46 +29,25 @@ import type { Dictionary } from "@/i18n/get-dictionary";
 function LogoMark() {
   return (
     <span className="flex items-center" aria-label="Tamga Design System">
-      {/* MANTIKSAL AMBLEMİ, ve artık geçici değil. Yerinde kitin kendi
-          fiziğiyle çizilmiş bir mühür duruyordu ve yorumu da öyle diyordu:
-          "gerçek logo gelene kadar". Geldi.
+      {/* DOSYA ADI TEMAYI SÖYLÜYOR, MÜREKKEBİ DEĞİL: `tamga-light.svg` AÇIK
+          temada kullanılan dosya ve kelime işareti lacivert; `tamga-dark.svg`
+          koyu temada kullanılır ve kelime işareti beyaz. Ters okunup
+          değiştirilmesi en kolay şey bu.
 
-          Kaynak `brand/mantiksal-amblem.svg` ile birebir aynı üç poligon;
-          yeniden çizilmedi, çünkü bir markanın işaretini yeniden çizmek onu
-          uydurmakla aynı kapıya çıkıyor.
+          SEÇİM CSS İLE, JS İLE DEĞİL. İkisi de DOM'da duruyor, `dark:`
+          varyantı birini gizliyor. Temayı JS okuyup tek bir `src` seçseydi
+          ilk boyamada yanlış logo bir kare görünürdü; CSS'te o kare yok.
+          İki dosya toplam 6 kB, indirme maliyeti tartışmaya değmez.
 
-          RENGİ TOKEN, sabit değil. Marka lacivertine en yakın rol
-          `--color-accent-line`, ve token olması işaretin temayla dönmesini
-          sağlıyor: iki ayrı dosya tutmak gerekmiyor, ve `check-scale` de
-          sabit renge zaten izin vermiyor.
+          İKİ YÜKSEKLİK FARKLI, VE BİLEREK: dosyalar aynı çizimi taşıyor ama
+          aynı tuvalde değil, o yüzden aynı `height` ikisini aynı boyda
+          göstermiyor. Hesap ve gerekçe `--docs-logo*` token'larının yanında.
 
-          Inline SVG, dosya değil: `<img>` içindeki bir SVG'ye CSS değişkeni
-          geçmez. */}
-      <svg
-        width="26"
-        height="23"
-        viewBox="0 0 3313 2898"
-        fill="var(--color-accent-line)"
-        aria-hidden
-        focusable="false"
-      >
-        <polygon points="2285.07 464.04 2673.45 985.2 1656.57 1751.53 639.65 985.2 1028.03 464.04 2285.07 464.04" />
-        <polygon points="3312.64 630.46 2811.23 985.2 2128.16 2897.01 3312.64 1898.32 3312.64 630.46" />
-        <polygon points="0.5 632.22 501.96 985.2 1184.94 2897.01 0.5 1898.32 0.5 632.22" />
-      </svg>
-      <span className="ml-2.5 text-[length:var(--docs-brand)] font-semibold tracking-tight text-ink">tamga</span>
-      {/* "ui" DEĞİL "design system", ve fark bir kelimeden fazlası: bir
-          kütüphane kod gönderir, bir tasarım sistemi kural da gönderir. Site
-          on üç kapı, token referansı, blok kataloğu ve şablon katmanı
-          taşıyorken adının "ui" demesi, taşıdığından azını söylüyordu. */}
-      {/* ALT BAŞLIK DAR EKRANDA GİZLİ. 390 pikselde logo tek başına 158 piksel
-          yer kaplıyordu ve sağdaki iki kontrolü ezdiriyordu. Amblem ve "tamga"
-          kalıyor: markayı taşıyan onlar, "design system" bir açıklama.
-          Erişilebilir ad (`aria-label`) değişmiyor, yani ekran okuyucu yine
-          tam adı duyuyor. */}
-      <span className="ml-2.5 hidden border-l border-[var(--color-edge)] pl-2.5 font-mono text-[length:var(--docs-small)] text-ink-faint sm:inline">
-        design system
-      </span>
+          `alt=""` çünkü erişilebilir ad saran `span`in `aria-label`ında. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/tamga-light.svg" alt="" className="h-(--docs-logo) w-auto dark:hidden" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/tamga-dark.svg" alt="" className="hidden h-(--docs-logo-dark) w-auto dark:block" />
     </span>
   );
 }
@@ -237,23 +216,40 @@ export function SiteHeader({
   dict,
   cta,
   onMenu,
+  duzen = "dokuman",
 }: {
   lang: Locale;
   dict: Dictionary;
   cta?: ReactNode;
   /** Verilirse dar ekranda bir menü düğmesi çıkıyor. Tanıtım sayfası vermiyor. */
   onMenu?: () => void;
+  /**
+   * Altındaki sayfanın kabı. Şerit onunla aynı genişliği kullanıyor, yoksa
+   * logo ile ilk başlık aynı hizada başlamıyor.
+   */
+  duzen?: "tanitim" | "dokuman";
 }) {
   return (
     <header
       className="sticky top-0 z-20 border-b border-[var(--color-line)]"
       style={{ height: "var(--docs-top)", background: "var(--color-shell)" }}
     >
-      {/* DOLGU İÇERİKLE AYNI (`px-5 sm:px-7`), ve bir ara `px-4` denendi.
-          Şerit 390 pikselde sığıyordu ama logo, altındaki metinden dört piksel
-          sola kayıyordu: kazanılan yer, kaybedilen hizaya değmiyor. Yer
-          bunun yerine boşluklardan ve alt başlığı gizlemekten kazanıldı. */}
-      <div className="mx-auto flex h-full max-w-(--docs-wrap) items-center gap-2 px-5 sm:gap-4 sm:px-7">
+      {/* KAP DA İÇERİKLE AYNI, dolgu da. Dolgu (`px-5 sm:px-7`) baştan
+          böyleydi ve gerekçesi yazılıydı: bir ara `px-4` denendi, şerit 390
+          pikselde sığdı ama logo altındaki metinden dört piksel sola kaydı:
+          kazanılan yer kaybedilen hizaya değmiyor.
+
+          AYNI GEREKÇE GENİŞLİKTE ATLANMIŞTI. Şerit iki düzende de
+          `--docs-wrap` (1400px) kullanıyordu; tanıtım sayfasının gövdesi ise
+          `--home-wrap` (1160px). Fark 120 piksel ve tamamı logoyu h1'in soluna
+          kaydırıyordu. Alt bilgi zaten `--home-wrap` kullanıyor, yani hizasız
+          olan tek parça şeritti. */}
+      <div
+        className={cn(
+          "mx-auto flex h-full items-center gap-2 px-5 sm:gap-4 sm:px-7",
+          duzen === "tanitim" ? "max-w-(--home-wrap)" : "max-w-(--docs-wrap)",
+        )}
+      >
         {/* MENÜ DÜĞMESİ SOLDA, LOGONUN ÖNÜNDE. Telefonda gezinme aracı ilk
             ulaşılan şey olmalı; sağ üst köşe başparmağın en uzak noktası. */}
         {onMenu ? (

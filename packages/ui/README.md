@@ -1,3 +1,5 @@
+<img src="https://tamga.org.tr/tamga-logo.svg" alt="Tamga" width="280">
+
 # tamga-ui
 
 Mantıksal's shared interface library: tokens, physics and components.

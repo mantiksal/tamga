@@ -226,6 +226,7 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
       <SiteHeader
         lang={lang}
         dict={dict}
+        duzen="tanitim"
         cta={
           <Link
             href={yol(lang, "installation")}

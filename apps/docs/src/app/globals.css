@@ -48,6 +48,17 @@
   --docs-measure: 68ch;
   --docs-top: 68px;
 
+  /* LOGO: iki tema iki DOSYA, ve ikisi aynı tuvalde değil. Aynı çizimi
+     taşıyorlar ama ızgara adımı light'ta 55/390 birim, dark'ta 27,375/224.
+     Aynı CSS yüksekliği verilirse dark %13 küçük kalıyor; ikinci değer o farkı
+     kapatıyor (44 × 224/390 × 55/27,375 ≈ 51).
+
+     BU BİR TELAFİ, ÇÖZÜM DEĞİL. Dosyalar ortak tuval ve ortak boşlukla
+     yeniden dışa aktarılırsa iki token da tek değere döner ve buradaki
+     hesap silinir. */
+  --docs-logo: 44px;
+  --docs-logo-dark: 51px;
+
   /* Okuma ölçeği */
   --docs-text: 17px;
   --docs-lead: 20px;
@@ -96,10 +107,20 @@ body {
 }
 
 /* ---- Başlıklar ---- */
+/* MARKA YÜZÜ YALNIZ BURADA VE `.home-h1`DE. Chakra Petch bir display yüzü:
+   köşeleri kırpılmış, kare karakterli, büyük punto için çizilmiş. `--docs-h2`
+   (26px) ve `--docs-h3` (19px) onun iyi çalıştığı boyların altında, ve site
+   96 sayfa düzyazı taşıyor; her başlıkta techno bir doku, kod bloklarıyla
+   ve prop tablolarıyla yarışır. Marka sesi en büyük tierde zaten duyuluyor.
+
+   AĞIRLIK 650 DEĞİL 600: Chakra Petch değişken değil, 650 kesimi yok ve
+   tarayıcı sentetik kalın üretirdi. Yedek yüz de aynı kuralı kullanıyor,
+   o yüzden font inmezse başlık 600'de kalıyor: bozulmuyor, inceliyor. */
 .docs-h1 {
   color: var(--color-ink);
+  font-family: var(--font-brand), var(--font-display);
   font-size: var(--docs-h1);
-  font-weight: 650;
+  font-weight: 600;
   letter-spacing: -0.025em;
   line-height: 1.08;
   text-wrap: balance;
@@ -325,6 +346,7 @@ li code {
 }
 
 .home-h1 {
+  font-family: var(--font-brand), var(--font-display);
   font-size: var(--home-h1);
   font-weight: 700;
   letter-spacing: -0.03em;

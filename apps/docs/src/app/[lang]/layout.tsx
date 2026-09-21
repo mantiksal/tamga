@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Chakra_Petch } from "next/font/google";
 import { notFound } from "next/navigation";
 import { isLocale, locales, type Locale } from "@/i18n/config";
 import "../globals.css";
@@ -11,6 +12,31 @@ import "../globals.css";
  * niteliği segmenti bilmek zorunda. Ekran okuyucu telaffuzunu, tarayıcı çeviri
  * teklifini ve tireleme kurallarını o nitelik belirler.
  */
+
+/**
+ * Marka yüzü: YALNIZ EN BÜYÜK BAŞLIK TİERİNDE.
+ *
+ * DEĞİŞKEN `<html>`DE, ve bu tek satır bir olaydan öğrenildi: bir arayüzde
+ * yüz `body`ye bağlanmış ama ölçek `:root`ta çözülmüştü; zincir koptu ve yüz
+ * indirilip hiç boyanmadı. `docs/type` sayfası o olayı anlatıyor. Kural:
+ * değişken, onu kullanan kuralın çözüldüğü yerden YUKARIDA tanımlanır.
+ *
+ * AĞIRLIKLAR GERÇEK KESİMLER. Chakra Petch değişken bir yüz değil; `.docs-h1`
+ * 650 istiyordu ve o kesim yok, tarayıcı sentetik kalın üretirdi. Kural 600'e
+ * çekildi, `.home-h1` zaten 700; ikisi de dosyada var olan kesimler.
+ *
+ * `latin-ext` ŞART: ğ ş İ ı ç ö ü onunla geliyor, site iki dilli.
+ *
+ * KİTE GİRMİYOR. `--font-display` sistem yığını olarak kalıyor: kit mekanizma
+ * taşır, kimlik taşımaz. Orayı değiştirmek, kiti tüketen her panelin
+ * başlıklarını bu sitenin markasına çevirirdi; gerekçe `docs/adr/0003`te.
+ */
+const markaYuzu = Chakra_Petch({
+  subsets: ["latin", "latin-ext"],
+  weight: ["600", "700"],
+  display: "swap",
+  variable: "--font-brand",
+});
 
 export async function generateStaticParams() {
   return locales.map((lang) => ({ lang }));
@@ -53,7 +79,7 @@ export default async function RootLayout({
 
      Kök layout yalnız `<html lang>` için var; kabuğu her dal kendi seçiyor. */
   return (
-    <html lang={lang} suppressHydrationWarning>
+    <html lang={lang} className={markaYuzu.variable} suppressHydrationWarning>
       <body>{children}</body>
     </html>
   );

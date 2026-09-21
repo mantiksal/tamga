@@ -1,26 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3313 3313">
-  <!--
-    Mantıksal amblemi, sekme ikonu olarak.
+<svg width="500" height="500" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!--
+  Tamga amblemi, sekme ikonu olarak.
 
-    ZEMİN DOLU, AMBLEM OYUK. Şeritteki amblem saydam zeminde lacivert duruyor
-    ve orada doğrusu bu; ama bir sekme ikonu tarayıcının kendi şeridinde
-    yaşıyor ve o şerit koyu da olabiliyor. Lacivert bir işaret koyu bir şeritte
-    kayboluyor. Dolu bir karo her iki şeritte de görünüyor.
+  TEMAYA GÖRE DIŞ HALKA DEĞİŞİYOR, ve renkler uydurulmadı: koyu şemadaki
+  değerler `tamga-dark.svg`in kendi paletinden alındı: dış halka beyaz, iç
+  halka açık mavi, merkez lacivert. Yani sekme ikonu koyu temada logonun
+  aynısını gösteriyor.
 
-    RENKLER SABİT, TOKEN DEĞİL: bu dosya bir SVG, kitin CSS değişkenlerine
-    erişimi yok. Değerler token'ların açık temadaki karşılığı: lacivert
-    #12245c (color accent line), mürekkep #fdfcfa (color accent ink).
+  NEDEN SADECE DIŞ HALKA: iç halkanın açık mavisi her iki şeritte de görünür,
+  merkezin laciverti ise koyu şeritte tek başına kaybolurdu, ama kaybolmuyor,
+  çünkü etrafı açık mavi. Koyu bir merkez, açık bir alanın içinde duruyor;
+  sayfanın zemininde değil.
 
-    KARE viewBox, ve sanat KÜÇÜLTÜLMÜŞ. İlk hâlde amblem kareyi kenardan
-    kenara dolduruyordu ve yuvarlak köşeler yan üçgenlerin uçlarını kesiyordu.
-    Bir sekme ikonu 16 pikselde okunacak; kenara değen bir işaret orada
-    çerçeveye yapışıp şekil olmaktan çıkıyor. 0.68 ölçek, dört yanda nefes
-    payı bırakıyor.
-  -->
-  <rect width="3313" height="3313" rx="620" fill="#12245c"/>
-  <g transform="translate(530,671) scale(0.68)" fill="#fdfcfa">
-    <polygon points="2285.07 464.04 2673.45 985.2 1656.57 1751.53 639.65 985.2 1028.03 464.04 2285.07 464.04"/>
-    <polygon points="3312.64 630.46 2811.23 985.2 2128.16 2897.01 3312.64 1898.32 3312.64 630.46"/>
-    <polygon points="0.5 632.22 501.96 985.2 1184.94 2897.01 0.5 1898.32 0.5 632.22"/>
-  </g>
+  `prefers-color-scheme` TARAYICININ ŞERİDİNİ İZLİYOR, sayfanın temasını
+  değil. Doğrusu bu: ikon sayfanın içinde değil, sekmede yaşıyor.
+
+  SVG favicon'u desteklemeyen tarayıcı `icon.png`e düşer; o dosya şeffaf ve
+  tek renkli değil, yani orada tema ayrımı yok. Kabul edilen bir eksik:
+  açık halkanın mavisi iki şeritte de okunuyor.
+-->
+<style>
+  .dis { fill: #1E4FD8 }
+  @media (prefers-color-scheme: dark) { .dis { fill: #FFFFFF } }
+</style>
+<g clip-path="url(#clip0_424_2308)">
+<path d="M194.444 0H101.852V92.5926H194.444V0Z" class="dis"/>
+<path d="M296.296 0H203.703V92.5926H296.296V0Z" class="dis"/>
+<path d="M398.147 0H305.555V92.5926H398.147V0Z" class="dis"/>
+<path d="M92.5926 101.852H0V194.444H92.5926V101.852Z" class="dis"/>
+<path d="M499.999 101.852H407.406V194.444H499.999V101.852Z" class="dis"/>
+<path d="M92.5926 203.703H0V296.296H92.5926V203.703Z" class="dis"/>
+<path d="M499.999 203.703H407.406V296.296H499.999V203.703Z" class="dis"/>
+<path d="M92.5926 305.555H0V398.147H92.5926V305.555Z" class="dis"/>
+<path d="M499.999 305.555H407.406V398.147H499.999V305.555Z" class="dis"/>
+<path d="M194.444 407.406H101.852V499.999H194.444V407.406Z" class="dis"/>
+<path d="M296.296 407.406H203.703V499.999H296.296V407.406Z" class="dis"/>
+<path d="M398.147 407.406H305.555V499.999H398.147V407.406Z" class="dis"/>
+<path d="M194.444 101.852H101.852V194.444H194.444V101.852Z" fill="#A8CDF7"/>
+<path d="M296.296 101.852H203.703V194.444H296.296V101.852Z" fill="#A8CDF7"/>
+<path d="M398.147 101.852H305.555V194.444H398.147V101.852Z" fill="#A8CDF7"/>
+<path d="M194.444 203.703H101.852V296.296H194.444V203.703Z" fill="#A8CDF7"/>
+<path d="M398.147 203.703H305.555V296.296H398.147V203.703Z" fill="#A8CDF7"/>
+<path d="M194.444 305.555H101.852V398.147H194.444V305.555Z" fill="#A8CDF7"/>
+<path d="M296.296 305.555H203.703V398.147H296.296V305.555Z" fill="#A8CDF7"/>
+<path d="M398.147 305.555H305.555V398.147H398.147V305.555Z" fill="#A8CDF7"/>
+<path d="M296.296 203.703H203.703V296.296H296.296V203.703Z" fill="#0A1F3D"/>
+</g>
+<defs>
+<clipPath id="clip0_424_2308">
+<rect width="500" height="500" fill="white"/>
+</clipPath>
+</defs>
 </svg>

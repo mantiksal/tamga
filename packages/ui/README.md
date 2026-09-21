@@ -133,7 +133,7 @@ document.documentElement.setAttribute("style", paletteCss(pair));
 ```
 
 This is the route whenever the colour can change at runtime (a settings screen): the tokens are
-written onto the root element and, because the kit's 87 classes read them, the whole panel turns
+written onto the root element and, because the kit's 111 classes read them, the whole panel turns
 in one line with no CSS recompiled.
 
 ### Or by hand

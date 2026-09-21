@@ -7,7 +7,10 @@
  * olabilir ve başka bir tonda yanlış olur — ve yanlışlığı ancak o markanın
  * paneli kurulunca görülür. Kapı ton çemberini tarayıp her birini ölçüyor.
  *
- * OTUZ ALTI TON, iki tema, on bir ölçüm: 792 ölçüm. Hepsi geçmezse build durur.
+ * KIRK TON, iki tema, on bir ölçüm: 880 ölçüm. Hepsi geçmezse build durur.
+ * Otuz altısı ton çemberinden üretiliyor, dördü gerçek marka rengi (doygunluğu
+ * düşük ve çok yüksek uçlar); yorum bir ara yalnız üretilenleri sayıp 792
+ * diyordu ve betiğin kendi çıktısıyla çelişiyordu.
  * Ayrıca `check-token-contrast` ile AYNI eşikler kullanılıyor; ikisi ayrışırsa
  * elle kurulmuş palet ile üretilen palet farklı kurallara tabi olurdu.
  */

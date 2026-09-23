@@ -339,14 +339,17 @@ function MenuGovdesi({
               içinde kayboluyordu. Gruplama bileşenleri BÖLMÜYOR, tek bir
               satıra katlıyor. */}
           {navGruplari(lang).map((g) => {
-            const acikMi = g.sayfalar.some((p) => pathname === yol(lang, p.slug));
             return (
               <div key={g.key} className="mb-5">
                 {g.katlanir ? (
-                  /* AÇIK MI KAPALI MI, O ANKİ SAYFAYA BAĞLI. Bir bileşen
-                     sayfasındayken kapalı duran bir liste, komşularını
-                     gizliyor demektir; okuyucu tam da orada gezinir. */
-                  <details open={acikMi} className="docs-nav-grup">
+                  /* AÇIK GELİYOR, VE KATLANIR OLMASI BUNU DEĞİŞTİRMİYOR.
+                     Önce "o anki sayfa bu grupta mı" sorusuna bağlıydı, yani
+                     siteye ilk giren kapalı bir liste görüyordu: menüde tek
+                     satır duruyor ve arkasında ne olduğu ancak tıklayınca
+                     anlaşılıyordu. Bir doküman menüsünün ilk işi neyin VAR
+                     olduğunu söylemek; katlama, yer açmak isteyen okuyucu
+                     için duruyor, karşılama hâli olarak değil. */
+                  <details open className="docs-nav-grup">
                     <summary className="docs-nav-baslik">
                       {g.baslik[lang]}
                       <span className="ml-auto font-mono text-[length:var(--text-caption)] tabular-nums">

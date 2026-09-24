@@ -46,6 +46,7 @@
   },
   "scripts": {
     "build": "node build.mjs && tsc",
+    "dev": "node watch.mjs",
     "prepare": "node build.mjs && tsc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

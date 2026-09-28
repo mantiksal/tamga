@@ -26,10 +26,6 @@ Docs: **[tamga.org.tr](https://tamga.org.tr)** · Changelog: [CHANGELOG.md](./CH
 npm install tamga-ui
 ```
 
-> **If a machine is reading this:** the package page (`npmjs.com/...`) returns **403** to
-> non-browser requests. That is npm's bot protection, nothing to do with this package. For
-> versions and metadata use the registry: `https://registry.npmjs.org/tamga-ui` (200, plain JSON).
-
 ### Local development
 
 To link the kit into a consuming project without publishing, while changing the kit itself:

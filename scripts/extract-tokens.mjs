@@ -156,17 +156,18 @@ const temaKoyu = new Map(bildirimler("theme.css", "tamga:tema-koyu").map((d) => 
 /** Ad → grup. Sıra önemli: ilk eşleşen kazanıyor. */
 const GRUPLAR = [
   [/^--color-(page|shell|sunk|hover|band|rail|scrim|chart-fill)$/, "zemin"],
-  [/^--color-ink/, "murekkep"],
-  [/^--color-(line|edge|tick)$/, "cizgi"],
+  [/^--color-ink|^--color-inverse-ink$/, "murekkep"],
+  [/^--color-inverse/, "zemin"],
+  [/^--color-(line|edge|tick|div)$|^--color-edge-/, "cizgi"],
   [/^--color-accent/, "aksan"],
-  [/^--color-(critical|warn|resolved|silent)/, "durum"],
+  [/^--color-(critical|warn|resolved|silent|info|elevated|danger)/, "durum"],
   [/^--color-nav/, "gezinme"],
   [/^--color-chart-/, "grafik"],
   [/^--shadow-/, "golge"],
   [/^--radius/, "yaricap"],
-  [/^--text-|^--font-|^--measure/, "tipografi"],
+  [/^--text-|^--font-|^--measure|^--weight-|^--tracking-/, "tipografi"],
   [/^--duration-|^--ease-/, "hareket"],
-  [/^--(gutter|row|control|table-min|offset-room|mark-|overlay-|dial-|dialog-)/, "olcu"],
+  [/^--(gutter|row|control|table-min|offset-room|mark-|overlay-|dial-|dialog-|step-)/, "olcu"],
   [/^--color-brand-/, "rampa"],
   [/^--breakpoint-/, "olcu"],
   /* Tema ailesinin adları --color- öneki taşımıyor; grupları elle eşleniyor. */
@@ -178,6 +179,31 @@ const GRUPLAR = [
   [/^--chart-/, "grafik"],
 ];
 const grubu = (ad) => GRUPLAR.find(([re]) => re.test(ad))?.[1] ?? "diger";
+
+/*
+ * EŞLEŞMEYEN TOKEN SESSİZCE KAYBOLUYORDU, ve yirmi bir tanesi kaybolmuştu.
+ *
+ * `grubu()` tanımadığı adı `diger`e atıyor, doküman sayfasının `SIRA` listesi
+ * `diger`i hiç çizmiyor · yani kite eklenen ama buradaki tabloya yazılmayan
+ * her token yayınlanan referanstan DÜŞÜYOR, hiçbir yerde hata vermeden.
+ * 2026-09-26'da sayfanın başlığı "162 ad" derken sayacı "141 token"
+ * diyordu, ve aradaki fark tam olarak buydu: `--color-info*`, `--color-div`,
+ * `--color-edge-strong`, `--weight-*`, `--step-*` ve ötekiler.
+ *
+ * Artık eşleşmeyen bir ad ÇIKTIYI DURDURUYOR. Bir token eklemek, onu bir
+ * gruba yazmayı da gerektiriyor; unutmak mümkün, sessizce unutmak değil.
+ */
+function orfanlariDurdur(tokenlar) {
+  const orfan = tokenlar.filter((t) => t.grup === "diger").map((t) => t.ad);
+  if (!orfan.length) return;
+  console.error(`extract-tokens: ${orfan.length} token hiçbir gruba girmiyor.\n`);
+  for (const ad of orfan) console.error(`  ${ad}`);
+  console.error(`
+Gruba girmeyen bir token doküman sitesinde HİÇ görünmüyor. Eşleme bu dosyanın
+içinde (\`GRUPLAR\`); yeni bir aile için oraya bir satır, doküman tarafında da
+\`apps/docs/src/components/tokens.tsx\` içindeki \`SIRA\` ve \`BASLIK\` gerekiyor.`);
+  process.exit(1);
+}
 
 /** Önizlemenin nasıl çizileceği. */
 function turu(ad, deger) {
@@ -198,10 +224,17 @@ const kopru = new Set(
     .filter((d) => d.deger.startsWith("var(--"))
     .map((d) => d.deger.slice(4, -1)),
 );
+/* KÖPRÜNÜN YANINDAKİ GERÇEK TOKEN'LAR. Bir zamanlar köprü bloğunun İÇİNDEYDİLER
+   ve hiç yayınlanmamışlardı: `--font-sans`, `--font-display`, `--font-mono`,
+   `--tracking-label` ve dört yarıçap. Blok yalnız `var(--x)` satırları için
+   okunuyordu, ve `@theme inline` zaten bir değişken yaymıyor. Artık kendi
+   `@theme static` bloklarında: hem utility üretiyorlar hem `var()` ile
+   ulaşılıyorlar. */
+const kopruDeger = bildirimler("theme.css", "tamga:kopru-token");
+const bos = new Map();
 const sabitOlcek = bildirimler("theme.css", "tamga:sabit-olcek");
 const sabitRol = bildirimler("theme.css", "tamga:sabit-rol");
 const sabitKit = bildirimler("kit.css", "tamga:sabit-kit");
-const bos = new Map();
 
 /**
  * TAILWIND UTILITY'Sİ ÜRETİLİYOR MU, ve iki koşul birden gerekiyor:
@@ -275,15 +308,23 @@ function kontrasti(ad, grup, deger, palet) {
    * bir kart çizdi; blok artık rengi değil kutuyu gösteriyordu.
    *
    * Üçüncüsü ikisinin de kaçındığı şey: DOLGU YOK, ince bir kenar ve renkli
-   * yazı. Ama rengi sabit değil ÖLÇÜLMÜŞ: mürekkep mi kâğıt mı, üstünde
-   * durduğu renge karşı hangisi daha çok ayrışıyorsa o. Yani ilk denemenin
-   * hafifliği, ikincisinin garantisiyle.
+   * yazı. Rengi sabit değil ÖLÇÜLMÜŞ: üç adayın (mürekkep · kâğıt · basılan
+   * kenar) hangisi o rengin üstünde daha çok ayrışıyorsa o. Bu bir GARANTİ
+   * DEĞİL, bir en-iyi seçim: orta parlaklıkta bir işaret renginin üstünde
+   * paletin en iyisi de AA'nın altında kalabiliyor, ve o an en zayıf rozet
+   * koşunun ✓ satırında yazılı çıkıyor.
    */
   const okunur = (uzerinde) => {
-    const murekkep = al("--color-ink");
-    const kagit = al("--color-shell");
-    if (!murekkep || !kagit || !/^#/.test(murekkep) || !/^#/.test(kagit)) return null;
-    return oran(murekkep, uzerinde) >= oran(kagit, uzerinde) ? murekkep : kagit;
+    /* ÜÇ ADAY, İKİ DEĞİL. İki uçla (mürekkep · kâğıt) seçmek koyu temada orta
+       parlaklıkta bir işaret renginin üstünde yetmiyordu: `--color-elevated-mark`
+       (#c8664a) üstünde koyunun mürekkebi 3.18, kâğıdı 4.08 veriyor, ikisi de
+       AA altı. Basılan kenar iki temada da neredeyse siyah ve orada 5.27 veriyor;
+       açık temada zaten mürekkeple aynı değer, yani orayı hiç kıpırdatmıyor. */
+    const adaylar = [al("--color-ink"), al("--color-shell"), al("--color-edge-strong")].filter(
+      (k) => k && /^#/.test(k),
+    );
+    if (!adaylar.length) return null;
+    return adaylar.reduce((en, k) => (oran(k, uzerinde) > oran(en, uzerinde) ? k : en));
   };
 
   /* EŞİĞİ GEÇMEYEN ROZET RENGİYLE DEĞİL İŞARETİYLE ayrılıyor: yazısına bir
@@ -343,7 +384,12 @@ const paletAcik = new Map([
 const paletKoyu = new Map([...kitKoyu.entries(), ...temaKoyu.entries()]);
 
 const tokenlar = [];
+/* SIRA CSS'İN SIRASI. Sekiz `--color-*` adı hem köprüde (takma ad olarak) hem
+   `tamga:kit-acik`te (gerçek değerle) yazılı; dosyada kit bloğu sonra geldiği
+   için kazanan o. Liste aynı sırayı taşıyor ve aşağıda ADA GÖRE SONUNCUSU
+   alınıyor, yani yayınlanan değer tarayıcının çözdüğü değer. */
 for (const [liste, koyu, aile, temaBloguMu] of [
+  [kopruDeger, bos, "sabit", true],
   [kitAcik, kitKoyu, "kit", true],
   [temaAcik, temaKoyu, "tema", false],
   [sabitOlcek, bos, "sabit", true],
@@ -367,14 +413,114 @@ for (const [liste, koyu, aile, temaBloguMu] of [
   }
 }
 
-mkdirSync(dirname(out), { recursive: true });
-writeFileSync(out, JSON.stringify(tokenlar, null, 2) + "\n");
+/* AYNI AD İKİ KEZ YAZILMIŞSA SON YAZILAN KAZANIYOR · tarayıcı da öyle yapıyor.
+   `--measure*` iki blokta birden duruyordu (aynı değerle), sekiz `--color-*` ise
+   köprüde takma ad koyuda gerçek değer olarak. Listede iki satır çıkması
+   sayacı da şişiriyordu. */
+const teklestir = (liste) => [...new Map(liste.map((t) => [t.ad, t])).values()];
+const tekil = teklestir(tokenlar);
 
-const gruplar = new Set(tokenlar.map((t) => t.grup));
-const aciklamali = tokenlar.filter((t) => t.aciklama).length;
-const cevirisiz = tokenlar.filter((t) => t.aciklama && !t.aciklamaTr);
-const utilityli = tokenlar.filter((t) => t.utilityleri.length).length;
-const utilitySayisi = tokenlar.reduce((n, t) => n + t.utilityleri.length, 0);
+mkdirSync(dirname(out), { recursive: true });
+writeFileSync(out, JSON.stringify(tekil, null, 2) + "\n");
+
+/**
+ * YAYINLANMAYAN TOKEN KAPISI — kaynakta tanımlı her ad bu listede olacak.
+ *
+ * NEDEN VAR, ve gerekçesi bir ölçüm: bu kapı yazıldığında SEKİZ token kaynakta
+ * duruyordu ama yayınlanan referansta yoktu · `--font-sans`, `--font-display`,
+ * `--font-mono`, `--tracking-label` ve dört yarıçap (`-sm`, `-md`, `-xl`,
+ * `-full`). Hepsi gerçek, hepsi kullanılıyor, üçü tipografi sayfasının
+ * anlattığı üç yüzün ta kendisi. Sebep `tamga:kopru` bloğunun yalnız takma ad
+ * satırları için okunmasıydı, ve hata hiçbir yerde ses çıkarmıyordu: bir
+ * tüketici için o adlar var OLMAMAKLA aynı şey.
+ *
+ * `orfanlariDurdur` bir basamak aşağısını koruyor (ada bir GRUP verilmiş mi);
+ * bu kapı bir basamak yukarısını: ad buraya hiç GELMİŞ mi.
+ *
+ * İKİ MEŞRU DIŞARIDA KALMA, ve ikisi de kuralla ayrılıyor, listeyle değil:
+ *   ① Bir kuralın İÇİNDEKİ yerel değişken (`.tamga-filter-row { --filter-gap }`)
+ *     bir token değil · yalnız `:root`/`@theme` gövdesi taranıyor.
+ *   ② Köprünün takma adı (`--color-card: var(--card)`) hedefi yayınlandığı
+ *     sürece kendisi yayınlanmıyor: aynı değeri iki adla listelemek okuyana
+ *     iki token varmış gibi görünür.
+ */
+function yayinlanmayanlariDurdur(tokenlar) {
+  const yayinda = new Set(tokenlar.map((t) => t.ad));
+  const kacak = [];
+
+  for (const dosya of ["theme.css", "kit.css"]) {
+    const ham = readFileSync(join(KIT, dosya), "utf8");
+    /* Yorumlar siliniyor ama satır sayısı korunuyor: bir kapının raporladığı
+       satır numarası yanlışsa rapor da güvenilmez. */
+    const css = ham.replace(/\/\*[\s\S]*?\*\//g, (y) => y.replace(/[^\n]/g, " "));
+    let i = 0;
+    while (i < css.length) {
+      const ac = css.indexOf("{", i);
+      if (ac < 0) break;
+      const secici = css.slice(css.lastIndexOf("}", ac) + 1, ac).trim();
+      /* Gövdeyi süslü parantez sayarak al: iç içe kurallar atlanıyor. */
+      let derinlik = 1;
+      let j = ac + 1;
+      const govde = [];
+      let par = "";
+      while (j < css.length && derinlik > 0) {
+        const c = css[j];
+        if (c === "{") derinlik++;
+        else if (c === "}") derinlik--;
+        if (derinlik === 1 && c !== "{") par += c;
+        else if (derinlik > 1) par = "";
+        j++;
+      }
+      govde.push(par);
+      if (/^(:root|\.dark|@theme\b[^{]*)$/.test(secici)) {
+        for (const m of govde.join("\n").matchAll(/(--[a-z0-9-]+)\s*:\s*([^;}]+)/g)) {
+          const [, ad, deger] = m;
+          if (yayinda.has(ad)) continue;
+          const takma = deger.trim().match(/^var\((--[a-z0-9-]+)\)$/);
+          if (takma && yayinda.has(takma[1])) continue;
+          const satir = css.slice(0, ac + m.index).split("\n").length;
+          kacak.push(`${dosya}:${satir}  ${ad}`);
+        }
+      }
+      i = j;
+    }
+  }
+
+  if (!kacak.length) return;
+  console.error(`extract-tokens: ${kacak.length} token kaynakta var, yayınlanan listede yok.\n`);
+  for (const k of [...new Set(kacak)]) console.error(`  ${k}`);
+  console.error(`
+Yayınlanmayan bir ad tüketici için YOK demek. Adın okunduğu bloğun başında bir
+\`tamga:\` işaretçisi olmalı ve bu betiğin kaynak listesinde geçmeli. Gerçekten
+bir token değilse (bir kuralın iç değişkeni) \`:root\`/\`@theme\` dışına taşı.`);
+  process.exit(1);
+}
+
+orfanlariDurdur(tekil);
+yayinlanmayanlariDurdur(tekil);
+const gruplar = new Set(tekil.map((t) => t.grup));
+const aciklamali = tekil.filter((t) => t.aciklama).length;
+const cevirisiz = tekil.filter((t) => t.aciklama && !t.aciklamaTr);
+const utilityli = tekil.filter((t) => t.utilityleri.length).length;
+const utilitySayisi = tekil.reduce((n, t) => n + t.utilityleri.length, 0);
+/* KAPI: yayınlanan her token bir gerekçe TAŞIYACAK. Bu kapı yazıldığında 22
+   token hiç açıklama taşımıyordu ve sebebi tek tek unutmak değil bir kalıptı:
+   bir yorum bir DİZİ token'ın üstünde duruyor (`--color-*-inverse` altılısı,
+   `--chart-2..5`, `--mark-dot` + `--mark-dot-radius`) ve ayrıştırıcı onu haklı
+   olarak yalnız İLKİNE bağlıyor · uzaktaki bir yorum bir token'ın açıklaması
+   değil. Sonuç sayfada boş bir sütun, yani "bu token ne işe yarıyor"
+   sorusunun cevapsız kalması. */
+const aciklamasiz = tekil.filter((t) => !t.aciklama && !t.aciklamaTr);
+if (aciklamasiz.length) {
+  console.error("✗ Gerekçesiz token — kaynakta bildirimin üstüne ya da yanına bir yorum gerekiyor:\n");
+  for (const t of aciklamasiz) console.error(`  ${t.ad}`);
+  console.error(
+    `\n${aciklamasiz.length} token. Bir DİZİ bildirimin üstündeki ortak yorum yalnız ilkine
+bağlanıyor; ötekilere aynı satırda kendi yorumunu yaz.`,
+  );
+  process.exit(1);
+}
+
 /* KAPI: yayınlanan her gerekçenin Türkçesi olacak. Site iki dilli; tek dilli
    bir gerekçe, öteki dilin sayfasını yarım gösteriyor. */
 if (cevirisiz.length) {
@@ -386,7 +532,24 @@ if (cevirisiz.length) {
   process.exit(1);
 }
 
+/* ROZETİN KENDİ OKUNURLUĞU SAYIYLA DURUYOR, cümleyle değil. Hem burada hem
+   `components/tokens.tsx`te "rozet garantili okunuyor" yazıyordu ve garanti
+   yoktu: `--color-elevated-mark` üstünde açık temanın en iyi adayı 4.27, AA'nın
+   altında, ve palet o rengin üstünde daha iyisini veremiyor (kâğıt 3.82). Sayı
+   artık her koşuda yazılıyor; düşerse görünür.
+   Gerekçe: docs/gerekce/10-kit-css.md */
+const rozetler = tekil.flatMap((t) =>
+  [
+    [t.kontrastAcik, t.acik],
+    [t.kontrastKoyu, t.koyu],
+  ]
+    .filter(([k, uzerinde]) => k?.yazi && uzerinde)
+    .map(([k, uzerinde]) => ({ ad: t.ad, o: oran(k.yazi, uzerinde) })),
+);
+const enZayif = rozetler.reduce((a, b) => (b.o < a.o ? b : a), { ad: "—", o: Infinity });
+
 console.log(
-  `✓ ${tokenlar.length} token çıkarıldı — ${gruplar.size} grup, ${aciklamali} tanesi iki dilli ` +
-    `gerekçesiyle, ${utilityli} tanesi ${utilitySayisi} Tailwind utility'si üretiyor.`,
+  `✓ ${tekil.length} token çıkarıldı — ${gruplar.size} grup, ${aciklamali} tanesi iki dilli ` +
+    `gerekçesiyle, ${utilityli} tanesi ${utilitySayisi} Tailwind utility'si üretiyor. ` +
+    `En zayıf rozet ${enZayif.o.toFixed(2)} (${enZayif.ad}).`,
 );

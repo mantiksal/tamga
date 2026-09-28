@@ -26,6 +26,12 @@ import { join, relative } from "node:path";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 const SCAN = [join(ROOT, "apps/docs/src"), join(ROOT, "docs")];
+/* İÇERİ ALINAN KAYNAK BELGELER TARANMIYOR, ve sebebi kapının kendi gerekçesi:
+   bu kapı BİZİM düzyazımızı denetliyor ("iki yargı arasındaki ilişkiyi seçmeden
+   yazma"). `docs/ozel/tasarim-dili/` dışarıdan gelen bir tasarım sisteminin
+   kendi belgeleri; oradaki noktalama yazarına ait ve düzeltmek kaynağı
+   bozmaktır. Bir referansı kendi üslubumuza çevirirsek artık referans olmaz. */
+const ATLA = [join(ROOT, "docs/ozel/tasarim-dili")];
 const LOOSE = ["README.md", "CLAUDE.md", ".changeset/README.md"].map((f) => join(ROOT, f));
 const EM = "—";
 
@@ -59,7 +65,9 @@ function* walk(dir) {
 }
 
 const hits = [];
-const files = [...SCAN.flatMap((d) => [...walk(d)]), ...LOOSE];
+const files = [...SCAN.flatMap((d) => [...walk(d)]), ...LOOSE].filter(
+  (f) => !ATLA.some((d) => f.startsWith(d)),
+);
 for (const file of files) {
   const raw = readFileSync(file, "utf8");
   if (!raw.includes(EM)) continue;

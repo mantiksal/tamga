@@ -935,7 +935,7 @@ KERNING: Red Hat Display, Y'den sonraki yuvarlağı kolun altına çekiyor · 64
 ("tasarım" 0.3 piksel). Punto 76'dan 64'e indi, satır aralığı 0.98'den 1.08'e çıktı: Türkçede
 noktalı harf çok (ö, ü, ı, i, ç, ş), yani sıkı bir başlık bu dilde daha çabuk çakışıyor.
 
-### README'nin kapı tablosu artık denetleniyor
+### Kontrol tablosu artık denetleniyor (README → GELISTIRME.md)
 
 Tablo elle yazılıydı ve ayrışmıştı: başlık "Yirmi kapı" diyordu (zincir yirmi iki), iki kapı
 (`check:olcu-hizasi`, `check:tema-cifti`) tabloda hiç yoktu, `check:yuvarlak`ın satırı ölçümle
@@ -943,3 +943,6 @@ yanlışlanmış bir cümle taşıyordu ("avatar ve canlı nokta"; doğrusu rady
 palet 960 ölçüm diyordu (1040), build 199 sayfa diyordu (203), depo haritası 96 sayfa diyordu (98).
 Hepsi düzeltildi, ve `extract-counts.mjs` artık tablodaki adları zincirle karşılaştırıyor: bir kapı
 eklenip tabloya yazılmazsa build duruyor. (Kapı sınandı: bir adın harfi değiştirilince çıkış 1.)
+
+Kök README dışarıya dönük hâline geçince tablo `GELISTIRME.md`ye taşındı ve orada da eksik geldi
+(dört kontrol yoktu); kapı onu da yakaladı, denetim artık o dosyaya bakıyor.

@@ -92,12 +92,12 @@ const sayilar = {
    değişir ya da zincirdeki sırası kayarsa demo sessizce yalan söylerdi; burada
    duruyor. Sıra numarası demoda tutulmuyor, buradan üretiliyor. */
 const demo = JSON.parse(oku("apps", "docs", "src", "content", "kapi-demo.json"));
-/* README'NİN KAPI TABLOSU ZİNCİRLE AYNI OLACAK. Tablo elle yazılıyor ve bir
-   kez ayrıştı: başlık "Yirmi kapı" diyordu, zincir yirmi ikiydi, tabloda
-   `check:olcu-hizasi` ile `check:tema-cifti` hiç yoktu ve `check:yuvarlak`ın
-   satırı ölçümle yanlışlanmış bir cümle taşıyordu ("avatar ve canlı nokta").
-   Sayıyı kaynaktan üretmek yetmiyor; LİSTE de kaynaktan denetlenmeli. */
-const readme = oku("README.md");
+/* EKİP EL KİTABININ KONTROL TABLOSU ZİNCİRLE AYNI OLACAK. Tablo elle yazılıyor
+   ve iki kez ayrıştı: kök README'de başlık "Yirmi kapı" diyordu (zincir yirmi
+   iki) ve iki kontrol tabloda hiç yoktu; tablo `GELISTIRME.md`ye taşınırken de
+   dört kontrol eksik geldi. Sayıyı kaynaktan üretmek yetmiyor; LİSTE de
+   kaynaktan denetlenmeli. */
+const readme = oku("GELISTIRME.md");
 const tabloda = [...readme.matchAll(/^\| `([^`]+)` \|/gm)].map((m) => m[1]);
 /* Tek takma ad: zincirde `ui:build`, README'de insanın okuduğu hâli. */
 const ayni = (a) => (a === "ui:build" ? "tamga-ui build" : a);
@@ -105,7 +105,7 @@ const readmeEksik = zincir.map(ayni).filter((a) => !tabloda.includes(a));
 const readmeFazla = tabloda.filter((a) => !zincir.map(ayni).includes(a));
 if (readmeEksik.length || readmeFazla.length) {
   console.error(
-    "✗ README'nin kapı tablosu zincirle uyuşmuyor:\n" +
+    "✗ GELISTIRME.md'nin kontrol tablosu zincirle uyuşmuyor:\n" +
       readmeEksik.map((a) => `  ${a} zincirde var, tabloda yok.`).join("\n") +
       readmeFazla.map((a) => `  ${a} tabloda var, zincirde yok.`).join("\n"),
   );

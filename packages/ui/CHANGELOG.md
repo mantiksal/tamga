@@ -5,10 +5,10 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
-## 0.5.0 (unreleased)
+## 0.5.0
 
-> This section covers the appearance screen only. The rest of the Soft Neo Brutalism port is in
-> the working tree and still has to be written up here before the release goes out.
+> The Soft Neo Brutalism port: every component, every token and the physics behind them. The
+> renames are under "Breaking", each with the line that moves you across.
 
 ### Removed
 

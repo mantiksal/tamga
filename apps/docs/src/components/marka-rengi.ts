@@ -5,7 +5,7 @@ import { useSyncExternalStore } from "react";
 /**
  * Marka rengi: ana sayfanın iki bölümünün PAYLAŞTIĞI tek değer.
  *
- * NEDEN SAĞLAYICI DEĞİL. "01 · Canlı önizleme" ile "02 · Kutunun içi" sayfanın
+ * NEDEN SAĞLAYICI DEĞİL. "01 · Canlı önizleme" ile "02 · Bileşenler" sayfanın
  * iki ayrı bölümü ve aralarında ortak bir React ağacı yok; ikisini saran bir
  * `Provider` koymak, sunucuda çizilen her şeyi o istemci bileşeninin çocuğu
  * yapardı. Modül seviyesindeki bir abonelik ikisini de sarmalamadan bağlıyor,

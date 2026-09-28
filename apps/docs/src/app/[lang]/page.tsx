@@ -184,7 +184,7 @@ const T = {
     title: "Yönetim panelleri için açık kaynak tasarım sistemi.",
     lead: "Bir paneli oluşturan tablo, form, filtre gibi bileşenleri ve bunlardan kurulmuş hazır ekranları tek pakette topluyor. Renkleri kendi markanıza göre ayarlayabilir, dokümanı Türkçe ya da İngilizce okuyabilirsiniz.",
     ctaDocs: "Bileşenlere göz at",
-    ctaKurulum: "Kuruluma başla",
+    ctaKurulum: "Kurulum",
     ctaRepo: "GitHub",
     headerCta: "Doküman",
     meta: [`${SAYILAR.bilesen} bileşen`, "Hazır ekranlar", "Türkçe ve İngilizce"],
@@ -245,9 +245,9 @@ const T = {
     /* Bölüm etiketleri numaralı: sayfa bir sıra izliyor ve okuyucu nerede
        olduğunu numaradan biliyor. */
     b01: "01 · Canlı önizleme",
-    b02: "02 · Kutunun içi",
+    b02: "02 · Bileşenler",
     b03: "03 · Kontroller",
-    b04: "04 · Başlamak",
+    b04: "04 · Hızlı başlangıç",
     b05: "05 · Adı nereden geliyor",
     sonSurum: `Son sürüm v${SAYILAR.surum}`,
     sayiKartlari: [
@@ -594,9 +594,9 @@ const T = {
     notify: "Notifications",
 
     b01: "01 · Live preview",
-    b02: "02 · What is in the box",
-    b03: "03 · The checks",
-    b04: "04 · Getting started",
+    b02: "02 · Components",
+    b03: "03 · Release checks",
+    b04: "04 · Quick start",
     b05: "05 · Where the name comes from",
     sonSurum: `Latest release v${SAYILAR.surum}`,
     sayiKartlari: [
@@ -867,20 +867,45 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
         duzen="tanitim"
         bolumler={
           <>
+            {/* DÖRDÜNÜN İKİSİ SAYFADAN ÇIKIYOR. "Bileşenler" ve "Hızlı
+                başlangıç" birer bölüme kaydırmıyor, dokümandaki karşılığını
+                açıyor: ana sayfa o ikisini ANLATIYOR, ziyaretçinin oradan
+                istediği ise listenin kendisi ve kurulum komutu. Kalan ikisi
+                (önizleme, kontroller) sayfanın kendisinde yaşıyor, onların
+                dokümanda bir karşılığı yok. */}
             {(
               [
                 ["#canli", t.b01],
-                ["#icinde", t.b02],
+                [yol(lang, "accordion"), t.b02],
                 ["#kontroller", t.b03],
-                ["#kurulum", t.b04],
+                [yol(lang, "installation"), t.b04],
               ] as const
-            ).map(([href, label]) => (
-              <a key={href} href={href} className="home-bolum-link">
-                {/* Şeritte yalnız ADI geçiyor, numarası değil: numara sayfadaki
-                    sırayı söylüyor, şeritteki bağlantı ise nereye gideceğini. */}
-                {label.slice(label.indexOf("·") + 2)}
-              </a>
-            ))}
+            ).map(([href, label]) => {
+              /* Şeritte yalnız ADI geçiyor, numarası değil: numara sayfadaki
+                 sırayı söylüyor, şeritteki bağlantı ise nereye gideceğini. */
+              const ad = label.slice(label.indexOf("·") + 2);
+              /* DOKÜMANA GİDEN İKİSİ YENİ SEKMEDE: ziyaretçi ana sayfayı
+                 okumanın ortasında, ve bu sayfada bıraktığı yer (yazdığı
+                 marka rengi, açtığı kart, koştuğu zincir) geri gelince
+                 durmuyor · sekme onu olduğu gibi bırakıyor. `Link` değil
+                 düz bağlantı: yeni sekmede istemci tarafı gezinme zaten
+                 devreye girmiyor. */
+              return href.startsWith("#") ? (
+                <a key={href} href={href} className="home-bolum-link">
+                  {ad}
+                </a>
+              ) : (
+                <a
+                  key={href}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="home-bolum-link"
+                >
+                  {ad}
+                </a>
+              );
+            })}
           </>
         }
         cta={
@@ -908,7 +933,7 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
             <p className="home-lead mt-6">{t.lead}</p>
             {/* İKİ DÜĞME, BİR KOMUT SATIRI DEĞİL: kurulum komutu hero'daydı ve
                 orada erken · ziyaretçi daha ne kurduğunu bilmiyor. Komut artık
-                "04 · Başlamak"ta, ilk adımın içinde. */}
+                "04 · Hızlı başlangıç"ta, ilk adımın içinde. */}
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <Link href={yol(lang, "table")} className={`${buttonVariants({ variant: "primary" })} no-underline`}>
                 {t.ctaDocs}
@@ -956,7 +981,7 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
             ikisinin (erişilebilirlik, değişiklik günlüğü) yok; dördünü bağlayıp
             ikisini düz bırakmak, bağlantısı olmayan ikisini eksik gösterirdi.
             O yüzden altısı da okunan bir kart ve hiçbiri yükselmiyor. */}
-        {/* 02 · KUTUNUN İÇİ. Altı söz kartı buradaydı; yerini masa aldı çünkü
+        {/* 02 · BİLEŞENLER. Altı söz kartı buradaydı; yerini masa aldı çünkü
             aynı şeyi ANLATMAK ile GÖSTERMEK arasındaki fark bu sayfanın
             tamamının konusu. Kapı şeridi kaldı: altı sözü derleme anında tutan
             mekanizmanın adı orada, hikâyesi bir alttaki bölümde. */}

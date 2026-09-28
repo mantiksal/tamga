@@ -171,7 +171,7 @@ const buyuk = (hex: string) => hex.toUpperCase();
 
 export function CanliOnizleme({ labels: t }: { labels: CanliMetin }) {
   const [urun, setUrun] = useState(VARSAYILAN_AD);
-  /* RENK BÖLÜMLER ARASINDA ORTAK: "02 · Kutunun içi"ndeki çip ile bu masa
+  /* RENK BÖLÜMLER ARASINDA ORTAK: "02 · Bileşenler"deki çip ile bu masa
      aynı değeri okuyor · birini değiştirmek ötekini de döndürüyor. */
   const [renk, setRenk] = useMarkaRengi();
   const [tema, setTema] = useState<ThemeChoice>("light");

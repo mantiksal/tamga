@@ -1,10 +1,11 @@
+import { Fragment } from "react";
 import { dataProps } from "../lib/data-props.js";
-import { toneOf, neutral, type Tone } from "./tone.js";
+import { toneOf, type Tone } from "./tone.js";
 
 /*
- * Three score readouts, all built from the same mark a segmented strip
- * uses: hard square segments. No smooth arc and no needle — a swept arc
- * is a skeuomorphic gauge, and this kit does not draw skeuomorphs.
+ * Aynı okumanın üç biçimi: halka, yatık ölçek, kare ızgara. Üçü de aynı
+ * `ScoreProps`u alıyor, ve üçünde de İBRE YOK: ibreli bir kadran bir nesnenin
+ * taklidi, bu kit taklit çizmiyor.
  */
 
 export type ScoreProps = {
@@ -24,7 +25,16 @@ export type ScoreProps = {
    * altında görünen bant metni. Verilmezse okuma hiçbir sözcük göstermiyor.
    */
   bandLabel?: string;
+  /**
+   * The readout's width in pixels: the dial's diameter, the matrix's side, the
+   * meter's track. TR: Okumanın piksel cinsinden genişliği: kadranın çapı,
+   * matrisin kenarı, ölçeğin şeridi.
+   */
   size?: number;
+  /**
+   * Draw `bandLabel` under the number. Off, the colour still carries the band.
+   * TR: `bandLabel`ı sayının altına çiz. Kapalıyken bandı yine renk taşıyor.
+   */
   showLabel?: boolean;
   /**
    * The PRODUCT decides the band's tone. The `band()` below is the kit's default (90 / 70 / 50)
@@ -50,210 +60,216 @@ function band(v: number): Tone {
   return "danger";
 }
 
-function Delta({ delta }: { delta: number }) {
-  const up = delta >= 0;
-  return (
-    <span
-      className="font-mono text-small font-medium"
-      style={{ color: up ? neutral.muted : toneOf("danger").fg }}
-    >
-      {up ? "▲" : "▼"} {Math.abs(delta).toFixed(1)}
-    </span>
-  );
-}
 
-/* ---------- A · Ring — the segmented strip bent round ---------- */
+/* ---------- A · Ring — the conic ring ---------- */
 
+/**
+ * Skor halkası · 0-100 arası tek bir okuma.
+ *
+ * SEGMENTLİ KADRAN DEĞİL, DOLU YAY. Önce 32 parçalı bir kadran çiziyordu ve
+ * parçalar bir ölçek vadediyordu; oysa okunan şey tek bir sayı ve o sayı zaten
+ * ortada yazılı. Yay, ne kadarının dolduğunu bir bakışta söylüyor.
+ *
+ * Gerekçe: docs/gerekce/03-grafik-ve-olcum.md
+ */
 export function ScoreRing({
   value,
   label,
   bandLabel,
-  size = 168,
+  size = 96,
   showLabel = true,
-  segments = 32,
   tone,
-}: ScoreProps & { segments?: number }) {
+  ...rest
+}: ScoreProps & { [k: `data-${string}`]: unknown }) {
   const v = Math.min(100, Math.max(0, value));
   const c = toneOf(tone ?? band(v));
 
-  const sweep = 270;
-  const start = 135;
-  const cx = size / 2;
-  const cy = size / 2;
-
-  const segLength = size * 0.1;
-  const segWidth = Math.max(2, size * 0.032);
-  const ringRadius = size * 0.42 - segLength / 2;
-  const filled = Math.round((v / 100) * segments);
-
-  /* every fifth of the scale gets a longer mark, like a rule */
-  const majorEvery = segments / 5;
-  const labelReads = size * 0.065 >= 10;
-
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      role="img"
-      aria-label={label}
-      shapeRendering="crispEdges"
-    >
-      {Array.from({ length: segments }).map((_, i) => {
-        const angle = start + (sweep * i) / (segments - 1);
-        const major = i % majorEvery === 0;
-        const len = major ? segLength * 1.28 : segLength;
-        return (
-          <rect
-            key={i}
-            x={cx - segWidth / 2}
-            y={cy - ringRadius - len / 2}
-            width={segWidth}
-            height={len}
-            transform={`rotate(${angle} ${cx} ${cy})`}
-            style={{ fill: i < filled ? c.mark : neutral.line }}
-          />
-        );
-      })}
-
-      <text
-        x={cx}
-        y={cy - size * 0.01}
-        textAnchor="middle"
-        dominantBaseline="central"
-        className="font-mono"
-        shapeRendering="auto"
-        style={{
-          /* derived from the ring's own size, not the type scale: this glyph
-             has to stay in proportion to the dial at any diameter */
-          fontSize: size * 0.28,
-          fontWeight: 700,
-          fill: neutral.title,
-          fontVariantNumeric: "tabular-nums",
-        }}
+    <div {...dataProps(rest)} className="tamga-ring-wrap">
+      <div
+        className="tamga-ring"
+        role="img"
+        aria-label={label}
+        style={
+          {
+            width: size,
+            height: size,
+            "--ring-renk": c.mark,
+            "--ring-yay": `${v * 3.6}deg`,
+          } as React.CSSProperties
+        }
       >
-        {Math.round(v)}
-      </text>
-
-      {showLabel && labelReads ? (
-        <text
-          x={cx}
-          y={cy + size * 0.26}
-          textAnchor="middle"
-          shapeRendering="auto"
-          style={{ fontSize: size * 0.065, fontWeight: 500, fill: c.fg }}
-        >
-          {bandLabel}
-        </text>
-      ) : null}
-    </svg>
+        {/* Sayı halkanın ölçüsünden türüyor, tip skalasından değil: bu glif her
+            çapta kadranla orantılı durmak zorunda. */}
+        <span className="tamga-ring-ic" style={{ fontSize: Math.round(size * 0.25) }}>
+          {Math.round(v)}
+        </span>
+      </div>
+      {showLabel && bandLabel ? <span className="tamga-ring-etiket">{bandLabel}</span> : null}
+    </div>
   );
 }
 
-/* ---------- B · Linear meter — the same strip, left straight ---------- */
+/* ---------- B · Meter — the same reading, laid flat ---------- */
 
+/**
+ * Skor ölçeği · kademeli bir bandın üstünde KONUM.
+ *
+ * Dolan bir çubuk değil: beş bant sabit duruyor ve üçgen işaret skorun hangi
+ * banda düştüğünü gösteriyor. Fark şu: bir çubuk "ne kadar" der, bu "hangisi"
+ * der, ve bir memnuniyet ya da risk skorunda sorulan ikincisi.
+ *
+ * Gerekçe: docs/gerekce/03-grafik-ve-olcum.md
+ */
 export function ScoreMeter({
   value,
   label,
-  bandLabel,
-  target = 90,
-  delta,
-  segments = 40,
+  bands,
+  total = 100,
+  size,
   tone,
   ...rest
-}: ScoreProps & { target?: number; delta?: number; segments?: number; [k: `data-${string}`]: unknown }) {
-  const v = Math.min(100, Math.max(0, value));
-  const c = toneOf(tone ?? band(v));
-  const filled = Math.round((v / 100) * segments);
+}: Omit<ScoreProps, "bandLabel" | "showLabel"> & {
+  /**
+   * The five band names under the scale, worst to best. The kit does not translate, so they come
+   * ready. Left out, only the bands are drawn. TR: Ölçeğin altındaki beş bandın adı, kötüden
+   * iyiye. Kit çeviri yapmıyor, hazır geliyorlar. Verilmezse yalnız bantlar çiziliyor.
+   */
+  bands?: readonly [string, string, string, string, string];
+  /** The scale's top, when it is not 100. TR: Ölçeğin tepesi, 100 değilse. */
+  total?: number;
+  [k: `data-${string}`]: unknown;
+}) {
+  const v = Math.min(total, Math.max(0, value));
+  const pct = (v / total) * 100;
 
   return (
-    <div {...dataProps(rest)} className="w-full max-w-sm" role="group" aria-label={label}>
-      <div className="flex items-end gap-4">
-        <span className="font-mono text-display-lg font-bold leading-none tabular-nums text-ink">
+    <div
+      {...dataProps(rest)}
+      className="tamga-meter"
+      style={{ maxWidth: size ?? "35rem" }}
+      role="group"
+      aria-label={label}
+    >
+      <div className="tamga-meter-ust">
+        <span className="tamga-meter-ad">{label}</span>
+        <span className="tamga-meter-sayi">
           {Math.round(v)}
+          <span className="tamga-meter-toplam"> / {total}</span>
         </span>
-        <span className="mb-1 font-mono text-body text-ink-faint">/ 100</span>
-        {delta !== undefined ? (
-          <span className="mb-1 ml-auto">
-            <Delta delta={delta} />
-          </span>
-        ) : null}
       </div>
-
-      <p className="mt-2 text-small" style={{ color: c.fg }}>
-        {bandLabel}
-      </p>
-
-      <div className="relative mt-4">
-        <div className="flex items-end gap-[var(--mark-tick)]">
-          {Array.from({ length: segments }).map((_, i) => (
-            <span
-              key={i}
-              className="h-6 flex-1"
-              style={{ background: i < filled ? c.mark : neutral.line }}
-            />
+      <div className="tamga-meter-yol">
+        {/* İŞARET BANTLARIN ÜSTÜNDE, içinde değil: bandın rengi ölçeğin kendisi,
+            skor ise o ölçek üzerinde bir NOKTA. */}
+        <span className="tamga-meter-ok" style={{ left: `calc(${pct}% - 7px)` }} aria-hidden />
+        <div className="tamga-meter-bantlar">
+          {BANT_RENKLERI.map((renk) => (
+            <span key={renk} style={{ background: renk }} />
           ))}
         </div>
-        {/* the target, as a hard rule through the scale */}
-        <span
-          className="absolute -top-1 bottom-[var(--dial-label-drop)] w-[var(--mark-tick)]"
-          style={{ left: `${target}%`, background: neutral.title }}
-        />
       </div>
-
-      <div className="mt-2 flex justify-between font-mono text-micro text-ink-faint">
-        <span>0</span>
-        <span>target {target}</span>
-        <span>100</span>
-      </div>
+      {bands ? (
+        <div className="tamga-meter-adlar" aria-hidden>
+          {bands.map((b) => (
+            <span key={b}>{b}</span>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
 
-/* ---------- C · Block matrix — one square is one point ---------- */
+/* Kötüden iyiye beş bant. Sabit bir dizi, çünkü ölçeğin kendisi sabit: skor
+   değişince bantlar değil İŞARET kayıyor. */
+const BANT_RENKLERI = [
+  "var(--color-critical-mark)",
+  "var(--color-warning)",
+  "var(--color-accent-bg)",
+  "var(--color-accent-soft)",
+  "var(--color-accent)",
+] as const;
 
+/* ---------- C · Matrix — a hundred squares, one per point ---------- */
+
+/**
+ * Skorun kare ızgara hâli · her kare bir puan.
+ *
+ * Gerekçe: docs/gerekce/03-grafik-ve-olcum.md
+ */
 export function ScoreMatrix({
-  value,
+  rows,
+  columns,
+  levels = 5,
   label,
-  bandLabel,
-  delta,
-  size = 176,
+  legend,
+  cellTitle,
   ...rest
-}: ScoreProps & { delta?: number; [k: `data-${string}`]: unknown }) {
-  const v = Math.round(Math.min(100, Math.max(0, value)));
-  const c = toneOf(band(v));
-  const cell = (size - 9 * 2) / 10;
+}: {
+  /**
+   * One row per band of the first dimension (a weekday, a region), with one value per column.
+   * TR: Birinci boyutun her bandı için bir satır (bir gün, bir bölge), sütun başına bir değer.
+   */
+  rows: readonly ({ label: string; values: readonly number[] } & Record<string, unknown>)[];
+  /** The marks over the columns (hours, weeks). TR: Sütunların üstündeki işaretler (saat, hafta). */
+  columns: readonly string[];
+  /**
+   * How many steps of intensity. Five is the design's ramp and about the most an eye reads off a
+   * grid without a number beside it. TR: Kaç yoğunluk basamağı. Beş, tasarımın rampası ve bir
+   * gözün yanında sayı olmadan bir ızgaradan okuyabileceği en fazla basamak.
+   */
+  levels?: number;
+  /** The grid's accessible name: what the two dimensions are. TR: Izgaranın erişilebilir adı: iki boyutun ne olduğu. */
+  label: string;
+  /** The two ends of the ramp, in the product's words: "few" and "many". TR: Rampanın iki ucu, ürünün sözcükleriyle. */
+  legend?: { low: string; high: string };
+  /**
+   * The cell's own title, written by the caller: the kit knows neither the unit nor the day's
+   * name. TR: Hücrenin kendi başlığı, çağıranın yazdığı: kit ne birimi bilir ne günün adını.
+   */
+  cellTitle?: (row: string, column: string, value: number) => string;
+  [k: `data-${string}`]: unknown;
+}) {
+  const enBuyuk = Math.max(1, ...rows.flatMap((r) => [...r.values]));
 
   return (
-    <div {...dataProps(rest)} style={{ width: size }} role="group" aria-label={label}>
-      <div className="flex items-end gap-2">
-        <span className="font-mono text-display font-bold leading-none tabular-nums text-ink">
-          {v}
-        </span>
-        {delta !== undefined ? (
-          <span className="mb-1 ml-auto">
-            <Delta delta={delta} />
+    <div {...dataProps(rest)} className="tamga-yogunluk" role="img" aria-label={label}>
+      <div
+        className="tamga-yogunluk-izgara"
+        style={{ gridTemplateColumns: `32px repeat(${columns.length}, minmax(26px, 1fr))` }}
+      >
+        <span />
+        {columns.map((c) => (
+          <span key={c} className="tamga-yogunluk-sutun">
+            {c}
           </span>
-        ) : null}
+        ))}
+        {rows.map(({ label: satir, values, ...kanca }) => (
+          <Fragment key={satir}>
+            <span className="tamga-yogunluk-satir">{satir}</span>
+            {values.map((v, i) => (
+              /* BASAMAK EN BÜYÜĞE GÖRE: mutlak bir eşik, bir ızgarayı başka bir
+                 haftanın rakamlarıyla kıyaslanamaz yapardı · burada okunan şey
+                 "bu ızgarada yoğunluk nerede". */
+              <span
+                {...kanca}
+                key={i}
+                className="tamga-yogunluk-hucre"
+                data-seviye={Math.round((v / enBuyuk) * (levels - 1))}
+                title={cellTitle?.(satir, columns[i] ?? "", v)}
+              />
+            ))}
+          </Fragment>
+        ))}
       </div>
-      <p className="mt-1 text-small" style={{ color: c.fg }}>
-        {bandLabel}
-      </p>
-
-      <div className="mt-4 grid grid-cols-10 gap-[var(--mark-tick)]">
-        {Array.from({ length: 100 }).map((_, i) => {
-          /* fill bottom-up so the block grows like a column of evidence */
-          const row = 9 - Math.floor(i / 10);
-          const index = row * 10 + (i % 10);
-          const on = index < v;
-          return (
-            <span key={i} style={{ height: cell, background: on ? c.mark : neutral.line }} />
-          );
-        })}
-      </div>
-      <p className="mt-3 font-mono text-micro text-ink-faint">one square is one point</p>
+      {legend ? (
+        <div className="tamga-yogunluk-lejant">
+          {legend.low}
+          {Array.from({ length: levels }, (_, i) => (
+            <span key={i} data-seviye={i} />
+          ))}
+          {legend.high}
+        </div>
+      ) : null}
     </div>
   );
 }
-
-/** default export keeps the existing call sites working */

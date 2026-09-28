@@ -4,8 +4,7 @@ import type { ReactNode } from "react";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
-import { Check } from "./icons.js";
-import { OFF } from "./control-base.js";
+import { Check, Minus } from "./icons.js";
 
 /* ---------------------------------------------------------------- *
  * Checkbox — bir DEĞER, bir hedef değil.
@@ -17,9 +16,11 @@ import { OFF } from "./control-base.js";
 export function Checkbox({
   label,
   checked,
+  indeterminate = false,
   onChange,
   disabled = false,
   className,
+  compact = false,
   ...rest
 }: {
   /**
@@ -28,9 +29,31 @@ export function Checkbox({
    */
   label: ReactNode;
   checked: boolean;
+  /**
+   * The third state: SOME of what this box stands for is checked, not all. A tree's parent row
+   * wears it. Visible as a dash, announced as "mixed"; clicking still hands the caller a plain
+   * true/false. TR: Üçüncü hâl: bu kutunun temsil ettiği şeyin BİR KISMI işaretli, hepsi değil.
+   * Bir ağacın üst satırı bunu giyiyor. Görünüşü tire, ekran okuyucuya "mixed"; tıklanınca
+   * çağırana yine düz bir true/false gidiyor.
+   */
+  indeterminate?: boolean;
   onChange?: (next: boolean) => void;
   disabled?: boolean;
   className?: string;
+  /**
+   * The box a TABLE row wears. TR: Bir TABLO satırının giydiği kutu.
+   *
+   * Smaller and flat. A form checkbox is a control someone walks up to and
+   * answers, so it is a raised object; a table checkbox is one of twenty-five
+   * down a column, and twenty-five raised boxes turn a list into a grid of
+   * buttons. The size drops too · the form box stands beside a sentence, this
+   * one beside a row. TR: Daha küçük ve düz. Form onay kutusu, birinin karşısına
+   * geçip yanıtladığı bir kontrol · o yüzden yükselmiş bir nesne. Tablo kutusu
+   * ise bir sütunda yirmi beş taneden biri, ve yirmi beş yükselmiş kutu listeyi
+   * bir düğme ızgarasına çeviriyor. Ölçü de düşüyor · form kutusu bir cümlenin
+   * yanında duruyor, bu bir satırın.
+   */
+  compact?: boolean;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
@@ -39,15 +62,24 @@ export function Checkbox({
 {...dataProps(rest)}
       type="button"
       role="checkbox"
-      aria-checked={checked}
+      aria-checked={indeterminate ? "mixed" : checked}
       aria-disabled={disabled || undefined}
       disabled={disabled}
       onClick={() => !disabled && onChange?.(!checked)}
-      className={cn("flex items-center gap-2 text-body", className)}
-      style={disabled ? OFF : undefined}
+      className={cn("flex items-center gap-2 text-body", disabled && "text-ink-faint", className)}
     >
-      <span className="tamga-check" data-checked={checked}>
-        {checked ? <Icon icon={Check} size="xs" weight="bold" /> : null}
+      <span
+        className={cn("tamga-check", compact && "tamga-check-sm")}
+        data-checked={(checked || indeterminate) && !disabled}
+        data-off={disabled || undefined}
+      >
+        {/* Kısmi hâl TİRE, yarım bir onay işareti değil: yarım çizilmiş bir
+            işaret "bu kutu bozuk" diye okunuyor, tire ise "bir kısmı" diyor. */}
+        {indeterminate ? (
+          <Icon icon={Minus} size="xs" weight="bold" />
+        ) : checked ? (
+          <Icon icon={Check} size="xs" weight="bold" />
+        ) : null}
       </span>
       {label}
     </button>

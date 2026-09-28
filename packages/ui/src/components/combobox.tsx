@@ -19,6 +19,27 @@ export type ComboOption<T extends string> = {
   hint?: string;
 } & Record<string, unknown>;
 
+/**
+ * Eşleşen harfleri kalınlaştırır.
+ *
+ * ARAMA SONUCU NEDEN EŞLEŞTİĞİNİ SÖYLEMELİ: elli ilin arasından dördü
+ * kaldığında okuyucu "neden bunlar" diye soruyor, cevabı harflerin kendisi.
+ * Karşılaştırma Türkçe küçük harfe göre, yoksa "İ" ile "i" eşleşmiyor.
+ */
+function vurgula(metin: string, q: string) {
+  const arama = q.trim();
+  if (!arama) return metin;
+  const i = metin.toLocaleLowerCase("tr").indexOf(arama.toLocaleLowerCase("tr"));
+  if (i < 0) return metin;
+  return (
+    <>
+      {metin.slice(0, i)}
+      <b className="font-bold text-ink">{metin.slice(i, i + arama.length)}</b>
+      {metin.slice(i + arama.length)}
+    </>
+  );
+}
+
 export function Combobox<T extends string>({
   options,
   value,
@@ -127,7 +148,7 @@ export function Combobox<T extends string>({
           {selected ? (
             <button
               type="button"
-              className="tamga-mini-btn"
+              className="tamga-mini-btn" data-inset="true"
               aria-label={labels.clear}
               onClick={() => {
                 onChange?.(undefined);
@@ -139,7 +160,7 @@ export function Combobox<T extends string>({
           ) : null}
           <button
             type="button"
-            className="tamga-mini-btn"
+            className="tamga-mini-btn" data-inset="true"
             aria-label={labels.open}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
@@ -153,7 +174,7 @@ export function Combobox<T extends string>({
         <div
           id={`${id}-list`}
           role="listbox"
-          className="tamga-overlay absolute z-30 mt-2 max-h-72 w-full overflow-y-auto py-1"
+          className="tamga-overlay tamga-menu absolute z-30 mt-2 max-h-72 w-full overflow-y-auto"
         >
           {shown.length === 0 ? (
             <p className="px-3 py-2.5 text-body text-ink-faint">{labels.empty}</p>
@@ -172,7 +193,7 @@ export function Combobox<T extends string>({
                 onMouseEnter={() => setActive(i)}
                 onClick={() => commit(shown[i]!)}
               >
-                <span className="block truncate">{etiket}</span>
+                <span className="block truncate">{vurgula(etiket, query)}</span>
                 {hint ? (
                   <span className="block truncate font-mono text-caption text-ink-faint">{hint}</span>
                 ) : null}

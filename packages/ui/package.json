@@ -20,6 +20,7 @@
       "default": "./dist/index.js"
     },
     "./styles.css": "./dist/styles.css",
+    "./fonts.css": "./dist/fonts.css",
     "./theme.css": "./dist/theme.css",
     "./kit.css": "./dist/kit.css",
     "./package.json": "./package.json",

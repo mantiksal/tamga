@@ -38,6 +38,7 @@ export function RichText({
   value,
   onChange,
   allow,
+  hint,
   labels,
   ariaLabel,
   rows = 10,
@@ -58,6 +59,13 @@ export function RichText({
    * başlık seviyeleri · `ul` madde listesi · `ol` numaralı liste.
    */
   allow: readonly RichTextFormat[];
+  /**
+   * The quiet note at the end of the toolbar: what the editor accepts ("Markdown supported").
+   * A sentence, not a button · the caller writes it, like every other visible string.
+   * TR: Araç çubuğunun sonundaki sessiz not: editörün ne kabul ettiği ("Markdown destekler").
+   * Düğme değil cümle · görünen her metin gibi onu da çağıran yazıyor.
+   */
+  hint?: string;
   labels: {
     bold: string;
     italic: string;
@@ -120,17 +128,11 @@ export function RichText({
   }, [value]);
 
   /**
-   * ÇIKTI: `<b>` YERİNE `<strong>`.
+   * ÇIKTI: `<b>` YERİNE `<strong>`. Tarayıcının `bold` komutu anlamsız bir sunum
+   * etiketi üretiyor, ve bir vitrinin beyaz listesinde `<b>` olmadığı için kalın
+   * yazılan her şey sessizce düz metne dönüyordu. `<i>` dokunulmadan kalıyor.
    *
-   * Tarayıcının `bold` komutu `<b>` üretiyor, ve `<b>` modern HTML'de hiçbir
-   * anlam taşımayan bir sunum etiketi; kalın düğmesinin söylediği şey ise
-   * "bu önemli", yani `<strong>`. Fark akademik değil, ölçüldü: bir vitrinin
-   * etiket beyaz listesinde `<strong>` vardı, `<b>` yoktu, ve kalın yazılan
-   * her şey mağazada sessizce düz metne dönüyordu.
-   *
-   * `<i>` DOKUNULMADAN KALIYOR: onun aksine `<i>` hâlâ anlamı olan bir
-   * etiket (başka bir ses tonu, teknik terim, yabancı sözcük) ve tarayıcının
-   * doğal çıktısı.
+   * Gerekçe: docs/gerekce/01-form-ve-girdi.md
    */
   function yayinla() {
     const el = alan.current;
@@ -216,6 +218,12 @@ export function RichText({
             </button>
           );
         })}
+        {hint ? (
+          <>
+            <span className="tamga-rule-v" />
+            <span className="tamga-editor-not">{hint}</span>
+          </>
+        ) : null}
       </div>
 
       {baglantiAcik && (

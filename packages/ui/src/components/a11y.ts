@@ -50,21 +50,10 @@ export function useFocusTrap<T extends HTMLElement>(open: boolean) {
 
     restoreTo.current = document.activeElement as HTMLElement | null;
 
-    /* İLK KONTROL, ya da AÇIKÇA İSTENEN kontrol.
-     *
-     * Varsayılan olarak ilk odaklanabilir eleman odağı alıyor ve çoğu panelde
-     * doğrusu bu. Ama bir onay diyaloğunda ilk kontrol kapatma çarpısı, ikinci
-     * sıradaki ise "Sil": Enter'a basan biri kaydı siliyor. Yıkıcı bir
-     * diyalogda güvenli olan varsayılan olmalı.
-     *
-     * `autoFocus` NİTELİĞİ BURADA ÇALIŞMIYOR: React onu bağlarken bu etki
-     * henüz koşmamış oluyor, sonra trap odağı ilk elemana çekiyor ve niteliğin
-     * etkisi siliniyor. O yüzden mekanizma DOM üzerinden: panelin içinde
-     * `data-autofocus` taşıyan bir eleman varsa odak onun.
-     *
-     * `focusable` listesinden seçiliyor ki gizli ya da devre dışı bir elemana
-     * odak verilmesin: kapalı bir düğmeye odaklanmak, odağı hiç vermemekle
-     * aynı şey ama sessizce. */
+    /* İLK KONTROL, ya da AÇIKÇA İSTENEN kontrol: panelin içinde `data-autofocus`
+       taşıyan bir eleman varsa odak onun. `autoFocus` NİTELİĞİ BURADA ÇALIŞMIYOR,
+       tuzak odağı ilk elemana çekince etkisi siliniyor.
+       Gerekçe: docs/gerekce/09-kitaplik.md */
     const adaylar = focusable(root);
     const istenen = adaylar.find((el) => el.hasAttribute("data-autofocus"));
     const first = istenen ?? adaylar[0];

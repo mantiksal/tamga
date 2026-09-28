@@ -1,21 +1,13 @@
 import { lightness, deltaL, isHex, hexToOklch, oklchToHex, contrast, type Oklch } from "./color.js";
 
 /**
- * Tek bir marka renginden iki temalık palet.
+ * Tek bir marka renginden iki temalık palet · 36 token, ölçülerek.
  *
- * NEDEN ÜRETİLİYOR. Bugüne kadar bir müşterinin rengi elle geçiriliyordu: yüz,
- * taban, mürekkep, seçili satır zemini ve koyu tema karşılıkları tek tek
- * seçiliyordu. Beş token için makul, otuz altı token için değil, ve her seferinde
- * kontrast eşiği elle kontrol ediliyordu.
+ * Kontrast eşikleri `measurePalette` ile sınanıyor (`check-token-contrast` ile
+ * aynı aritmetik, bkz. `lib/color.ts`): bir formül bugün doğru olup yarın bir
+ * ton için yanlış olabiliyor.
  *
- * ZEMİN DE DÖNÜYOR. Bugünün zemini sıcak kâğıt (#f5f2ec) ve aksandan bağımsız;
- * mor bir markanın yanında sarıya çalıyor. Nötrler markanın TONUNU çok düşük
- * doyumla taşıyor: gri kalıyorlar ama markanın grisi oluyorlar.
- *
- * EŞİKLER TAHMİN DEĞİL ARAMA. Her renk "şu formülle koyulaştır" ile değil,
- * hedef orana ulaşana kadar ÖLÇÜLEREK bulunuyor — çünkü bir tonun beyaz
- * mürekkebi hangi açıklıkta taşıdığı tona göre değişiyor. Sonuç
- * `check-token-contrast` ile aynı aritmetikten geçiyor (bkz. `lib/color.ts`).
+ * Gerekçenin tamamı: docs/ozel/10-tasarim-dili-yenileme.md
  */
 
 /** Bir temanın üreteceği token'lar. Adlar `theme.css`'teki kit ailesiyle birebir. */
@@ -28,7 +20,12 @@ export type Palette = {
   sunk: string;
   chartFill: string;
   line: string;
+  /** Kapatan çizgi: kart/tablo başlığının altı. `line` sıralar, `div` böler. */
+  div: string;
   edge: string;
+  /** Tıklanabilir kartın hover kenarı: soluk çizgi ile koyu kenar arası. */
+  edgeHover: string;
+  edgeStrong: string;
   tick: string;
   ink: string;
   inkSoft: string;
@@ -39,6 +36,8 @@ export type Palette = {
   accentInk: string;
   accentLine: string;
   accentBg: string;
+  /** Vurgunun yumuşak hâli: odak katmanı, sayaç rozeti, yumuşak düğme. */
+  accentSoft: string;
   accentShadow: string;
   navIdle: string;
   navHover: string;
@@ -48,39 +47,96 @@ export type Palette = {
 export type PalettePair = { light: Palette; dark: Palette };
 
 /**
- * Nötrlerin AÇIKLIK basamakları, iki temada.
+ * Nötrler markadan ne kadar etkilenir · üç kademe.
  *
- * Sayılar bugünkü paletten ölçüldü, uydurulmadı: `#f5f2ec` ile `#fdfcfa`
- * arasındaki fark ne ise mor bir markada da o. Böylece marka değişince
- * yüzeylerin BİRBİRİNE göre yeri sabit kalıyor, yalnız tonu dönüyor.
+ *   TAM      `ink`, `edge` ve vurgu ailesi · doyumu ORANLA alıyor.
+ *   KISITLI  `muted`, `line`, `bedge`, ara mürekkepler · doyum 0.022 tavanlı.
+ *   SABİT    açık temanın KÂĞITLARI · sıcak krem her markada aynı.
+ *
+ * Gerekçe: docs/ozel/10-tasarim-dili-yenileme.md · docs/gerekce/09-kitaplik.md
  */
-const BASAMAK = {
-  light: { page: 0.962, shell: 0.991, hover: 0.933, sunk: 0.933, line: 0.891, edge: 0.845, tick: 0.771, ink: 0.246, inkSoft: 0.372, inkFaint: 0.516, navIdle: 0.523, navHover: 0.386 },
-  dark: { page: 0.166, shell: 0.212, hover: 0.262, sunk: 0.262, line: 0.302, edge: 0.372, tick: 0.409, ink: 0.951, inkSoft: 0.869, inkFaint: 0.643, navIdle: 0.606, navHover: 0.869 },
-} as const;
+/* Referans marka: tasarımın varsayılan mavisi (#1E4FD8). Oranlar onun doyumuna
+   göre. Referansın kendisinde OKLCH gidiş-dönüşünden 1-2 birimlik sapma var ve
+   kabul edildi: literal bir tablo sapmayı kapatır ama üreticiyi ikiye böler. */
+const REFERANS_MARKA = { l: 0.49, c: 0.2158, h: 264.4 };
+
+/** `l` açıklık, `c` doyum, `k` marka kademesi. */
+type Basamak = { l: number; c: number; k: "tam" | "kisitli" | "sabit" };
+
+type NotrRol =
+  | "page" | "shell" | "rail" | "hover" | "sunk" | "line" | "div" | "edge" | "edgeHover"
+  | "edgeStrong" | "tick" | "ink" | "inkSoft" | "inkFaint" | "navIdle" | "navHover" | "navHoverBg";
+
+const BASAMAK: Record<"light" | "dark", Record<NotrRol, Basamak>> = {
+  light: {
+    page: { l: 0.961, c: 0.0083, k: "sabit" },
+    shell: { l: 0.997, c: 0.0041, k: "sabit" },
+    rail: { l: 0.925, c: 0.0112, k: "sabit" },
+    hover: { l: 0.970, c: 0.0082, k: "sabit" },
+    sunk: { l: 0.898, c: 0.0142, k: "sabit" },
+    line: { l: 0.861, c: 0.0156, k: "sabit" },
+    div: { l: 0.904, c: 0.0129, k: "sabit" },
+    edge: { l: 0.834, c: 0.0154, k: "kisitli" },
+    edgeHover: { l: 0.677, c: 0.0340, k: "kisitli" },
+    edgeStrong: { l: 0.241, c: 0.0635, k: "tam" },
+    tick: { l: 0.771, c: 0.0154, k: "kisitli" },
+    ink: { l: 0.241, c: 0.0635, k: "tam" },
+    inkSoft: { l: 0.372, c: 0.0550, k: "kisitli" },
+    inkFaint: { l: 0.460, c: 0.0476, k: "kisitli" },
+    navIdle: { l: 0.241, c: 0.0635, k: "tam" },
+    navHover: { l: 0.241, c: 0.0635, k: "tam" },
+    navHoverBg: { l: 0.997, c: 0.0041, k: "sabit" },
+  },
+  dark: {
+    page: { l: 0.218, c: 0.0385, k: "kisitli" },
+    shell: { l: 0.257, c: 0.0473, k: "kisitli" },
+    rail: { l: 0.187, c: 0.0331, k: "kisitli" },
+    hover: { l: 0.278, c: 0.0521, k: "kisitli" },
+    /* ÇUKUR SAYFANIN ALTINDA, ve koyu temada bu basamak neredeyse hiç yoktu:
+       l 0.209 sayfanın 0.218'ine ΔL* 1.0 kadar yakındı — açık temada aynı çift
+       ΔL* 7.3. Gömülü yüzey sayfanın üstünde görünmüyordu. Rayın altına indi
+       (açık temadaki sıra da bu), kroma açıklıkla birlikte düşüyor.
+       Gerekçe: docs/gerekce/10-kit-css.md */
+    sunk: { l: 0.168, c: 0.0290, k: "kisitli" },
+    line: { l: 0.352, c: 0.0535, k: "kisitli" },
+    div: { l: 0.313, c: 0.0512, k: "kisitli" },
+    edge: { l: 0.352, c: 0.0535, k: "kisitli" },
+    edgeHover: { l: 0.437, c: 0.0618, k: "kisitli" },
+    edgeStrong: { l: 0.120, c: 0.0209, k: "tam" },
+    tick: { l: 0.409, c: 0.0535, k: "kisitli" },
+    /* Koyu temada mürekkep TAM kademede DEĞİL · tasarımın üreticisi onu
+       ailenin dışında tutuyor. Koyu bir zeminde açık bir yazı markanın
+       doyumunu tam aldığında renkli bir metin oluyor ve okunurluğu düşüyor. */
+    ink: { l: 0.935, c: 0.0150, k: "kisitli" },
+    inkSoft: { l: 0.869, c: 0.0220, k: "kisitli" },
+    inkFaint: { l: 0.725, c: 0.0352, k: "kisitli" },
+    navIdle: { l: 0.935, c: 0.0150, k: "kisitli" },
+    navHover: { l: 0.935, c: 0.0150, k: "kisitli" },
+    navHoverBg: { l: 0.257, c: 0.0473, k: "kisitli" },
+  },
+};
+
+/** Açık temanın sabit kâğıtları: tonu 78, markadan bağımsız. */
+const KAGIT_TONU = 78;
+
+function notrUret(b: Basamak, marka: Oklch, koyu: boolean): string {
+  if (b.k === "sabit") return oklchToHex({ l: b.l, c: b.c, h: 90 });
+  const oran = Math.max(0.12, Math.min(1.4, marka.c / REFERANS_MARKA.c));
+  const tavan = koyu ? 0.02 : 0.022;
+  let c = b.k === "tam" ? b.c * oran : Math.min(b.c * oran, tavan);
+  let h = marka.h;
+  /* Sıcak marka muhafızı · yalnız AÇIK nötrlerde. */
+  if (b.l > 0.7 && (marka.h < 75 || marka.h > 340)) {
+    h = KAGIT_TONU;
+    c *= 0.8;
+  }
+  return oklchToHex({ l: b.l, c, h });
+}
+
 
 /**
- * Nötrlerin doyumu: gri kalacak kadar az, markayı taşıyacak kadar çok.
- *
- * YÜKSELEN YÜZEY TONSUZ, ve bu bir tutarsızlık değil bir ayrım. Marka rengi
- * ZEMİNE giriyor: sayfa, şerit, ray, satır vurgusu. Kart ise zeminin üstünde
- * DURAN şey, ve beyaza yakın kalması onu her markada aynı yükseklikte
- * tutuyor — kartın rengi değil kenarı yükseltiyor (13 Yasa 1).
- *
- * Pratik karşılığı: müşteri rengini değiştirdiğinde sayfanın zemini dönüyor
- * ama kenar çubuğu, üst şerit ve kartlar yerinde kalıyor. Panelin iskeleti
- * sabit, rengi değişken.
- */
-const NOTR_DOYUM = { zemin: 0.006, yuzey: 0, cizgi: 0.009, murekkep: 0.014 } as const;
-
-const notr = (h: number, l: number, c: number) => oklchToHex({ l, c, h });
-
-/**
- * Yüzün üstündeki mürekkep: beyaz mı koyu mu.
- *
- * ÖLÇÜLEREK seçiliyor, kurala göre değil. Lacivert bir yüz beyaz mürekkep
- * taşıyor, sarı bir yüz taşımıyor — ve "markalar koyu olur" varsayımı ilk sarı
- * markada okunmayan bir düğme üretiyor.
+ * Yüzün üstündeki mürekkep: beyaz mı koyu mu. ÖLÇÜLEREK seçiliyor · "markalar
+ * koyu olur" varsayımı ilk sarı markada okunmayan bir düğme üretiyor.
  */
 function yuzMurekkebi(yuz: string, acikNotr: string, koyuNotr: string): string {
   return contrast(acikNotr, yuz) >= contrast(koyuNotr, yuz) ? acikNotr : koyuNotr;
@@ -89,23 +145,17 @@ function yuzMurekkebi(yuz: string, acikNotr: string, koyuNotr: string): string {
 function temaUret(marka: Oklch, koyu: boolean): Palette {
   const h = marka.h;
   const b = koyu ? BASAMAK.dark : BASAMAK.light;
-  const page = notr(h, b.page, NOTR_DOYUM.zemin);
-  /* Kart · üst şerit · kenar çubuğu: markadan bağımsız. */
-  const shell = notr(h, b.shell, NOTR_DOYUM.yuzey);
-  const hover = notr(h, b.hover, NOTR_DOYUM.zemin);
-  const ink = notr(h, b.ink, NOTR_DOYUM.murekkep);
+  const page = notrUret(b.page, marka, koyu);
+  const shell = notrUret(b.shell, marka, koyu);
+  const hover = notrUret(b.hover, marka, koyu);
+  const railRengi = notrUret(b.rail, marka, koyu);
+  const ink = notrUret(b.ink, marka, koyu);
 
-  /* YÜZ: markanın KENDİ açıklığından başlıyor.
-   *
-   * İlk hâli sabit bir açıklıktan başlayıp beyaz mürekkep geçene kadar
-   * koyulaştırıyordu, ve sarı bir markayı `#8f6c00` yapıyordu: ölçüm geçiyor
-   * ama kimse ona sarı demiyor. Marka rengini tanınmaz hâle getiren bir palet
-   * üreticisi işini yapmıyor.
-   *
-   * Doğrusu: yüz markanın açıklığında kalıyor (kullanılabilir bir banda
-   * kırpılarak), MÜREKKEP ona göre seçiliyor. Lacivert bir yüz beyaz taşır,
-   * sarı bir yüz koyu taşır — ikisi de markasını koruyor. Yalnız hiçbir
-   * mürekkeple 4.5'e ulaşılamıyorsa yüz mürekkepten UZAĞA itiliyor. */
+  /* YÜZ markanın KENDİ açıklığında kalıyor (kullanılabilir bir banda kırpılarak),
+     mürekkep ona göre seçiliyor · lacivert bir yüz beyaz, sarı bir yüz koyu
+     taşıyor. Sabit bir açıklıktan başlayıp koyulaştırmak sarı bir markayı
+     `#8f6c00` yapıyordu: ölçüm geçiyor ama kimse ona sarı demiyor. Hiçbir
+     mürekkeple 4.5'e ulaşılamıyorsa yüz mürekkepten UZAĞA itiliyor. */
   const band = koyu ? { alt: 0.58, ust: 0.82 } : { alt: 0.45, ust: 0.78 };
   const yuzL = Math.max(band.alt, Math.min(band.ust, marka.l));
   /* DOYUM KIRPILMIYOR. Bir süre `min(marka.c, 0.16)` vardı ve doygun bir marka
@@ -137,28 +187,45 @@ function temaUret(marka: Oklch, koyu: boolean): Palette {
     page,
     shell,
     hover,
-    band: page,
-    rail: page,
-    sunk: hover,
-    chartFill: hover,
-    line: notr(h, b.line, NOTR_DOYUM.cizgi),
-    edge: notr(h, b.edge, NOTR_DOYUM.cizgi),
-    tick: notr(h, b.tick, NOTR_DOYUM.cizgi),
+    /* Ray ve şerit sayfadan ΔL* 3.6 KOYU, iki temada da aynı yönde. Koyu temada
+       AÇMAK denendi ve kartı yok etti: ray ile shell arası ΔL* 0.4'e düşüyor. */
+    band: railRengi,
+    rail: railRengi,
+    /* ÇUKUR İLE HOVER AYRI, ve bir süre aynı değerdi. Tasarımda hover kâğıdın
+       bir tık ÜSTÜ (kartın içinde açılan bir satır), çukur ise bir tık ALTI
+       (gömülü bir kuyu). Aynı değer verildiğinde gömülü alanlar kayboluyordu. */
+    sunk: notrUret(b.sunk, marka, koyu),
+    chartFill: notrUret(b.sunk, marka, koyu),
+    line: notrUret(b.line, marka, koyu),
+    edge: notrUret(b.edge, marka, koyu),
+    /* Ayraç ile kart hover kenarı · ikisi de tasarımın kendi token'ı. */
+    div: notrUret(b.div, marka, koyu),
+    edgeHover: notrUret(b.edgeHover, marka, koyu),
+    /* BASILAN KENAR: düğmenin altındaki taban. `edge`ten ayrı, çünkü o sessiz
+       (kart çizer), bu ağır (tuş çizer). Koyu temada mürekkep açılırken bu
+       koyu kalıyor, o yüzden mürekkebe de bağlanamıyor. */
+    edgeStrong: notrUret(b.edgeStrong, marka, koyu),
+    tick: notrUret(b.tick, marka, koyu),
     ink,
-    inkSoft: notr(h, b.inkSoft, NOTR_DOYUM.murekkep),
-    inkFaint: notr(h, b.inkFaint, NOTR_DOYUM.murekkep),
+    inkSoft: notrUret(b.inkSoft, marka, koyu),
+    inkFaint: notrUret(b.inkFaint, marka, koyu),
     accent: yuz,
     accentHover: adim(koyu ? 0.05 : -0.06),
     accentActive: adim(koyu ? -0.04 : -0.11),
     accentInk: murekkep,
     accentLine: cizgi,
     /* Seçili satır zemini: sayfaya çok yakın, ama ayrı okunuyor. */
-    accentBg: oklchToHex({ l: koyu ? b.page + 0.06 : b.page - 0.035, c: 0.03, h }),
+    /* `notrUret`ten geçmek zorunda: sıcak-marka muhafızı oradan geliyor. */
+    accentBg: notrUret({ l: koyu ? 0.318 : 0.930, c: koyu ? 0.075 : 0.0282, k: "tam" }, marka, koyu),
+    /* Odak katmanı ve sayaç rozeti; markadan türüyor, sabit değil. */
+    accentSoft: notrUret({ l: koyu ? 0.357 : 0.836, c: koyu ? 0.0964 : 0.0712, k: "tam" }, marka, koyu),
     /* Taban: yüzün ALTINDA duran koyu, doygun renk (13 Yasa 1). */
     accentShadow: oklchToHex({ l: koyu ? 0.42 : 0.28, c: Math.min(marka.c, 0.13), h }),
-    navIdle: notr(h, b.navIdle, NOTR_DOYUM.murekkep),
-    navHover: notr(h, b.navHover, NOTR_DOYUM.murekkep),
-    navHoverBg: notr(h, koyu ? b.hover : b.hover - 0.01, NOTR_DOYUM.zemin),
+    navIdle: notrUret(b.navIdle, marka, koyu),
+    navHover: notrUret(b.navHover, marka, koyu),
+    /* Rayın basamağından türüyor, sayfanınkinden değil: ikisi eşitlenirse
+       rayda hover görünmez olur (`check:palette` · `navHoverBg · rail`). */
+    navHoverBg: notrUret(b.navHoverBg, marka, koyu),
   };
 }
 
@@ -174,6 +241,10 @@ export function makePalette(markaHex: string): PalettePair {
   return { light: temaUret(marka, false), dark: temaUret(marka, true) };
 }
 
+/* ÖLÇÜNÜN KENDİSİ DE DIŞARI AÇIK. Bir ürün kendi rengini seçerken kapının
+   sorduğu soruyu sorabilmeli, ve aynı matematikle: metin için WCAG oranı,
+   yüzey ve çizgi için CIE L* farkı. İkisini yeniden yazan her taraf, kapıdan
+   BAŞKA bir sonuç üretme riskini de yeniden yazıyor. */
 export { isHex };
 
 /* ---- doğrulama ---- */
@@ -214,6 +285,14 @@ export function measurePalette(p: Palette): Measurement[] {
     metin("accentInk · accent", p.accentInk, p.accent),
     metin("accentLine · page", p.accentLine, p.page),
     metin("navIdle · rail", p.navIdle, p.rail),
+    /* Ray kendi basamağına indiğinde bu çift ÜST ÜSTE bindi ve hiçbir kapı
+       görmedi: hover zemini ölçülmüyordu. Taban 2.0 — bir satırın altındaki
+       zeminin "değişti" diye okunması için gereken en az fark. */
+    yuzey("navHoverBg · rail", p.navHoverBg, p.rail, 2),
+    /* Gömülü yüzey sayfadan ayrılıyor mu, aynı 2.0 tabanı: koyu temada kitin
+       kendi `--color-sunk`u sayfaya ΔL* 1.1 kadar yaklaşmıştı ve üretici de
+       aynı kusuru bir marka rengi için üretebilir. */
+    yuzey("sunk · page", p.sunk, p.page, 2),
     yuzey("edge · page", p.edge, p.page, 10),
     yuzey("line · page", p.line, p.page, 4),
     yuzey("accentBg · page", p.accentBg, p.page, 1.2),
@@ -221,35 +300,28 @@ export function measurePalette(p: Palette): Measurement[] {
 }
 
 /** `:root` bloğuna yapıştırılabilir CSS. */
-/**
- * Palette alanı → CSS simge adı.
- *
- * DIŞARI AÇIK, ÇÜNKÜ ÜÇÜNCÜ KOPYASI DOĞACAKTI. Bu eşleme `paletteCss`in içinde
- * özeldi; bir ürün paneli aynısını kendi dosyasına elle yazmıştı (rengi
- * çalışma zamanında köke yazmak için), ve doküman sitesi de üçüncüsünü
- * yazacaktı. Aynı yirmi iki satırın üç kopyası, kite bir simge eklendiği gün
- * ikisinin sessizce eksik kalması demek.
- */
+/* Palette alanı → CSS simge adı. Yeni bir alan buraya da yazılmazsa
+   sessizce dışarı çıkmıyor. */
 const AD: Record<keyof Palette, string> = {
   page: "--color-page", shell: "--color-shell", hover: "--color-hover", band: "--color-band",
   rail: "--color-rail", sunk: "--color-sunk", chartFill: "--color-chart-fill",
-  line: "--color-line", edge: "--color-edge", tick: "--color-tick",
+  line: "--color-line", edge: "--color-edge", edgeHover: "--color-edge-hover",
+  edgeStrong: "--color-edge-strong",
+  div: "--color-div", tick: "--color-tick",
   ink: "--color-ink", inkSoft: "--color-ink-soft", inkFaint: "--color-ink-faint",
   accent: "--color-accent", accentHover: "--color-accent-hover",
   accentActive: "--color-accent-active", accentInk: "--color-accent-ink",
   accentLine: "--color-accent-line", accentBg: "--color-accent-bg",
+  accentSoft: "--color-accent-soft",
   accentShadow: "--color-accent-shadow", navIdle: "--color-nav-idle",
   navHover: "--color-nav-hover", navHoverBg: "--color-nav-hover-bg",
 };
 
 /**
- * Bir paleti CSS değişkeni sözlüğüne çevirir: `{ "--color-accent": "#..." }`.
- *
- * NEDEN `paletteCss` YETMİYOR: o bir STİL SAYFASI dizgisi üretiyor (`:root { … }`),
- * ve bir stil sayfası ancak belgenin tamamına uygulanabiliyor. Bir paleti tek
- * bir kutuya uygulamak (bir önizleme, bir tema seçici) ya da köke çalışma
- * zamanında yazmak için gereken şey bir SÖZLÜK. Simge adları kalıtsal olduğu
- * için bir kutuya yazılan palet, içindeki her bileşeni birlikte döndürüyor.
+ * Bir paleti CSS değişkeni sözlüğüne çevirir. `paletteCss` bir STİL SAYFASI
+ * dizgisi üretiyor ve o ancak belgenin tamamına uygulanabiliyor; bir paleti tek
+ * bir kutuya (önizleme, tema seçici) ya da köke çalışma zamanında yazmak için
+ * gereken şey bir SÖZLÜK.
  */
 export function paletteVars(p: Palette): Record<string, string> {
   const stil: Record<string, string> = {};

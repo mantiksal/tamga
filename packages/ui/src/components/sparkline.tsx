@@ -1,7 +1,8 @@
 import { neutral, toneOf, type Tone } from "./tone.js";
 
 /**
- * Sparkline — satır içi, eksensiz mini grafik.
+ * Sparkline · eksensiz mini çizgi, tek soru: YÖN NE. Etkileşim yok ve alan
+ * dolgusu da yok: ikisi de eksensiz bir çizgiye ölçek taklidi verir.
  *
  * Gerekçe: docs/gerekce/03-grafik-ve-olcum.md
  */
@@ -10,6 +11,7 @@ export function Sparkline({
   tone = "neutral",
   width = 108,
   height = 30,
+  mark = false,
 }: {
   values: number[];
   /**
@@ -19,6 +21,12 @@ export function Sparkline({
   tone?: Tone;
   width?: number;
   height?: number;
+  /**
+   * A 5px square on the last point: where the line ENDED. Off by default, because in a column of
+   * sparklines it repeats on every row. TR: Son noktada 5px kare: çizginin NEREDE bittiği. Kapalı
+   * geliyor, çünkü bir sütun dolusu sparkline'da her satırda tekrar ediyor.
+   */
+  mark?: boolean;
 }) {
   const min = Math.min(...values);
   const max = Math.max(...values);
@@ -27,9 +35,13 @@ export function Sparkline({
   const y = (v: number) => height - 2 - ((v - min) / span) * (height - 4);
 
   const line = values.map((v, i) => `${i === 0 ? "M" : "L"}${i * step},${y(v)}`).join(" ");
-  const area = `${line} L${width},${height} L0,${height} Z`;
   const t = toneOf(tone);
-  const stroke = tone === "neutral" || tone === "positive" ? neutral.muted : t.mark;
+  /* YÜKSELEN ÇİZGİ VURGU RENGİNDE, gri değil · `Delta` çipinde yazılı olan
+     kararın aynısı: `positive` yeşili bir DURUM rengi ("çözüldü"), oysa
+     yükselen bir eğilim bir durum değil bir hareket. Nötr olan sessiz kalıyor;
+     bir eğilim çizgisinin rengi ancak iyi ya da kötü haber verdiğinde var. */
+  const stroke =
+    tone === "neutral" ? neutral.muted : tone === "positive" ? "var(--color-accent)" : t.mark;
 
   return (
     <svg
@@ -38,18 +50,25 @@ export function Sparkline({
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="none"
       aria-hidden
-      shapeRendering="crispEdges"
     >
-      <path d={area} style={{ fill: t.bg }} />
-      <path d={line} fill="none" style={{ stroke }} strokeWidth="1.5" shapeRendering="geometricPrecision" />
-      <rect
-        x={width - 2.5}
-        y={y(values[values.length - 1] ?? 0) - 2.5}
-        width="5"
-        height="5"
-        style={{ fill: stroke }}
+      <path
+        d={line}
+        fill="none"
+        style={{ stroke }}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
       />
-      <line x1="0" y1={height} x2={width} y2={height} style={{ stroke: neutral.line }} strokeWidth="1" />
+      {mark ? (
+        <rect
+          x={width - 2.5}
+          y={y(values[values.length - 1] ?? 0) - 2.5}
+          width="5"
+          height="5"
+          style={{ fill: stroke }}
+        />
+      ) : null}
     </svg>
   );
 }

@@ -29,47 +29,18 @@ export function Surface({
 }
 
 /**
- * Yatay taşma kabı — ve bu bileşenin asıl işi erişilebilirlik.
+ * Yatay taşma kabı · asıl işi erişilebilirlik. `overflow-x: auto` tek başına
+ * yalnız FARE için çalışıyor; `tabIndex={0}` + `role="region"` + zorunlu bir ad
+ * o kutuyu klavyeye açıyor.
  *
- * `overflow-x: auto` tek başına FARE için çalışır. Klavye kullanan biri o
- * kutuya hiç giremez: kaydırılabilir bir alan odaklanabilir değilse içindeki
- * geniş tabloyu yana kaydırmanın yolu yoktur. Tarayıcılar bunu kendiliğinden
- * çözmüyor.
- *
- * `tabIndex={0}` + `role="region"` + bir ad, o kutuyu klavyeye açıyor. Ad
- * zorunlu: adsız bir `region` ekran okuyucunun landmark listesinde
- * "bölge, bölge, bölge" olarak birikir ve hiçbirinin ne olduğu bilinmez.
+ * Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md
  */
-export function ScrollX({
-  label,
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div"> & { label: string }) {
-  return (
-    <div
-      className={cn("tamga-scroll-x", className)}
-      role="region"
-      aria-label={label}
-      tabIndex={0}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}
-
 /**
- * Aşağıdan giren blok.
+ * Aşağıdan giren blok · GİRİŞ animasyonu, hover etkisi değil.
  *
- * `.tamga-rise` bir HOVER etkisi değil, bir GİRİŞ animasyonu: sekiz piksel
- * aşağıdan, sönükten. Azaltılmış harekette CSS onu tamamen kapatıyor.
- *
- * `delay` bir listeyi sırayla açmak için. Basamak küçük tutulmalı — otuz
- * satırlık bir listede 60ms'lik bir gecikme, sonuncuyu iki saniye sonra
- * gösterir ve bekleme hissi yaratır.
+ * Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md
  */
-export function Rise({
+export function Reveal({
   delay = 0,
   className,
   children,
@@ -77,7 +48,7 @@ export function Rise({
 }: React.ComponentProps<"div"> & { delay?: number }) {
   return (
     <div
-      className={cn("tamga-rise", className)}
+      className={cn("tamga-reveal", className)}
       style={delay ? { animationDelay: `${delay}ms` } : undefined}
       {...props}
     >
@@ -87,15 +58,11 @@ export function Rise({
 }
 
 /**
- * İki durumun aynı yerde durması.
+ * İki durumun aynı yerde durması · kutu her zaman UZUN olanın genişliğinde,
+ * yani "Kaydet" → "Kaydediliyor…" yanındaki hiçbir şeyi kaydırmıyor. Gizlenen
+ * taraf `aria-hidden` alıyor.
  *
- * Bir düğmenin yazısı "Kaydet" iken "Kaydediliyor…" olduğunda düğme genişler
- * ve yanındaki her şey kayar. Swap ikisini de aynı ızgara hücresine koyuyor:
- * kutu her zaman UZUN olanın genişliğinde, yani hiçbir şey oynamıyor.
- *
- * Gizlenen taraf `aria-hidden` alıyor. Almasaydı ekran okuyucu iki metni
- * arka arkaya okurdu — "Kaydet Kaydediliyor" — ve hangisinin geçerli olduğu
- * anlaşılmazdı.
+ * Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md
  */
 export function Swap({
   showing,
@@ -125,15 +92,11 @@ export function Swap({
 }
 
 /**
- * Liste satırı — tablo olmayan listeler için.
+ * Liste satırı · tablo olmayan listeler için. `href` verilirse bağlantı,
+ * `onClick` verilirse düğme, ikisi de yoksa düz satır: tıklanabilir bir `<div>`
+ * klavyeyle erişilemiyor.
  *
- * Bir tabloya yetmeyen ama bir listeden fazlası olan şey: ayarlar satırı,
- * entegrasyon satırı, üye satırı. Sabit yükseklik ve alt kural, satırların
- * taranabilir kalmasını sağlıyor.
- *
- * `href` verilirse bir bağlantıya, `onClick` verilirse bir düğmeye döner —
- * ikisi de yoksa düz bir satır kalır. Bu ayrım önemli: tıklanabilir bir
- * `<div>` klavyeyle erişilemez ve ekran okuyucuya hiçbir şey söylemez.
+ * Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md
  */
 export function ListRow({
   size = "base",
@@ -170,18 +133,12 @@ export function ListRow({
 }
 
 /**
- * İçinde bir panel AÇILAN tablo hücresi.
+ * İçinde bir panel AÇILAN tablo hücresi. Tek işi kırpmayı kapatmak, ve
+ * unutulduğunda görünmeyen bir hata üretiyor: hücredeki menü hücre sınırında
+ * KESİLİYOR, konsol sessiz, ve ilk akla gelen z-index oluyor. Z-index bunu
+ * çözmez · hiçbir yığın sırası bir `overflow` kırpmasını aşamaz.
  *
- * Tek işi kırpmayı kapatmak — ve o tek iş, unutulduğunda görünmeyen bir hata
- * üretiyor: hücrenin içindeki bir menü, ipucu ya da açılır panel hücre
- * sınırında KESİLİYOR. Kontrol çalışıyor, tıklanıyor, ama yarısı yok. Hata
- * mesajı yok, konsol sessiz, ve ilk akla gelen z-index oluyor. Z-index bunu
- * çözmez: hiçbir yığın sırası bir `overflow` kırpmasını aşamaz.
- *
- * `align` VARSAYILAN OLARAK SAĞDA, çünkü en sık kullanımı satır sonundaki
- * eylem menüsü. Ama hiza ile kırpma AYRI iki karar: sola yaslı bir hücrede
- * ipucu barındırmak isteyen, hizasını feda etmek zorunda kalmasın diye
- * `align="start"` var. (Uzun süre tek parçaydı ve tam bu yüzden yakalandı.)
+ * `align` varsayılan olarak sağda: en sık kullanımı satır sonundaki eylem.
  */
 export function CellActions({
   className,
@@ -204,22 +161,28 @@ export function CellActions({
 }
 
 /**
- * Sayfa başlığı şeridi.
+ * Sayfa başlığı şeridi. Eylem SAĞA yaslı ve başlığın taban çizgisinde.
  *
- * Ürün bunu kendi yazmıştı (23 satır) ve doğru yazmıştı — ama her ekranın
- * tepesinde duran bir şeyin her projede yeniden yazılması, on panelde on
- * farklı boşluk demek.
- *
- * Eylem SAĞA yaslı ve başlığın taban çizgisinde. Başka yere koyan bir başlık
- * altındaki listeden kopmuş görünüyor — bu bir tercih değil, ölçülmüş bir şey.
+ * Doküman: /docs/page-band
  */
 export function PageBand({
+  eyebrow,
   title,
   subtitle,
   actions,
   className,
   ...rest
 }: {
+  /**
+   * A short line above the title saying what KIND of page this is, or whose it is.
+   * TR: Başlığın üstünde, bu sayfanın NE TÜR bir sayfa olduğunu ya da kimin olduğunu söyleyen kısa satır.
+   *
+   * Use it when the title alone leaves a question the reader would otherwise ask, such as whether a
+   * setting applies to everyone or only to them.
+   * TR: Başlığın tek başına cevapsız bıraktığı bir soru varsa kullanılıyor · bir ayarın herkesi mi
+   * yoksa yalnız o kişiyi mi ilgilendirdiği gibi.
+   */
+  eyebrow?: string;
   title: string;
   subtitle?: string;
   actions?: ReactNode;
@@ -228,10 +191,17 @@ export function PageBand({
   [k: `data-${string}`]: unknown;
 }) {
   return (
-    <div {...dataProps(rest)} className={cn("tamga-section tamga-gutter flex flex-wrap items-center gap-4 py-4", className)}>
-      <div className="min-w-0">
-        <h2 className="text-title font-semibold text-ink">{title}</h2>
-        {subtitle ? <p className="text-small text-ink-faint">{subtitle}</p> : null}
+    /* BU BİR `h1`, `h2` DEĞİL: kabuk bir başlık çizmiyor, yani `h2` kalırsa
+       her ekran belgesinin birinci düzey başlığını kaybediyor. Bir sayfada tek
+       şerit olur; bölüm başlığı gereken yerde `SectionHead` var.
+       Kendi dolgusu yok: yerini kap biliyor. Gerekçe: docs/ozel/10-tasarim-dili-yenileme.md */
+    <div {...dataProps(rest)} className={cn("flex flex-wrap items-end gap-4", className)}>
+      <div className="min-w-0 flex-1 basis-65">
+        {eyebrow ? (
+          <p className="mb-1.5 text-small font-semibold text-ink-faint">{eyebrow}</p>
+        ) : null}
+        <h1 className="font-display text-display-lg leading-tight font-extrabold text-ink">{title}</h1>
+        {subtitle ? <p className="mt-1.5 text-body text-ink-soft">{subtitle}</p> : null}
       </div>
       {actions ? <div className="ml-auto flex flex-wrap items-center gap-2">{actions}</div> : null}
     </div>
@@ -239,23 +209,14 @@ export function PageBand({
 }
 
 /**
- * Gezinen bağlantı.
- *
- * `.tamga-link` sınıfı kitte yıllarca vardı, bileşeni yoktu — ve doküman
- * sitesi kendi sarmalayıcısını yazmak zorunda kaldı. Sınıfın olup bileşenin
- * olmaması, tam olarak checkbox'ın yaşadığı boşluk.
- *
- * NEDEN `Button variant="link"` DEĞİL. O bir `<button>`; bir bağlantı gibi
- * GÖRÜNÜR ama gezinmez. Orta tuşla yeni sekmede açılamaz, sağ tıkla
- * kopyalanamaz, ve ekran okuyucuya "düğme" der. Görünüm aynı, sözleşme
- * ters.
- *
- * `external` verilince `rel="noopener noreferrer"` geliyor. `noopener`
- * olmadan açılan sayfa `window.opener` üzerinden seninkini yönlendirebilir —
- * eski ve hâlâ geçerli bir açık.
+ * Gezinen bağlantı. `Button variant="link"` DEĞİL: o bir `<button>`, yani orta
+ * tuşla yeni sekmede açılmıyor, kopyalanmıyor, ve ekran okuyucuya "düğme"
+ * diyor. `external` verilince `rel="noopener noreferrer"` geliyor · `noopener`
+ * olmadan açılan sayfa `window.opener` ile seninkini yönlendirebilir.
  */
 export function Link({
   external = false,
+  look = "inline",
   className,
   children,
   href,
@@ -263,6 +224,15 @@ export function Link({
   ...props
 }: React.ComponentProps<"a"> & {
   external?: boolean;
+  /**
+   * `inline` inside a sentence, `standalone` on its own line with an arrow that steps forward
+   * under the pointer, `quiet` a link that waits until it is looked at, `marked` a link carrying
+   * a wash, for the one address in a paragraph that must be found. TR: `inline` bir cümlenin
+   * içinde, `standalone` kendi satırında ve işaretçi altında bir adım ileri giden okuyla,
+   * `quiet` bakılana kadar bekleyen bağlantı, `marked` yıkama taşıyan bağlantı · bir paragrafta
+   * bulunması gereken tek adres için.
+   */
+  look?: "inline" | "standalone" | "quiet" | "marked";
   /**
    * The router's link, so an in-app link does not reload the page. TR: Yönlendiricinin
    * bağlantısı, uygulama içi bir bağlantı sayfayı yeniden yüklemesin diye.
@@ -273,7 +243,13 @@ export function Link({
   linkComponent?: ComponentType<{ href: string; className?: string; children?: ReactNode; [k: string]: unknown }>;
 }) {
   const shared = {
-    className: cn("tamga-link", className),
+    className: cn(
+      "tamga-link",
+      look === "standalone" && "tamga-link-standalone",
+      look === "quiet" && "tamga-link-quiet",
+      look === "marked" && "tamga-link-marked",
+      className,
+    ),
     target: external ? ("_blank" as const) : undefined,
     rel: external ? ("noopener noreferrer" as const) : undefined,
     ...props,

@@ -2,7 +2,10 @@ import type { ReactNode } from "react";
 import { Icon } from "./icon.js";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
+import type { IconGlyph } from "./icons.js";
 import { CaretRight } from "./icons.js";
+import type { Tone } from "./tone.js";
+import { toneOf } from "./tone.js";
 
 /**
  * BOŞ DURUM SİSTEMİ — dört slot, ve hiçbiri neyin eksik olduğunu bilmez.
@@ -43,17 +46,14 @@ function ArtFigure({
 }
 
 /**
- * The speech bubble — the answer to "and the figure says …".
+ * ÇİZİMİN balonu · "ve figür şunu diyor" sorusunun cevabı. Adı bir ara
+ * `SaysBubble`dı ve tasarımda o ad KONUŞMA balonunun (04.14): müşteri
+ * mesajları, sipariş notları. İkisi aynı adı taşıyınca boş durum arayan da
+ * sohbet arayan da yanlış bileşeni buluyordu.
  *
- * It is the one part of the mascot that IS in the system: 1px edge plus a 2px
- * hard offset, exactly like every other raised object. That pairing is the
- * whole trick — it lets pixel art sit inside a strict interface without either
- * one looking lost.
- *
- * The line is real text, not decoration, so it is readable. Keep it to one
- * short sentence: the bubble is a voice, not a paragraph.
+ * Gerekçe: docs/gerekce/04-bos-ve-hata.md
  */
-export function SaysBubble({
+export function ArtSays({
   children,
   art,
   size = 168,
@@ -112,27 +112,53 @@ export function SaysBubble({
  */
 export function EmptyNote({
   art,
+  icon,
   title,
   children,
   action,
   className,
   ...rest
 }: {
-  art: Art;
-  title: string;
+  /** The drawing. With `icon` instead, the note collapses to a single line. TR: Çizim. Yerine `icon` verilirse not tek satıra iniyor. */
+  art?: Art;
+  /**
+   * A glyph instead of the drawing · and with it the note becomes ONE LINE: a card that is empty
+   * inside an otherwise full screen does not deserve a picture, it deserves a sentence. TR:
+   * Çizim yerine bir glif · ve onunla birlikte not TEK SATIR oluyor: dolu bir ekranın içindeki
+   * boş bir kart resim değil bir cümle hak ediyor.
+   */
+  icon?: IconGlyph;
+  /** Omitted, the sentence stands alone · which is the one-line note's whole shape. TR: Verilmezse cümle tek başına duruyor · tek satırlık notun bütün biçimi bu. */
+  title?: string;
   children?: React.ReactNode;
   action?: React.ReactNode;
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
+  if (icon || !art) {
+    return (
+      <div
+        {...dataProps(rest)}
+        className={cn("tamga-gutter flex items-center gap-2.5 py-4", className)}
+      >
+        {icon ? <Icon icon={icon} size="sm" className="shrink-0 text-ink-faint" /> : null}
+        <span className="min-w-0 flex-1 text-body text-ink-faint">
+          {title ? <span className="font-semibold text-ink">{title} </span> : null}
+          {children}
+        </span>
+        {action ? <div className="shrink-0">{action}</div> : null}
+      </div>
+    );
+  }
+
   return (
     <div {...dataProps(rest)} className={cn("tamga-gutter flex items-center gap-4 py-6", className)}>
       <span className="tamga-art-port tamga-art-well">
         <ArtFigure art={art} size={56} ground={false} />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-body font-medium text-ink">{title}</p>
+        {title ? <p className="font-display text-subhead font-extrabold text-ink">{title}</p> : null}
         {children ? (
           <p className="mt-1 max-w-[var(--measure)] text-small leading-relaxed text-ink-faint">
             {children}
@@ -144,32 +170,23 @@ export function EmptyNote({
   );
 }
 
-export type EmptyLayout = "banner" | "ticket" | "routes";
+export type EmptyLayout = "plain" | "banner" | "ticket" | "routes";
 
 export type EmptyRoute = { label: string; note?: string; onClick?: () => void };
 
 /**
- * A surface that has nothing in it.
+ * A surface that has nothing in it · three layouts (banner · ticket · routes),
+ * one set of content. Not three styles of the same picture: each answers a
+ * different question about the screen underneath, and each wants its own
+ * drawing.
  *
- * Three layouts, one set of content. They are NOT three styles of the same
- * picture — each answers a different question about the screen underneath:
- *
- *   banner  wide and horizontal: art left, words centre, action at the far
- *           right edge, numbered base plate underneath. Reads as a strip
- *           across the top of a working screen.
- *   ticket  a narrow tag pinned to a big surface, with a perforation and one
- *           full-width action. For a single unambiguous next step.
- *   routes  the words and the figure on the left, a list of ways in on the right.
- *           Two buttons ask a yes/no question; a list answers "what can I even
- *           do here", which is what somebody arriving actually wants to know.
- *
- * Each one also wants a different drawing. The layout decides the shape; the
- * drawing decides what the emptiness FEELS like, and those are two choices,
- * not one.
+ * Gerekçe: docs/gerekce/04-bos-ve-hata.md
  */
 export function EmptyState({
   layout = "banner",
   art,
+  icon,
+  tone,
   kicker,
   title,
   children,
@@ -178,12 +195,30 @@ export function EmptyState({
   says,
   steps,
   routes,
+  routesLabel,
   size = 150,
   className,
   ...rest
 }: {
+  /**
+   * `plain` the dashed card: an icon tile, a line and the first step · the shape most screens
+   * need. The other three carry the drawing. TR: `plain` kesik kenarlı kart: bir ikon karosu,
+   * bir satır ve ilk adım · çoğu ekranın ihtiyacı olan biçim. Ötekiler çizimi taşıyor.
+   */
   layout?: EmptyLayout;
-  art: Art;
+  /**
+   * The drawing, for the three layouts built around one. TR: Çizim, etrafında kurulan üç
+   * yerleşim için.
+   */
+  art?: Art;
+  /** `plain` only: the glyph in the tile. TR: yalnız `plain`: karodaki glif. */
+  icon?: IconGlyph;
+  /**
+   * `plain` only: the tile's wash. Left out it stays the accent's light tone, which is what an
+   * empty state is: an invitation, not a fault. TR: yalnız `plain`: karonun yıkaması.
+   * Verilmezse vurgunun açık tonunda kalıyor · bir boş durum bir davet, bir arıza değil.
+   */
+  tone?: Tone;
   /** what KIND of nothing this is: "no records", "no results" TR: bunun NE TÜR bir hiçlik olduğu: "kayıt yok", "sonuç yok" */
   kicker?: string;
   title: string;
@@ -204,26 +239,31 @@ export function EmptyState({
   steps?: string[];
   /** routes only: the ways in TR: yalnız rotalar: içeri giden yollar */
   routes?: EmptyRoute[];
+  /**
+   * routes only: the micro-label over the list. Omitted, the list stands on its
+   * own. TR: yalnız rotalar: listenin üstündeki mikro etiket. Verilmezse liste
+   * kendi başına duruyor.
+   */
+  routesLabel?: string;
   size?: number;
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
-  const figure =
-    says !== undefined ? (
-      <SaysBubble art={art} size={size}>
-        {says}
-      </SaysBubble>
-    ) : (
-      <ArtFigure art={art} size={size} float />
-    );
+  const figure = !art ? null : says !== undefined ? (
+    <ArtSays art={art} size={size}>
+      {says}
+    </ArtSays>
+  ) : (
+    <ArtFigure art={art} size={size} float />
+  );
 
   const words = (
     <>
       {kicker ? <p className="tamga-kicker mb-2">{kicker}</p> : null}
-      <h3 {...dataProps(rest)} className="text-display-sm font-semibold tracking-tight text-ink">{title}</h3>
+      <h3 {...dataProps(rest)} className="font-display text-display-sm font-extrabold tracking-tight text-ink">{title}</h3>
       {children ? (
-        <p className="mt-3 max-w-[var(--measure)] text-control leading-relaxed text-ink-soft">
+        <p className="mt-3 max-w-[var(--measure)] text-body leading-relaxed text-ink-soft">
           {children}
         </p>
       ) : null}
@@ -234,6 +274,27 @@ export function EmptyState({
       ) : null}
     </>
   );
+
+  if (layout === "plain") {
+    /* KESİK KENARLI KART: kitin her yerinde kesik çizgi "henüz gerçek içerik
+       değil" demek, ve boş bir bölüm tam olarak o. Dolu hâlinde aynı yerde
+       kesiksiz bir kart duruyor · ikisi aynı kutu, biri henüz dolmamış. */
+    return (
+      <div {...dataProps(rest)} className={cn("tamga-empty-plain", className)}>
+        {icon ? (
+          <span
+            aria-hidden
+            className="tamga-empty-tile"
+            style={tone ? { background: toneOf(tone).bg, color: toneOf(tone).fg } : undefined}
+          >
+            <Icon icon={icon} size="xl" weight="bold" />
+          </span>
+        ) : null}
+        {words}
+        {action ? <div className="mt-2 flex flex-wrap justify-center gap-3">{action}</div> : null}
+      </div>
+    );
+  }
 
   if (layout === "banner") {
     return (
@@ -289,15 +350,7 @@ export function EmptyState({
       {/* the figure reads first, at the head of the line, standing on his own cast
           shadow rather than in a well: this layout has no divided ground, so a
           framed window here would be a box with nothing to bound. */}
-      <div className="flex shrink-0 items-end">
-        {says !== undefined ? (
-          <SaysBubble art={art} size={size}>
-            {says}
-          </SaysBubble>
-        ) : (
-          <ArtFigure art={art} size={size} float />
-        )}
-      </div>
+      <div className="flex shrink-0 items-end">{figure}</div>
 
       <div className="min-w-0 flex-1">
         {words}
@@ -305,7 +358,7 @@ export function EmptyState({
       </div>
 
       <div className="flex w-full shrink-0 flex-col gap-2.5 sm:max-w-76">
-        <p className="tamga-kicker mb-0.5">ways in</p>
+        {routesLabel ? <p className="tamga-kicker mb-0.5">{routesLabel}</p> : null}
         {routes?.map((r) => (
           /* no mini figure here: a 26px scene is the smudge this kit just stopped
              shipping, and a route needs a direction, not a mascot */
@@ -323,18 +376,11 @@ export function EmptyState({
 }
 
 /**
- * A whole body with nothing in it — and no box drawn around the nothing.
+ * A whole body with nothing in it, and no box drawn around the nothing: no
+ * border, no ground, no offset, just a hard floor rule as wide as the figure.
+ * For an empty area INSIDE a working screen use EmptyState instead.
  *
- * This is the one that goes straight onto the page, not inside a card. A
- * bordered panel needs content to bound; when the entire screen is empty there
- * is nothing to bound, and the border becomes a frame around a void. So there
- * is no border, no ground, no offset. The only structure is a hard floor rule
- * as wide as the figure — enough to say he is standing somewhere, not enough to be a
- * box.
- *
- * Reach for it when somebody lands on a section they have never used. For an
- * empty area INSIDE a working screen, use EmptyState instead: that one has a
- * card around it because the rest of the screen does too.
+ * Gerekçe: docs/gerekce/04-bos-ve-hata.md
  */
 export function EmptyBlank({
   art,
@@ -367,9 +413,9 @@ export function EmptyBlank({
       )}
     >
       {says !== undefined ? (
-        <SaysBubble art={art} size={size}>
+        <ArtSays art={art} size={size}>
           {says}
-        </SaysBubble>
+        </ArtSays>
       ) : (
         <ArtFigure art={art} size={size} float ground={false} />
       )}
@@ -377,9 +423,9 @@ export function EmptyBlank({
       <span className="tamga-art-blank-floor mt-1 mb-8" style={{ width: size * 0.72 }} />
 
       {kicker ? <p className="tamga-kicker mb-2">{kicker}</p> : null}
-      <h3 className="text-display-sm font-semibold tracking-tight text-ink">{title}</h3>
+      <h3 className="font-display text-display-sm font-extrabold tracking-tight text-ink">{title}</h3>
       {children ? (
-        <p className="mt-3 max-w-[var(--measure)] text-control leading-relaxed text-ink-soft">
+        <p className="mt-3 max-w-[var(--measure)] text-body leading-relaxed text-ink-soft">
           {children}
         </p>
       ) : null}
@@ -391,18 +437,15 @@ export function EmptyBlank({
 }
 
 /**
- * A choice you are offering — a template, a starting point, a preset.
+ * A choice you are offering · a template, a preset. A real button, so it obeys
+ * raised physics. The category colour is a 3px SPINE under the art, never a
+ * coloured banner behind it (Yasa 3).
  *
- * It is a real button, so it obeys raised physics: 1px edge, 2px offset, lifts
- * under the cursor, presses flat when clicked. A template you cannot pick has
- * no business looking like a card.
- *
- * The category colour is a 3px SPINE under the art rather than a coloured
- * banner behind it. A wall of coloured banners would out-shout a real event
- * (Yasa 3); a rule carries the same grouping and outranks nothing.
+ * Gerekçe: docs/gerekce/04-bos-ve-hata.md
  */
 export function EmptyTile({
   art,
+  icon,
   kicker,
   title,
   children,
@@ -411,7 +454,16 @@ export function EmptyTile({
   className,
   ...rest
 }: {
-  art: Art;
+  /** The drawing. With `icon` instead, the tile becomes the dashed ADD cell. TR: Çizim. Yerine `icon` verilirse karo kesik kenarlı EKLE hücresi oluyor. */
+  art?: Art;
+  /**
+   * A glyph instead of the drawing · and the tile turns into the grid's empty cell: dashed while
+   * it waits, solid and raised under the pointer. The dashed edge says "not content yet", the
+   * lift says "this is a control". TR: Çizim yerine bir glif · ve karo ızgaranın boş hücresine
+   * dönüşüyor: beklerken kesik, imleç altında kesiksiz ve yükselmiş. Kesik kenar "henüz içerik
+   * değil" diyor, yükselme "bu bir kontrol".
+   */
+  icon?: IconGlyph;
   /** the identifier-shaped line above the title TR: başlığın üstündeki tanımlayıcı biçimli satır */
   kicker?: string;
   title: string;
@@ -426,6 +478,24 @@ export function EmptyTile({
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
+  if (icon || !art) {
+    return (
+      <button
+        {...dataProps(rest)}
+        type="button"
+        onClick={onClick}
+        className={cn("tamga-empty-add", className)}
+      >
+        {icon ? (
+          <span aria-hidden className="tamga-empty-add-kare">
+            <Icon icon={icon} size="sm" weight="bold" />
+          </span>
+        ) : null}
+        <span className="text-body font-bold">{title}</span>
+      </button>
+    );
+  }
+
   return (
     <button {...dataProps(rest)} type="button" onClick={onClick} className={cn("tamga-art-tile", className)}>
       <span className="tamga-art-well flex h-28 items-end justify-center pt-4">

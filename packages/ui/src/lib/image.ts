@@ -1,25 +1,9 @@
 /**
- * Turning an uploaded file into something a panel can carry.
+ * Turning an uploaded file into something a panel can carry. No library: a
+ * `<canvas>` and `drawImage`. A data URI, not an object URL. Resized, because
+ * `localStorage` holds about 5 MB. Ratio kept, nothing cropped. PNG, not JPEG.
  *
- * NO LIBRARY, and none is needed: a `<canvas>` and `drawImage`.
- *
- * A DATA URI, NOT AN OBJECT URL. `URL.createObjectURL` dies with the tab, so a
- * logo chosen today would be gone tomorrow. A data URI survives in storage and
- * goes straight into `<img src>`. When a server arrives this file becomes an
- * upload call and nothing else changes: screens already hold a STRING and do
- * not care whether it is a data URI or an `https://` address.
- *
- * WHY IT IS RESIZED. `localStorage` holds about 5 MB per browser and a phone
- * photo alone is 4 MB. Writing one unresized throws `QuotaExceeded`, and the
- * thing that gets lost may not be the logo but whatever else was being saved
- * at that moment.
- *
- * THE RATIO IS KEPT, NOTHING IS CROPPED. Cropping to fit a square is the most
- * common and most silent mistake: the logo looks fine and its edge is gone.
- * The long side is pulled to the limit, the short side follows.
- *
- * PNG, NOT JPEG. Logos are flat and transparent; JPEG turns transparency into
- * solid black and rings the edges.
+ * Gerekçe: docs/gerekce/09-kitaplik.md
  */
 
 export type ImageError = "type" | "size" | "unreadable";

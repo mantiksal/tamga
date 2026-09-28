@@ -74,7 +74,11 @@ export function Calendar({
   [k: `data-${string}`]: unknown;
 }) {
   const today = new Date();
-  const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() });
+  /* AÇILAN AY DEĞERİN AYI, bugünün ayı değil · ve bir süre bugünündü: başka bir
+     aydan bir tarih verildiğinde takvim bu ayı açıyor, seçili gün hiç
+     görünmüyor ve kullanıcı kendi verdiği tarihi arıyordu. Değer yoksa bugün. */
+  const acilis = value ? new Date(`${value}T00:00:00`) : today;
+  const [view, setView] = useState({ y: acilis.getFullYear(), m: acilis.getMonth() });
 
   const first = weekStart(locale);
   const cells = useMemo(() => monthMatrix(view.y, view.m, first), [view, first]);
@@ -89,6 +93,10 @@ export function Calendar({
       fmt.format(new Date(Date.UTC(2024, 0, 7 + ((first + i) % 7)))),
     );
   }, [locale, first]);
+
+  /* BUGÜN İŞARETLİ, ve değildi: bir takvimde "hangi gün bugün" sorusu her
+     zaman soruluyor, ve cevabı yoksa kullanıcı tarihi baştan sayıyor. */
+  const bugun = iso(today.getFullYear(), today.getMonth(), today.getDate());
 
   const inRange = (d: DateISO) =>
     range?.from && range?.to ? d >= range.from && d <= range.to : false;
@@ -131,10 +139,11 @@ export function Calendar({
             <button
               key={date}
               type="button"
-              /* Seçili gün DOLGU alır — bir tarih bir değerdir, bir hedef değil;
+              /* Seçili gün DOLGU alır: bir tarih bir değerdir, bir hedef değil;
                  checkbox ile aynı gerekçe (Yasa 2). */
-              className="tamga-option justify-center tabular-nums"
+              className="tamga-gun"
               data-selected={isEdge(date)}
+              data-today={date === bugun || undefined}
               data-active={inRange(date) && !isEdge(date)}
               aria-pressed={isEdge(date)}
               onClick={() => onSelect?.(date)}
@@ -199,7 +208,7 @@ export function DatePicker({
           {value ? (
             <button
               type="button"
-              className="tamga-mini-btn"
+              className="tamga-mini-btn" data-inset="true"
               aria-label={labels.clear}
               onClick={() => onChange?.(undefined)}
             >
@@ -208,7 +217,7 @@ export function DatePicker({
           ) : null}
           <button
             type="button"
-            className="tamga-mini-btn"
+            className="tamga-mini-btn" data-inset="true"
             aria-label={labels.open}
             onClick={() => setOpen((v) => !v)}
           >

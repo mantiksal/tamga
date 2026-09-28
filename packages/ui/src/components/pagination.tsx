@@ -85,10 +85,14 @@ export function Pagination({
         <span className="tamga-label tabular-nums">{labels.summary(from, to, total)}</span>
       ) : null}
 
-      <span className="ml-auto flex items-center gap-1.5">
+      <span className="ml-auto flex items-center gap-2">
         <button
           type="button"
-          className="tamga-icon-btn shrink-0"
+          /* OKLAR SAYFA DÜĞMELERİYLE AYNI ÖLÇÜDE (`tamga-page`), ayrı bir
+             `icon-btn` değil. İkon düğmesi 40px, sayfa düğmesi 36: yan yana
+             duran bir şeridin iki ucu ortasından uzun kalıyordu ve şerit
+             eğri okunuyordu. İkisi de aynı ailenin üyesi. */
+          className="tamga-page shrink-0"
           aria-label={labels.previous}
           disabled={!canPrev}
           onClick={() => canPrev && onChange?.(page - 1)}
@@ -99,17 +103,20 @@ export function Pagination({
         {pages !== undefined
           ? pageWindow(page, pages, span).map((n, i) =>
               n === null ? (
-                <span key={`gap-${i}`} className="px-1 text-small text-ink-faint" aria-hidden>
+                /* Atlama işareti bir DÜĞME DEĞİL: kendi kenarı, tabanı ve
+                   imleci yok · tıklanamayan bir şeyin tuş gibi görünmesi,
+                   kullanıcıya çalışmayan bir hedef gösterir. */
+                <span key={`gap-${i}`} className="px-1 font-mono text-small text-ink-faint" aria-hidden>
                   …
                 </span>
               ) : (
                 <button
                   key={n}
                   type="button"
-                  /* Seçili sayfa DOLGU almaz: "buradasın" bir eylem değildir
-                     (Yasa 2). Gerekçesi `.tamga-page`'in üstünde — bu satır
-                     bir zamanlar `.tamga-option` diyordu ve yorumun tersini
-                     yapıyordu. */
+                  /* Seçili sayfa hem DOLU hem BASILI (`.tamga-page[aria-current]`).
+                     Yasa 2'nin istisnası değil, okunuşu: sayfalayıcıda "buradasın"
+                     kalıcı olarak basılmış bir düğmedir, ve basılı bir düğme
+                     dolgusunu korur. Bu yorum bir süre bunun TERSİNİ yazıyordu. */
                   className="tamga-page tabular-nums"
                   aria-current={n === page ? "page" : undefined}
                   aria-label={labels.page(n)}
@@ -123,7 +130,7 @@ export function Pagination({
 
         <button
           type="button"
-          className="tamga-icon-btn shrink-0"
+          className="tamga-page shrink-0"
           aria-label={labels.next}
           disabled={!canNext}
           onClick={() => canNext && onChange?.(page + 1)}

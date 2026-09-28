@@ -14,6 +14,8 @@ import { Tooltip } from "./overlay.js";
 export function RailLink({
   label,
   active = false,
+  badge,
+  badgeLabel,
   href,
   onClick,
   className,
@@ -24,6 +26,22 @@ export function RailLink({
 }: {
   label: string;
   active?: boolean;
+  /**
+   * How many things are waiting behind this entry: 3 new orders, 12 open tickets. On a wide rail
+   * it is the number; on a narrow one only a square, because a two-digit number sits on top of
+   * the icon in a 40px box and an unreadable number says nothing more than "there is something".
+   * TR: Bu girişin arkasında kaç şey beklediği: 3 yeni sipariş, 12 açık talep. Geniş rayda sayı,
+   * dar rayda yalnız bir kare · 40 piksellik bir kutuda iki haneli sayı ikonun üstüne biniyor, ve
+   * okunmayan bir sayı "bir şey var" demekten fazlasını söylemiyor.
+   */
+  badge?: number;
+  /**
+   * What the badge means, for a screen reader: "3 new orders". Required with `badge`, because a
+   * bare number read after the label says nothing. TR: Rozetin ne anlama geldiği, ekran okuyucu
+   * için: "3 yeni sipariş". `badge` ile zorunlu, çünkü etiketin ardından okunan çıplak bir sayı
+   * hiçbir şey söylemiyor.
+   */
+  badgeLabel?: string;
   href?: string;
   onClick?: () => void;
   className?: string;
@@ -65,6 +83,20 @@ export function RailLink({
     <>
       {children}
       {showLabel && <span className="min-w-0 truncate">{label}</span>}
+      {badge !== undefined && badge > 0 ? (
+        showLabel ? (
+          <span className="tamga-rail-badge tabular-nums" aria-label={badgeLabel}>
+            {badge}
+          </span>
+        ) : (
+          /* Dar rayda sayı YOK ama haber var: kare görünüyor, anlamı ekran
+             okuyucuya `badgeLabel` ile gidiyor. */
+          <>
+            <span className="tamga-rail-dot" aria-hidden />
+            <span className="sr-only">{badgeLabel}</span>
+          </>
+        )
+      ) : null}
     </>
   );
 
@@ -92,7 +124,9 @@ export function RailLink({
   return showLabel ? (
     kontrol
   ) : (
-    <Tooltip label={label} placement="right">
+    /* `bind={false}`: kontrolün `aria-label`i zaten bu metin · bağlanırsa
+       okuyucu "Siparişler, Siparişler" diyor. */
+    <Tooltip label={label} placement="right" bind={false}>
       {kontrol}
     </Tooltip>
   );

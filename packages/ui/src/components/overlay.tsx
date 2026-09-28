@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { cloneElement, isValidElement, useCallback, useEffect, useId, useRef, useState } from "react";
 import type { Tone } from "./tone.js";
 import { toneOf } from "./tone.js";
 import { Icon } from "./icon.js";
@@ -8,17 +8,18 @@ import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
 import { Close } from "./icons.js";
 import { SkeletonOptions, SkeletonPanel } from "./skeleton.js";
+import { Kbd } from "./display.js";
 import { Button } from "./button.js";
 import { useFocusTrap, useListKeys } from "./a11y.js";
 import { MiniButton } from "./button.js";
 import { useScrollLock } from "../lib/scroll-lock.js";
 
-/* ------------------------------------------------------------------ *
- * The overlay plane. Everything here sits at 6px — past the 4px the
- * page can reach — which is the whole "this is floating" signal.
- * Only Dialog and Sheet add a scrim. Tooltip is the one exception:
- * it is a label, not a surface you act on, so it never lifts.
- * ------------------------------------------------------------------ */
+/**
+ * Katman düzlemi · 6 piksel, sayfanın ulaşabildiği 4 pikselin ötesi. Perde
+ * yalnız `Dialog` ve `Sheet`te; `Tooltip` bir etiket, hiç yükselmiyor.
+ *
+ * Gerekçe: docs/gerekce/07-katman-ve-diyalog.md
+ */
 
 function useDismiss(open: boolean, close: () => void) {
   const box = useRef<HTMLDivElement>(null);
@@ -49,16 +50,18 @@ export type MenuItem =
       state?: Tone;
       onSelect?: () => void;
       /**
-       * The menu is a CHOICE, and this row is the one currently chosen.
-       *
-       * Set it and the row wears the kit's existing chosen treatment (`.tamga-option[data-selected]` —
-       * wash plus a left rule, the same one the Select overlay uses) and reports itself as
-       * `menuitemradio` / `aria-checked` instead of `menuitem`. Leave it undefined and the menu is
-       * a list of ACTIONS, which is what most menus are — a plain `menuitem` with no state to
-       * announce. The distinction is not decoration: a screen reader given six identical menu
-       * items has no way to learn which language it is already in.
+       * Menü bir SEÇİM ve bu satır seçili olan: satır `menuitem` değil
+       * `menuitemradio` bildiriliyor. Verilmezse menü bir eylem listesi.
+       * Gerekçe: docs/gerekce/07-katman-ve-diyalog.md
        */
       checked?: boolean;
+      /**
+       * The keyboard shortcut that runs the same command, drawn on the right as a `Kbd`. It does
+       * NOT bind the key: a menu that binds a global shortcut would fight the page that already
+       * has one. TR: Aynı komutu çalıştıran klavye kısayolu, sağda `Kbd` olarak çiziliyor. Tuşu
+       * BAĞLAMIYOR: global bir kısayolu menünün bağlaması, zaten bağlayan sayfayla çakışırdı.
+       */
+      shortcut?: string;
     }
   | { kind: "separator" }
   | { kind: "label"; label: string };
@@ -71,6 +74,7 @@ export function DropdownMenu({
   loading = false,
   loadingRows = 4,
   openOnHover = false,
+  defaultOpen = false,
   ...rest
 }: {
   trigger: React.ReactNode;
@@ -92,6 +96,16 @@ export function DropdownMenu({
    */
   openOnHover?: boolean;
   /**
+   * Starts open. For a DOCUMENTATION surface, where the point is to show what the panel looks
+   * like, not to keep a corner tidy. TR: Açık başlıyor. Menünün nasıl göründüğünü GÖSTERMEK için
+   * duran bir yüzey için · bir köşeyi toplu tutmak için değil.
+   *
+   * NOT FOR A PRODUCT SCREEN: a menu that is open before anyone asked for it covers the content
+   * under it and has no reason to be there. TR: ÜRÜN EKRANINDA KULLANILMAZ: kimse istemeden açık
+   * duran bir menü altındaki içeriği örtüyor ve orada durmasının bir sebebi yok.
+   */
+  defaultOpen?: boolean;
+  /**
    * contents not in yet; the panel holds its shape instead of showing a spinner TR: içerik
    * henüz gelmedi; panel bir dönen simge göstermek yerine şeklini koruyor
    */
@@ -109,7 +123,7 @@ export function DropdownMenu({
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const box = useDismiss(open, () => setOpen(false));
   const close = useCallback(() => setOpen(false), []);
   const panel = useRef<HTMLDivElement>(null);
@@ -156,7 +170,7 @@ export function DropdownMenu({
         <div
           ref={panel}
           role="menu"
-          className="tamga-overlay absolute top-[var(--overlay-below)] z-40 overflow-hidden py-1"
+          className="tamga-overlay tamga-menu absolute top-[var(--overlay-below)] z-40 overflow-hidden"
           style={{ width, [align === "end" ? "right" : "left"]: 0 }}
           aria-busy={loading || undefined}
         >
@@ -167,7 +181,7 @@ export function DropdownMenu({
             }
             if (item.kind === "label") {
               return (
-                <span key={i} className="tamga-label block px-4 py-2">
+                <span key={i} className="tamga-menu-baslik">
                   {item.label}
                 </span>
               );
@@ -192,7 +206,8 @@ export function DropdownMenu({
                 }}
               >
                 {item.icon}
-                {item.label}
+                <span className="min-w-0 flex-1 truncate text-left">{item.label}</span>
+                {item.shortcut ? <Kbd className="ml-auto shrink-0">{item.shortcut}</Kbd> : null}
               </button>
             );
           })}
@@ -219,10 +234,13 @@ export function Popover({
   trigger: React.ReactNode;
   title?: string;
   /**
-   * Accessible name for the close control, supplied by the caller (docs/08 rule 5). TR: Kapatma
-   * kontrolünün erişilebilir adı, çağıran veriyor (docs/08 kural 5).
+   * Given, a quiet close control appears in the corner · and without it there is none, which is
+   * the panel's normal shape: a popover is dismissed by Escape or by clicking away, and a dialog
+   * is the thing that must be closed deliberately. TR: Verilirse köşede sessiz bir kapatma
+   * kontrolü beliriyor · verilmezse yok, ve panelin olağan hâli bu: bir popover Escape ile ya da
+   * dışına tıklayınca kapanıyor, bilerek kapatılması gereken şey diyalog.
    */
-  closeLabel: string;
+  closeLabel?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
   width?: number;
@@ -248,23 +266,36 @@ export function Popover({
       <span onClick={() => setOpen((o) => !o)}>{trigger}</span>
       {open && (
         <div
-          className="tamga-overlay absolute top-[var(--overlay-below)] z-40"
+          className="tamga-overlay tamga-pop absolute top-[var(--overlay-below)] z-40"
           style={{ width, [align === "end" ? "right" : "left"]: 0 }}
           aria-busy={loading || undefined}
         >
-          {title ? (
-            <div className="tamga-head tamga-gutter tamga-section">
-              <h4 className="text-control font-semibold">{title}</h4>
-              <MiniButton className="ml-auto" aria-label={closeLabel} onClick={() => setOpen(false)}>
-                <Icon icon={Close} size="xs" />
-              </MiniButton>
-            </div>
-          ) : null}
-          <div className="tamga-gutter py-4 text-small leading-relaxed">
+          {/* Ok tetikleyicinin hizasında, panelin ortasında değil: panel 288px
+              ve tetikleyici çoğu zaman ondan dar · ortadan çıkan bir ok neyin
+              altından çıktığını göstermek yerine boşluğu işaret ediyor. */}
+          <span
+            aria-hidden
+            className="tamga-pop-ok"
+            style={{ [align === "end" ? "right" : "left"]: 22 }}
+          />
+          {/* BAŞLIK BİR ŞERİT DEĞİL BİR SATIR. Panel bir kart gibi çiziliyordu:
+              zeminli bir başlık şeridi, altında kural, altta ikinci bir kural ·
+              288 piksellik bir kutuda üç yatay çizgi, içeriği değil kutunun
+              kendisini gösteriyordu. Tasarımın paneli dolgulu tek bir yüzey. */}
+          {title ? <strong className="text-control font-semibold text-ink">{title}</strong> : null}
+          <div className="text-small leading-relaxed">
             {loading ? <SkeletonPanel lines={3} block={loadingBlock} /> : children}
           </div>
-          {footer ? (
-            <div className="tamga-gutter flex justify-end gap-2 border-t border-line py-3">{footer}</div>
+          {footer ? <div className="flex justify-end gap-2.5">{footer}</div> : null}
+          {closeLabel ? (
+            <button
+              type="button"
+              className="tamga-icon-btn tamga-icon-btn-sm tamga-icon-btn-ghost absolute top-2 right-2"
+              aria-label={closeLabel}
+              onClick={() => setOpen(false)}
+            >
+              <Icon icon={Close} size="xs" />
+            </button>
           ) : null}
         </div>
       )}
@@ -281,13 +312,9 @@ const placements = {
   right: "left-[var(--overlay-below)] top-1/2 -translate-y-1/2",
 } as const;
 
-/* A hard triangle cut with clip-path — no rotated square, no border to line up.
-   Solid ink, square corners, same as the bubble it belongs to.
-
-   The BOX turns with the arrow. It used to be 12×6 for all four placements, so the sideways ones
-   were a 12-long spike where the vertical ones were a 12-wide wedge — the same clip-path in a box
-   that had not been rotated with it. Every arrow is now a 12 base and a 6 rise, whichever way it
-   points. */
+/* Sert üçgen `clip-path` ile: döndürülmüş kare yok, hizalanacak kenarlık yok.
+   KUTU OKLA BİRLİKTE DÖNER · her ok 12 taban, 6 yükseklik, hangi yöne bakarsa.
+   Gerekçe: docs/gerekce/07-katman-ve-diyalog.md */
 const arrows = {
   top: {
     left: "50%", top: "100%", marginLeft: -6, width: 12, height: 6,
@@ -308,36 +335,48 @@ const arrows = {
 } as const;
 
 /**
- * KABARCIK `fixed`, `absolute` DEĞİL.
+ * İpucu · kabarcık `fixed`, `absolute` DEĞİL: kaydırılabilir bir kabın
+ * `overflow`u onu kırpıyordu, ve z-index bir kırpmayı aşamaz. Bedeli konumun
+ * açılışta ölçülmesi; kapalıyken maliyeti yok.
  *
- * Ölçülen hata: dar bir kenar çubuğunda ipucu hiç görünmüyordu. Sebep
- * `overflow`du — menü kaydırılabilir olduğu için (`overflow-y: auto`, ki yatayı
- * da `auto` yapıyor) ipucu doğuyor, çiziliyor ve kabın dışında kaldığı için
- * tamamen kırpılıyordu. Bu, kitin üç kez karşılaştığı aynı tuzağın üçüncü yüzü
- * (kart, ray, şimdi ipucu).
- *
- * Z-index çözmüyor: hiçbir yığın sırası bir `overflow` kırpmasını aşamaz.
- * Çözüm kabarcığı akıştan çıkarmak. `fixed` bir eleman en yakın kaydırma
- * kabına değil GÖRÜNTÜ ALANINA göre yerleşiyor, yani hiçbir kap onu kesemiyor.
- *
- * KONUM HOVER'DA ÖLÇÜLÜYOR, çünkü `fixed` bir elemanın CSS ile tetikleyiciye
- * hizalanmasının yolu yok. Ölçüm yalnız ipucu açılırken yapılıyor: kapalıyken
- * hiçbir maliyeti yok.
+ * Gerekçe: docs/gerekce/07-katman-ve-diyalog.md
  */
 export function Tooltip({
   label,
   placement = "bottom",
+  delay = 400,
+  bind = true,
   children,
   ...rest
 }: {
   label: string;
   placement?: keyof typeof placements;
+  /**
+   * How long the pointer has to rest before the bubble opens, in ms. Keyboard focus opens it
+   * immediately: someone who tabbed here asked for it. `0` opens on contact, for a dense toolbar
+   * where the labels are the only thing naming the icons. TR: Kabarcığın açılması için işaretçinin
+   * ne kadar beklemesi gerektiği, ms. Klavye odağı ANINDA açıyor: buraya Tab'layan kişi zaten
+   * istemiş. `0`, değince açıyor · etiketlerin ikonları adlandıran tek şey olduğu sık bir araç
+   * çubuğu için.
+   */
+  delay?: number;
+  /**
+   * Ties the label to the trigger with `aria-describedby`. Turn it OFF when the trigger's
+   * accessible name is already this same text (an icon rail item whose `aria-label` is the
+   * label): a screen reader would then read it twice, once as the name and once as the
+   * description. TR: Etiketi tetikleyiciye `aria-describedby` ile bağlar. Tetikleyicinin
+   * erişilebilir adı zaten aynı metinse KAPAT: ikon rayının `aria-label`i etiketin kendisiyse,
+   * ekran okuyucu metni iki kez okuyor · bir kez ad, bir kez açıklama olarak.
+   */
+  bind?: boolean;
   children: React.ReactNode;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
   const sarmal = useRef<HTMLSpanElement>(null);
   const [konum, setKonum] = useState<{ left: number; top: number } | null>(null);
+  const id = useId();
+  const bekleyen = useRef<number | null>(null);
 
   const olc = useCallback(() => {
     const el = sarmal.current;
@@ -353,17 +392,49 @@ export function Tooltip({
     setKonum(yerler[placement]);
   }, [placement]);
 
-  const kapat = useCallback(() => setKonum(null), []);
+  const kapat = useCallback(() => {
+    if (bekleyen.current !== null) {
+      clearTimeout(bekleyen.current);
+      bekleyen.current = null;
+    }
+    setKonum(null);
+  }, []);
+
+  /* FARE BEKLİYOR, KLAVYE BEKLEMİYOR. Gecikmesiz bir ipucu, ekranı geçen
+     farenin arkasında sıra sıra kabarcık açıyor; Tab'la gelen kişi ise onu
+     bilerek istedi.
+     Gerekçe: docs/gerekce/07-katman-ve-diyalog.md */
+  const gecikmeliAc = useCallback(() => {
+    if (delay <= 0) {
+      olc();
+      return;
+    }
+    if (bekleyen.current !== null) clearTimeout(bekleyen.current);
+    bekleyen.current = window.setTimeout(() => {
+      bekleyen.current = null;
+      olc();
+    }, delay);
+  }, [delay, olc]);
+
+  useEffect(() => () => {
+    if (bekleyen.current !== null) clearTimeout(bekleyen.current);
+  }, []);
 
   /* Kaydırma ya da yeniden boyutlanma ipucunun altından tetikleyiciyi çekiyor;
      o an kapanması, yanlış yerde durmasından iyi. */
   useEffect(() => {
     if (!konum) return;
+    /* Esc bir ipucunu da kapatır: ekranı kapatan kabarcık, klavye kullanan
+       biri için bir engel · ve odak tetikleyicide kaldığı için başka çıkışı
+       yok. */
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && kapat();
     window.addEventListener("scroll", kapat, true);
     window.addEventListener("resize", kapat);
+    document.addEventListener("keydown", esc);
     return () => {
       window.removeEventListener("scroll", kapat, true);
       window.removeEventListener("resize", kapat);
+      document.removeEventListener("keydown", esc);
     };
   }, [konum, kapat]);
 
@@ -379,15 +450,29 @@ export function Tooltip({
 {...dataProps(rest)}
       ref={sarmal}
       className="relative inline-flex"
-      onPointerEnter={olc}
+      onPointerEnter={gecikmeliAc}
       onPointerLeave={kapat}
       onFocusCapture={olc}
       onBlurCapture={kapat}
     >
-      {children}
+      {/* ETİKET HER ZAMAN DOM'DA, görünür kabarcık ise yalnız açıkken. İpucu
+          `aria-describedby` ile bağlanıyor ve bağın hedefi kaybolan bir eleman
+          olamaz: okuyucu odak anında okumaya çalışıyor, kabarcık ise o an
+          henüz açılmamış olabiliyor. Görünen kopya `aria-hidden`, yani metin
+          iki kez okunmuyor. */}
+      {bind ? (
+        <span id={id} className="sr-only">
+          {label}
+        </span>
+      ) : null}
+      {bind && isValidElement(children)
+        ? cloneElement(children as React.ReactElement<{ "aria-describedby"?: string }>, {
+            "aria-describedby": id,
+          })
+        : children}
       {konum && (
         <span
-          role="tooltip"
+          aria-hidden
           className="pointer-events-none fixed z-40 whitespace-nowrap px-2 py-1 text-small"
           style={{
             left: konum.left,
@@ -395,7 +480,11 @@ export function Tooltip({
             transform: kaydirma[placement],
             background: "var(--color-ink)",
             color: "var(--color-page)",
-            borderRadius: "var(--radius-ctl)",
+            /* KENDİ KENARI VAR. Kenarsız koyu bir kutu, koyu temada sayfadan
+               ayrılmıyordu: iki koyu yüzey üst üste. `edge-strong` iki temada
+               da koyu kaldığı için sınır her ikisinde de duruyor. */
+            border: "1.5px solid var(--color-edge-strong)",
+            borderRadius: "calc(var(--radius) - 1px)",
           }}
         >
           {label}
@@ -421,6 +510,7 @@ export function Toast({
   action,
   onDismiss,
   dismissLabel,
+  duration,
   ...rest
 }: {
   tone?: ToastTone;
@@ -433,33 +523,86 @@ export function Toast({
    * Kapatma kontrolünün erişilebilir adı, çağıran veriyor (docs/08 kural 5).
    */
   dismissLabel: string;
+  /**
+   * How long it stays, in ms. Unset, it derives: 5000, or 8000 when there is an `action`, because
+   * "Undo" has to be readable AND reachable before it goes. `0` keeps it until dismissed, for the
+   * rare notice that must be acknowledged. The timer needs `onDismiss`: without it the kit has no
+   * way to remove the toast. TR: Ne kadar durduğu, ms. Verilmezse türüyor: 5000, `action` varsa
+   * 8000 · "Geri al" gitmeden önce hem OKUNABİLMELİ hem ULAŞILABİLMELİ. `0`, kapatılana kadar
+   * duruyor · onaylanması gereken ender bildirim için. Sayaç `onDismiss` istiyor: onsuz kitin
+   * bildirimi kaldırmak için bir yolu yok.
+   */
+  duration?: number;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
+  /* ÜSTÜNE GELİNCE SAYAÇ DURUYOR. Okumak için üstüne gelen kişiden bildirimi
+     kaçırmak, bu bileşenin yapabileceği en can sıkıcı şey · ve "Geri al"
+     düğmesine uzanan fare tam oradan geçiyor. Klavye odağı da durduruyor.
+     Gerekçe: docs/gerekce/07-katman-ve-diyalog.md */
+  const sure = duration ?? (action ? 8000 : 5000);
+  const kapat = useRef(onDismiss);
+  kapat.current = onDismiss;
+  const sayac = useRef<number | null>(null);
+  const bitis = useRef(0);
+  const kalan = useRef(sure);
+
+  const baslat = useCallback((ms: number) => {
+    if (!kapat.current || ms <= 0) return;
+    bitis.current = Date.now() + ms;
+    sayac.current = window.setTimeout(() => kapat.current?.(), ms);
+  }, []);
+
+  const durdur = useCallback(() => {
+    if (sayac.current === null) return;
+    clearTimeout(sayac.current);
+    sayac.current = null;
+    kalan.current = Math.max(0, bitis.current - Date.now());
+  }, []);
+
+  useEffect(() => {
+    kalan.current = sure;
+    baslat(sure);
+    return () => {
+      if (sayac.current !== null) clearTimeout(sayac.current);
+      sayac.current = null;
+    };
+  }, [sure, baslat]);
+
   /* NÖTR RENK ALMIYOR, VE BU ÖLÇEĞİN KURALI: renk taşımayarak anlam taşıyan tek
      ton o. Renkli değişkenler tanımsız bırakılıyor, CSS yedeğe düşüyor. */
+  /* İŞARET TERS YÜZEYİN MÜREKKEBİNDEN. Bildirim iki temada da koyu, yani
+     `mark` (açık zemin için üretilmiş) burada okunmuyor: ölçüm kritik için
+     2.79, bilgi için 1.99 · grafik ögeleri için geçerli 3:1 eşiğinin altında.
+     `inverse` o yüzey için üretilmiş olan (8.1-10.5). */
   const t = tone === "neutral" ? null : toneOf(tone);
-  const mark = t ? t.mark : "var(--color-ink)";
+  const mark = t ? t.inverse : "var(--color-inverse-ink)";
   return (
     <div
 {...dataProps(rest)}
-      role="status"
-      className="tamga-toast flex w-full max-w-80 items-start gap-4 p-4"
+      /* `alert` YALNIZ `danger`DA: assertive bir bölge, ekran okuyucunun o an
+         okuduğu cümleyi KESİYOR. Bir kayıt onayı için bu bedel fazla, bir
+         başarısız ödeme için değil. */
+      role={tone === "danger" ? "alert" : "status"}
+      onPointerEnter={durdur}
+      onPointerLeave={() => baslat(kalan.current)}
+      onFocusCapture={durdur}
+      onBlurCapture={() => baslat(kalan.current)}
+      className="tamga-toast flex w-full max-w-80 items-start gap-3 py-2.5 pr-2.5 pl-3.5"
       style={
         {
           animation: "tamga-toast-in var(--duration-base) var(--ease-standard) both",
-          ...(t ? { "--toast-wash": t.bg } : null),
         } as React.CSSProperties
       }
     >
       <span className="tamga-toast-mark mt-1 size-2.5 shrink-0" style={{ background: mark }} />
       <div className="min-w-0 flex-1">
-        <p className="text-body font-medium text-ink">{title}</p>
-        {/* GÖVDE `ink-soft`, `ink-faint` DEĞİL. Faint, kartın beyazı için
-            seçilmişti; bir tonun yıkaması ondan koyu ve aradaki fark AA'yı
-            zorluyordu. Soft ikisinde de okunuyor. */}
+        <p className="text-body font-semibold">{title}</p>
+        {/* GÖVDE DE TERS MÜREKKEPTE, yalnız biraz sönük. Kutunun rengini
+            `.tamga-toast` veriyor; buraya bir `text-ink` yazmak, onu sayfanın
+            temasına geri bağlardı. */}
         {description ? (
-          <p className="mt-1 text-small leading-relaxed text-ink-soft">{description}</p>
+          <p className="mt-1 text-small leading-relaxed opacity-80">{description}</p>
         ) : null}
         {action ? <div className="mt-3">{action}</div> : null}
       </div>
@@ -495,12 +638,8 @@ export function ToastViewport({
 }) {
   return (
     <div {...dataProps(rest)} className={`pointer-events-none fixed z-50 flex flex-col gap-2 ${corners[position]}`}>
-      {/* GENİŞLİK KABIN KARARI, BİLDİRİMİN DEĞİL.
-          `Toast` sabit `w-80`di ve dar bir kapta taşıyordu; `w-full max-w-80`e
-          çevrilince bu sefer TERS kırıldı: kap içeriğe göre daralan bir sütun
-          olduğu için `w-full` çöküyor ve bildirim 146 piksele iniyordu. Ölçü
-          burada veriliyor — 320 piksel, ve ekran ondan darsa kenar boşluğu
-          kadar küçülüyor (bir telefonda 320 + 2×24 zaten sığmıyordu). */}
+      {/* GENİŞLİK KABIN KARARI: 320 piksel burada veriliyor, bildirimin kendinde
+          değil. Gerekçe: docs/gerekce/07-katman-ve-diyalog.md */}
       <div className="tamga-toast-stack pointer-events-auto flex flex-col gap-2">{children}</div>
     </div>
   );
@@ -509,24 +648,11 @@ export function ToastViewport({
 /* ---------------------------- dialog --------------------------- */
 
 /**
- * The modal shell. Hooks cannot run behind an early return, so the trap lives
- * here and the surface below stays a plain component.
- */
-/**
- * Diyalog genişliği. Bir VARYANT, ayrı bir bileşen değil (kitin kuralı: adı
- * bölünen şey bileşen, ayarlanan şey prop).
+ * Diyalog genişliği · bir varyant, ayrı bileşen değil. `full` panelin
+ * kenarını, yarıçapını ve gölgesini de kaldırıyor: yükseltilecek zemin
+ * kalmıyor.
  *
- * `wide` bir ÖNİZLEME için var: bir bloğu ya da tam bir ekran şablonunu 448
- * pikselde göstermek, gösterdiğini gizlemek olur. `md` hâlâ varsayılan, çünkü
- * bir diyaloğun asıl işi bir KARAR sormak ve geniş bir karar kutusu, kararı
- * daha kolay yapmıyor.
- *
- * `full` BİR ÇALIŞMA YÜZEYİ için: bir görsel düzenleyici, bir tuval, bir harita
- * seçici. Bunlar bir karar kutusu değil bir EKRAN, ve `wide` bile onlara az
- * geliyor — kalan kenar boşluğu tuvalden çalınan alan. Bu boyutta panelin
- * kenarı, yarıçapı ve kaydırma gölgesi de kalkıyor: yükseltilecek bir zemin
- * kalmadığında yükselme işareti de anlamsız. Nadir olması gerekiyor; bir formu
- * tam ekran açmak, formu daha kolay doldurmuyor.
+ * Gerekçe: docs/gerekce/07-katman-ve-diyalog.md
  */
 const DIALOG_GENISLIK = {
   md: "max-w-md",
@@ -537,6 +663,10 @@ const DIALOG_GENISLIK = {
 
 export type DialogSize = keyof typeof DIALOG_GENISLIK;
 
+/**
+ * Kipli kabuk. Hook'lar erken bir `return`un arkasında çalışamaz, bu yüzden
+ * tuzak burada duruyor ve alttaki yüzey düz bir bileşen kalıyor.
+ */
 function DialogShell({
   open,
   onClose,
@@ -576,14 +706,16 @@ function DialogShell({
       aria-modal
       aria-label={label}
     >
-      {/* mouse affordance only: Escape and the Close button already cover the
-            keyboard, and leaving this in the a11y tree gave the panel two
-            controls both announced as "Close" */}
-        <div className="tamga-scrim absolute inset-0" aria-hidden onClick={onClose} />
+      {/* Yalnız fare için: Escape ile Kapat düğmesi klavyeyi karşılıyor, ve bu
+          a11y ağacında kalınca panel "Kapat" diye bildirilen iki kontrol oluyordu. */}
+        <div className="tamga-scrim tamga-scrim-in absolute inset-0" aria-hidden onClick={onClose} />
       <div
         ref={panel}
+        /* PANEL EKRANDAN TAŞAMAZ: `max-h-full` + `flex-col` + `overflow-hidden`.
+           Yoksa uzun içerik ortalanıp başlıkla kapatma düğmesini kırpıyor.
+           Gerekçe: docs/gerekce/07-katman-ve-diyalog.md */
         className={cn(
-          "tamga-overlay relative z-10 w-full",
+          "tamga-overlay tamga-dialog-in relative z-10 flex max-h-full w-full flex-col overflow-hidden",
           tam && "tamga-overlay-full",
           DIALOG_GENISLIK[size],
         )}
@@ -596,23 +728,11 @@ function DialogShell({
 }
 
 /**
- * Yıkıcı bir eylemin önündeki kapı.
+ * Yıkıcı bir eylemin önündeki kapı · üç güvenlik kuralını tek yerde tutuyor:
+ * onay düğmesi FİİLİ taşır, odak VAZGEÇ'te açılır, gövde metni geri
+ * alınamazlığı yazar.
  *
- * NEDEN AYRI BİR BİLEŞEN. `Dialog` zaten var ve bu onun üstüne kurulu; ama
- * "emin misin" diyaloğu her seferinde elle kurulduğunda üç şey kayıyor ve
- * üçü de güvenlikle ilgili:
- *
- *   1. ONAY DÜĞMESİ FİİLİ TAŞIR, "Tamam"ı değil. Bir kullanıcı diyaloğun
- *      metnini okumadan düğmeye basar; okuduğu tek şey düğmenin üstündeki
- *      kelimedir. "Tamam" hiçbir şey söylemez, "Sil" söyler.
- *   2. ODAK VAZGEÇ'TE AÇILIR. Yıkıcı bir diyalogda odağın onay düğmesinde
- *      olması, Enter'a basan birinin kaydı silmesi demek. Güvenli olan
- *      varsayılan olmalı.
- *   3. GERİ ALINAMAZLIK YAZILIR. Gövde metni ne olacağını değil NEYİN GERİ
- *      GELMEYECEĞİNİ söyler; kullanıcının kararı buna bağlı.
- *
- * KELİMELER ÇAĞIRANIN. Kit hiçbir dil bilmiyor: başlık, gövde ve iki düğmenin
- * etiketi dışarıdan geliyor.
+ * Gerekçe: docs/gerekce/07-katman-ve-diyalog.md
  */
 export function ConfirmDialog({
   open,
@@ -726,22 +846,23 @@ export function Dialog({
 }) {
   return (
     <DialogShell open={open} onClose={onClose} loading={loading} label={title} size={size}>
-      <div {...dataProps(rest)} className="tamga-head tamga-gutter tamga-section">
+      <div {...dataProps(rest)} className="tamga-head tamga-gutter tamga-section shrink-0">
         <h3 className="text-subhead font-semibold">{title}</h3>
         <MiniButton onClick={onClose} aria-label={closeLabel} className="ml-auto">
           <Icon icon={Close} size="xs" />
         </MiniButton>
       </div>
-      <div
-        className={cn(
-          "tamga-gutter py-6 text-body leading-relaxed",
-          size === "full" && "min-h-0 flex-1 overflow-y-auto",
-        )}
-      >
+      {/* KAYAN YER GÖVDE, panelin kendisi değil: başlık ve ayak yerinde
+          kalmalı, çünkü kapatma düğmesi başlıkta ve kararı veren düğmeler
+          ayakta. Bu kural bir süre yalnız `full` boyuna yazılmıştı ve öteki
+          üç boy sessizce pencereden taşıyordu. */}
+      <div className="tamga-gutter min-h-0 flex-1 overflow-y-auto py-6 text-body leading-relaxed">
         {loading ? <SkeletonPanel lines={4} /> : children}
       </div>
       {footer ? (
-        <div className="tamga-gutter flex justify-end gap-2 border-t border-line py-4">{footer}</div>
+        <div className="tamga-gutter flex shrink-0 justify-end gap-2 border-t border-line py-4">
+          {footer}
+        </div>
       ) : null}
     </DialogShell>
   );

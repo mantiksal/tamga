@@ -4,19 +4,11 @@ import type { ReactNode } from "react";
 import { Button } from "../components/button.js";
 
 /**
- * KAYDET ŞERİDİ: kayan yüzeyin dibine yapışık.
+ * KAYDET ŞERİDİ · kayan yüzeyin dibine yapışık, formun sonunda değil. Fiziği
+ * `.tamga-save-bar`ta, ve orada `sticky bottom-0` tuzağı yazılı. Değişiklik
+ * yoksa düğme kapalı.
  *
- * NEDEN FORMUN SONUNDA DEĞİL. Eski panellerin alışkanlığı kaydet düğmesini
- * formun en altına koymak; yirmi alanlık bir formda üstteki bir alanı
- * düzeltip kaydetmek için sonuna kadar kaydırmak gerekiyor. Şerit her zaman
- * görünür, ve kaydedilecek bir şey olup olmadığını da söylüyor.
- *
- * FİZİĞİ BİR SINIFTA (`.tamga-save-bar`), ve orada ölçülmüş bir tuzak yazılı:
- * `sticky bottom-0` şeridin alt kenarını yüzeyin İÇERİK kutusuna hizalıyor,
- * ama yüzeyin kendi alt dolgusu var ve içerik o boşluktan akıp geçiyordu.
- *
- * DEĞİŞİKLİK YOKSA KAYDEDİLECEK BİR ŞEY DE YOK: düğme kapalı. Tıklanıp
- * hiçbir şey olmayan bir düğme, olmayan bir düğmeden kötüdür.
+ * Gerekçe: docs/gerekce/08-blok-ve-sablon.md
  */
 export function SaveBar({
   changed = true,

@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
+import { seriRenk } from "./tone.js";
 
 /**
  * Pasta / halka grafik — PARÇA-BÜTÜN, ve yalnız o.
@@ -79,7 +80,7 @@ export function PieChart({
     const bas = aci;
     const son = aci + pay * 360;
     aci = son;
-    return { ...s, pay, bas, son, renk: `var(--color-chart-${(i % 5) + 1})` };
+    return { ...s, pay, bas, son, renk: seriRenk(i) };
   });
 
   return (
@@ -102,6 +103,21 @@ export function PieChart({
             .map((p) => `${p.label}: ${formatValue(p.value)} (%${(p.pay * 100).toFixed(1)})`)
             .join(", ")}
         </title>
+        {/* THE DISC CASTS A SHADOW, like every other object in this language.
+            Drawn as a STROKED circle rather than a filled one: a doughnut's
+            hole is transparent, and a filled shadow disc would show through it
+            as a dark pupil. A circle at the mid-radius, stroked the width of
+            the ring, is exactly the ring — and it degenerates correctly to a
+            solid disc when there is no hole. */}
+        <circle
+          cx={R + 5}
+          cy={R + 5}
+          r={ic > 0 ? (R + ic) / 2 : R / 2}
+          fill="none"
+          stroke="var(--color-edge-strong)"
+          strokeWidth={ic > 0 ? R - ic : R}
+          pointerEvents="none"
+        />
         {parcalar.map((p, i) => {
           if (p.pay <= 0) return null;
           /* TEK DİLİM %100 İSE YAY ÇİZİLEMEZ: başlangıç ve bitiş noktası
@@ -128,7 +144,7 @@ export function PieChart({
              bırakıyor: bir oran grafiğinde en son isteyeceğin şey. Merkezden
              dışarı kaydırmak açıyı da yarıçapı da koruyor. */
           const orta = (p.bas + p.son) / 2;
-          const [kx, ky] = nokta(orta, 6);
+          const [kx, ky] = nokta(orta, 4);
           const secili = uzerinde === i;
           return (
             <path
@@ -143,13 +159,37 @@ export function PieChart({
                 transform: secili ? `translate(${kx - R}px, ${ky - R}px)` : undefined,
                 /* Öteki dilimler soluyor: vurgulanan şey parlamıyor, çevresi
                    çekiliyor. Rengi açmak paleti bozardı. */
-                opacity: uzerinde === null || secili ? 1 : 0.45,
+                opacity: uzerinde === null || secili ? 1 : 0.4,
                 transition: "opacity var(--duration-press) var(--ease-standard), transform var(--duration-press) var(--ease-standard)",
               }}
               onMouseEnter={() => setUzerinde(i)}
             />
           );
         })}
+        {/* The rim, on top of the slices. Half the stroke sits inside the
+            radius so the drawn edge ends exactly where the disc ends. It never
+            takes the pointer, or it would steal the hover from the slice under
+            it. */}
+        <circle
+          cx={R}
+          cy={R}
+          r={R - 0.75}
+          fill="none"
+          stroke="var(--color-edge-strong)"
+          strokeWidth={1.5}
+          pointerEvents="none"
+        />
+        {ic > 0 && (
+          <circle
+            cx={R}
+            cy={R}
+            r={ic + 0.75}
+            fill="none"
+            stroke="var(--color-edge-strong)"
+            strokeWidth={1.5}
+            pointerEvents="none"
+          />
+        )}
         {/* ORTADAKİ SAYI ÜZERİNE GELİNCE O DİLİME DÖNÜŞÜYOR.
             Halkanın ortası zaten "payda" için ayrılmış bir yer; bir dilimin
             üzerindeyken orada toplamı göstermeye devam etmek, o boşluğu boşa
@@ -161,8 +201,8 @@ export function PieChart({
               x={R}
               y={R - 4}
               textAnchor="middle"
-              className="fill-[var(--color-ink)] font-semibold"
-              style={{ fontSize: 26 }}
+              className="fill-[var(--color-ink)] font-display"
+              style={{ fontSize: 22, fontWeight: 900 }}
             >
               {uzerinde === null
                 ? formatValue(toplam)
@@ -173,7 +213,7 @@ export function PieChart({
               y={R + 20}
               textAnchor="middle"
               className="fill-[var(--color-ink-faint)]"
-              style={{ fontSize: 14 }}
+              style={{ fontSize: 11.5 }}
             >
               {uzerinde === null
                 ? (totalLabel ?? "")
@@ -202,13 +242,13 @@ export function PieChart({
           >
             <span
               aria-hidden
-              className="size-2.5 shrink-0 translate-y-px rounded-(--radius-mark)"
+              className="tamga-pie-kare"
               style={{ background: p.renk }}
             />
-            <dt className="min-w-0 flex-1 truncate text-ink">{p.label}</dt>
-            <dd className="shrink-0 tabular-nums text-ink">
-              {formatValue(p.value)}
-              <span className="ml-1.5 text-ink-faint">%{(p.pay * 100).toFixed(1)}</span>
+            <dt className="min-w-0 flex-1 truncate font-medium text-ink">{p.label}</dt>
+            <dd className="shrink-0 font-mono font-bold tabular-nums text-ink">
+              %{(p.pay * 100).toFixed(1)}
+              <span className="ml-2 font-sans font-normal text-ink-faint">{formatValue(p.value)}</span>
             </dd>
           </div>
         ))}

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
 
@@ -53,62 +52,32 @@ export function BarChart({
   [k: `data-${string}`]: unknown;
 }) {
   const enBuyuk = niceMax(Math.max(0, ...bars.map((b) => b.value)));
-  /* SATIRIN TAMAMI VURGULANIYOR, yalnız çubuk değil: uzun bir listede gözün
-     kaydığı şey satır. Ad solda, sayı sağda, arada bir metre uzunluğunda
-     çubuk var; hangi adın hangi sayıya ait olduğunu takip etmek zorlaşıyor ve
-     satır zemini o izi tutuyor. */
-  const [uzerinde, setUzerinde] = useState<string | null>(null);
 
   return (
-    <div {...dataProps(rest)} className={cn("flex flex-col gap-0.5", className)} onMouseLeave={() => setUzerinde(null)}>
+    <div {...dataProps(rest)} className={cn("tamga-bar", className)}>
       {bars.map((b) => {
         const oran = enBuyuk > 0 ? b.value / enBuyuk : 0;
-        const secili = uzerinde === b.label;
         return (
-          <div
-            key={b.label}
-            className="grid cursor-default items-center gap-3 rounded-(--radius-mark) px-1.5 py-1 transition-[background] duration-(--duration-press)"
-            style={{
-              gridTemplateColumns: `${labelWidth} minmax(0,1fr) auto`,
-              background: secili ? "var(--color-hover)" : undefined,
-            }}
-            onMouseEnter={() => setUzerinde(b.label)}
-          >
-            <span
-              className="truncate text-right text-small"
-              style={{ color: secili ? "var(--color-ink)" : "var(--color-ink-soft)" }}
-              title={b.label}
-            >
+          <div key={b.label} className="tamga-bar-row" style={{ gridTemplateColumns: `${labelWidth} minmax(0,1fr) auto` }}>
+            <span className="tamga-bar-ad" title={b.label}>
               {b.label}
             </span>
-            {/* Çubuğun ardında SOLUK BİR RAY var: bir çubuğun ne kadarının
-                dolu olduğu, ancak kabı görünürse okunuyor. */}
-            <span className="relative block h-4 rounded-(--radius-mark) bg-[var(--color-chart-fill)]">
+            <span className="tamga-bar-yol">
               <span
-                className="absolute inset-y-0 left-0 rounded-(--radius-mark) transition-[background] duration-(--duration-press)"
-                style={{
-                  width: `${Math.max(oran * 100, b.value > 0 ? 1.5 : 0)}%`,
-                  /* Üzerine gelinen çubuk bir kademe koyu: aynı hue, farklı
-                     ton. Renk değiştirmek çubuğu başka bir seriye ait
-                     gösterirdi. */
-                  background: secili ? "var(--color-accent-line)" : "var(--color-chart-3)",
-                }}
+                className="tamga-bar-dolgu"
+                style={{ width: `${Math.max(oran * 100, b.value > 0 ? 2 : 0)}%` }}
               />
             </span>
             {/* SAYI ÇUBUĞUN İÇİNDE DEĞİL SAĞINDA. İçinde olsaydı kısa
                 çubuklarda sığmaz, ve sığdığı yerde de zemine göre kontrastı
                 çubuğun uzunluğuna bağlı olurdu. */}
-            <span
-              className="tabular-nums text-small"
-              style={{ color: secili ? "var(--color-ink)" : "var(--color-ink-soft)" }}
-            >
+            <span className="tamga-bar-deger">
               {formatValue(b.value)}
-              {b.note && <span className="ml-1.5 text-ink-faint">{b.note}</span>}
+              {b.note && <span className="tamga-bar-not">{b.note}</span>}
             </span>
           </div>
         );
       })}
-      {bars.length === 0 && <p className="text-ink-faint">Gösterilecek veri yok.</p>}
     </div>
   );
 }

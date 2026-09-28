@@ -3,14 +3,10 @@ import { render, screen } from "@testing-library/react";
 import { WizardTemplate } from "./wizard-template.js";
 
 /**
- * Bir sihirbazın sözü şudur: "bu kadar adım, sonra bitti". Buradaki testler o
- * sözü tutuyor — liste her zaman görünür, tam bir adım güncel, ve neyin bittiği
- * birinin işaretlemeyi hatırlaması gereken bir bayrağa değil KONUMA bağlı.
+ * Bir sihirbazın sözü şudur: "bu kadar adım, sonra bitti". Kancalar şeridin
+ * kendisinden: `Steps` durumu `.tamga-step-mark[data-state]` ile söylüyor.
  *
- * KANCALAR ŞERİDİN KENDİSİNDEN. Şeridi `Steps` çiziyor ve durumu
- * `.tamga-step-mark[data-state]` ile söylüyor (`todo · current · done`).
- * Bu testler o niteliği okuyor, çünkü ölçtükleri şey şablonun `Steps`e doğru
- * `current` indeksini geçmesi.
+ * Gerekçe: docs/09-testler-ve-degismezler.md
  */
 
 const steps = [
@@ -100,16 +96,11 @@ describe("WizardTemplate · gezinme çağıranın", () => {
 });
 
 /**
- * KİMLİK ŞERİDE KADAR İNİYOR.
+ * KİMLİK ŞERİDE KADAR İNİYOR · `key` bir zamanlar bu sınırda çöpe gidiyordu ve
+ * ölçüm etikete bağlanmak zorunda kalıyordu. Etiket çevriliyor: dil değişince
+ * o ölçüm kırılır.
  *
- * Şablon bir zamanlar `steps.map((s) => s.label)` yapıyordu: `key` tam bu
- * sınırda çöpe gidiyordu, yani bir adıma kanca takmanın yolu yoktu ve tüketen
- * taraf ölçümü etikete bağlamak zorunda kalıyordu. Etiket çevriliyor; dil
- * değiştiği an o ölçüm kırılır.
- *
- * Bu test o sınırı tutuyor: adımın kendi elemanı kimliğini taşıyor, ve
- * kancayla `aria-current` aynı adımda buluşuyor — "şu adım, ve şu an açık
- * olan o" ancak ikisi birlikte ölçülebiliyor.
+ * Gerekçe: docs/09-testler-ve-degismezler.md
  */
 describe("Steps'in kimliği", () => {
   it("adımın kancası kendi <li>sine iniyor", () => {

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
+import { yiginRenk } from "./tone.js";
 
 /**
  * Yığılmış sütun grafiği — HER GÜN İÇİN HEM TOPLAM HEM KIRILIM.
@@ -92,13 +93,16 @@ export function StackedBarChart({
                     const v = s.values[i] ?? 0;
                     if (v <= 0) return null;
                     return (
+                      /* DİLİMİN KENARI VAR, ALT KENARI YOK: üst üste duran iki
+                         dilimin arasında tek bir çizgi kalıyor, ve en alttaki
+                         taban çizgisinin üstüne ikinci bir çizgi koymuyor. */
                       <span
                         key={s.name}
-                        className="w-full transition-opacity duration-(--duration-press)"
+                        className="w-full border border-b-0 border-[var(--color-edge-strong)] transition-opacity duration-(--duration-press)"
                         style={{
                           height: `${(v / enBuyuk) * 100}%`,
-                          background: `var(--color-chart-${(si % 5) + 1})`,
-                          opacity: uzerinde === null || secili ? 1 : 0.45,
+                          background: yiginRenk(si),
+                          opacity: uzerinde === null || secili ? 1 : 0.4,
                         }}
                       />
                     );
@@ -144,8 +148,8 @@ export function StackedBarChart({
             <span key={s.name} className="flex items-center gap-2 text-small text-ink-soft">
               <span
                 aria-hidden
-                className="size-2.5 rounded-(--radius-mark)"
-                style={{ background: `var(--color-chart-${(i % 5) + 1})` }}
+                className="size-2.5 rounded-(--radius-mark) border border-[var(--color-edge-strong)]"
+                style={{ background: yiginRenk(i) }}
               />
               {s.name}
               <span className="font-mono tabular-nums text-ink">{formatValue(v)}</span>

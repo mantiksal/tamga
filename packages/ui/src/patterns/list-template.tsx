@@ -54,7 +54,11 @@ export function ListTemplate({
 }: ListTemplateProps) {
   return (
     <div className="flex min-h-0 flex-col" data-list-state={state}>
-      <PageBand title={title} subtitle={subtitle} actions={actions} />
+      {/* ŞERİDİN OLUĞUNU KAP VERİYOR. `PageBand` kendi yatay dolgusunu
+          bıraktı · bir blok kendi yerini değil yalnız kendi içini bilir. */}
+      <div className="tamga-gutter py-4">
+        <PageBand title={title} subtitle={subtitle} actions={actions} />
+      </div>
 
       {filters ? (
         <div

@@ -6,8 +6,9 @@ import { dataProps } from "../lib/data-props.js";
 import { Avatar } from "./avatar.js";
 import { Icon } from "./icon.js";
 import { Select } from "./primitives.js";
+import { Segmented } from "./segmented.js";
 import { Switch } from "./switch.js";
-import { ThemeDark, ThemeLight } from "./icons.js";
+import { ThemeDark, ThemeLight, ThemeSystem } from "./icons.js";
 
 /**
  * Kabuk parçaları.
@@ -32,30 +33,22 @@ function write(key: string, value: string) {
 }
 
 /**
- * Açık/koyu tema düğmesi.
+ * Açık/koyu tema düğmesi · sunucu temayı bilmiyor, ilk kare her zaman açık
+ * çıkıyor: engelleyici script uygulamanın işi, kitin bir `<head>`i yok.
+ * `storageKey` bu yüzden prop, iki taraf aynı anahtarı okumak zorunda. İki
+ * biçim (`icon` · `switch`) bir orantı kararı.
  *
- * SUNUCU TEMAYI BİLMEZ. İlk boyama her zaman açık temayla çıkar ve tercih
- * `useEffect` içinde uygulanır — yani koyu tema seçmiş biri bir kare boyunca
- * açık ekran görür. Bunu tamamen çözmenin tek yolu `<head>`'e engelleyici bir
- * script koymak, ve o script'in yeri KİT DEĞİL uygulamadır: kitin bir
- * `<head>`'i yoktur.
- *
- * `storageKey` bu yüzden bir prop: uygulama aynı anahtarı kendi script'inde
- * de okuyabilsin diye. İki taraf farklı anahtar kullanırsa tercih sessizce
- * kaybolur.
- *
- * Metinler dışarıdan geliyor. Kit çeviri yapmaz — ve bir düğmenin adı, içinde
- * metin olmadığı için erişilebilirliğin tamamıdır.
- *
- * İKİ BİÇİM, VE SEBEBİ ORANTI. `icon` sıkışık bir araç çubuğuna girer: 40×40,
- * tek simge. Ama yanında bir dil anahtarı gibi ANAHTAR biçimli bir kontrol
- * varsa, kare düğme onun iki katı yüksekliğinde durur ve şerit dengesiz
- * görünür. `switch` biçimi aynı iskeleti kullanıyor — iki uçta birer simge,
- * ortada kayan bir anahtar — yani ikisi yan yana aynı satırda oturuyor.
+ * Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md
  */
+/** The three answers a reader can give about theme. TR: Okuyucunun tema
+ *  hakkında verebileceği üç cevap. */
+export type ThemePreference = "light" | "dark" | "system";
+
 export function ThemeToggle({
   labels,
   variant = "icon",
+  preference,
+  onPreferenceChange,
   storageKey = "tamga-theme",
   dark: controlled,
   onChange,
@@ -75,7 +68,25 @@ export function ThemeToggle({
    * durumla adlandırılıyor ("Koyu"). Eylem sözcüklerini kutuda kullanmak, tema zaten açıkken
    * kutuda "Koyu temaya geç" yazması demekti: kontrol kendi tersini duyurur.
    */
-  labels: { toLight: string; toDark: string } | { light: string; dark: string };
+  labels:
+    | { toLight: string; toDark: string }
+    | { light: string; dark: string }
+    | { light: string; dark: string; system: string };
+  /**
+   * `segmented` only: which of the three the reader has chosen. TR: yalnız
+   * `segmented`: okuyucunun üçünden hangisini seçtiği.
+   *
+   * WHY IT IS SEPARATE FROM `dark`. "System" is not a third shade, it is the
+   * absence of a choice: the reader is saying "ask the machine". A boolean
+   * cannot hold that, and a control that only offers two silently turns the
+   * machine's answer into a decision the reader never made. TR: NEDEN `dark`TAN
+   * AYRI. "Sistem" üçüncü bir ton değil, bir seçimin YOKLUĞU: okuyucu "makineye
+   * sor" diyor. Bir boolean bunu tutamıyor, ve yalnız ikisini sunan bir kontrol
+   * makinenin cevabını okuyucunun hiç vermediği bir karara dönüştürüyor.
+   */
+  preference?: ThemePreference;
+  /** `segmented` only. TR: yalnız `segmented`. */
+  onPreferenceChange?: (next: ThemePreference) => void;
   /**
    * The current theme, when the PRODUCT owns it. TR: O anki tema, temayı ÜRÜN tutuyorsa.
    *
@@ -91,15 +102,21 @@ export function ThemeToggle({
    * says the current theme in words. TR: `icon` kare düğme · `switch` bir dil anahtarıyla aynı
    * şekil · `select` o anki temayı sözcükle yazan bir kutu.
    */
-  variant?: "icon" | "switch" | "select";
+  variant?: "icon" | "switch" | "select" | "segmented";
   storageKey?: string;
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
-  const owned = controlled === undefined;
+  /* `segmented` TEMAYI ASLA SAHİPLENMİYOR: tercihi `preference` taşıyor, yani
+     ürün tutuyor. Sahipliği `dark`ın verilip verilmediğine bakarak ölçmek,
+     `.dark` sınıfını İŞLETİM SİSTEMİNDEN basmaya yol açıyordu.
+     Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md */
+  const owned = variant !== "segmented" && controlled === undefined;
   const [self, setSelf] = useState(false);
-  const dark = owned ? self : controlled;
+  /* `segmented` dalı buraya hiç gelmiyor (yukarıda dönüyor); `controlled`
+     yalnız orada `undefined` olabiliyor, o yüzden yedek `false`. */
+  const dark = owned ? self : (controlled ?? false);
 
   useEffect(() => {
     if (!owned) return;
@@ -118,6 +135,51 @@ export function ThemeToggle({
     setSelf(next);
     document.documentElement.classList.toggle("dark", next);
     write(storageKey, next ? "dark" : "light");
+  }
+
+  if (variant === "segmented") {
+    /* DURUM SÖZCÜKLERİ ŞART: eksik bir etiket, ekran okuyucuya adsız bir düğme
+       demek · kit çeviri üretmiyor (docs/08 kural 5). */
+    if (!("light" in labels) || !("dark" in labels)) {
+      throw new Error('ThemeToggle variant="segmented" için labels {light, dark} (ve tercihen system) olmalı');
+    }
+    if (preference === undefined || onPreferenceChange === undefined) {
+      throw new Error('ThemeToggle variant="segmented" `preference` ve `onPreferenceChange` ister');
+    }
+    /* SİSTEM ETİKETİ VARSA ÜÇ, YOKSA İKİ · üçlü hâli önerilen kalıyor (bkz.
+       `preference`). İkide etiketler görünüyor, üçte yalnız glif: üç metin
+       kontrolü gereksiz uzatıyor.
+       Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md */
+    const ucluMu = "system" in labels;
+    const secenek = (value: ThemePreference, icon: typeof ThemeLight, text: string) => ({
+      value,
+      label: (
+        <>
+          <Icon icon={icon} size="sm" />
+          {ucluMu ? <span className="sr-only">{text}</span> : text}
+        </>
+      ),
+    });
+    return (
+      <Segmented
+        {...dataProps(rest)}
+        className={cn(ucluMu && "tamga-segment-icons", className)}
+        label={
+          ucluMu
+            ? `${labels.light} / ${labels.dark} / ${(labels as { system: string }).system}`
+            : `${labels.light} / ${labels.dark}`
+        }
+        value={preference}
+        onChange={onPreferenceChange}
+        options={[
+          secenek("light", ThemeLight, labels.light),
+          secenek("dark", ThemeDark, labels.dark),
+          ...(ucluMu
+            ? [secenek("system", ThemeSystem, (labels as { system: string }).system)]
+            : []),
+        ]}
+      />
+    );
   }
 
   if (variant === "select") {
@@ -187,19 +249,10 @@ export function ThemeToggle({
 }
 
 /**
- * Dil değiştirici.
+ * Dil değiştirici · kit YÖNLENDİRME YAPMAZ, `onChange` yalnız seçilen dili
+ * verir. Etiketler endonim. İki dilde `Segmented`, üçten fazlasında `Select`.
  *
- * Kit YÖNLENDİRME YAPMAZ. `onChange` seçilen dili verir; nereye gidileceği —
- * `router.push`, tam sayfa yenileme, bir çerez yazıp yeniden yükleme —
- * uygulamanın kararı ve yönlendiricisine bağlı. Kitin `next/navigation`'a
- * bağlanması, onu bir framework'e bağlamak olurdu.
- *
- * Etiketler ENDONİM olmalı: "English", "İngilizce" değil. Bir dili arayan
- * kişi onu kendi dilinde arar. Kit bunu zorlayamaz ama doküman söyler.
- *
- * İki dilde SEGMENTED, üç ve fazlasında SELECT — kendiliğinden. İki seçenek
- * yan yana sığar ve tek tıkla değişir; beş dil yan yana konursa üst şeridi
- * doldurur ve altıncı dilde taşar.
+ * Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md
  */
 export function LocaleSwitcher({
   locales,
@@ -239,32 +292,26 @@ export function LocaleSwitcher({
       </span>
     );
   }
+  /* ÜÇ VE ÜZERİ DİLDE KİTİN KENDİ SEÇİMİ, tarayıcınınki DEĞİL · bir süre düz
+     bir `<select>` çiziliyordu: oku işletim sisteminin, açılan listesi
+     işletim sisteminin, ve kitin hiçbir kuralı orada geçmiyordu. */
   return (
-    <select
-      className={cn("tamga-input h-9 w-auto", className)}
+    <Select
+      className={cn("w-auto min-w-40", className)}
       aria-label={label}
+      placeholder={label}
+      options={locales}
       value={current}
-      onChange={(e) => onChange(e.target.value)}
-    >
-      {locales.map((l) => (
-        <option key={l.value} value={l.value}>
-          {l.label}
-        </option>
-      ))}
-    </select>
+      onChange={onChange}
+    />
   );
 }
 
 /**
- * Kare marka karosu.
+ * Kare marka karosu · görsel yoksa baş harf. `alt` bilerek boş: karo
+ * neredeyse her zaman adı yanında yazan bir şeyin yanında duruyor.
  *
- * Bir logonun etrafındaki kutu. Görsel yoksa baş harf — `Avatar`'la aynı
- * gerekçe: gri bir yer tutucu hiçbir şeyi temsil etmez, bir harf gerçekten o
- * şeyi işaret eder.
- *
- * `alt` boş bırakılıyor ve bu bilinçli: karo neredeyse her zaman adı YANINDA
- * yazan bir şeyin yanında durur. İkisini de okutmak ekran okuyucuda adı iki
- * kez tekrarlar.
+ * Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md
  */
 export function LogoTile({
   name,
@@ -290,7 +337,10 @@ export function LogoTile({
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt="" className="h-full w-full object-contain p-1.5" />
       ) : (
-        <span aria-hidden className="font-mono text-subhead font-semibold text-ink-faint">
+        /* HARF MARKANIN HARFİ: display yüzü, en ağır kesim ve vurgu rengi.
+           Mono ve soluk çizildiğinde karo bir logo yerine bir KOD gibi
+           okunuyordu · oysa bu kutu görselin yerini tutuyor. */
+        <span aria-hidden className="font-display text-subhead font-black text-accent">
           {name.trim().charAt(0).toLocaleUpperCase()}
         </span>
       )}
@@ -299,20 +349,10 @@ export function LogoTile({
 }
 
 /**
- * Şeridin sağ ucundaki hesap düğmesi.
+ * Şeridin sağ ucundaki hesap düğmesi · ölçüsü şeridin ölçüsü (`--control`,
+ * 40px), fotoğraf yoksa baş harfler.
  *
- * NEDEN BİR BİLEŞEN, VE SAYARAK. İki panelde de aynı şey elle kuruldu:
- * `<button className="tamga-icon-btn"><Avatar bare …/></button>`. `Avatar`ın
- * `bare` prop'u tam bu iş için var ve JSDoc'u bunu anlatıyor, ama bulunmadı;
- * ikinci kurulumda avatar kendi çerçevesiyle kondu ve şeritteki öteki
- * kontrollerden farklı boyda durdu. Bulunmayan bir prop, olmayan proptur.
- *
- * ÖLÇÜ ŞERİDİN ÖLÇÜSÜ. Kare `--control` (40px), yani tema anahtarı ve öteki
- * simge düğmeleriyle birebir aynı. Bir araç çubuğunda yükseklik tek karardır;
- * tek bir kontrolün farklı durması bütün şeridi hizasız gösteriyor.
- *
- * FOTOĞRAF YOKSA BAŞ HARFLER: `Avatar` zaten öyle davranıyor, ve bir hesabın
- * fotoğrafı olmaması normal hâl.
+ * Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md
  */
 export function AccountButton({
   name,
@@ -340,7 +380,7 @@ export function AccountButton({
   const ic = (
     <Avatar name={name} src={src} size={38} bare />
   );
-  const sinif = cn("tamga-icon-btn overflow-hidden p-0", className);
+  const sinif = cn("tamga-account-btn", className);
 
   if (href && Link) {
     return (

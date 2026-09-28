@@ -1,9 +1,9 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useState } from "react";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
-import { toneOf, type Tone } from "./tone.js";
+import { toneOf, type Tone, seriRenk } from "./tone.js";
 
 /**
  * Çizgi grafik — eksenli, gerçek grafik.
@@ -31,11 +31,16 @@ export type Series = {
    * KATEGORİDİR (ürün, mağaza, kanal), ve kategorinin rengi paletten gelir.
    */
   tone?: Tone;
+  /**
+   * Draw it as a dashed line: the comparison period, not a series of its own. TR: Kesik çizgiyle
+   * çiz: kendi başına bir seri değil, KARŞILAŞTIRMA dönemi.
+   */
+  dashed?: boolean;
 };
 
 /** Ton verilmemiş serinin rengi: sırayla kategorik palet. */
 function seriRengi(s: Series, i: number): string {
-  return s.tone ? toneOf(s.tone).mark : `var(--color-chart-${(i % 5) + 1})`;
+  return s.tone ? toneOf(s.tone).mark : seriRenk(i);
 }
 
 /** Sayıyı ızgara çizgisine yuvarlar: 87 → 100, 412 → 500. */
@@ -69,8 +74,10 @@ export function LineChart({
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
-  const id = useId();
   const [hover, setHover] = useState<number | null>(null);
+  const ad = series
+    .map((s) => `${s.name}: ${formatValue(s.values[s.values.length - 1] ?? 0)}`)
+    .join(" · ");
 
   const all = series.flatMap((s) => [...s.values]);
   const max = niceMax(Math.max(1, ...all));
@@ -103,30 +110,47 @@ export function LineChart({
         </div>
 
         <div className="min-w-0 flex-1">
+          {/* İŞARET SVG'NİN DIŞINDA: `preserveAspectRatio="none"` içeri çizilen
+              kareyi hap yapıyor, `vectorEffect` yalnız çizgiyi koruyor.
+              Gerekçe: docs/gerekce/03-grafik-ve-olcum.md */}
+          <span className="relative block" style={{ height }}>
           <svg
             viewBox={`0 0 ${W} ${H}`}
             preserveAspectRatio="none"
             style={{ height, width: "100%" }}
             role="img"
-            aria-labelledby={id}
+            /* `aria-label`, `<title>` DEĞİL: SVG'nin `<title>`ı tarayıcıya
+               native bir ipucu balonu çizdiriyordu.
+               Gerekçe: docs/gerekce/03-grafik-ve-olcum.md */
+            aria-label={ad}
             onMouseLeave={() => setHover(null)}
           >
-            <title id={id}>
-              {series.map((s) => `${s.name}: ${formatValue(s.values[s.values.length - 1] ?? 0)}`).join(" · ")}
-            </title>
 
-            {ticks.map((t) => (
+            {/* Izgara içeride SESSİZ, tabanda değil: en alttaki çizgi eksenin
+                kendisi ve ötekilerden bir kademe koyu. */}
+            {ticks.map((t, i) => (
               <line
                 key={t}
                 x1={0}
                 x2={W}
                 y1={y(t)}
                 y2={y(t)}
-                stroke="var(--color-line)"
+                stroke={i === 0 ? "var(--color-line)" : "var(--color-div)"}
                 strokeWidth={1}
                 vectorEffect="non-scaling-stroke"
               />
             ))}
+
+            {/* ALAN DOLGUSU YALNIZ BİRİNCİ SERİDE, ve yalnız kesik değilse:
+                iki dolgu üst üste gelince ikisi de okunmuyor, ve karşılaştırma
+                dönemi bir alan değil bir HATIRLATMA. */}
+            {series[0] && !series[0].dashed ? (
+              <polygon
+                points={`0,${H} ${series[0].values.map((v, i) => `${x(i)},${y(v)}`).join(" ")} ${W},${H}`}
+                fill="var(--color-accent-soft)"
+                opacity={0.35}
+              />
+            ) : null}
 
             {series.map((s, si) => {
               const renk = seriRengi(s, si);
@@ -136,8 +160,9 @@ export function LineChart({
                   key={s.name}
                   d={d}
                   fill="none"
-                  stroke={renk}
-                  strokeWidth={2}
+                  stroke={s.dashed ? "var(--color-ink-faint)" : renk}
+                  strokeWidth={s.dashed ? 2 : 3}
+                  strokeDasharray={s.dashed ? "6 5" : undefined}
                   strokeLinejoin="round"
                   strokeLinecap="round"
                   vectorEffect="non-scaling-stroke"
@@ -160,17 +185,32 @@ export function LineChart({
             ))}
 
             {hover !== null ? (
-              <line
-                x1={x(hover)}
-                x2={x(hover)}
-                y1={0}
-                y2={H}
-                stroke="var(--color-ink-faint)"
-                strokeWidth={1}
-                vectorEffect="non-scaling-stroke"
-              />
+              <>
+                <line
+                  x1={x(hover)}
+                  x2={x(hover)}
+                  y1={0}
+                  y2={H}
+                  stroke="var(--color-edge-strong)"
+                  strokeWidth={1.5}
+                  strokeDasharray="5 4"
+                  vectorEffect="non-scaling-stroke"
+                />
+              </>
             ) : null}
           </svg>
+          {hover !== null && series[0]?.values[hover] !== undefined ? (
+            /* İŞARET KARE, DAİRE DEĞİL: kitin her işareti kare. */
+            <span
+              className="tamga-chart-mark"
+              style={{
+                left: `${x(hover)}%`,
+                top: `${y(series[0].values[hover] ?? 0)}%`,
+              }}
+              aria-hidden
+            />
+          ) : null}
+          </span>
 
           <div className="mt-1 flex justify-between font-mono text-caption text-ink-faint" aria-hidden>
             {labels.map((l) => (
@@ -186,7 +226,15 @@ export function LineChart({
           const v = hover !== null ? s.values[hover] : s.values[s.values.length - 1];
           return (
             <span key={s.name} className="flex items-center gap-2 text-small text-ink-soft">
-              <span aria-hidden className="h-0.5 w-4" style={{ background: renk }} />
+              <span
+                aria-hidden
+                className="w-4"
+                style={
+                  s.dashed
+                    ? { borderTop: "2px dashed var(--color-ink-faint)" }
+                    : { height: 3, background: renk }
+                }
+              />
               {s.name}
               <span className="font-mono text-ink tabular-nums">{formatValue(v ?? 0)}</span>
             </span>

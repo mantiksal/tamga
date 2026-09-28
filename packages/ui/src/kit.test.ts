@@ -3,23 +3,11 @@ import { pageWindow } from "./components/pagination.js";
 import { toneOf, rankOf, tones, TONE_RANK, type Tone } from "./components/tone.js";
 
 /**
- * Kitin testleri.
+ * Kitin testleri · saf fonksiyonlar, DOM yok: sayfalayıcı aritmetiği, ton
+ * rolleri, nabız rütbesi. Üçü de yanlış olduğunda hata vermiyor, yalnız yanlış
+ * çiziyor. Render `src/patterns/*.test.tsx` içinde.
  *
- * NEDEN BİR SÜRE YOKTU VE NEDEN ARTIK VAR. On projenin bağlı olduğu bir
- * kütüphanenin sıfır testi vardı, üstelik onu tüketen ürünün kendi test paketi
- * varken. Bir bileşenin görünüşü gözle yakalanıyordu; ama kitte GÖRÜNMEYEN
- * mantık da var, ve o mantık sessizce yanlış olabiliyor.
- *
- * NE TEST EDİLİYOR: saf fonksiyonlar. Bir sayfalayıcının hangi numaraları
- * göstereceği, bir skorun hangi tona düşeceği, bir nabzın hangi rütbeyi
- * kazanacağı. Üçü de DOM'suz, üçü de yanlış olduğunda hiçbir hata vermiyor:
- * yalnız yanlış çiziyor.
- *
- * RENDER AYRI DOSYALARDA. Şablonların davranışı `src/patterns/*.test.tsx`
- * içinde jsdom ile ölçülüyor. Bir zamanlar burada "render tüketen ürünün
- * story'lerinde kanıtlanıyor" yazıyordu; o story'ler kaldırıldı ve ölçüm
- * kite taşındı. Yasanın GÖRSEL tarafını `scripts/check-physics.mjs` kitin
- * kendi CSS'ini okuyarak, ilişkisel olarak ölçüyor.
+ * Gerekçe: docs/09-testler-ve-degismezler.md
  */
 
 describe("pageWindow — sayfalayıcının aritmetiği", () => {
@@ -74,22 +62,25 @@ describe("pageWindow — sayfalayıcının aritmetiği", () => {
   });
 });
 
-describe("tone — kitin beş rolü", () => {
+describe("tone — kitin altı rolü", () => {
   /* `tones` bir DİZİ değil `Record<Tone, ToneStyle>`. İlk sürümde dizi
      sanılmıştı ve test patladı — kitin kendisi doğruydu, varsayım yanlıştı.
      Testin ilk işi tam olarak bu oldu. */
   const all = Object.keys(tones) as Tone[];
 
-  it("tam olarak beş rol vardır", () => {
-    /* Altıncısı eklenirse bu test düşer, ve düşmesi gerekir: rol sayısı bir
-       ürün kararı değil, kitin sözleşmesi.
-
-       DÖRTTEN BEŞE ÇIKTI, ve tripwire işini yaptı: `info` eklenince burası
-       kırıldı ve değişiklik bir karar olarak görünür oldu. Beşinci rol bir
-       tonlama değil eksik bir cümle: öbür dördü "bir şey yanlış mı" sorusuna
-       cevap veriyor, yalnızca BİLDİRMEK isteyen ürünün elinde "raporlamıyor"
-       diyen bir gri ile "çözüldü" diyen bir yeşilden başkası yoktu. */
-    expect([...all].sort()).toEqual(["caution", "danger", "info", "neutral", "positive"]);
+  it("tam olarak altı rol vardır", () => {
+    /* Yedincisi eklenirse bu test düşer, ve düşmesi gerekir: rol sayısı bir ürün
+       kararı değil, kitin sözleşmesi. Dörtten beşe (`info`) ve beşten altıya
+       (`elevated`) geçişlerde tripwire işini yaptı.
+       Gerekçe: docs/09-testler-ve-degismezler.md */
+    expect([...all].sort()).toEqual([
+      "caution",
+      "danger",
+      "elevated",
+      "info",
+      "neutral",
+      "positive",
+    ]);
   });
 
   it("her rol bir işaret rengi taşır", () => {

@@ -80,12 +80,20 @@ export function TreeSelect({
   function Dal({ node, derinlik }: { node: TreeNode; derinlik: number }) {
     const cocuklar = node.children ?? [];
     const acik = !kapali.has(node.id);
-    const isaretli = secili.has(node.id);
+    /* ÜÇ HÂL, İKİ DEĞİL. Bir dalın durumu ALTLARINDAN geliyor: hepsi seçiliyse
+       dolu, bir kısmı seçiliyse KISMİ. İki hâlli bir kutu burada yalan söylüyor:
+       üç alt kategoriden biri seçiliyken üst satır boş görünüyor ve kullanıcı
+       seçimini kaybettiğini sanıyor. */
+    const altlar = altIdler(node).filter((id) => id !== node.id);
+    const secilenAlt = altlar.filter((id) => secili.has(id)).length;
+    const isaretli =
+      altlar.length > 0 ? secilenAlt === altlar.length : secili.has(node.id);
+    const kismi = altlar.length > 0 && secilenAlt > 0 && secilenAlt < altlar.length;
     return (
       <li {...dataProps(rest)} role="none">
         <div
           className="flex items-center gap-1.5 rounded-(--radius-mark) py-1 hover:bg-[var(--color-hover)]"
-          style={{ paddingLeft: `${derinlik * 18}px` }}
+          style={{ paddingLeft: `${derinlik * 20}px` }}
         >
           {cocuklar.length > 0 ? (
             <button
@@ -115,9 +123,10 @@ export function TreeSelect({
           <Checkbox
             className="min-w-0 flex-1"
             checked={isaretli}
+            indeterminate={kismi}
             onChange={(v) => cevir(node, v)}
             label={
-              <span className={cn("truncate", isaretli ? "text-ink" : "text-ink-soft")}>
+              <span className={cn("truncate", isaretli || kismi ? "text-ink" : "text-ink-soft")}>
                 {node.label}
               </span>
             }
@@ -154,13 +163,10 @@ export function TreeSelect({
           />
         </span>
       )}
-      {/* KAYDIRMA ALANININ İÇ BOŞLUĞU ŞART.
-          Ağacın en solundaki açma oku kutunun sol sınırına yapışıyordu, ve
-          `.tamga-mini-btn` hover'da `translate(-1px,-1px)` ile kalkıyor:
-          o bir piksel kaydırma kabının dışına çıkıyor ve `overflow-y: auto`
-          onu kırpıyor (bir eksen `visible` değilse öteki de olamaz). Düğmenin
-          gölgesi de sağa-aşağı 2px, o da kırpılıyordu. Dört piksel iç boşluk,
-          kontrolün kendi fiziğine yer açıyor. */}
+      {/* KAYDIRMA ALANININ İÇ BOŞLUĞU ŞART: açma okunun hover kalkışı ile 2px gölgesi
+          kaydırma kabının dışına çıkıyor ve `overflow-y: auto` onları kırpıyor. Dört
+          piksel, kontrolün kendi fiziğine yer açıyor.
+          Gerekçe: docs/gerekce/01-form-ve-girdi.md */}
       <div className="overflow-y-auto p-1" style={{ maxHeight: height }}>
         {gorunen.length === 0 ? (
           <p className="py-6 text-center text-ink-faint">{labels.empty}</p>

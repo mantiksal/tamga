@@ -9,27 +9,11 @@ import { Label } from "./surface.js";
 import { cropSquare } from "../lib/image.js";
 
 /**
- * LOGODAN AMBLEM SEÇME — otomatik kesme DEĞİL.
+ * LOGODAN AMBLEM SEÇME · otomatik kesme DEĞİL: dosyada "amblem" diye işaretli
+ * bir şey yok, konumu sabit değil, ve yanlış kesim patlamaz, sessizce kalır.
+ * Kesimi insan yapıyor. Çerçeve ORANLA tutuluyor, piksele dönüşüm tek yerde.
  *
- * Sorulan soru şuydu: yüklenen logoyu ayırıp amblemi kendiliğinden çıkaramaz
- * mıyız? Çıkaramayız, ve denememesi gerekiyor:
- *
- *   · Dosyada "amblem" diye işaretli bir şey yok. SVG'de bazen bir grup id'si
- *     olur ama bu tasarımcının keyfine bağlı; PNG'de hiç yok.
- *   · Konum sabit değil: amblem solda, üstte, sağda olabilir, yazının içine
- *     gömülü olabilir, ya da hiç olmayabilir (yalnız kelime-logo).
- *   · Hata SESSİZ ve KALICI olur. Yanlış kesim patlamaz; yarım bir harf
- *     panelin her sayfasının sol üstünde durur ve kimse bunun otomatik
- *     kesildiğini bilmez.
- *
- * Bu yüzden kesimi İNSAN yapıyor: kare bir çerçeve, sürüklenip boyutlanıyor.
- * Sonuç tahmin değil karar.
- *
- * ÇERÇEVE ORANLA TUTULUYOR (0–1), piksel ile değil: önizleme ekrandan ekrana
- * farklı ölçekte çiziliyor, oran her ölçekte aynı yeri gösteriyor. Ekrana
- * çizilirken piksele dönüyor ve dönüşüm TEK YERDE (`kenarPx`): kesim
- * matematiği ile çerçevenin CSS'i ayrı ayrı hesaplansaydı, kullanıcının
- * gördüğü kare ile kesilen kare farklı olurdu — ve fark sessiz olurdu.
+ * Gerekçe: docs/gerekce/01-form-ve-girdi.md
  */
 export function SquarePicker({
   open,

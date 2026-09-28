@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
-import { CaretDown, Close } from "./icons.js";
+import { CaretDown, Close, Sort } from "./icons.js";
 import { Checkbox } from "./checkbox.js";
 
 /**
@@ -55,15 +55,20 @@ export function SortHeader({
         )}
       >
         {children}
-        {/* Yön oku YALNIZ sıralı sütunda görünür. Her başlıkta soluk bir ok
-            göstermek, hangisinin etkin olduğunu okunmaz hâle getirir. */}
+        {/* YÖN oku yalnız sıralı sütunda, ve vurgu renginde. Sıralı olmayan
+            sütun yön DEĞİL, iki yönlü nötr bir glif taşıyor: bu ok değil bir
+            davet · "bu başlık tıklanabilir". İkisi aynı glif olsaydı hangi
+            sütunun etkin olduğu okunmaz olurdu, hiç glif olmasaydı da
+            başlığın bir kontrol olduğu görünmüyordu. */}
         {direction ? (
           <Icon
             icon={CaretDown}
             size="xs"
-            className={direction === "asc" ? "rotate-180" : undefined}
+            className={cn("text-accent", direction === "asc" && "rotate-180")}
           />
-        ) : null}
+        ) : (
+          <Icon icon={Sort} size="xs" className="text-ink-faint" />
+        )}
       </button>
     </th>
   );
@@ -91,31 +96,19 @@ export function SelectAll({
   [k: `data-${string}`]: unknown;
 }) {
   return (
-    <span
-{...dataProps(rest)}
-      /* `aria-checked="mixed"` üçüncü durumun standart karşılığı. */
-      role="checkbox"
-      aria-checked={indeterminate ? "mixed" : checked}
-      aria-label={label}
-      tabIndex={0}
-      onClick={() => onChange?.(!checked)}
-      onKeyDown={(e) => {
-        if (e.key === " " || e.key === "Enter") {
-          e.preventDefault();
-          onChange?.(!checked);
-        }
-      }}
-      className="inline-flex cursor-pointer"
-    >
-      <span className="tamga-check" data-checked={checked || indeterminate}>
-        {indeterminate ? (
-          <span className="block h-0.5 w-2 bg-current" aria-hidden />
-        ) : checked ? (
-          <Icon icon={CaretDown} size="xs" className="hidden" />
-        ) : null}
-        {checked && !indeterminate ? <span className="block h-2 w-2 bg-current" aria-hidden /> : null}
-      </span>
-    </span>
+    <Checkbox
+      {...dataProps(rest)}
+      compact
+      /* İKİSİ DE TABLONUN KUTUSU (`compact`): başlıktaki ile satırdakinin aynı
+         ölçüde olması şart · yarım piksellik bir fark bile sütunu eğri
+         gösteriyor. Baş kutu bir zamanlar elle çiziliyordu ve işaretliyken
+         `Checkbox`ın çentiği yerine düz bir kare basıyordu: aynı sütunda iki
+         farklı işaret. */
+      label={<span className="sr-only">{label}</span>}
+      checked={checked}
+      indeterminate={indeterminate}
+      onChange={onChange}
+    />
   );
 }
 
@@ -132,15 +125,23 @@ export function SelectRow({
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
-  return <Checkbox label={<span {...dataProps(rest)} className="sr-only">{label}</span>} checked={checked} onChange={onChange} />;
+  return (
+    <Checkbox
+      {...dataProps(rest)}
+      compact
+      label={<span className="sr-only">{label}</span>}
+      checked={checked}
+      onChange={onChange}
+    />
+  );
 }
 
 /**
- * Seçim çubuğu — "3 kayıt seçildi" ve yanındaki toplu eylemler.
+ * Seçim çubuğu · bir şerit değil bir ADA: kendi genişliği kadar, ortalanmış,
+ * ters zeminde. `sticky`, yani kaydırılan bir alanın içindeyse altta asılı
+ * kalıyor. Seçim boşken hiç render edilmiyor.
  *
- * Tablonun ÜSTÜNDE durur, altında değil: seçim yukarıdan yapılır ve eylem
- * gözün gittiği yerde olmalı. Ve seçim boşken hiç render edilmez — boş bir
- * çubuk yer kaplar, bilgi vermez.
+ * Gerekçe: docs/gerekce/02-veri-ve-liste.md
  */
 export function SelectionBar({
   count,
@@ -172,17 +173,15 @@ export function SelectionBar({
     <div
 {...dataProps(rest)}
       role="status"
-      className={cn(
-        "tamga-gutter flex flex-wrap items-center gap-3 border-b border-[var(--color-line)] py-3",
-        className,
-      )}
-      style={{ background: "var(--color-accent-bg)" }}
+      className={cn("tamga-selection-bar", className)}
     >
-      <span className="text-body font-medium text-ink tabular-nums">{labels.selected(count)}</span>
-      {children ? <span className="flex flex-wrap items-center gap-2">{children}</span> : null}
+      <span className="text-body font-semibold tabular-nums whitespace-nowrap">
+        {labels.selected(count)}
+      </span>
+      {children ? <span className="flex items-center gap-2">{children}</span> : null}
       <button
         type="button"
-        className="tamga-icon-btn ml-auto"
+        className="tamga-icon-btn"
         aria-label={labels.clear}
         onClick={onClear}
       >

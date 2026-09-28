@@ -2,7 +2,6 @@
 
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
-import { OFF } from "./control-base.js";
 
 /* ---------------------------------------------------------------- *
  * Switch — akranlar arası seçim DEĞİL, açık/kapalı durumu.
@@ -16,6 +15,7 @@ export function Switch({
   label,
   disabled = false,
   className,
+  compact = false,
   ...rest
 }: {
   on: boolean;
@@ -27,6 +27,19 @@ export function Switch({
   label: string;
   disabled?: boolean;
   className?: string;
+  /**
+   * The switch a TABLE row wears. TR: Bir TABLO satırının giydiği anahtar.
+   *
+   * Smaller, and its layer is a step shallower. A form switch answers one
+   * question on a settings page and can afford the room; in a table it is one
+   * of twenty-five down a column, and at full size it is the tallest thing in
+   * the row · the row's rhythm ends up set by a control rather than by its
+   * content. TR: Daha küçük, ve katmanı bir basamak sığ. Form anahtarı bir
+   * ayarlar sayfasında tek bir soruyu yanıtlıyor ve yeri var; tabloda ise bir
+   * sütunda yirmi beş taneden biri, ve tam boyunda satırın en uzun şeyi oluyor
+   * · satırın ritmini içeriği değil bir kontrol belirliyor.
+   */
+  compact?: boolean;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
@@ -40,9 +53,9 @@ export function Switch({
       aria-disabled={disabled || undefined}
       disabled={disabled}
       onClick={() => !disabled && onChange?.(!on)}
-      className={cn("tamga-switch", className)}
-      data-on={on}
-      style={disabled ? OFF : undefined}
+      className={cn("tamga-switch", compact && "tamga-switch-sm", className)}
+      data-on={on && !disabled}
+      data-off={disabled || undefined}
     >
       {/* Topuz. CSS onu `> span` ile hedefliyor ve `data-on` geldiğinde 16px
           kaydırıyor — yani anahtarın hareket eden yarısı bu eleman. Boş bir

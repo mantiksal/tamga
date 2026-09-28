@@ -1,22 +1,9 @@
 /**
- * BLOK KATMANI — `tamga-ui/blocks`.
+ * BLOK KATMANI · `tamga-ui/blocks`. Bir bileşenden büyük, bir şablondan küçük:
+ * birkaç bileşenin TEK BİR İŞ yaptığı bölüm. Ürün sözlüğü taşıyan hiçbir şey
+ * girmez, ve yeni bir blok yazmadan önce kitin o işi yapan bileşeni aranır.
  *
- * BİR BLOK NEDİR. Bir bileşenden büyük, bir şablondan küçük: birkaç bileşenin
- * bir araya gelip TEK BİR İŞ yaptığı bölüm. Filtre çubuğu bir düğme değil ama
- * bir ekran da değil; bir ekranın içindeki bir bölge.
- *
- * ADR-0003'ün katman şeması "filtre paneli · toplu eylem çubuğu" diye ikisini
- * de `tamga-ui` kutusunun içine yazıyor. Toplu eylem çubuğu ZATEN VARDI:
- * `SelectionBar`, bir bileşen olarak, kendi doküman sayfasıyla. Buraya bir
- * `BulkBar` yazıldı ve aynı propları alan ikinci bir kopyaydı; silindi.
- *
- * DERS BU DOSYANIN BAŞINDA DURSUN: yeni bir blok yazmadan önce kitin o işi
- * yapan bir bileşeni var mı diye bakılır. Bir tasarım sisteminin en sinsi
- * hatası, aynı şeyin iki adla iki yerde durmasıdır.
- *
- * BURAYA NE GİRMEZ. Bir ürünün sözlüğünü taşıyan hiçbir şey. Bir sipariş
- * kartı, bir iade satırı, bir mülk özeti: bunlar e-ticaret ya da izleme
- * katmanının işi. Blok, alanı bilmeyen bölümdür.
+ * Gerekçe: docs/gerekce/08-blok-ve-sablon.md
  */
 export {
   FilterBar,

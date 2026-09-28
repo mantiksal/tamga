@@ -4,6 +4,7 @@ import { useId, useState, type ReactNode } from "react";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
+import type { IconGlyph } from "./icons.js";
 import { CaretRight } from "./icons.js";
 
 /**
@@ -16,12 +17,19 @@ import { CaretRight } from "./icons.js";
 export function Collapsible({
   title,
   defaultOpen = false,
+  icon,
   meta,
   className,
   children,
   ...rest
 }: {
   title: string;
+  /**
+   * The glyph at the head of the row, in the accent. It says what KIND of section this is before
+   * the words are read. TR: Satırın başındaki glif, vurgu renginde. Sözcükler okunmadan önce bu
+   * bölümün NE TÜR bir bölüm olduğunu söylüyor.
+   */
+  icon?: IconGlyph;
   defaultOpen?: boolean;
   /**
    * The secondary text to the right of the title: a count, a state. TR: Başlığın sağındaki
@@ -36,32 +44,42 @@ export function Collapsible({
   const id = useId();
   const [open, setOpen] = useState(defaultOpen);
   return (
-    /* Son bölümün alt kuralı kalkıyor: kabın kendi kenarıyla üst üste binip
-       çift çizgi oluşturuyordu. */
-    <div {...dataProps(rest)} className={cn("border-b border-[var(--color-line)] last:border-b-0", className)}>
+    /* KILIĞI KAP VERİYOR (`Accordion look`): satır mı kart mı · aynı kararı
+       her çağrı yerinde tekrar almamak için. */
+    <div
+      {...dataProps(rest)}
+      className={cn("tamga-collapsible", className)}
+      data-open={open || undefined}
+    >
       <button
         type="button"
-        /* `tamga-gutter` şart: `.tamga-head` yalnız DİKEY boşluk taşıyor.
-           Onsuz başlık kabın kenarına yapışıyordu — ve altındaki gövde
-           gutter'lı olduğu için ikisi hizasız duruyordu. */
-        className="tamga-head tamga-gutter w-full text-left"
+        className="tamga-collapsible-head"
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((v) => !v)}
       >
+        {icon ? <Icon icon={icon} size="base" className="shrink-0 text-accent" /> : null}
         {/* Ok DÖNÜYOR, değişmiyor: iki ayrı ikon (sağ/aşağı) kullanmak geçişi
             bir takas yapardı; döndürmek onu bir hareket yapıyor ve hangi
             yönde gittiğini gösteriyor. */}
+        <span className="min-w-0 flex-1 text-body font-bold text-ink">{title}</span>
+        {meta ? <span className="text-small text-ink-faint">{meta}</span> : null}
+        {/* Ok DÖNÜYOR, değişmiyor: iki ayrı ikon (sağ/aşağı) kullanmak geçişi
+            bir takas yapardı; döndürmek onu bir hareket yapıyor. */}
         <Icon
           icon={CaretRight}
           size="xs"
+          weight="bold"
           className="shrink-0 transition-transform"
           style={{ transform: open ? "rotate(90deg)" : undefined }}
         />
-        <span className="min-w-0 flex-1 text-body font-medium text-ink">{title}</span>
-        {meta ? <span className="text-small text-ink-faint">{meta}</span> : null}
       </button>
-      <div id={id} hidden={!open} className="tamga-gutter pb-4">
+      <div
+        id={id}
+        hidden={!open}
+        className="tamga-collapsible-body"
+        data-indent={icon ? "true" : undefined}
+      >
         {children}
       </div>
     </div>
@@ -76,6 +94,30 @@ export function Collapsible({
  * karşılaştırmak yaygın bir iş, ve otomatik kapanma onu imkânsız kılar.
  * Gerekiyorsa çağıran kendi durumunu tutar.
  */
-export function Accordion({ className, children, ...rest }: { className?: string; children: ReactNode; [k: `data-${string}`]: unknown }) {
-  return <div {...dataProps(rest)} className={cn("tamga-surface overflow-hidden", className)}>{children}</div>;
+export function Accordion({
+  look = "cards",
+  className,
+  children,
+  ...rest
+}: {
+  /**
+   * `cards` each section is its own card and the open one rises · a list where which one is open
+   * can be read from across the screen. `list` the quiet stack inside one surface, for a card
+   * that already has an edge. TR: `cards` her bölüm kendi kartı ve açık olan yükseliyor · bir
+   * listede hangisinin açık olduğu uzaktan okunuyor. `list` tek bir yüzeyin içindeki sessiz
+   * yığın, kenarı zaten olan bir kartın içi için.
+   */
+  look?: "cards" | "list";
+  className?: string;
+  children: ReactNode;
+  [k: `data-${string}`]: unknown;
+}) {
+  return (
+    <div
+      {...dataProps(rest)}
+      className={cn(look === "cards" ? "tamga-accordion-cards" : "tamga-surface overflow-hidden", className)}
+    >
+      {children}
+    </div>
+  );
 }

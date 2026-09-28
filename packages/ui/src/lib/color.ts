@@ -1,16 +1,9 @@
 /**
- * Renk matematiği: sRGB · OKLab · WCAG oranı · CIE L*.
+ * Renk matematiği: sRGB · OKLab · WCAG oranı · CIE L*. Bağımlılık değil, çünkü
+ * ölçenle (`check-token-contrast`) üretenin aynı aritmetiği kullanması gerekiyor.
+ * OKLCH, çünkü palet "aynı açıklıkta, başka renk" üretmek zorunda.
  *
- * Bir bağımlılık değil çünkü ihtiyaç küçük ve KAPI'ya bağlı: paletin doğru
- * olup olmadığını `check-token-contrast` ölçüyor, ve ölçenle üretenin aynı
- * aritmetiği kullanması gerekiyor. `lib/color.test.ts` ikisinin aynı sayıyı
- * verdiğini kanıtlıyor.
- *
- * NEDEN OKLCH. Palet "aynı açıklıkta, başka renk" üretmek zorunda: mor bir
- * markanın zemini ile mavi bir markanın zemini AYNI açıklıkta olmalı, yoksa
- * biri ötekinden koyu görünür ve kontrast eşikleri kayar. HSL bunu yapamıyor
- * (HSL'de %50 sarı ile %50 mavi bambaşka parlaklıkta); OKLab algısal olarak
- * düzgün, yani L sabit tutulduğunda açıklık gerçekten sabit kalıyor.
+ * Gerekçe: docs/gerekce/09-kitaplik.md
  */
 
 export type Oklch = { l: number; c: number; h: number };
@@ -22,15 +15,11 @@ const doğrusalSrgb = (v: number) => (v <= 0.0031308 ? v * 12.92 : 1.055 * v ** 
 export const isHex = (v: string): boolean => /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v.trim());
 
 /**
- * Hex → RGB, GEÇERSİZ GİRDİDE FIRLATARAK.
+ * Hex → RGB, GEÇERSİZ GİRDİDE FIRLATARAK. Sessiz `NaN` paleti griye düşürüyordu,
+ * ve kullanıcı hex yazarken ara adımlarda panel gri geliyordu. Kit KATI, çağıran
+ * toleranslı (bkz. `isHex`).
  *
- * Önce sessizce `NaN` üretiyordu ve palet gri bir şeye düşüyordu: bir kullanıcı
- * hex kutusuna `#7c3aed` yazarken ara adımlarda (`#7`, `#7c`) panel griye
- * dönüyor, sonra geri geliyordu. Hata vermeyen bir bozulma en pahalısı, çünkü
- * sebebi rengin kendisinde aranıyor.
- *
- * Kit KATI, çağıran toleranslı: yarım yazılmış bir kodun ne anlama geldiği
- * ekranın kararı (bkz. `isHex`).
+ * Gerekçe: docs/gerekce/09-kitaplik.md
  */
 export function hexToRgb(hex: string): [number, number, number] {
   if (!isHex(hex)) throw new Error(`Geçersiz hex: ${JSON.stringify(hex)}`);

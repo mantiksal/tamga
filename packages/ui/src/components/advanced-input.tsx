@@ -5,7 +5,7 @@ import { cn } from "../lib/cn.js";
 import { inputVariants } from "./input.js";
 import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
-import { Check, Close, Customize, Eye, EyeSlash, Search } from "./icons.js";
+import { Check, Clock, Close, Copy, Customize, Eye, EyeSlash, Key, Search } from "./icons.js";
 
 /* ------------------------------------------------------------------ *
  * Gelişmiş girdiler.
@@ -21,11 +21,21 @@ import { Check, Close, Customize, Eye, EyeSlash, Search } from "./icons.js";
  */
 export function PasswordInput({
   labels,
+  strength,
   invalid = false,
   className,
   ...props
 }: Omit<React.ComponentProps<"input">, "type"> & {
   labels: { show: string; hide: string };
+  /**
+   * The strength meter under the field: `value` bars lit out of `of`, and `note` the line saying
+   * what is still missing. The kit LIGHTS the bars, it does not judge the password: what counts
+   * as strong is a policy, and a policy belongs to the product. TR: Alanın altındaki güç
+   * göstergesi: `of` çubuğun `value` tanesi yanıyor, `note` neyin eksik olduğunu söyleyen satır.
+   * Kit çubukları YAKIYOR, parolayı yargılamıyor: neyin güçlü sayıldığı bir politika, ve politika
+   * ürünün.
+   */
+  strength?: { value: number; of?: number; note?: string };
   /**
    * The field failed validation: it takes the error edge and sets `aria-invalid`, so the failure is
    * announced as well as shown. TR: Alan doğrulamadan geçemedi: hata kenarını alıyor ve
@@ -34,7 +44,7 @@ export function PasswordInput({
   invalid?: boolean;
 }) {
   const [shown, setShown] = useState(false);
-  return (
+  const alan = (
     <span className="relative flex items-center">
       {/* SINIF TABLOSU KİTİN KENDİ TABLOSU. Burada `tamga-input` elle yazılıydı,
           yani `inputVariants`a bir kural eklendiği gün parola alanı onu almazdı:
@@ -61,18 +71,32 @@ export function PasswordInput({
       </button>
     </span>
   );
+
+  if (!strength) return alan;
+
+  const toplam = strength.of ?? 4;
+  const yanan = Math.max(0, Math.min(toplam, strength.value));
+  return (
+    <span className="flex flex-col gap-2.5">
+      {alan}
+      {/* ÇUBUKLAR EŞİT GENİŞLİKTE: dolan tek bir çubuk "ne kadar" diyor, oysa
+          buradaki soru "kaç kural karşılandı" · dördü de aynı boyda olmalı. */}
+      <span className="tamga-guc" style={{ gridTemplateColumns: `repeat(${toplam}, 1fr)` }}>
+        {Array.from({ length: toplam }, (_, i) => (
+          <span key={i} data-dolu={i < yanan || undefined} />
+        ))}
+      </span>
+      {strength.note ? <span className="text-small text-ink-faint">{strength.note}</span> : null}
+    </span>
+  );
 }
 
 /**
- * Maskeli sır — API anahtarı, webhook secret.
+ * Maskeli sır · API anahtarı, webhook secret. `PasswordInput`un kardeşi ama işi
+ * TERS: buraya yazılmıyor, okunup kopyalanıyor, o yüzden salt-okunur. Maske ilk
+ * ve son birkaç karakteri bırakıyor.
  *
- * `PasswordInput`'un kardeşi ama İŞİ TERS: parola alanına bir şey YAZILIR,
- * buraya yazılmaz — okunur ve kopyalanır. O yüzden salt-okunur, ve asıl
- * düğmesi kopyalama.
- *
- * Maske ilk ve son birkaç karakteri bırakıyor. Tamamen gizlemek, kullanıcının
- * "hangi anahtar bu" sorusunu cevapsız bırakır; üç anahtarı olan biri
- * hangisine baktığını bilemez.
+ * Gerekçe: docs/gerekce/01-form-ve-girdi.md
  */
 export function SecretField({
   value,
@@ -121,48 +145,37 @@ export function SecretField({
   }
 
   return (
-    <span {...dataProps(rest)} className={cn("relative flex items-center", className)}>
-      <input
-        readOnly
-        value={shown ? value : masked}
-        className="tamga-input w-full pr-18 font-mono"
-        /* Salt-okunur bir alan yine de odaklanabilir olmalı: kullanıcı onu
-           seçip elle kopyalayabilsin. `disabled` bunu imkânsız kılardı. */
-        onFocus={(e) => e.currentTarget.select()}
-      />
-      <span className="absolute right-1.5 flex gap-0.5">
-        <button
-          type="button"
-          className="tamga-mini-btn"
-          aria-label={shown ? labels.hide : labels.reveal}
-          aria-pressed={shown}
-          onClick={() => setShown((v) => !v)}
-        >
-          <Icon icon={shown ? EyeSlash : Eye} size="xs" />
-        </button>
-        <button
-          type="button"
-          className="tamga-mini-btn"
-          aria-label={copied === "done" ? labels.copied : copied === "failed" ? labels.failed : labels.copy}
-          onClick={copy}
-        >
-          <Icon icon={copied === "done" ? Check : Customize} size="xs" />
-        </button>
+    /* EYLEMLER ALANIN DIŞINDA, içinde değil. Bir sır YAZILMIYOR okunuyor: alan
+       salt-okunur bir plaka, göster ve kopyala onun üstünde işlem yapan iki
+       gerçek düğme · alanın içine sıkışmış iki mini düğme, kopyalamayı bir
+       kenar süsü gibi gösteriyordu. */
+    <span {...dataProps(rest)} className={cn("flex flex-wrap items-center gap-2.5", className)}>
+      <span className="tamga-secret">
+        <Icon icon={Key} size="xs" className="shrink-0 text-ink-faint" />
+        <input readOnly value={shown ? value : masked} onFocus={(e) => e.currentTarget.select()} />
       </span>
+      <button
+        type="button"
+        className="tamga-icon-btn"
+        aria-label={shown ? labels.hide : labels.reveal}
+        aria-pressed={shown}
+        onClick={() => setShown((v) => !v)}
+      >
+        <Icon icon={shown ? EyeSlash : Eye} size="sm" />
+      </button>
+      <button type="button" className="tamga-btn" onClick={copy}>
+        <Icon icon={copied === "done" ? Check : Copy} size="xs" />
+        {copied === "done" ? labels.copied : copied === "failed" ? labels.failed : labels.copy}
+      </button>
     </span>
   );
 }
 
 /**
- * Etiket girdisi.
+ * Etiket girdisi · Enter ya da virgül bir etiketi kapatıyor, boşken Backspace
+ * sonuncuyu siliyor. Yinelenen etiket SESSİZCE yutuluyor, hata verilmiyor.
  *
- * Enter ya da virgül bir etiketi kapatıyor; boşken Backspace sonuncuyu siliyor.
- * İkincisi küçük görünür ama en çok kullanılan yoldur — yanlış yazılan bir
- * etiketi silmek için fareye uzanmak, akışı kesen tek şeydir.
- *
- * Yinelenen ETİKET SESSİZCE YUTULUYOR, hata verilmiyor: aynı etiketi iki kez
- * yazmak bir hata değil, bir tekrardır, ve kullanıcı zaten istediğini almış
- * olur.
+ * Gerekçe: docs/gerekce/01-form-ve-girdi.md
  */
 export function TagsInput({
   value,
@@ -184,6 +197,7 @@ export function TagsInput({
   [k: `data-${string}`]: unknown;
 }) {
   const [draft, setDraft] = useState("");
+  const [silinecek, setSilinecek] = useState<number | null>(null);
   const full = max !== undefined && value.length >= max;
 
   function commit() {
@@ -199,14 +213,17 @@ export function TagsInput({
       className={cn("tamga-input h-auto min-h-10 w-full flex-wrap items-center gap-1.5 py-1.5", className)}
       style={{ display: "flex" }}
     >
-      {value.map((tag) => (
-        <span key={tag} className="tamga-chip gap-1">
+      {value.map((tag, i) => (
+        /* `tamga-chip` DEĞİL `tamga-token`: çip okunan bir durum işareti, bu ise
+           kaldırılabilen bir şey. İkisi aynı sınıftayken bir etiket, bir durumu
+           söylüyormuş gibi okunuyordu. */
+        <span key={tag} className="tamga-token" data-silinecek={i === silinecek || undefined}>
           {tag}
           <button
             type="button"
             aria-label={labels.remove(tag)}
             onClick={() => onChange(value.filter((x) => x !== tag))}
-            className="-mr-1 inline-flex items-center"
+            className="tamga-token-x"
           >
             <Icon icon={Close} size="xs" />
           </button>
@@ -216,14 +233,28 @@ export function TagsInput({
         <input
           value={draft}
           placeholder={value.length === 0 ? placeholder : undefined}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            setSilinecek(null);
+          }}
           onBlur={commit}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === ",") {
               e.preventDefault();
               commit();
             } else if (e.key === "Backspace" && draft === "" && value.length > 0) {
-              onChange(value.slice(0, -1));
+              /* İKİ ADIM: ilk Backspace son etiketi İŞARETLİYOR, ikincisi
+                 siliyor. Tek adımlı hâlinde bir tuş fazla basan kişi
+                 yazdığı etiketi silip fark etmiyordu; işaretli hâl o bir
+                 karelik duraklamayı veriyor. Başka bir tuş işareti kaldırıyor. */
+              if (silinecek === value.length - 1) {
+                onChange(value.slice(0, -1));
+                setSilinecek(null);
+              } else {
+                setSilinecek(value.length - 1);
+              }
+            } else {
+              setSilinecek(null);
             }
           }}
           className="min-w-24 flex-1 bg-transparent text-body text-ink outline-none"
@@ -234,16 +265,16 @@ export function TagsInput({
 }
 
 /**
- * Çoklu seçim — aranabilir.
+ * Çoklu seçim · aranabilir. `Combobox`tan ayrı olmasının sebebi görünüm değil
+ * DAVRANIŞ: çoklu seçimde liste seçince KAPANMIYOR. Seçilenler girdinin içinde
+ * çip olarak duruyor.
  *
- * `Combobox` tek seçim yapar; bu birden çok. Ayrı bileşen olmasının sebebi
- * görünüm değil DAVRANIŞ: tek seçimde liste seçince kapanır, çoklu seçimde
- * KAPANMAZ — üç şey seçecek biri listeyi üç kez açmak zorunda kalmamalı.
- *
- * Seçilenler girdinin İÇİNDE çip olarak duruyor, altında ayrı bir listede
- * değil: seçim ile seçilenler arasındaki mesafe arttıkça, kullanıcı neyi
- * seçtiğini görmek için gözünü iki yere birden koymak zorunda kalır.
+ * Gerekçe: docs/gerekce/01-form-ve-girdi.md
  */
+/* Kutuda yazıyla duran çip sayısı. Dördüncüden sonrası "+N": bir filtre
+   kutusunun iki satırı geçmemesi gerekiyor. */
+const GORUNEN_CIP = 4;
+
 export function MultiSelect({
   options,
   value,
@@ -278,19 +309,11 @@ export function MultiSelect({
     onChange(value.includes(v) ? value.filter((x) => x !== v) : [...value, v]);
   }
 
-  /**
-   * KLAVYE, ve onsuz bu kontrol yarım.
-   *
-   * Etiket eklemenin doğal yolu YAZIP ENTER'A BASMAK: kullanıcı "adidas" yazıp
-   * Enter, "nike" yazıp Enter diyor ve iki çip ekliyor. Önce yalnız fareyle
-   * çalışıyordu; yazdıktan sonra listeye uzanıp tıklamak gerekiyordu, ve
-   * klavyeyle gezen biri seçim yapamıyordu.
-   *
-   *   Enter       vurgulanan seçeneği ekler/çıkarır, ve kutuyu boşaltır
-   *   Ok tuşları  vurguyu gezdirir
-   *   Backspace   kutu BOŞKEN son çipi kaldırır (yazarken silmeye karışmaz)
-   *   Escape      listeyi kapatır
-   */
+  /* KLAVYE, ve onsuz bu kontrol yarım:
+       Enter       vurgulanan seçeneği ekler/çıkarır, ve kutuyu boşaltır
+       Ok tuşları  vurguyu gezdirir
+       Backspace   kutu BOŞKEN son çipi kaldırır (yazarken silmeye karışmaz)
+       Escape      listeyi kapatır */
   function tus(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -332,13 +355,10 @@ export function MultiSelect({
         if (!box.current?.contains(e.relatedTarget as Node)) setOpen(false);
       }}
     >
-      {/* BÜYÜTEÇ SABİT, ÇİPLERİN PEŞİNDE DEĞİL.
-          Önce esnek kutunun SON çocuğuydu: çipler sarınca satır atlıyor ve
-          ikinci, üçüncü satırın sağ altına düşüyordu. Bir simge bir yer
+      {/* BÜYÜTEÇ SABİT, ÇİPLERİN PEŞİNDE DEĞİL: `data-leading` ile sol başa sabitli
+          (`.tamga-input[data-leading]` 40px sol dolgu açıyor). Bir simge bir yer
           işaretidir; yeri her seçimde değişiyorsa işaret olmaktan çıkıyor.
-          Kitin kendi `data-leading` mekanizmasıyla sol başa sabitlendi
-          (`.tamga-input[data-leading]` 40px sol dolgu açıyor), ve ilk satıra
-          hizalı duruyor: kutu büyüdükçe simge yerinde kalıyor. */}
+          Gerekçe: docs/gerekce/01-form-ve-girdi.md */}
       <span
         className="tamga-input relative h-auto min-h-10 w-full flex-wrap items-center gap-1.5 py-1.5"
         data-leading="true"
@@ -350,19 +370,27 @@ export function MultiSelect({
           aria-hidden
           className="pointer-events-none absolute left-3 top-3 text-ink-faint"
         />
-        {chosen.map((o) => (
-          <span key={o.value} className="tamga-chip gap-1">
+        {/* ÇİPLER SAYILI: ilk dördü yazılı, gerisi "+N" olarak tek çipte.
+            Sınırsız çip kutuyu üç satıra çıkarıyor ve altındaki alanı aşağı
+            itiyordu; seçilenlerin TAMAMI zaten listede işaretli duruyor. */}
+        {chosen.slice(0, GORUNEN_CIP).map((o) => (
+          <span key={o.value} className="tamga-token">
             {o.label}
             <button
               type="button"
               aria-label={labels.remove(o.label)}
               onClick={() => toggle(o.value)}
-              className="-mr-1 inline-flex items-center"
+              className="tamga-token-x"
             >
               <Icon icon={Close} size="xs" />
             </button>
           </span>
         ))}
+        {chosen.length > GORUNEN_CIP ? (
+          <span className="tamga-token" aria-hidden>
+            +{chosen.length - GORUNEN_CIP}
+          </span>
+        ) : null}
         <input
           value={query}
           placeholder={chosen.length === 0 ? placeholder : undefined}
@@ -382,7 +410,7 @@ export function MultiSelect({
       </span>
 
       {open ? (
-        <div id={id} role="listbox" aria-multiselectable className="tamga-overlay absolute z-30 mt-2 max-h-64 w-full overflow-y-auto py-1">
+        <div id={id} role="listbox" aria-multiselectable className="tamga-overlay tamga-menu absolute z-30 mt-2 max-h-64 w-full overflow-y-auto">
           {shown.length === 0 ? (
             <p className="px-4 py-3 text-small text-ink-faint">{labels.empty}</p>
           ) : (
@@ -417,47 +445,111 @@ export function MultiSelect({
 }
 
 /**
- * Zamanlama girdisi — "her N dakikada bir".
+ * Zamanlama girdisi · "her N dakikada bir". NEDEN CRON DEĞİL: kürasyonlu
+ * seçenek, serbestlik değil. Aralıklar dakika olarak veriliyor, çevirisi
+ * çağıranın.
  *
- * NEDEN CRON DEĞİL. Bir cron ifadesi (yıldız-eğik-beş biçimi) bir geliştirici
- * için okunur, bir panel
- * kullanıcısı için değildir — ve yanlış yazılan bir cron ifadesi hata
- * vermez, sadece yanlış zamanda çalışır. Bu bileşen kürasyonlu bir liste
- * sunuyor: kürasyonlu seçenek, serbestlik değil.
- *
- * Aralıklar dakika olarak veriliyor, çevirisi çağıranın: "5 dakika" ile
- * "5 minutes" arasındaki farkı kit bilemez.
+ * Gerekçe: docs/gerekce/01-form-ve-girdi.md
  */
 export function ScheduleInput({
-  value,
-  onChange,
-  options,
-  label,
+  days,
+  onDaysChange,
+  from,
+  to,
+  onFromChange,
+  onToChange,
+  labels,
+  summary,
   className,
+  ...rest
 }: {
-  /** The interval, in minutes. TR: Dakika cinsinden aralık. */
-  value: number;
-  onChange: (minutes: number) => void;
+  /** Selected weekdays, 0 Sunday to 6 Saturday. TR: Seçili günler, 0 Pazar ile 6 Cumartesi arası. */
+  days: readonly number[];
+  onDaysChange: (next: number[]) => void;
+  /** "09:00". TR: "09:00". */
+  from: string;
+  to: string;
+  onFromChange: (next: string) => void;
+  onToChange: (next: string) => void;
   /**
-   * `[{ minutes: 5, label: "5 minutes" }, …]`: ordered and curated. TR: `[{ minutes: 5, label:
-   * "5 dakika" }, …]`: sıralı ve kürasyonlu.
+   * Every visible word. `dayNames` starts at Sunday and is written short ("Pzt"); `zone` is the
+   * line after the hours ("Istanbul (GMT+3)"), and it is optional. TR: Görünen her sözcük.
+   * `dayNames` Pazar'dan başlıyor ve kısa yazılıyor ("Pzt"); `zone` saatlerin ardındaki satır
+   * ("İstanbul (GMT+3)") ve isteğe bağlı.
    */
-  options: readonly ({ minutes: number; label: string } & Record<string, unknown>)[];
-  label: string;
+  labels: {
+    days: string;
+    dayNames: readonly string[];
+    hours: string;
+    between: string;
+    zone?: string;
+  };
+  /**
+   * The schedule in one human sentence, built by the caller: "Every weekday between 09:00 and
+   * 18:00". The kit cannot write it, because the sentence is grammar and the kit does not
+   * translate. TR: Zamanlamanın tek cümlelik insan hâli, çağıran kuruyor: "Her hafta içi
+   * 09:00-18:00 arası". Kit yazamaz, çünkü cümle bir dilbilgisi işi ve kit çeviri yapmaz.
+   */
+  summary: string;
   className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
 }) {
+  const secili = new Set(days);
+  const cevir = (g: number) => {
+    const next = new Set(secili);
+    if (next.has(g)) next.delete(g);
+    else next.add(g);
+    onDaysChange([...next].sort((a, b) => a - b));
+  };
+
   return (
-    <select
-      className={cn("tamga-input w-full", className)}
-      aria-label={label}
-      value={value}
-      onChange={(e) => onChange(Number(e.target.value))}
-    >
-      {options.map(({ minutes, label: etiket, ...rest }) => (
-        <option key={minutes} {...rest} value={minutes}>
-          {etiket}
-        </option>
-      ))}
-    </select>
+    <div {...dataProps(rest)} className={cn("flex flex-col gap-4", className)}>
+      {/* GÜNLER YEDİ DÜĞME, bir çoklu seçim listesi değil: yedi seçenek bir
+          listeyi açmaya değmez, ve hangi günlerin seçili olduğu tek bakışta
+          görünmek zorunda. Seçili gün BASILI duruyor (Yasa 2'nin kendisi). */}
+      <div role="group" aria-label={labels.days} className="flex flex-wrap gap-2">
+        {labels.dayNames.map((ad, g) => (
+          <button
+            key={ad}
+            type="button"
+            aria-pressed={secili.has(g)}
+            onClick={() => cevir(g)}
+            className="tamga-gun-btn"
+            data-on={secili.has(g) || undefined}
+          >
+            {ad}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2.5 text-body">
+        <span className="font-semibold text-ink">{labels.hours}</span>
+        <input
+          type="time"
+          value={from}
+          onChange={(e) => onFromChange(e.target.value)}
+          aria-label={labels.hours}
+          className="tamga-input tamga-sayi w-auto"
+        />
+        <span className="text-ink-faint">{labels.between}</span>
+        <input
+          type="time"
+          value={to}
+          onChange={(e) => onToChange(e.target.value)}
+          aria-label={labels.between}
+          className="tamga-input tamga-sayi w-auto"
+        />
+        {labels.zone ? <span className="text-ink-faint">{labels.zone}</span> : null}
+      </div>
+
+      {/* ÖZET CÜMLE, ve kontrollerin altında: yedi düğme ile iki saat kutusu
+          birlikte bir CÜMLE kuruyor, ama o cümleyi okuyucu kafasında kurmak
+          zorunda kalmamalı. Geçersiz bir kombinasyon da burada görünür olur. */}
+      <p className="tamga-ozet">
+        <Icon icon={Clock} size="xs" weight="bold" className="text-accent" />
+        {summary}
+      </p>
+    </div>
   );
 }

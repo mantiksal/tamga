@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
 
@@ -17,6 +17,9 @@ import { dataProps } from "../lib/data-props.js";
 export function Card({
   as: Tag = "div",
   overflow = "clip",
+  href,
+  onClick,
+  linkComponent: Link,
   children,
   className,
   ...rest
@@ -43,16 +46,56 @@ export function Card({
    * ver.
    */
   overflow?: "clip" | "visible";
+  /**
+   * Where the whole card leads. It becomes a link and takes the raised physics: it lifts under
+   * the pointer and presses flat. A product card, a report card. TR: Kartın tamamının götürdüğü
+   * yer. Kart bir bağlantıya dönüyor ve yükselen fiziği alıyor: işaretçinin altında kalkıyor,
+   * tıklanınca tabanına oturuyor. Bir ürün kartı, bir rapor kartı.
+   *
+   * A CARD THAT LEADS SOMEWHERE HAS TO SAY SO. A clickable `div` is invisible to the keyboard
+   * and silent to a screen reader; the anchor is the contract, the physics only the promise.
+   * TR: BİR YERE GÖTÜREN KART BUNU SÖYLEMEK ZORUNDA. Tıklanabilir bir `div` klavyeye görünmez,
+   * ekran okuyucuya sessizdir; sözleşme bağlantının kendisi, fizik yalnızca sözü.
+   */
+  href?: string;
+  /** What the card does when there is nowhere to go. Makes it a `button`. TR: Gidilecek bir yer yokken kartın yaptığı şey. Kartı `button` yapar. */
+  onClick?: () => void;
+  /** The router's link, so the card does not force a full page load. TR: Yönlendiricinin bağlantısı, kart tam sayfa yüklemeye zorlamasın diye. */
+  linkComponent?: ComponentType<{ href: string; className?: string; children?: ReactNode; [k: string]: unknown }>;
   children: ReactNode;
   className?: string;
   /** `data-*` hooks pass through; nothing else does. TR: `data-*` kancaları geçiyor, başkası değil. */
   [k: `data-${string}`]: unknown;
 }) {
+  const sinif = cn(
+    "tamga-card",
+    overflow === "visible" && "tamga-card-open",
+    (href || onClick) && "tamga-card-live",
+    className,
+  );
+
+  if (href) {
+    return Link ? (
+      <Link {...dataProps(rest)} href={href} className={sinif}>
+        {children}
+      </Link>
+    ) : (
+      <a {...dataProps(rest)} href={href} className={sinif}>
+        {children}
+      </a>
+    );
+  }
+
+  if (onClick) {
+    return (
+      <button {...dataProps(rest)} type="button" onClick={onClick} className={cn(sinif, "w-full text-left")}>
+        {children}
+      </button>
+    );
+  }
+
   return (
-    <Tag
-      {...dataProps(rest)}
-      className={cn("tamga-card", overflow === "visible" && "tamga-card-open", className)}
-    >
+    <Tag {...dataProps(rest)} className={sinif}>
       {children}
     </Tag>
   );
@@ -113,11 +156,20 @@ export function Table({ children, className, ...rest }: { children: ReactNode; c
  */
 export function Label({
   children,
+  look = "quiet",
   mono = false,
   className,
   ...rest
 }: {
   children: ReactNode;
+  /**
+   * `quiet` the micro-label beside a value ("p95 · 24s"). `section` the heading OVER a group of
+   * fields ("delivery details"): letter-spaced and heavier, because it is naming a region rather
+   * than annotating a number. TR: `quiet` bir değerin yanındaki mikro etiket ("p95 · 24s").
+   * `section` bir alan grubunun ÜSTÜNDEKİ başlık ("teslimat bilgileri"): harf aralıklı ve daha
+   * ağır, çünkü bir sayıyı işaretlemiyor bir bölgeyi adlandırıyor.
+   */
+  look?: "quiet" | "section";
   /**
    * Identifier-shaped text (codes, SKUs) keeps the mono face. TR: Tanımlayıcı biçimli metinler
    * (kodlar, SKU) mono yüzü korur.
@@ -127,5 +179,16 @@ export function Label({
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
-  return <span {...dataProps(rest)} className={cn("tamga-label", mono && "font-mono", className)}>{children}</span>;
+  return (
+    <span
+      {...dataProps(rest)}
+      className={cn(
+        look === "section" ? "tamga-label-section" : "tamga-label",
+        mono && "font-mono",
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
 }

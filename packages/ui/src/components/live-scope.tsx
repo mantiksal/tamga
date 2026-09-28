@@ -43,14 +43,11 @@ export function LiveScope({ children }: { children: React.ReactNode }) {
   const winner = useMemo(() => {
     let best: string | null = null;
     let bestSeverity = -Infinity;
-    /* Object key order is insertion order, and claims are registered in effect
-       order — which is tree order. So a strict `>` keeps the FIRST of equals,
-       and "first" means highest on the page. That is question 2's answer
-       (SETTLED 2026-08-19, Ercüment: first of equals wins), and it lives here
-       rather than in a doc nobody reads. The reasoning: the presence of the
-       signal matters more than which row carries it, and every alternative
-       (timestamp, domain priority) buys a nicer tie-break by making call sites
-       thread data they do not otherwise need. */
+    /* Insertion order is tree order, so a strict `>` keeps the FIRST of equals, and
+       "first" means highest on the page. (SETTLED 2026-08-19, Ercüment.) Every
+       alternative buys a nicer tie-break by making call sites thread data they do
+       not otherwise need.
+       Gerekçe: docs/gerekce/06-isaret-ve-ton.md */
     for (const [id, severity] of Object.entries(claims)) {
       if (severity > bestSeverity) {
         best = id;

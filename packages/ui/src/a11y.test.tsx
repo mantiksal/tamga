@@ -4,29 +4,16 @@ import { AppShell, ListTemplate, DetailTemplate, WizardTemplate, OverviewTemplat
 import {
   Button, IconButton, MiniButton, Input, Textarea, Checkbox, Switch, RadioGroup, Segmented,
   Select, Pagination, StatusChip, Progress, Spinner, Steps, Tabs, Field, LogoTile, AccountButton,
+  PageBand, ThemeToggle,
 } from "./index.js";
 import { Search } from "./components/icons.js";
 
 /**
- * ERİŞİLEBİLİRLİK DEĞİŞMEZLERİ.
+ * ERİŞİLEBİLİRLİK DEĞİŞMEZLERİ · altı tane, ve hepsi kitin kendi verdiği söz.
+ * Bu bir axe taraması DEĞİL: axe bir kütüphane, ve bu depoya yeni kütüphane
+ * girmiyor. Kapsamadıkları da yazılı.
  *
- * NE OLDUĞU, VE NE OLMADIĞI. Bu bir axe taraması DEĞİL. Üç değişmez ölçüyor ve
- * üçü de kitin KENDİ verdiği sözler:
- *
- *   1. Etkileşimli her elemanın erişilebilir bir adı var.
- *   2. `aria-hidden` bir ağaç, odaklanabilir bir şey saklamıyor.
- *   3. Rol çiftleri tam: `radio` bir `radiogroup` içinde, `tab` bir `tablist`
- *      içinde, `option` bir `listbox` içinde.
- *
- * NEDEN AXE DEĞİL: axe bir kütüphane, ve bu depoya yeni kütüphane girmiyor. O
- * bir karar ve kararın sahibi burası değil. Bu dosya karar verilene kadar
- * BOŞLUĞU KAPATMIYOR, sadece daraltıyor — ve neyi kapsamadığını söylüyor:
- * kontrast (`check-token-contrast` ölçüyor), odak sırası, canlı bölge
- * davranışı, ve burada ÇİZİLMEYEN bileşenler.
- *
- * ÖNCEKİ ÖLÇÜM NEDEN KAYBOLDU: 48 story üzerinde axe koşuyordu ve o story'ler
- * tüketen üründeydi; Storybook kaldırılınca ölçüm de kalktı. Kitin sözü kitin
- * deposunda ölçülmeliydi, orada değil.
+ * Gerekçe: docs/09-testler-ve-degismezler.md
  */
 
 /** Görünür metin, `aria-label`, `aria-labelledby`, sarmalayan `<label>` ya da `alt`. */
@@ -126,4 +113,113 @@ describe("erişilebilirlik değişmezleri · etkileşimli bileşenler", () => {
   for (const [ad, el] of catalog) {
     it(ad, () => a11yKontrol(render(el).container, ad));
   }
+});
+
+/**
+ * DÖRDÜNCÜ DEĞİŞMEZ: alanın altındaki not kontrole bağlı. `description` ile
+ * `error` bir süre gevşek paragraflardı; bir hatanın yalnız renkle söylenmesi
+ * formlardaki en eski kusur. Üç test bağın kopmasında düşüyor.
+ *
+ * Gerekçe: docs/09-testler-ve-degismezler.md
+ */
+describe("Field · alt notun kontrole bağı", () => {
+  it("açıklama kontrole bağlanıyor", () => {
+    const { container } = render(
+      <Field label="Ad" description="Kimliğinizdeki hâliyle yazın." htmlFor="a1">
+        <Input id="a1" />
+      </Field>,
+    );
+    const girdi = container.querySelector("input")!;
+    const id = girdi.getAttribute("aria-describedby");
+    expect(id).toBeTruthy();
+    expect(container.querySelector(`#${id}`)?.textContent).toBe("Kimliğinizdeki hâliyle yazın.");
+  });
+
+  it("hata kontrole bağlanıyor ve alanı geçersiz işaretliyor", () => {
+    const { container } = render(
+      <Field label="Ad" error="Bu alan boş kalamaz." htmlFor="a2">
+        <Input id="a2" />
+      </Field>,
+    );
+    const girdi = container.querySelector("input")!;
+    const id = girdi.getAttribute("aria-describedby");
+    expect(container.querySelector(`#${id}`)?.textContent).toBe("Bu alan boş kalamaz.");
+    expect(girdi.getAttribute("aria-invalid")).toBe("true");
+  });
+
+  it("çağıranın kendi `aria-describedby`si korunuyor", () => {
+    const { container } = render(
+      <>
+        <span id="disarisi">Dışarıdan bir not</span>
+        <Field label="Ad" description="İçeriden bir not" htmlFor="a3">
+          <Input id="a3" aria-describedby="disarisi" />
+        </Field>
+      </>,
+    );
+    const bag = container.querySelector("input")!.getAttribute("aria-describedby")!;
+    expect(bag.split(" ")).toHaveLength(2);
+    expect(bag.split(" ")[0]).toBe("disarisi");
+  });
+});
+
+/**
+ * BEŞİNCİ DEĞİŞMEZ: sayfanın bir birinci düzey başlığı var. Şerit sayfanın adı;
+ * `PageBand` bir `h2` çizdiği sürece kite geçen ürün `<h1>`ini kaybediyordu.
+ *
+ * Gerekçe: docs/09-testler-ve-degismezler.md
+ */
+describe("PageBand · sayfanın birinci düzey başlığı", () => {
+  it("şerit `h1` çiziyor", () => {
+    const { container } = render(<PageBand title="Siparişler" subtitle="Hepsi" />);
+    const h1 = container.querySelector("h1");
+    expect(h1?.textContent).toBe("Siparişler");
+  });
+
+  it("şeridi kullanan şablon da `h1` veriyor", () => {
+    const { container } = render(
+      <ListTemplate
+        title="Kayıtlar"
+        labels={{ busy: "Yükleniyor", error: { title: "Hata", body: "Olmadı", retry: "Yeniden" } }}
+        empty={<p>Boş</p>}
+      >
+        <p>Satırlar</p>
+      </ListTemplate>,
+    );
+    expect(container.querySelectorAll("h1")).toHaveLength(1);
+  });
+});
+
+/**
+ * ALTINCI DEĞİŞMEZ: `segmented` tema anahtarı `.dark` sınıfına dokunmuyor.
+ * Gözle bulundu, ölçümle değil: token'lar doğruydu, yanlış olan hangi bloğun
+ * yürürlükte olduğuydu.
+ *
+ * Gerekçe: docs/09-testler-ve-degismezler.md
+ */
+describe("ThemeToggle · segmented temayı sahiplenmiyor", () => {
+  it("`.dark` sınıfına dokunmuyor", () => {
+    document.documentElement.classList.remove("dark");
+    render(
+      <ThemeToggle
+        variant="segmented"
+        labels={{ light: "Açık", dark: "Koyu", system: "Sistem" }}
+        preference="light"
+        onPreferenceChange={() => {}}
+      />,
+    );
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+  });
+
+  it("tercih `dark` iken de sınıfa dokunmuyor · yazar üründür", () => {
+    document.documentElement.classList.remove("dark");
+    render(
+      <ThemeToggle
+        variant="segmented"
+        labels={{ light: "Açık", dark: "Koyu", system: "Sistem" }}
+        preference="dark"
+        onPreferenceChange={() => {}}
+      />,
+    );
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+  });
 });

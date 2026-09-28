@@ -2,10 +2,13 @@
 
 import { useId, useRef, useState, type ReactNode } from "react";
 import { cn } from "../lib/cn.js";
+import { makePalette } from "../lib/palette.js";
 import { dataProps } from "../lib/data-props.js";
 import { IMAGE_ACCEPT, prepareImage } from "../lib/image.js";
 import { Alert } from "./primitives.js";
 import { Button } from "./button.js";
+import { Icon } from "./icon.js";
+import { Check, Eyedropper } from "./icons.js";
 
 /* ------------------------------------------------------------------ *
  * Bir görünüm ayarı ekranının üç parçası: renk, tema, görsel.
@@ -57,12 +60,14 @@ export function ColorSwatches({
           {...rest}
           type="button"
           className="tamga-swatch"
+          style={{ background: hex, color: mürekkep(hex) }}
           data-selected={secili(hex)}
+          aria-pressed={secili(hex)}
           aria-label={etiket}
           title={etiket}
           onClick={() => onChange(hex)}
         >
-          <span aria-hidden style={{ background: hex }} />
+          {secili(hex) ? <Icon icon={Check} size="base" weight="bold" /> : null}
         </button>
       ))}
 
@@ -70,8 +75,29 @@ export function ColorSwatches({
         /* SERBEST RENK DE BİR KUTU, ayrı bir alan değil: altı hazır rengin
            yanında duran bir metin girdisi, yedinci seçeneği ötekilerden başka
            bir şey gibi gösteriyordu. */
-        <label className="tamga-swatch" data-selected={!hazirMi} title={customLabel}>
+        <label
+          className="tamga-swatch tamga-swatch-custom"
+          data-selected={!hazirMi}
+          title={customLabel}
+          style={
+            hazirMi
+              ? /* Hiçbir hazır renk seçili değilken kutu o rengi giyiyor;
+                   seçiliyken damalı zemin "burada henüz bir renk yok" diyor. */
+                { background: DAMA }
+              : { background: value, color: mürekkep(value) }
+          }
+        >
           <span className="sr-only">{customLabel}</span>
+          {/* BOŞ HÂLDE DAMLALIK DURUYOR, kutu bomboş değil: damalı zemin
+              "burada renk yok" diyor ama ne YAPILACAĞINI söylemiyordu, ve
+              yedinci kutu ötekilerden farklı bir şey yapıyor · glif o farkı
+              söylüyor. Renk seçilince yerini çentik alıyor. */}
+          <Icon
+            icon={hazirMi ? Eyedropper : Check}
+            size="base"
+            weight="bold"
+            style={hazirMi ? { color: "var(--color-ink)" } : undefined}
+          />
           <input
             type="color"
             value={hazirMi ? options[0]!.hex : value}
@@ -85,23 +111,106 @@ export function ColorSwatches({
   );
 }
 
+/* Damalı zemin: "burada renk yok". Kutunun kendisi bir renk olduğu için boş
+   hâlin de bir zemini olmak zorunda, ve düz bir gri yedinci bir renk gibi
+   okunuyordu. */
+const DAMA =
+  "repeating-linear-gradient(135deg, var(--color-hover) 0 6px, var(--color-sunk) 6px 12px)";
+
+/**
+ * Ink that stays readable on a given fill.
+ * TR: Verilen dolgunun üstünde okunur kalan mürekkep.
+ *
+ * TOKEN DEĞİL, HESAP · ve önce token'dı: `--color-accent-ink`. Kusuru
+ * tarayıcıda göründü. Kutular SEÇİLEN ham rengi gösteriyor, token ise o an
+ * YÜRÜRLÜKTEKİ paletin mürekkebi; koyu temada antrasit marka seçilince palet
+ * vurguyu açıyor (#838c9d) ve mürekkebini koyulaştırıyor (#222326), oysa
+ * kutunun zemini hâlâ ham #3f4756. Sonuç koyunun üstünde koyu çentik: 1.4
+ * kontrast, yani görünmez.
+ *
+ * Cevap paletin kendisinde: o rengin PALETİ hangi mürekkebi seçiyorsa kutu da
+ * onu giyiyor. Eşik uydurmuyoruz, üreteci ikinci kez yazmıyoruz.
+ */
+const MUREKKEP = new Map<string, string>();
+function mürekkep(hex: string): string {
+  const anahtar = hex.toLowerCase();
+  let m = MUREKKEP.get(anahtar);
+  if (m === undefined) {
+    m = makePalette(anahtar).light.accentInk;
+    MUREKKEP.set(anahtar, m);
+  }
+  return m;
+}
+
 export type ThemeChoice = "light" | "dark" | "system";
 
-function Yarim({ theme }: { theme: "light" | "dark" }) {
+/* Panelin yarısı: ray ve gövde. Bir tema kartı bunu bir kez çiziyor,
+   "Sistem" kartı iki kez · ikincisi çapraz kesilerek üstüne biniyor.
+
+   MİNYATÜR SABİT RENKLERLE, ve kitin tek istisnası bu. Seçenekler o an
+   yürürlükteki temayı değil SEÇİLİRSE ne olacağını gösteriyor; token
+   kullanılsaydı üçü de aynı görünürdü. Tek token: marka vurgusu, çünkü
+   önizlemenin yarısı o. */
+function Yarim({ theme, clip = false }: { theme: "light" | "dark"; clip?: boolean }) {
   return (
-    <span className="tamga-theme-half" data-theme={theme} aria-hidden>
+    <span className="tamga-theme-half" data-theme={theme} data-clip={clip || undefined} aria-hidden>
       <span className="tamga-theme-rail">
-        <span className="tamga-theme-dot" data-accent="true" />
-        <span className="tamga-theme-dot" />
-        <span className="tamga-theme-dot" />
+        <span className="tamga-theme-dot" data-accent="true" style={{ width: "80%" }} />
+        <span className="tamga-theme-dot" style={{ width: "100%" }} />
+        <span className="tamga-theme-dot" style={{ width: "70%" }} />
+        <span className="tamga-theme-dot" style={{ width: "60%" }} />
       </span>
       <span className="tamga-theme-body">
+        <span className="tamga-theme-line" data-accent="true" style={{ width: "50%" }} />
+        <span className="tamga-theme-line" style={{ width: "100%" }} />
         <span className="tamga-theme-line" style={{ width: "70%" }} />
-        <span className="tamga-theme-line" style={{ width: "45%" }} />
-        <span className="tamga-theme-line" data-accent="true" style={{ width: "30%" }} />
-        <span className="tamga-theme-line" style={{ width: "60%" }} />
       </span>
     </span>
+  );
+}
+
+/**
+ * A miniature of the panel with a radio and a name under it.
+ * TR: Altında bir radyo ve bir ad duran panel minyatürü.
+ *
+ * Tema ve kenar çubuğu aynı soruyu soruyor ("hangisi olsun") ve ayrı
+ * çizilmişlerdi; ortak olan kap, farklı olan yalnız minyatürün içi.
+ */
+function OnizlemeKarti({
+  selected,
+  onSelect,
+  label,
+  sub,
+  children,
+}: {
+  selected: boolean;
+  onSelect: () => void;
+  label: string;
+  sub?: string;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      tabIndex={selected ? 0 : -1}
+      data-selected={selected}
+      className="tamga-preview-card"
+      onClick={onSelect}
+    >
+      <span className="tamga-preview-box">{children}</span>
+      <span className="tamga-preview-foot">
+        {/* Kitin kendi radyosu, ikinci bir daire değil: kart tıklanan şey, bu
+            yalnız hangisinin seçili olduğunu söyleyen işaret · o yüzden
+            `aria-hidden`, erişilebilir hâli kartın `role="radio"`su. */}
+        <span className="tamga-radio" data-checked={selected} aria-hidden />
+        <span className="tamga-preview-text">
+          <strong>{label}</strong>
+          {sub ? <span>{sub}</span> : null}
+        </span>
+      </span>
+    </button>
   );
 }
 
@@ -125,37 +234,124 @@ export function ThemeCards({
 }: {
   value: ThemeChoice;
   onChange: (next: ThemeChoice) => void;
-  /** The three names and the group's accessible name. TR: Üç ad ve kümenin erişilebilir adı. */
-  labels: { light: string; dark: string; system: string; group: string };
+  /** The three names, a one-line note under each, and the group's accessible name. TR: Üç ad, her birinin altındaki tek satır, ve kümenin erişilebilir adı. */
+  labels: {
+    light: string;
+    dark: string;
+    system: string;
+    group: string;
+    lightNote?: string;
+    darkNote?: string;
+    systemNote?: string;
+  };
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
-  const secenekler: { deger: ThemeChoice; ad: string }[] = [
-    { deger: "light", ad: labels.light },
-    { deger: "dark", ad: labels.dark },
-    { deger: "system", ad: labels.system },
+  const secenekler: { deger: ThemeChoice; ad: string; alt?: string }[] = [
+    { deger: "light", ad: labels.light, alt: labels.lightNote },
+    { deger: "dark", ad: labels.dark, alt: labels.darkNote },
+    { deger: "system", ad: labels.system, alt: labels.systemNote },
   ];
 
   return (
-    <div {...dataProps(rest)} role="radiogroup" aria-label={labels.group} className={cn("flex flex-wrap gap-3", className)}>
+    <div
+      {...dataProps(rest)}
+      role="radiogroup"
+      aria-label={labels.group}
+      className={cn("tamga-preview-grid", className)}
+    >
       {secenekler.map((s) => (
-        <button
+        <OnizlemeKarti
           key={s.deger}
-          type="button"
-          role="radio"
-          aria-checked={value === s.deger}
-          tabIndex={value === s.deger ? 0 : -1}
-          data-selected={value === s.deger}
-          className="tamga-theme-card"
-          onClick={() => onChange(s.deger)}
+          selected={value === s.deger}
+          onSelect={() => onChange(s.deger)}
+          label={s.ad}
+          sub={s.alt}
         >
           <span className="tamga-theme-box">
-            {s.deger === "dark" ? <Yarim theme="dark" /> : <Yarim theme="light" />}
-            {s.deger === "system" ? <Yarim theme="dark" /> : null}
+            <Yarim theme={s.deger === "dark" ? "dark" : "light"} />
+            {s.deger === "system" ? <Yarim theme="dark" clip /> : null}
           </span>
-          <span className="tamga-theme-name">{s.ad}</span>
-        </button>
+        </OnizlemeKarti>
+      ))}
+    </div>
+  );
+}
+
+export type RailChoice = "narrow" | "wide" | "free";
+
+/**
+ * Sidebar width picked from three little pictures of the panel.
+ * TR: Panelin üç küçük resminden seçilen kenar çubuğu genişliği.
+ *
+ * This was a `Segmented` of three words. On the same screen the theme was
+ * asked with pictures and this with words, and how much room a menu takes is
+ * the kind of thing you see rather than read.
+ * TR: Bu üç kelimelik bir `Segmented` idi. Aynı ekranda tema resimle, bu
+ * kelimeyle soruluyordu; oysa bir menünün ne kadar yer kapladığı okunacak
+ * değil görülecek bir şey.
+ */
+export function RailCards({
+  value,
+  onChange,
+  labels,
+  className,
+  ...rest
+}: {
+  value: RailChoice;
+  onChange: (next: RailChoice) => void;
+  /** The three names, a one-line note under each, and the group's accessible name. TR: Üç ad, her birinin altındaki tek satır, ve kümenin erişilebilir adı. */
+  labels: {
+    narrow: string;
+    wide: string;
+    free: string;
+    group: string;
+    narrowNote?: string;
+    wideNote?: string;
+    freeNote?: string;
+  };
+  className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
+}) {
+  const secenekler: { deger: RailChoice; ad: string; alt?: string }[] = [
+    { deger: "wide", ad: labels.wide, alt: labels.wideNote },
+    { deger: "narrow", ad: labels.narrow, alt: labels.narrowNote },
+    { deger: "free", ad: labels.free, alt: labels.freeNote },
+  ];
+
+  return (
+    <div
+      {...dataProps(rest)}
+      role="radiogroup"
+      aria-label={labels.group}
+      className={cn("tamga-preview-grid", className)}
+    >
+      {secenekler.map((s) => (
+        <OnizlemeKarti
+          key={s.deger}
+          selected={value === s.deger}
+          onSelect={() => onChange(s.deger)}
+          label={s.ad}
+          sub={s.alt}
+        >
+          <span className="tamga-rail-mini" data-mode={s.deger} aria-hidden>
+            <span className="tamga-rail-mini-rail">
+              <span data-accent="true" />
+              <span />
+              <span />
+              <span />
+              {/* Daraltma düğmesi yalnız "serbest"te çiziliyor: öteki ikisinde
+                  menü sabit, yani basılacak bir şey de yok. */}
+              {s.deger === "free" ? <span className="tamga-rail-mini-toggle" /> : null}
+            </span>
+            <span className="tamga-rail-mini-body">
+              <span />
+              <span />
+            </span>
+          </span>
+        </OnizlemeKarti>
       ))}
     </div>
   );

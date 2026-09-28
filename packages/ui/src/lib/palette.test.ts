@@ -35,12 +35,10 @@ describe("makePalette", () => {
     });
   }
 
-  /* BUGÜNKÜ PALETİ YENİDEN ÜRETİYOR. Elle seçilmiş aksan #2069c9 ve kaynaktaki
-     yorum "beyaz mürekkep 5.22:1" diyor. Üretici aynı markadan aynı ölçüyü
-     buluyorsa, elle yapılan iş ile aritmetik aynı şeyi söylüyor demektir. */
-  it("elle seçilmiş mavi paletin ölçüsünü yeniden üretiyor", () => {
-    const { light } = makePalette("#2069c9");
-    expect(contrast(light.accent, light.accentInk)).toBeCloseTo(5.22, 1);
+  /* Sayıyla duruyor: sessizce 4.5'in altına düşmesi mümkün. */
+  it("varsayılan markanın mürekkep kontrastını yeniden üretiyor", () => {
+    const { light } = makePalette("#1e4fd8");
+    expect(contrast(light.accent, light.accentInk)).toBeCloseTo(6.58, 1);
   });
 
   /* MARKA TANINIR KALIYOR. İlk hâli sarıyı beyaz mürekkep geçene kadar
@@ -69,18 +67,86 @@ describe("makePalette", () => {
     expect(() => makePalette(" #7c3aed ")).not.toThrow();
   });
 
-  /* NÖTRLER MARKANIN TONUNU TAŞIYOR: mor bir markanın grisi mor grisi.
-   *
-   * Ton AİLESİ denetleniyor, açı değil. Doyum bilerek çok düşük (0.006) ve o
-   * kadar düşük bir renkte 8 bitlik hex nicelemesi tonu birkaç derece
-   * kaydırıyor — mor zemin 293°'den 286°'ye düşüyor. Sıkı bir açı testi bu
-   * yüzden yanlış yerde kırılırdı: ölçülmesi gereken şey "gri kaldı mı" ve
-   * "markanın ailesinde mi". */
-  it("zemin markanın tonunu alıyor, grisi kalarak", () => {
-    const mor = makePalette("#7c3aed").light;
+  /* ÜÇ KADEME: TAM · KISITLI · SABİT. Aşağıdaki dördü o kademeleri tutuyor; biri
+     düşerse kademe kaymış demektir, ve kayma gözle zor fark ediliyor.
+     Gerekçe: docs/09-testler-ve-degismezler.md */
+
+  it("TAM kademe: mürekkep ve buton kenarı markanın tonunu alıyor", () => {
+    const kirmizi = makePalette("#e02938").light;
     const yesil = makePalette("#0a7a5f").light;
-    expect(mor.page).not.toBe(yesil.page);
-    expect(Math.abs(hexToOklch(mor.page).h - hexToOklch("#7c3aed").h)).toBeLessThan(15);
-    expect(hexToOklch(mor.page).c).toBeLessThan(0.02);
+    for (const rol of ["ink", "edgeStrong"] as const) {
+      expect(kirmizi[rol], rol).not.toBe(yesil[rol]);
+      /* Ton markaya yakın · gri bir mürekkep bu kademenin başarısızlığı. */
+      expect(hexToOklch(kirmizi[rol]).c, rol).toBeGreaterThan(0.03);
+    }
+  });
+
+  it("KISITLI kademe: ara mürekkepler markayı hissettiriyor ama gri kalıyor", () => {
+    const kirmizi = makePalette("#e02938").light;
+    const yesil = makePalette("#0a7a5f").light;
+    for (const rol of ["inkFaint", "edge", "edgeHover"] as const) {
+      expect(kirmizi[rol], rol).not.toBe(yesil[rol]);
+      /* Tavan 0.022 · bir gri, tonlanmış bile olsa gri kalmalı. */
+      expect(hexToOklch(kirmizi[rol]).c, rol).toBeLessThanOrEqual(0.023);
+    }
+  });
+
+  it("SABİT kademe: açık temanın kâğıtları her markada aynı", () => {
+    const kirmizi = makePalette("#e02938").light;
+    const yesil = makePalette("#0a7a5f").light;
+    for (const rol of ["page", "shell", "rail", "band", "sunk", "hover", "line", "div"] as const) {
+      expect(kirmizi[rol], rol).toBe(yesil[rol]);
+      /* Sıcak krem: ton 78-90 bandında. */
+      expect(hexToOklch(kirmizi[rol]).h, rol).toBeGreaterThan(60);
+      expect(hexToOklch(kirmizi[rol]).h, rol).toBeLessThan(110);
+    }
+  });
+
+  /* TASARIMIN ÜRETİCİSİYLE BİREBİR. Sayılar `docs/ozel/tasarim-dili/palette.js`
+     koşturularak alındı, elle yazılmadı · formül oradan port edildiği için bu
+     test iki uygulamanın aynı kaldığını söylüyor. Referans mavinin kendisi
+     dışarıda: orada tasarım hex'i aynen döndürüyor, buradaki formülü koşturuyor
+     ve OKLCH yuvarlaması 1-2 birim sapıyor (palette.ts'te yazılı). */
+  it("tasarımın üreticisiyle aynı çıktıyı veriyor", () => {
+    const k = makePalette("#e02938").light;
+    expect(k.ink).toBe("#381110");
+    expect(k.inkFaint).toBe("#645352");
+    expect(k.edge).toBe("#cdc8c0");
+    expect(k.edgeHover).toBe("#a59291");
+    expect(k.edgeStrong).toBe("#381110");
+
+    const kahve = makePalette("#8B5E2B").light;
+    expect(kahve.ink).toBe("#281d12");
+    expect(kahve.inkFaint).toBe("#60564d");
+    expect(kahve.edge).toBe("#cac8c5");
+
+    /* SEÇİLİ ZEMİN · sıcak markada muhafız devreye giriyor ve doygunluğu
+       kısıyor. Elle bir formülle üretilirken şeftali (#f5e3d2) çıkıyordu,
+       tasarımın üreticisi nötr bej (#ebe7e1) veriyor · fark gözle bakınca
+       "seçili kart neden pembe" diye okunuyordu. */
+    expect(kahve.accentBg).toBe("#ebe7e1");
+    expect(makePalette("#e02938").light.accentBg).toBe("#f0e6d8");
+  });
+
+  /* RENK KUTUSUNUN ÇENTİĞİ: kutular HAM rengi gösteriyor, çentik de o rengin
+     kendi mürekkebini · token'la çizilince koyu temada 1.4 kontrasta düşüyordu.
+     Eşik metin değil işaret eşiği (3.0).
+     Gerekçe: docs/09-testler-ve-degismezler.md */
+  it("bir rengin mürekkebi o rengin HAM hâlinin üstünde okunuyor", () => {
+    const kutular = [
+      "#e02938", // kırmızı
+      "#ff7024", // turuncu
+      "#0a7a5f", // yeşil
+      "#2069c9", // mavi
+      "#7c3aed", // mor
+      "#3f4756", // antrasit · kusurun çıktığı renk
+      "#f5e050", // açık sarı · mürekkebin koyuya döndüğü uç
+      "#ffffff", // beyaz · öteki uç
+      "#000000",
+    ];
+    for (const hex of kutular) {
+      const murekkep = makePalette(hex).light.accentInk;
+      expect(contrast(murekkep, hex), `${hex} üstünde ${murekkep}`).toBeGreaterThanOrEqual(3);
+    }
   });
 });

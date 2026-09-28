@@ -8,15 +8,11 @@ import { Alert, Breadcrumb } from "./primitives.js";
 import { ErrorState } from "./error-state.js";
 
 /**
- * `data-*` HER SUNAN BİLEŞENDEN GEÇER.
+ * `data-*` HER SUNAN BİLEŞENDEN GEÇER. Burada altı temsilci var; kuralın
+ * tamamını `check-data-props` tarıyor. Test kapının ölçemediğini ölçüyor:
+ * niteliğin gerçekten DOM'a indiğini.
  *
- * Bu testin sebebi bir gün değil, ÜST ÜSTE BEŞ GÜNdü: bir test ya da stil kancası gerektiği her
- * seferinde bileşen onu sessizce düşürdü, tüketici bileşeni bırakıp sınıfını elle yazdı, ve
- * sınıfla gelmesi gereken korumaları (kırpma, kaydırma, klavye) kaybetti. Hiçbirinde hata yoktu:
- * geçen taraf geçtiğini sanıyor, alan taraf hiç çizmiyor.
- *
- * Burada altı temsilci var; kuralın tamamını `check-data-props` kapısı tarıyor. Test kapının
- * ölçemediğini ölçüyor: niteliğin gerçekten DOM'a indiğini.
+ * Gerekçe: docs/09-testler-ve-degismezler.md
  */
 
 describe("data-* geçişi", () => {

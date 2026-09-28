@@ -15,7 +15,7 @@
  * her kurulumda indiriliyorlardı. Kaynakta duruyorlar; indirilen dosya yalnız
  * kuralları taşıyor.
  */
-import { readdir, readFile, writeFile, mkdir, rm, stat } from "node:fs/promises";
+import { readdir, readFile, writeFile, mkdir, rm, stat, copyFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -65,10 +65,19 @@ async function* ciktilar(d) {
   }
 }
 
+/** Derlenmeyen, olduğu gibi taşınan dosyalar: yüzler ve lisansları. */
+const VARLIK = /\.(woff2?|txt)$/;
+
 const beklenen = new Set();
 for await (const yol of kaynaklar(src)) {
   const bagil = yol.slice(src.length + 1);
   if (bagil.endsWith(".css")) {
+    beklenen.add(join(dist, bagil));
+  } else if (VARLIK.test(bagil)) {
+    /* VARLIKLAR OLDUĞU GİBİ TAŞINIYOR. Yüz dosyaları ve lisansları pakette
+       geliyor; burada sayılmasalardı aşağıdaki bayat temizliği onları
+       `dist`ten SİLERDİ, ve `fonts.css`in `url()`leri 404 verirdi: kurulum
+       doğru, CSS doğru, yalnız dosya yok. */
     beklenen.add(join(dist, bagil));
   } else if (/\.tsx?$/.test(bagil) && !/\.test\.tsx?$/.test(bagil)) {
     const govde = bagil.replace(/\.tsx?$/, "");
@@ -103,6 +112,18 @@ function yorumsuz(css) {
     .replace(/[ \t]+$/gm, "")
     .replace(/\n{3,}/g, "\n\n")
     .replace(/\u0000(\d+)\u0000/g, (_, i) => dizgeler[Number(i)]);
+}
+
+/* Varlıkları kopyala (CSS'ten ÖNCE: `fonts.css` yazıldığında işaret ettiği
+   dosyalar yerinde olsun). */
+let varlik = 0;
+for await (const yol of kaynaklar(src)) {
+  const bagil = yol.slice(src.length + 1);
+  if (!VARLIK.test(bagil)) continue;
+  const hedef = join(dist, bagil);
+  await mkdir(dirname(hedef), { recursive: true });
+  await copyFile(yol, hedef);
+  varlik++;
 }
 
 const files = (await readdir(src)).filter((f) => f.endsWith(".css"));

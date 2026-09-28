@@ -1,5 +1,7 @@
+import type { ReactNode } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../lib/cn.js";
+import { dataProps } from "../lib/data-props.js";
 
 /**
  * Text entry. Flat until focus, then it joins the raised family — an accent
@@ -68,5 +70,48 @@ export function Textarea({ className, invalid, full, ...props }: TextareaProps) 
       className={cn(textareaVariants({ invalid, full }), className)}
       {...props}
     />
+  );
+}
+
+/**
+ * ÖNEKLİ VE SONEKLİ GİRDİ · para birimi, alan adı, birim.
+ *
+ * Neden girdinin kendi prop'u değil: önek bir METİN değil bir PARÇA · bazen
+ * "₺", bazen "tamga.shop/", bazen bir ikon. Girdiye string olarak verilseydi
+ * ikincisi mümkün olmazdı, ve girdinin kendi kenarı ile önekin ayracı arasında
+ * kim hangi çizgiyi çizecek belirsiz kalırdı: kutu burada, girdi onun içinde.
+ *
+ * Gerekçe: docs/gerekce/01-form-ve-girdi.md
+ */
+export function InputGroup({
+  prefix,
+  suffix,
+  children,
+  className,
+  ...rest
+}: {
+  /** What sits before the field: "₺", "tamga.shop/". TR: Alanın önünde duran şey. */
+  prefix?: ReactNode;
+  /** What sits after it: "KDV dahil", "kg". TR: Ardında duran şey. */
+  suffix?: ReactNode;
+  children: ReactNode;
+  className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
+}) {
+  return (
+    <div {...dataProps(rest)} className={cn("tamga-input-group", className)}>
+      {prefix !== undefined ? (
+        <span className="tamga-unit" data-side="start">
+          {prefix}
+        </span>
+      ) : null}
+      {children}
+      {suffix !== undefined ? (
+        <span className="tamga-unit" data-side="end">
+          {suffix}
+        </span>
+      ) : null}
+    </div>
   );
 }

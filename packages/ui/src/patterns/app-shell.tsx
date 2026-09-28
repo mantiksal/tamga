@@ -79,18 +79,9 @@ export function AppShell({
   labels,
   children,
 }: AppShellProps) {
-  /* Bir giriş kendi alt ağacına sahip: `/urunler`, `/urunler/42/fotograflar`
-     üzerinde de açık giriştir.
-
-     AMA EN UZUN EŞLEŞEN KAZANIR, ve bu bir özel durumu ortadan kaldırdı. Önce
-     kural "tam eşleşme yalnız `/` için" diye yazılıydı: kökün `/` olmadığı bir
-     panelde (`/panel`) kök giriş altındaki HER rotayı yutuyordu, yani sipariş
-     detayında hem "Pano" hem "Siparişler" açık görünüyordu. Ölçüldü.
-
-     Kökün hangi yol olduğu ürünün bilgisi, kitin değil — o yüzden kite yeni bir
-     prop eklemek yerine kural genelleştirildi: yolu kapsayan girişlerden EN
-     ÖZELİ açık. `/` de bu kuralın kendiliğinden bir örneği, artık ayrıca
-     yazılmıyor. */
+  /* Bir giriş kendi alt ağacına sahip, ve EN UZUN EŞLEŞEN KAZANIR: kökün `/`
+     olmadığı bir panelde kök giriş altındaki her rotayı yutuyordu.
+     Gerekçe: docs/gerekce/08-blok-ve-sablon.md */
   const kapsiyor = (href: string) => activePath === href || activePath.startsWith(`${href}/`);
   const enOzel = nav.reduce<string | null>(
     (kazanan, entry) =>
@@ -104,12 +95,18 @@ export function AppShell({
   const wide = rail === "wide";
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden bg-shell text-ink-soft">
+    /* ÇERÇEVE KENDİ ZEMİNİNDE, ve bu 2026-09-24'e kadar öyle DEĞİLDİ.
+       Kabuk `bg-shell` ile boyanıyordu, yani kartların yüzey rengiyle. Sonuç:
+       `--color-rail` ve `--color-band` token olarak tanımlı, belgelenmiş ve
+       HİÇBİR YERDE kullanılmıyordu · rolü olup tüketicisi olmayan iki token.
+       Zeminleri değiştiren biri hiçbir şeyin değişmediğini görüyor ve sebebini
+       renkte arıyordu. */
+    <div className="flex h-dvh w-full overflow-hidden bg-rail text-ink-soft">
       {/* Rayın genişliği yüzeyin sol boşluğunu da içeriyor: aşağıdaki kap
           soldan dolgu vermiyor, yoksa rayın zemini yüzeyin dolgusuyla birleşip
           simgeleri sola yaslı gösteriyor. */}
       <aside
-        className={`flex shrink-0 flex-col gap-2 bg-shell py-4 ${
+        className={`flex shrink-0 flex-col gap-2 bg-rail py-4 ${
           wide ? "w-60 px-3" : "w-20 items-center px-1"
         }`}
         data-rail={rail}
@@ -137,17 +134,14 @@ export function AppShell({
                   gezinme listesinde tıklanamayan bir şeyin bağlantıya benzemesi, kullanıcıya
                   çalışmayan bir hedef gösterir. */}
               {wide && entry.section && entry.section !== nav[i - 1]?.section ? (
-                <p className={`px-2.5 text-micro font-semibold uppercase tracking-wide text-ink-faint ${i > 0 ? "mt-4 pb-1" : "pb-1"}`}>
+                <p className={`px-2.5 text-caption font-bold uppercase tracking-label text-ink-faint ${i > 0 ? "mt-5 pb-1.5" : "pb-1.5"}`}>
                   {entry.section}
                 </p>
               ) : null}
-            {/* RAY BAĞLANTISI KİTİN `RailLink`İ, ELLE ÇİZİLMİYOR.
-               Burada elle bir `<Link className="tamga-rail-link">` vardı ve
-               geniş rayda `tamga-rail-link-wide` sınıfını atlıyordu: etiket
-               40 piksellik kutuda "İ..." diye kırpılıyordu. Aynı kontrolün iki
-               uygulaması vardı ve yenisi eksikti. `RailLink` artık
-               `linkComponent` de aldığı için elle çizmenin sebebi kalmadı; dar
-               raydaki ipucu da onun kendi işi. */}
+            {/* RAY BAĞLANTISI KİTİN `RailLink`İ, ELLE ÇİZİLMİYOR: elle yazılan kopya geniş
+                rayda `tamga-rail-link-wide`ı atlıyordu ve etiket kırpılıyordu. `RailLink`
+                artık `linkComponent` de alıyor.
+                Gerekçe: docs/gerekce/08-blok-ve-sablon.md */}
             <RailLink
               href={entry.href}
               label={entry.label}
@@ -156,7 +150,17 @@ export function AppShell({
               linkComponent={Link}
               data-nav={entry.key}
             >
-              <Icon icon={entry.icon} size="base" />
+              {/* 20px: ikon rayda tek başına da taşınıyor (dar hâlde etiket
+                  yok), yani satırı tanıtan şey o · 18px'te bir metin glifi
+                  kadar kalıyordu. AĞIRLIK SEÇİLİYKEN DEĞİŞİYOR: seçili glif
+                  dolu, ötekiler ince · tasarımın "buradasın" işareti bu, ve
+                  çerçeveyle birlikte iki kanaldan okunuyor. Bir ara hepsi iki
+                  tonluydu ve fark yalnız çerçeveden okunuyordu. */}
+              <Icon
+                icon={entry.icon}
+                size="md"
+                weight={isCurrent(entry.href) ? "fill" : "regular"}
+              />
             </RailLink>
             </Fragment>
           ))}
@@ -166,23 +170,25 @@ export function AppShell({
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="tamga-gutter flex items-center gap-4 py-4">{topbar}</header>
+        {/* Üst şerit rayla aynı zemini paylaşıyor: ikisi içeriğin etrafındaki
+            tek çerçeve, ve köşede ton değiştiren bir çerçeve iki ayrı şey gibi
+            okunuyor. */}
+        <header className="tamga-gutter flex items-center gap-4 bg-band py-4">{topbar}</header>
 
         {/* Sağ ve alt boşluk kartın kendi ofsetine yer bırakıyor: kırpma tuzağı. */}
         <div className="min-h-0 flex-1 overflow-hidden pr-4 pb-4">
-          {/* `relative` BİR SÜS DEĞİL, BİR SİGORTA.
-
-              Kaydırılan yüzey KONUMLU DEĞİLSE, içindeki her `position: absolute`
-              eleman kapsayıcı bloğunu `html`de arıyor — ve `sr-only` tam olarak
-              öyle bir eleman. Bulduğu an belge koordinatlarına yerleşiyor,
-              belgeyi uzatıyor, ve `h-dvh overflow-hidden` olmasına rağmen
-              SAYFANIN KENDİSİ kayıyor: gövdenin altında boş bir alan beliriyor.
-
-              Bir tüketicide iki kez çıktı, ikisi de gözle bulundu ve ikisinde de
-              ilk şüpheli yanlış yerdeydi. Yüzeyi konumlu yapmak sınıfın tamamını
-              kapatıyor: içeride kaçan bir mutlak eleman artık en fazla bu yüzeyin
-              içinde kayıyor. */}
-          <main className="tamga-surface relative h-full min-h-0 overflow-y-auto">{children}</main>
+          {/* `relative` BİR SÜS DEĞİL, BİR SİGORTA: kaydırılan yüzey konumlu değilse
+              içindeki her `position: absolute` eleman (örneğin `sr-only`) kapsayıcı
+              bloğunu `html`de bulup belgeyi uzatıyor, ve `h-dvh overflow-hidden` olmasına
+              rağmen SAYFANIN KENDİSİ kayıyor.
+              Gerekçe: docs/gerekce/08-blok-ve-sablon.md */}
+          {/* İÇERİK ÇERÇEVENİN İÇİNDE YÜZEN BİR KUTU. Zemin ve kenar zaten
+              `tamga-surface`tan geliyordu; eksik olan köşeydi. Kontrol
+              yarıçapıyla (6px) çizilen bir ekran kutusu, içindeki girdilerle
+              aynı köşeyi taşıyor ve bir kap gibi okunmuyor. */}
+          <main className="tamga-surface tamga-app-main relative h-full min-h-0 overflow-y-auto">
+            {children}
+          </main>
         </div>
       </div>
     </div>

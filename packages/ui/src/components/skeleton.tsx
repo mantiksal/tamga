@@ -100,9 +100,12 @@ export function SkeletonKpi({ index = 0, ...rest }: { index?: number; [k: `data-
   return (
     <section {...dataProps(rest)} className="tamga-kpi" aria-hidden>
       <Skeleton index={index} className="size-10 shrink-0" />
+      {/* `max-w-full`: çubuklar karonun GERÇEK ölçülerinde (80 ve 96 piksel),
+          ama dar bir kapta kutudan taşmıyor · taşan bir iskelet, yerini
+          tuttuğu şeyin geometrisini taşımıyor demektir. */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <Skeleton index={index + 1} className="h-2.5 w-20" />
-        <Skeleton index={index + 2} className="mt-2 h-7 w-24" />
+        <Skeleton index={index + 1} className="h-2.5 w-20 max-w-full" />
+        <Skeleton index={index + 2} className="mt-2 h-7 w-24 max-w-full" />
       </div>
     </section>
   );

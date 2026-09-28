@@ -1,21 +1,16 @@
 "use client";
 
-import { Children, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
 import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 import { Icon } from "./icon.js";
 import { PlainLink as PlainAnchor, type LinkComponent } from "./link.js";
-import { Check, Customize } from "./icons.js";
+import { Check, Copy } from "./icons.js";
 import { toneOf, type Tone } from "./tone.js";
 
-/* ------------------------------------------------------------------ *
- * Okunacak şeyler: anahtar/değer, sayı, kod, adım, sayaç, tuş.
- *
- * Beşi de üründe HAM yazılmış hâlde duruyordu — `<dl>` beş dosyada, `<code>`
- * sekiz dosyada, KPI karosu kendi 28 satırında. Yani tasarımları zaten
- * verilmişti; eksik olan tek şey, o tasarımın bir kez yazılmış olmasıydı.
- * ------------------------------------------------------------------ */
+/* Okunacak şeyler: anahtar/değer, sayı, kod, adım, sayaç, tuş.
+   Gerekçeler: docs/gerekce/02-veri-ve-liste.md */
 
 /**
  * Anahtar/değer listesi — detay sayfalarının omurgası.
@@ -25,6 +20,7 @@ import { toneOf, type Tone } from "./tone.js";
 export function Descriptions({
   items,
   layout = "wide",
+  split = false,
   className,
   ...rest
 }: {
@@ -34,6 +30,15 @@ export function Descriptions({
    * kartın içinde.
    */
   layout?: "wide" | "compact";
+  /**
+   * Break the list into as many columns as fit. A six-row list at page width leaves the right
+   * half empty; split, it reads as two short lists rather than one long one. Each column keeps
+   * its own label column, so the values still line up. TR: Listeyi sığdığı kadar sütuna böl.
+   * Sayfa genişliğinde altı satırlık bir liste sağ yarıyı boş bırakıyor; bölününce uzun bir
+   * liste değil iki kısa liste okunuyor. Her sütun kendi etiket sütununu koruyor, yani değerler
+   * yine hizalı.
+   */
+  split?: boolean;
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
@@ -43,9 +48,10 @@ export function Descriptions({
       {...dataProps(rest)}
       className={cn(
         "grid",
+        split && "tamga-desc-split",
         layout === "wide"
-          ? "gap-x-8 gap-y-4 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)]"
-          : "gap-x-4 gap-y-2.5 sm:grid-cols-[minmax(0,8rem)_minmax(0,1fr)]",
+          ? "gap-x-8 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)]"
+          : "gap-x-4 sm:grid-cols-[minmax(0,8rem)_minmax(0,1fr)]",
         className,
       )}
     >
@@ -53,10 +59,22 @@ export function Descriptions({
           `dataProps(rest)` bu `map`in içindeydi, yani çağıranın TEK kancası her
           satıra kopyalanıyor ve `<dl>`e hiç inmiyordu. `check-data-props` bunu
           geçirdi çünkü o kapı niteliğin VARLIĞINA bakıyor, YERİNE değil. */}
+      {/* `subgrid` şart: `display: contents` ile satırın kendi kutusu olmadığı
+          için kenar da çizemiyor. Ayraç KESİKLİ, çünkü künyenin satırları ayrı
+          şeyler değil, aynı künyenin parçaları. */}
       {items.map(({ term, value: deger, mono, ...rest }) => (
-        <div {...rest} key={term} className="contents">
+        <div
+          {...rest}
+          key={term}
+          className="col-span-full grid grid-cols-subgrid items-baseline gap-y-1 border-b border-dashed border-line py-3 last:border-b-0"
+        >
           <dt className="text-small text-ink-faint">{term}</dt>
-          <dd className={cn("min-w-0 text-body text-ink", mono && "font-mono tabular-nums")}>
+          <dd
+            className={cn(
+              "min-w-0 text-body font-semibold text-ink",
+              mono && "font-mono tabular-nums",
+            )}
+          >
             {deger}
           </dd>
         </div>
@@ -66,51 +84,11 @@ export function Descriptions({
 }
 
 /**
- * Tek bir sayı, büyük. Sektörde adı "stat" ya da "KPI kartı".
+ * Tek bir sayı, büyük. Üç hâl, üç ayrı eleman: okunur `<div>`, `href` ile
+ * `<a>`, `onClick` ile `<button>`. Yönlendiren bir karo bir EKRAN açıyor,
+ * `pressed` olan bir FİLTRE uyguluyor; ikisi ayrı sözleşme.
  *
- * `SkeletonKpi` kitte YILLARCA vardı ve yerini tuttuğu bileşen yoktu — bir
- * iskelet, var olmayan bir şeyin yerini tutuyordu. Kitin en tuhaf açığıydı.
- *
- * TIKLANABİLİR OLMASI SONRADAN GELDİ, ve gelmek zorundaydı. İlk hâli yalnız
- * okunuyordu; oysa bir panodaki sayı neredeyse hiçbir zaman salt okunur
- * değildir. Ölçüldü: bir ürün panelinde bu karo iki kez elle yeniden yazılmış,
- * çünkü biri bir EKRAN AÇIYOR ("37 iade bekliyor" → iade listesi), öteki bir
- * FİLTRE UYGULUYOR (aynı listeyi o adıma indiriyor). Kitin karosu ikisini de
- * yapamadığı için iki kopya doğdu ve ikisi birbirine benzemez oldu. Yeteneği
- * eksik bir bileşen, olmayan bir bileşenden daha çok kopya üretiyor.
- *
- * ÜÇ HÂL, VE SEMANTİK ELEMAN HER BİRİNDE FARKLI:
- *
- *   okunur   `<div>`     — sayı bir bilgi
- *   `href`   `<a>`       — sayı bir yere gidiyor
- *   `onClick` `<button>` — sayı bir şeyi değiştiriyor, `pressed` ile açık/kapalı
- *
- * Üçünü tek elemanla yapmak (her şey `<div onClick>`) klavyeyle gezilemeyen
- * ve ekran okuyucunun hiç duyurmadığı bir kart üretir.
- *
- * FİZİK YALNIZ TIKLANABİLİR HÂLDE. Kitin 1. yasası (kenar + kaymış gölge,
- * hover'da yükselme, basınca oturma) tıklanan şeyler içindir; okunan bir
- * karonun hover'da oynaması, tıklanabilir olduğu yalanını söyler.
- *
- * Sayı `tabular-nums`: değişen bir sayaç, rakam genişlikleri eşit olmadığı
- * sürece her güncellemede yatay olarak zıplar.
- *
- * `delta` bir yön taşır ama İYİ/KÖTÜ taşımaz — artan bir hata oranı da
- * artıştır. Anlamı `better` veriyor: yükselmesi mi iyi, düşmesi mi.
- *
- * SAYI HER ZAMAN MÜREKKEP RENGİNDE. Bir süre `attention` diye bir bayrak
- * vardı ve sayıyı kritik renge boyuyordu; kaldırıldı. Tek tüketicisinde beş
- * karonun üçü kırmızıydı, ve üç kırmızı hiçbir şeyi öne çıkarmıyor — yalnız
- * paneli alarm hâlinde gösteriyor. Bir sayının kötü olduğunu söylemenin yeri
- * `delta` (yönü ve anlamı olan bir değişim) ya da karonun açtığı ekranın
- * kendisi; karonun rengi değil.
- *
- * `accent` DENENDİ VE KALDIRILDI. Karonun sol kenarında verinin kendi rengini
- * (bir iade adımının rengi) taşıyan ince bir şerit vardı. Tek tüketicisi vardı
- * ve o tüketici reddetti: renk zaten listedeki rozette ve çiplerde duruyordu,
- * kartın kenarında üçüncü kez söylenince aynı bileşen iki ekranda farklı
- * görünüyordu. Tüketicisi olmayan bir prop, `SkeletonKpi`ın yıllarca yaşadığı
- * boşluğun aynısı: duruyor, belgeleniyor, hiçbir şeyin yerini tutmuyor.
+ * Doküman: /docs/kpi
  */
 export function Kpi({
   label,
@@ -121,9 +99,11 @@ export function Kpi({
   delta,
   better = "up",
   chart,
+  look = "tile",
   href,
   onClick,
   pressed,
+  iconTone,
   linkComponent: Link = PlainAnchor,
   className,
   ...rest
@@ -141,12 +121,33 @@ export function Kpi({
   better?: "up" | "down";
   /** An inline chart, such as a `Sparkline`. TR: Satır içi grafik, `Sparkline` gibi. */
   chart?: ReactNode;
+  /**
+   * `tile` the shape a KPI grid is built from: icon tile on the left, label over the number.
+   * `detail` the taller card, for a number that carries a curve and a change beside it: icon and
+   * label on top, the number and the chart side by side, the delta in a chip underneath. TR:
+   * `tile`, bir KPI ızgarasının kurulduğu biçim: solda ikon karosu, sayının üstünde etiket.
+   * `detail`, yanında bir eğri ve bir değişim taşıyan sayı için daha uzun kart: ikon ve etiket
+   * üstte, sayı ile grafik yan yana, değişim altta bir çipte.
+   */
+  look?: "tile" | "detail";
   /** Where the number leads. Makes the tile a link. TR: Sayının götürdüğü yer. Karoyu bağlantı yapar. */
   href?: string;
   /** What the number toggles. Makes the tile a button. TR: Sayının açıp kapadığı şey. Karoyu düğme yapar. */
   onClick?: () => void;
   /** Whether that toggle is currently on. TR: O anahtarın şu an açık olup olmadığı. */
   pressed?: boolean;
+  /**
+   * The tone the icon box wears. TR: İkon kutusunun giydiği ton.
+   *
+   * It says what KIND of queue this tile counts, not whether the number is
+   * good: a row of four tiles all in the same grey reads as one block, and the
+   * eye has to read every label to tell them apart. Left out, the box stays
+   * transparent. TR: Bu karonun NE TÜR bir kuyruğu saydığını söylüyor, sayının
+   * iyi olup olmadığını değil: aynı gride duran dört karo tek bir blok gibi
+   * okunuyor ve göz ayırt etmek için her etiketi okumak zorunda kalıyor.
+   * Verilmezse kutu şeffaf kalıyor.
+   */
+  iconTone?: Tone;
   /** The router's link, so the tile does not force a full page load. TR: Yönlendiricinin bağlantısı, karo tam sayfa yüklemeye zorlamasın diye. */
   linkComponent?: LinkComponent;
   className?: string;
@@ -161,37 +162,87 @@ export function Kpi({
         : "danger";
   const c = toneOf(tone);
 
-  const govde = (
-    <>
-      {icon ? (
-        <span {...dataProps(rest)} className="tamga-kpi-tile" aria-hidden>
-          <Icon icon={icon} size="base" />
-        </span>
-      ) : null}
+  const karo = icon ? (
+    <span
+      {...dataProps(rest)}
+      className="tamga-kpi-tile"
+      style={iconTone ? { background: toneOf(iconTone).bg, color: toneOf(iconTone).fg } : undefined}
+      aria-hidden
+    >
+      <Icon icon={icon} size={look === "detail" ? "sm" : "base"} />
+    </span>
+  ) : null;
 
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="tamga-label">{label}</span>
-        <span className="mt-1 flex items-end gap-2">
-          <span className="font-mono text-display-sm leading-none font-bold tabular-nums text-ink">
-            {value}
-          </span>
-          {unit ? (
-            <span className="font-mono text-small font-medium text-ink-faint">{unit}</span>
-          ) : null}
-          {delta !== undefined ? (
-            <span className="ml-auto font-mono text-small tabular-nums" style={{ color: c.mark }}>
-              {delta > 0 ? "+" : ""}
-              {delta}%
-            </span>
-          ) : null}
-        </span>
-        {note ? <span className="mt-1 text-caption text-ink-faint">{note}</span> : null}
-        {chart ? <span className="mt-4 block">{chart}</span> : null}
-      </span>
-    </>
+  /* DEĞER MONO DEĞİL DISPLAY YÜZÜNDE, ve ağırlığı en üst basamakta. Mono, bir
+     SÜTUNDA okunan sayılar için: orada rakam genişliğinin eşit olması hizayı
+     kuruyor. Bir KPI karosunda sütun yok, tek bir sayı var ve işi okunmak
+     değil ÇARPMAK. */
+  const sayi = (
+    <span
+      className={cn(
+        "font-display leading-none font-extrabold tabular-nums text-ink",
+        look === "detail" ? "text-display" : "text-display-sm",
+      )}
+    >
+      {value}
+    </span>
   );
 
-  const sinif = cn("tamga-kpi", (href || onClick) && "tamga-kpi-live", className);
+  const birim = unit ? (
+    <span className="font-mono text-small font-medium text-ink-faint">{unit}</span>
+  ) : null;
+
+  const degisim =
+    delta !== undefined ? (
+      /* ÇİP TONUN KENDİ ÇİFTİNİ GİYİYOR (yıkama + mürekkep), sabit bir vurgu
+         yıkamasının üstünde ton rengi DEĞİL: koyu temada kırmızı mürekkep mavi
+         yıkamanın üstünde 2.53 kontrasta düşüyordu · `bg`/`fg` çiftini
+         `check-token-contrast` iki temada da ölçüyor. */
+      <span className="tamga-kpi-delta" style={{ background: c.bg, color: c.fg, borderColor: c.fg }}>
+        {delta > 0 ? "+" : ""}
+        {delta}%
+      </span>
+    ) : null;
+
+  const govde =
+    look === "detail" ? (
+      <>
+        <span className="tamga-kpi-ust">
+          {karo}
+          {label}
+        </span>
+        <span className="tamga-kpi-orta">
+          <span className="flex items-end gap-2">
+            {sayi}
+            {birim}
+          </span>
+          {chart ? <span className="shrink-0">{chart}</span> : null}
+        </span>
+        {note ? <span className="text-caption text-ink-faint">{note}</span> : null}
+        {degisim}
+      </>
+    ) : (
+      <>
+        {karo}
+        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="tamga-kpi-etiket">{label}</span>
+          <span className="flex items-end gap-2">
+            {sayi}
+            {birim}
+            {degisim ? <span className="ml-auto">{degisim}</span> : null}
+          </span>
+          {note ? <span className="text-caption text-ink-faint">{note}</span> : null}
+          {chart ? <span className="mt-3 block">{chart}</span> : null}
+        </span>
+      </>
+    );
+
+  const sinif = cn(
+    "tamga-kpi",
+    look === "detail" && "tamga-kpi-detay",
+    (href || onClick) && "tamga-kpi-live",
+    className,
+  );
 
   if (href) {
     return (
@@ -219,49 +270,43 @@ export function Kpi({
 }
 
 /**
- * KPI karolarının ızgarası.
+ * KPI karolarının ızgarası. Sütun sayısını KAP veriyor: karo 210 pikselin
+ * altına inmiyor, sığmayan alt satıra geçiyor. Sayılan bir sütun sayısı bir
+ * süre buradaydı ve kabı değil EKRANI ölçüyordu · dar bir sütunun içinde dört
+ * karo açıp sayıları kırpıyordu.
  *
- * NEDEN AYRI BİR BİLEŞEN: karoların dizilişi her ekranda elle yazılıyordu
- * (`grid gap-4 sm:grid-cols-2 xl:grid-cols-5`) ve ekrandan ekrana tutmuyordu —
- * biri dörtlü, öteki beşli, bir üçüncüsü boşluğu 3 veriyordu. Izgara karonun
- * kendi işi değil ama karo KÜMESİNİN işi, ve tek yerde durunca hepsi tutuyor.
- *
- * SÜTUN SAYISI VERİLMİYOR, SAYILIYOR: kaç karo varsa o kadar sütun (en çok
- * altı). Elle verilen bir sütun sayısı, karo eklenince yalnız o ekranda
- * güncelleniyor ve tek başına kalan bir karo tam satırı kaplıyor.
+ * Doküman: /docs/kpi
  */
 export function KpiGrid({ children, className, ...rest }: { children: ReactNode; className?: string; [k: `data-${string}`]: unknown }) {
-  const sayi = Math.min(Children.count(children), 6);
   return (
-    <div
-{...dataProps(rest)}
-      className={cn("tamga-kpi-grid", className)}
-      style={{ "--tamga-kpi-cols": sayi } as CSSProperties}
-    >
+    <div {...dataProps(rest)} className={cn("tamga-kpi-grid", className)}>
       {children}
     </div>
   );
 }
 
 /**
- * Kod bloğu, kopyalanabilir.
+ * Kod bloğu, kopyalanabilir. Kopyalama panosu her yerde çalışmıyor (HTTPS
+ * olmayan kaynak, izin verilmemiş); başarısızlık SESSİZ olmamalı, yoksa
+ * kullanıcı kopyalandığını sanıp boş yapıştırıyor.
  *
- * Bir panelde bu her zaman aynı üç şeydir: API anahtarı, webhook adresi,
- * kurulum komutu. Üçünde de kullanıcının yaptığı tek şey KOPYALAMAK — o yüzden
- * kopyalama düğmesi bir seçenek değil, bileşenin kendisi.
- *
- * Kopyalama panosu her yerde çalışmaz (HTTPS olmayan bir kaynakta, ya da
- * izin verilmemişse). Başarısızlık SESSİZ olmamalı: düğme metni değişmezse
- * kullanıcı kopyalandığını sanır ve boş yapıştırır.
+ * Doküman: /docs/code
  */
 export function Code({
   children,
+  filename,
   labels,
   className,
   ...rest
 }: {
   /** The text to be copied itself. TR: Kopyalanacak metnin kendisi. */
   children: string;
+  /**
+   * The name on the strip: "webhook.js", "docker-compose.yml". Left out, the strip still stands
+   * and holds the copy button. TR: Şeritteki ad. Verilmezse şerit yine duruyor ve kopyala
+   * düğmesini taşıyor.
+   */
+  filename?: string;
   labels: { copy: string; copied: string; failed: string };
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
@@ -289,20 +334,32 @@ export function Code({
     timer.current = window.setTimeout(() => setState("idle"), 1600);
   }
 
+  const satirlar = children.replace(/\n$/, "").split("\n");
+
   return (
-    <div {...dataProps(rest)} className={cn("tamga-code-block tamga-surface relative overflow-hidden", className)}>
-      <pre className="tamga-scroll-x px-4 py-3 font-mono text-caption text-ink">{children}</pre>
-      <button
-        type="button"
-        onClick={copy}
-        className="tamga-mini-btn absolute top-2 right-2 w-auto gap-1 px-2"
-        aria-label={labels.copy}
-      >
-        <Icon icon={state === "done" ? Check : Customize} size="xs" />
-        <span className="text-caption">
+    <div {...dataProps(rest)} className={cn("tamga-code", className)}>
+      {/* ŞERİT: solda dosya adı, sağda kopyala. Adsız bir blokta da şerit
+          duruyor · düğmenin kodun üstüne binmemesi için bir yere ihtiyacı var,
+          ve köşeye oturan bir düğme ilk satırı kapatıyordu. */}
+      <div className="tamga-code-bar">
+        <span className="min-w-0 flex-1 truncate font-mono text-caption">{filename}</span>
+        <button type="button" onClick={copy} className="tamga-code-copy" aria-label={labels.copy}>
+          <Icon icon={state === "done" ? Check : Copy} size="xs" weight="bold" />
           {state === "done" ? labels.copied : state === "failed" ? labels.failed : labels.copy}
-        </span>
-      </button>
+        </button>
+      </div>
+      <pre className="tamga-code-pre">
+        {satirlar.map((satir, i) => (
+          /* SATIR NUMARASI SEÇİLEMİYOR (`user-select: none`): kodu kopyalamak
+             için fareyle seçen kişi numaraları da alıyordu. */
+          <span key={i} className="tamga-code-line">
+            <span className="tamga-code-no" aria-hidden>
+              {i + 1}
+            </span>
+            <span className="tamga-code-text">{satir}</span>
+          </span>
+        ))}
+      </pre>
     </div>
   );
 }
@@ -313,40 +370,96 @@ export function Code({
  * `<kbd>` KULLANILIYOR, `<span>` değil: bir ekran okuyucu için "Ctrl" ile
  * "bir tuşa basılacak" arasındaki fark bu elemanda yaşıyor.
  */
-export function Kbd({ children, className }: { children: ReactNode; className?: string }) {
+export function Kbd({
+  children,
+  inline = false,
+  className,
+}: {
+  children: ReactNode;
+  /**
+   * The quieter key, for a row in a shortcut list. Twenty layered boxes down a list turn it into
+   * a keypad. TR: Daha sessiz tuş, bir kısayol listesinin satırı için. Bir listede yirmi katmanlı
+   * kutu, listeyi bir tuş takımına çeviriyor.
+   */
+  inline?: boolean;
+  className?: string;
+}) {
+  return <kbd className={cn("tamga-kbd", inline && "tamga-kbd-inline", className)}>{children}</kbd>;
+}
+
+/**
+ * Sayaç rozeti: bir ikonun köşesindeki SAYI (`StatusChip` bir DURUM taşır).
+ * `max` üstünde "+" ile kesiliyor, yoksa dört hane kutuyu şişirip altındaki
+ * ikonu eziyor. Sıfır gösterilmiyor.
+ *
+ * Doküman: /docs/badge
+ */
+/**
+ * Etiket rozeti · bir özelliğin durumu: BETA, YENİ, PRO.
+ *
+ * SAYACIN (`Badge`) KARDEŞİ AMA AYNI ŞEY DEĞİL: sayaç bir MİKTAR taşıyor ve
+ * okunduktan sonra kayboluyor; etiket bir DURUM taşıyor ve yerinde duruyor.
+ * İkisini tek bileşene koymak, "sayı verilmemişse etiket" gibi bir kural
+ * demekti.
+ *
+ * Gerekçe: docs/gerekce/06-isaret-ve-ton.md
+ */
+export function Tag({
+  children,
+  look = "outline",
+  className,
+  ...rest
+}: {
+  children: ReactNode;
+  /**
+   * `dashed` not real yet (beta, coming), `solid` the loudest one, for what is new right now,
+   * `outline` the quiet standing fact (a plan name, a tier). TR: `dashed` henüz gerçek değil
+   * (beta, yakında), `solid` en yükseği · şu anda yeni olan için, `outline` ise sessiz duran
+   * gerçek (bir plan adı, bir kademe).
+   */
+  look?: "dashed" | "solid" | "outline";
+  className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
+}) {
   return (
-    <kbd
+    /* Sınıf adları AÇIK yazılıyor, şablonla üretilmiyor: `check-kit-class`
+       şablon içindeki adı çözemiyor ve tanımsız sanıyor · kapı haklı, çünkü
+       üretilen bir ad silindiğinde de kimse görmüyor. */
+    <span
+      {...dataProps(rest)}
       className={cn(
-        "tamga-surface inline-flex h-5 min-w-5 items-center justify-center px-1.5 font-mono text-caption text-ink-soft",
+        "tamga-tag",
+        look === "dashed" && "tamga-tag-dashed",
+        look === "solid" && "tamga-tag-solid",
+        look === "outline" && "tamga-tag-outline",
         className,
       )}
     >
       {children}
-    </kbd>
+    </span>
   );
 }
 
-/**
- * Sayaç rozeti — bir ikonun köşesindeki rakam.
- *
- * `StatusChip` bir DURUM taşır ("Yayında"), bu bir SAYI taşır ("3"). İkisi
- * ayrı bileşen çünkü ayrı şeyler: durum okunur, sayı sayılır.
- *
- * `max` üstünde "+" ile kesiliyor. Kesilmezse dört haneli bir sayı rozetin
- * kutusunu şişirir ve altındaki ikonu ezer.
- *
- * Sıfır GÖSTERİLMEZ: "0 bildirim" bir bilgi değil, gürültüdür.
- */
 export function Badge({
   count,
   max = 99,
   tone = "danger",
+  dot = false,
   label,
   className,
   children,
   ...rest
 }: {
-  count: number;
+  /** The number. Not needed when `dot` is set. TR: Sayı. `dot` verildiğinde gerekmiyor. */
+  count?: number;
+  /**
+   * Show a mark with NO number. Use it when the answer is "there is something new" rather than
+   * "there are four": a number nobody will act on is a number nobody reads. TR: Sayısız bir
+   * işaret göster. Cevap &quot;dört tane var&quot; değil &quot;yeni bir şey var&quot; olduğunda:
+   * kimsenin üzerine hareket etmeyeceği bir sayı, kimsenin okumadığı bir sayıdır.
+   */
+  dot?: boolean;
   max?: number;
   tone?: Tone;
   /**
@@ -363,14 +476,28 @@ export function Badge({
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
-  if (count <= 0) return <>{children}</>;
+  if (!dot && (count ?? 0) <= 0) return <>{children}</>;
   const c = toneOf(tone);
-  const shown = count > max ? `${max}+` : String(count);
-  const dot = (
+  const shown = (count ?? 0) > max ? `${max}+` : String(count ?? 0);
+  const isaret = dot ? (
+    <span
+      {...dataProps(rest)}
+      className="tamga-count-dot"
+      style={{ background: c.mark }}
+      role="status"
+      aria-label={label}
+    />
+  ) : (
+    /* DAİRE DEĞİL, KÖŞELİ KUTU · ve dolgu yerine YIKAMA + koyu kenar.
+       Dolu daire, kitin işaret ailesinin (sert kareler) dışına düşüyordu ve
+       sayıyı taşıyan tek nesne oydu. Tasarım dili sayacı bir etiket gibi
+       çiziyor: yumuşak zemin, koyu çerçeve, koyu rakam. Böylece rakam
+       okunuyor · dolu bir daire üstündeki açık rakam, iki hanede zaten
+       sıkışıyordu. */
     <span
 {...dataProps(rest)}
-      className="inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-mono text-micro leading-none font-semibold tabular-nums"
-      style={{ background: c.mark, color: "var(--color-page)" }}
+      className="tamga-count tabular-nums"
+      style={{ background: c.bg, color: c.fg, borderColor: c.fg }}
     >
       <span aria-hidden>{shown}</span>
       <span className="sr-only">
@@ -378,42 +505,30 @@ export function Badge({
       </span>
     </span>
   );
-  if (!children) return dot;
+  if (!children) return isaret;
+  /* Rozet, üstüne oturduğu şeyin KARDEŞİ: çocuğu yapmak mümkün değil, çünkü
+     `children` herhangi bir eleman olabilir. Hover'da onunla birlikte gitmesini
+     `.tamga-count-yuva` sağlıyor (kit.css, düğmenin kaymalarıyla aynı). */
   return (
-    <span className={cn("relative inline-flex", className)}>
+    <span className={cn("tamga-badge-wrap relative inline-flex", className)}>
       {children}
-      <span className="absolute -top-1 -right-1">{dot}</span>
+      <span className="tamga-count-yuva">{isaret}</span>
     </span>
   );
 }
 
 /**
- * Bir adım: kimliği ve çevrilmiş etiketi.
- *
- * KİMLİK ETİKETTEN AYRI, ve bu bir kolaylık değil bir düzeltme. Adım listesi
- * bir zamanlar düz `string[]` idi: kimlik yoktu, React anahtarı ÇEVRİLMİŞ
- * ETİKETTİ, ve iki adım aynı etiketi taşıdığında ya da dil değiştiğinde
- * düğümler yeniden kuruluyordu. Kitin kendi kuralı bunu zaten söylüyor:
- * bir öğenin adı etiketi değildir, çünkü etiket çevrilir ve değişir.
- *
- * `key` ve `label` DIŞINDAKİ her şey o adımın `<li>`sine iniyor, yani bir
- * adım testin ya da stilin ihtiyaç duyduğu kancayı taşıyabiliyor. Kardeşi
- * `Segmented` ile aynı sözleşme; ikisinin farklı olması bir asimetriydi.
+ * Bir adım: kimliği ve çevrilmiş etiketi. Kimlik etiketten AYRI, çünkü etiket
+ * çevriliyor; React anahtarı olarak kullanılırsa dil değişince düğümler
+ * yeniden kuruluyor. `key`/`label` dışındaki her şey adımın `<li>`sine iniyor.
  */
 export type Step = { key: string; label: string } & Record<string, unknown>;
 
 /**
- * Adım göstergesi.
+ * Adım göstergesi. `<ol>` kullanılıyor: adımlar SIRALI ve sıra bilgi taşıyor;
+ * `<div>`lerle ekran okuyucu "öğe 2 / 3" diyemiyor.
  *
- * Bir sihirbazın adım göstergesi yoksa kullanıcı kaçıncı adımda olduğunu ve
- * kaç adım kaldığını bilmiyor; sihirbazın varlık sebebi tam olarak budur.
- *
- * `<ol>` kullanılıyor: adımlar SIRALI ve sıra bilgi taşıyor. Ekran okuyucu
- * "3 öğeli liste, öğe 2" der; `<div>`'lerle bu bilgi kaybolur.
- *
- * Tamamlanan adım bir onay işareti alıyor, aktif olan aksan kenarı, gelecek
- * olan sönük. Üç durum üç ayrı görsel dil — çünkü "neredeyim" ve "ne kaldı"
- * ayrı iki soru.
+ * Doküman: /docs/steps
  */
 export function Steps({
   steps,
@@ -473,5 +588,69 @@ export function Steps({
         );
       })}
     </ol>
+  );
+}
+
+/**
+ * Rise — sayı sıfırdan hedefe YÜKSELEREK geliyor.
+ *
+ * Gerekçe: docs/gerekce/03-grafik-ve-olcum.md
+ */
+export function Rise({
+  value,
+  format = (n) => String(Math.round(n)),
+  duration = 900,
+  className,
+  ...rest
+}: {
+  value: number;
+  /**
+   * How the number is written on the way up, not only at the end: the kit knows no currency and
+   * no thousands separator. TR: Sayının yolda nasıl yazıldığı, yalnız sonunda değil: kit ne para
+   * birimi bilir ne binlik ayracı.
+   */
+  format?: (n: number) => string;
+  /** How long the climb takes, in ms. TR: Tırmanışın süresi, ms. */
+  duration?: number;
+  className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
+}) {
+  const [n, setN] = useState(value);
+  const kare = useRef<number | null>(null);
+
+  useEffect(() => {
+    /* AZALTILMIŞ HAREKETTE TIRMANIŞ YOK: sayı hedefinde beliriyor. Hareket
+       duyarlılığı olan biri için değişen bir sayı, kayan bir sayfadan daha
+       yorucu · göz onu okumaya çalışıyor. */
+    const durgun = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (durgun || duration <= 0) {
+      setN(value);
+      return;
+    }
+
+    const bas = performance.now();
+    const adim = (t: number) => {
+      const o = Math.min(1, (t - bas) / duration);
+      /* Yavaşlayarak varıyor (`1-(1-o)³`): sabit hızla artan bir sayaç sayı
+         durduğunda "kesildi" gibi duruyor. */
+      setN(value * (1 - (1 - o) ** 3));
+      if (o < 1) kare.current = requestAnimationFrame(adim);
+    };
+    kare.current = requestAnimationFrame(adim);
+    return () => {
+      if (kare.current !== null) cancelAnimationFrame(kare.current);
+    };
+  }, [value, duration]);
+
+  return (
+    <span
+      {...dataProps(rest)}
+      /* Sayı DEĞİŞİRKEN duyurulmuyor: `aria-live` olsaydı ekran okuyucu her
+         karede yeni bir sayı okurdu. Son değer zaten metinde. */
+      className={cn("font-display leading-none font-black tabular-nums text-ink", className)}
+    >
+      {format(n)}
+    </span>
   );
 }

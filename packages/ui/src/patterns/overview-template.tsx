@@ -44,7 +44,11 @@ export function OverviewTemplate({
 }: OverviewTemplateProps) {
   return (
     <div className="flex min-h-0 flex-col" data-overview-state={state}>
-      <PageBand title={title} subtitle={subtitle} actions={actions} />
+      {/* Şeridin oluğunu kap veriyor · `PageBand` kendi yatay dolgusunu
+          taşımıyor. */}
+      <div className="tamga-gutter py-4">
+        <PageBand title={title} subtitle={subtitle} actions={actions} />
+      </div>
 
       <div className="tamga-gutter min-h-0 flex-1 py-6">
         {state === "loading" ? (

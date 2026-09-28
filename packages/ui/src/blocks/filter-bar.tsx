@@ -1,46 +1,23 @@
 "use client";
 
-import { useId, useState, type ReactNode } from "react";
+import { Fragment, useId, useState, type ReactNode } from "react";
 import { Button, buttonVariants } from "../components/button.js";
-import { MiniButton } from "../components/button.js";
 import { Combobox } from "../components/combobox.js";
 import { MultiSelect } from "../components/advanced-input.js";
 import { DatePicker } from "../components/date-picker.js";
 import { Icon } from "../components/icon.js";
 import { Close, Customize, Search, Upload } from "../components/icons.js";
+import type { IconGlyph } from "../components/icons.js";
+import type { Tone } from "../components/tone.js";
 import { Input } from "../components/input.js";
 import { Select, Sheet } from "../components/primitives.js";
 
 /**
- * FİLTRE ÇUBUĞU.
+ * FİLTRE ÇUBUĞU · birkaç alan üstte, gerisi çekmecede, VE çekmecede bir şey
+ * açıksa bunu görüyorsun: uygulanan her filtre tablonun üstünde bir çip.
+ * Çekmecedeki alanlar bir `<form>` içinde, yani Enter'ı tarayıcı uyguluyor.
  *
- * ─── NEDEN KİTTE ────────────────────────────────────────────────────────
- * Bir süre üründe durdu ve orada "kite taşınmadı, bilinçli" diye bir not
- * vardı: gerekçesi "Excel ile ara" ve "Tüm filtreler" gibi şeylerin bir
- * e-ticaret paneli kalıbı olması. Not yanlış çıktı ve iki sebeple:
- *
- *   ① ADR-0003'ün katman şeması `tamga-ui` kutusunun içine zaten
- *     "filtre paneli · toplu eylem çubuğu" yazıyor. Bir satır içi yorum,
- *     kilitli bir ADR'yi geçersiz kılmaz.
- *   ② Notun işaret ettiği sözlük SÖZCÜKLERDİ, mekanizma değil. Metinler
- *     `labels`a çıkınca geriye kalan şey saf mekanizma: bir arama kutusu, en
- *     çok dört alan, bir çekmece, ve uygulanan filtrelerin çipleri. Dosyayla
- *     arama da bir alan adı değil bir yöntem; her yönetim listesi yapabilir.
- *
- * ─── ÜÇ MADDE, VE ÜÇÜNCÜSÜ EN ÖNEMLİSİ ──────────────────────────────────
- * Bir yönetim panelinin filtresi otuz alanı aynı anda açık tutmaya meyleder,
- * hepsi aynı görsel ağırlıkta. Buradaki fikir tek cümle: birkaçı üstte,
- * gerisi çekmecede, VE çekmecede bir şey açıksa bunu görüyorsun.
- *
- * Gizli bir filtre açıkken kullanıcı listeyi eksik görür ve sebebini bulamaz;
- * bu, filtreyi gizlemenin tek gerçek riski. O yüzden uygulanan her filtre
- * tablonun üstünde bir çip olarak duruyor, tek tıkla kalkıyor, ve çekmece
- * düğmesinde aktif sayıyı gösteren bir rozet var.
- *
- * ─── ENTER UYGULAR ──────────────────────────────────────────────────────
- * Çekmecedeki alanlar bir `<form>` içinde ve "Uygula" o formun `submit`
- * düğmesi, yani Enter tarayıcının kendi davranışıyla çalışıyor: dinlenen bir
- * tuş değil, formun anlamı.
+ * Gerekçe: docs/gerekce/08-blok-ve-sablon.md
  */
 
 /** Filtre durumunun tamamı: anahtar → dizgi. Boş dizgi "filtre yok" demek. */
@@ -65,6 +42,42 @@ export type FilterField = {
   kind: FilterFieldKind;
   /** Falls back to `optionSource[key]`; with neither, the list is empty. TR: Verilmezse `optionSource[key]` kullanılır; ikisi de yoksa liste boş. */
   options?: string[];
+  /**
+   * Start a new row before this field. TR: Bu alandan önce yeni bir satır başlat.
+   *
+   * WHY IT IS NOT AUTOMATIC. Fields wrap when they run out of room, and where
+   * they break is a question of pixels: the same bar breaks in one place on a
+   * laptop and another on a monitor. Sometimes the break is MEANING, not fit ·
+   * "what am I searching for" on one line, "how do I narrow it" on the next ·
+   * and only the caller knows which. Given, the break holds at every width.
+   * TR: NEDEN KENDİLİĞİNDEN OLMUYOR. Alanlar yer kalmayınca satır atlıyor ve
+   * nerede atladıkları bir piksel meselesi: aynı çubuk dizüstünde başka, geniş
+   * ekranda başka yerde kırılıyor. Bazen kırılma bir ANLAM ayrımı, sığma
+   * meselesi değil · "neyi arıyorum" bir satırda, "nasıl daraltıyorum" ötekinde
+   * · ve bunu yalnız çağıran biliyor. Verilirse kırılma her genişlikte duruyor.
+   */
+  break?: boolean;
+  /**
+   * A glyph before the value, naming what this filter is about. TR: Değerin
+   * önünde, bu filtrenin neyle ilgili olduğunu söyleyen glif.
+   *
+   * Five boxes side by side all reading "All" are told apart only by the label
+   * above them, so the eye travels up and back down for each one. TR: Yan yana
+   * duran ve hepsi "Tümü" yazan beş kutuyu ayıran tek şey üstlerindeki etiket
+   * oluyor; göz her biri için yukarı çıkıp geri iniyor.
+   */
+  icon?: IconGlyph;
+  /**
+   * A tone per option, for a filter whose items ARE states. TR: Öğeleri birer
+   * DURUM olan filtrede, seçenek başına ton.
+   *
+   * Keyed by the option's own text. The swatch it draws is the same square the
+   * table's chip draws, so the eye matches the list to the rows without reading
+   * either. Only where the option really is a state. TR: Anahtar, seçeneğin
+   * kendi metni. Çizdiği kare, tablodaki çipin çizdiği karenin aynısı · göz
+   * listeyi satırlara okumadan eşliyor. Yalnız seçenek gerçekten bir durumsa.
+   */
+  tones?: Record<string, Tone>;
 };
 
 export type FilterGroup = { title: string; fields: FilterField[] };
@@ -178,8 +191,18 @@ function FieldControl({
     return (
       <Select
         className="w-full"
-        options={[labels.all, ...options]}
-        value={values[field.key]}
+        icon={field.icon}
+        options={[
+          labels.all,
+          ...options.map((o) => (field.tones?.[o] ? { value: o, tone: field.tones[o] } : o)),
+        ]}
+        /* BOŞ FİLTRE "TÜMÜ"NÜN KENDİSİ · liste açıldığında onay işareti orada
+           duruyor. Ama DOLU DEĞİL: `set` ayrı geçiliyor, yoksa "Tümü" yazan
+           her kutu kendini dolu sayıp çizgisini sertleştiriyordu ve çubuktaki
+           asıl süzen kutu öne çıkmayı bırakıyordu. İki ayrı soru, iki ayrı
+           prop: "listede hangisi seçili" ve "bu filtre uygulanmış mı". */
+        value={values[field.key] || labels.all}
+        set={Boolean(values[field.key])}
         onChange={(v) => write(field.key, v === labels.all ? "" : v)}
         placeholder={labels.all}
       />
@@ -265,13 +288,16 @@ export function FilterBar({
   };
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* IZGARA, ESNEK SATIR DEĞİL. Esnek satırda kontroller kabından taşıp
-          sayfaya yatay kaydırma açıyor. Izgarada her sütunun tabanı
-          `minmax(0, …)`, yani hiçbiri içeriğinin genişliğini dayatamıyor. */}
-      <div className="grid items-end gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-[minmax(10rem,1fr)_repeat(4,minmax(0,1.25fr))_auto]">
-        <label className="flex min-w-0 flex-col gap-1.5">
-          <span className="text-small font-medium text-ink">{labels.search}</span>
+    /* FİLTRE ÇUBUĞU KENDİ YÜZEYİNDE, ve `tamga-card-open` ŞART: `tamga-card`ın
+       kırpması içindeki her açılır paneli hücre sınırında keserdi.
+       Gerekçe: docs/gerekce/08-blok-ve-sablon.md */
+    <div className="tamga-card tamga-card-open flex flex-col gap-3.5 p-4">
+      {/* ESNEK SARMA, SABİT IZGARA DEĞİL: taşmayı yaratan şey sütun sayısı değil
+          TABANSIZ esneme, o yüzden çözüm `basis`. Arama iki pay, seçimler birer.
+          Gerekçe: docs/gerekce/08-blok-ve-sablon.md */}
+      <div className="tamga-filter-row">
+        <label className="flex min-w-0 shrink grow-[2] basis-75 flex-col gap-1.5">
+          <span className="text-small font-bold text-ink-faint">{labels.search}</span>
           {/* `leading` bir boolean: kite sol boşluğu açtırıyor, ikonu çağıran
               çiziyor. Böylece ikon seti kitin değil ürünün kararı kalıyor. */}
           <span className="relative flex items-center">
@@ -293,8 +319,22 @@ export function FilterBar({
         </label>
 
         {top.map((field) => (
-          <div key={field.key} className="flex min-w-0 flex-col gap-1.5">
-            <span className="text-small font-medium text-ink">{field.label}</span>
+          /* TARİH ARALIĞI İKİ SÜTUN KAPLIYOR, bir sütunu İKİYE BÖLMÜYOR: iki takvim bir
+             alanın yarısına sığmıyor. Tavan yarım satır, yani sona tek başına düşen alan
+             bütün satıra yayılmıyor.
+             Gerekçe: docs/gerekce/08-blok-ve-sablon.md */
+          <Fragment key={field.key}>
+            {/* SATIRI KIRAN ŞEY TAM GENİŞLİKTE, YÜKSEKLİKSİZ BİR ELEMAN.
+                Esnek bir kapta satır atlatmanın tek yolu bu: `basis-full` kalan
+                yeri doldurup sonrakini aşağı itiyor, `h-0` ise kendisi için yer
+                kaplamıyor. Bir `<br>` esnek kapta hiçbir şey yapmaz. */}
+            {field.break ? <span aria-hidden className="h-0 basis-full" /> : null}
+          <div
+            className={`flex min-w-0 shrink grow flex-col gap-1.5 ${
+              field.kind === "dateRange" ? "basis-80" : "basis-40 tamga-filter-cap"
+            }`}
+          >
+            <span className="text-small font-bold text-ink-faint">{field.label}</span>
             <FieldControl
               field={field}
               values={values}
@@ -304,15 +344,23 @@ export function FilterBar({
               labels={labels}
             />
           </div>
+          </Fragment>
         ))}
 
         {/* Rozet AKTİF olanı sayıyor, toplam alan sayısını değil: "20" hiçbir
             şey söylemez, "2" ise listenin neden eksik olduğunu söyler. */}
-        <Button onClick={() => setDrawerOpen(true)}>
+        {/* ÇEKMECE DÜĞMESİ SATIRIN SAĞ UCUNDA (`ml-auto`). Alanların hemen
+            yanında dururken onlarla aynı şeymiş gibi okunuyordu; oysa öbürleri
+            bir DEĞER seçiyor, bu bir PANEL açıyor. Sağ uç, bir araç çubuğunda
+            "bu listenin geri kalanı" demenin yeri. */}
+        <Button className="ml-auto" onClick={() => setDrawerOpen(true)}>
           <Icon icon={Customize} size="xs" />
           {labels.allFilters}
           {hiddenActive > 0 && (
-            <span className="ml-1 rounded-full bg-[var(--color-accent)] px-1.5 text-micro font-semibold text-[var(--color-accent-ink)] tabular-nums">
+            /* Sayaç kitin `tamga-count`u, elle çizilmiş bir daire değil: aynı
+               rozet `Badge`de de geçiyor ve ikisinin ayrı çizilmesi, işaret
+               ailesi değiştiğinde yalnız birinin değişmesi demekti. */
+            <span className="tamga-count ml-1 tabular-nums">
               {hiddenActive}
             </span>
           )}
@@ -326,15 +374,21 @@ export function FilterBar({
       {active.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           {active.map(([key, value]) => (
-            <span
-              key={key}
-              className="inline-flex items-center gap-1.5 rounded-(--radius-ctl) border border-[var(--color-edge)] bg-shell py-1 pl-2.5 pr-1 text-small text-ink"
-            >
-              <span className="text-ink-faint">{labelFor(key)}:</span>
+            <span key={key} className="tamga-token">
+              <span className="font-normal text-ink-faint">{labelFor(key)}:</span>
               {value}
-              <MiniButton aria-label={labels.remove(labelFor(key))} onClick={() => write(key, "")}>
+              {/* Kitin `MiniButton`ı DEĞİL: o kendi kenarını ve tabanını
+                  taşıyor, yani kenarlı bir çipin içinde ikinci bir nesne
+                  oluyordu. Kaldırma karesi çipin bir parçası, ayrı bir kutu
+                  değil. */}
+              <button
+                type="button"
+                className="tamga-token-x"
+                aria-label={labels.remove(labelFor(key))}
+                onClick={() => write(key, "")}
+              >
                 <Icon icon={Close} size="xs" />
-              </MiniButton>
+              </button>
             </span>
           ))}
           <Button variant="link" size="sm" onClick={() => onChange({})}>
@@ -367,11 +421,16 @@ export function FilterBar({
             e.preventDefault();
             setDrawerOpen(false);
           }}
-          className="flex flex-col gap-7"
+          className="flex flex-col"
         >
           {drawer.map((group) => (
-            <div key={group.title}>
-              <p className="mb-3 text-micro font-semibold uppercase tracking-wide text-ink-faint">
+            /* GRUPLAR KESİKLİ ÇİZGİYLE AYRILIYOR, boşlukla değil. Yirmi alanlık
+               bir çekmecede yalnız boşluk, grubun nerede bittiğini söylemiyor
+               ve kullanıcı aşağı kaydırdıkça hangi başlığın altında olduğunu
+               kaybediyor. Çizgi kesikli, çünkü gruplar ayrı şeyler değil aynı
+               formun bölümleri (tablo satırlarındaki gerekçenin aynısı). */
+            <div key={group.title} className="flex flex-col gap-3.5 border-b border-dashed border-line py-4.5 last:border-b-0">
+              <p className="text-caption font-extrabold uppercase tracking-label text-ink-faint">
                 {group.title}
               </p>
               {/* `sm:grid-cols-2` yerine açık `minmax(0,1fr)`: varsayılan `1fr`

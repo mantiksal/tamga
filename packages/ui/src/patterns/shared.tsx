@@ -43,13 +43,19 @@ export function errorDetail(error?: TemplateError): string | undefined {
 }
 
 export function ErrorSlot({ error, labels }: { error?: TemplateError; labels: ErrorLabels }) {
+  /* Etiket ile işleyici BİRLİKTE geçiyor. Önceden `retryLabel` her zaman, işleyici
+     ise varsa geçiyordu; yani çağıran yeniden deneyemediğinde de bir düğme adı
+     gönderiliyor, `ErrorState` da onu sessizce atıyordu. İkisini tek bir yayıma
+     bağlamak, hangisinin hangisi olmadan anlamsız olduğunu kodda görünür yapıyor. */
+  const yeniden = error?.onRetry
+    ? ({ onRetry: error.onRetry, retryLabel: labels.retry } as const)
+    : {};
   return (
     <ErrorState
       title={labels.title}
       description={labels.body}
       detail={errorDetail(error)}
-      retryLabel={labels.retry}
-      {...(error?.onRetry ? { onRetry: error.onRetry } : {})}
+      {...yeniden}
     />
   );
 }

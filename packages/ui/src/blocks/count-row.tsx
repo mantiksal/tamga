@@ -5,15 +5,10 @@ import { Label } from "../components/surface.js";
 import { Select } from "../components/primitives.js";
 
 /**
- * SAYAÇ SATIRI: tablonun tepesindeki tek satırlık okuma.
+ * SAYAÇ SATIRI · kaç kayda bakıldığı her zaman yazıyor. Sağ taraftaki iki şey
+ * (ekrana özel `aside`, sayfa boyu) isteğe bağlı; verilmezse çizilmiyor.
  *
- * KAÇ KAYIT OLDUĞU HER ZAMAN YAZIYOR. Filtre uygulandıktan sonra kaç kayda
- * bakıldığını söylemeyen bir liste, kullanıcıya saydırıyor.
- *
- * SAĞ TARAF İKİ ŞEY TAŞIYABİLİR ve ikisi de isteğe bağlı: ekrana özel ikinci
- * bir okuma (`aside` — "12 tanesi eşiği geçti" gibi) ve sayfa boyu seçimi.
- * İkincisi verilmezse hiç çizilmiyor: sayfalanmayan bir listeye sayfa boyu
- * sormak, olmayan bir kontrolü öğretmek.
+ * Gerekçe: docs/gerekce/08-blok-ve-sablon.md
  */
 export function CountRow({
   count,

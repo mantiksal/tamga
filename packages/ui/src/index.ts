@@ -29,14 +29,14 @@ export {
   iconButtonVariants,
   MiniButton,
 } from "./components/button.js";
-export { Input, inputVariants, type InputProps, Textarea, type TextareaProps } from "./components/input.js";
+export { Input, InputGroup, inputVariants, type InputProps, Textarea, type TextareaProps } from "./components/input.js";
 
 /* --- seçim kontrolleri -------------------------------------------------- */
 export { Checkbox } from "./components/checkbox.js";
 export { RadioGroup } from "./components/radio-group.js";
 export { Switch } from "./components/switch.js";
 export { Segmented } from "./components/segmented.js";
-export { Tabs, type TabItem } from "./components/tabs.js";
+export { Tabs, TabPanel, type TabItem } from "./components/tabs.js";
 export { RichText, type RichTextFormat } from "./components/rich-text.js";
 export { TreeSelect, type TreeNode } from "./components/tree-select.js";
 
@@ -58,7 +58,9 @@ export { DatePicker, Calendar, type DateISO, type DateRange } from "./components
 /* --- display ----------------------------------------------------------- */
 export { Avatar, AvatarStack } from "./components/avatar.js";
 export { StatusChip, Delta, Dot } from "./components/badge.js";
+export { SaysBubble, type SaysFrom } from "./components/says-bubble.js";
 export { Icon, type IconSize } from "./components/icon.js";
+export { Announcement } from "./components/announcement.js";
 export { Progress } from "./components/progress.js";
 export { SectionHead } from "./components/section.js";
 export { Spinner } from "./components/spinner.js";
@@ -91,7 +93,7 @@ export {
   type Art,
   type EmptyLayout,
   type EmptyRoute,
-  SaysBubble,
+  ArtSays,
   EmptyNote,
   EmptyState,
   EmptyTile,
@@ -116,23 +118,25 @@ export {
 /* --- düzen ve kabuk ---------------------------------------------------- *
  * Buradan aşağısı, sınıfı olup bileşeni olmayan şeylerin kapandığı yer.
  * Gerekçesi `components/layout.tsx`'in başında. */
+export { ScrollX } from "./components/scroll-x.js";
 export {
   Surface,
-  ScrollX,
-  Rise,
+  Reveal,
   Swap,
   ListRow,
   CellActions,
   PageBand,
   Link,
 } from "./components/layout.js";
-export { ThemeToggle, LocaleSwitcher, LogoTile, AccountButton } from "./components/chrome.js";
+export { ThemeToggle, LocaleSwitcher, LogoTile, AccountButton, type ThemePreference } from "./components/chrome.js";
 export {
   ColorSwatches,
   ThemeCards,
+  RailCards,
   ImageField,
   type SwatchOption,
   type ThemeChoice,
+  type RailChoice,
 } from "./components/appearance.js";
 export { SquarePicker } from "./components/square-picker.js";
 export { prepareImage, cropSquare, IMAGE_ACCEPT, type ImageError } from "./lib/image.js";
@@ -143,7 +147,7 @@ export { Slider } from "./components/slider.js";
 export { Accordion, Collapsible } from "./components/disclosure.js";
 
 /* --- okunacak şeyler --------------------------------------------------- */
-export { Descriptions, Kpi, KpiGrid, Code, Kbd, Badge, Steps, type Step } from "./components/display.js";
+export { Descriptions, Kpi, KpiGrid, Rise, Code, Kbd, Badge, Tag, Steps, type Step } from "./components/display.js";
 
 /* --- gelişmiş girdiler ------------------------------------------------- */
 export {

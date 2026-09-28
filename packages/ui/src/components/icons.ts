@@ -86,6 +86,10 @@ export {
   CalendarPlus,
   MoonStars as ThemeDark,
   Sun as ThemeLight,
+  /* "İşletim sistemi ne diyorsa o" · temanın üçüncü hâli ve bir açık/koyu
+     ikilisiyle söylenemiyor. Bir ekran glifi, çünkü karar ekranın kendisine
+     bırakılıyor. */
+  Desktop as ThemeSystem,
   /* Dört geri bildirim işareti. `Warning` zaten vardı ama tek başına bir
      ailenin dörtte biriydi: bir arayüz "oldu", "olmadı", "dikkat" ve "şunu
      bil" demek zorunda, ve üçünü glifsiz bırakmak dördüncüyü de zayıflatıyor. */

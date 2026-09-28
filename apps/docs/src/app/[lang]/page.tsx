@@ -1,24 +1,34 @@
 import Link from "next/link";
+import { buttonVariants, Icon, Sparkline, StatusChip, type Tone } from "tamga-ui";
 import {
-  Button,
-  StatusChip,
-  ScoreRing,
-  Dot,
-  Kpi,
-  Sparkline,
-  Switch,
-  Card,
-  CardHead,
-  CardBody,
-  Label,
-  buttonVariants,
-} from "tamga-ui";
+  ArrowRight,
+  CaretLeft,
+  CaretRight,
+  Layout,
+  Palette,
+  Shapes,
+  SquaresFour,
+  TerminalWindow,
+  Translate,
+} from "tamga-ui/icons";
+
+/* Hero'nun üç bilgisinin glifleri, `meta` ile AYNI sırada. Kit Phosphor'un
+   tamamını da geçiriyor; bunlar kürasyonlu kümede yok ama aynı kapıdan
+   geliyor. */
+const HERO_GLIF = [SquaresFour, Layout, Translate];
+
+/* Dört sayı kartının glifleri, `sayiKartlari` ile AYNI sırada. */
+const SAYI_GLIF = [SquaresFour, Layout, Translate, Shapes];
 import { SiteHeader } from "@/components/shell";
-import { CodeDemo } from "@/components/interactive";
-import { TokenKatmani } from "./token-katmani";
+import { KomutKopyala } from "@/components/komut";
+import { Baslamak } from "@/components/baslamak";
+import { CanliOnizleme } from "@/components/canli";
 import { navFor } from "@/content/nav";
 import { yol } from "@/content/yollar";
 import SAYILAR from "@/content/counts.json";
+import KAPI_DEMO from "@/content/kapi-demo.json";
+import { KapiZinciri } from "@/components/kapilar";
+import { Masa } from "@/components/masa";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 
@@ -52,60 +62,165 @@ const S = SAYILAR;
 
 const T = {
   tr: {
-    eyebrow: "Mantıksal'ın tasarım sistemi",
-    title: "Panellerimizi bu sistemle kuruyoruz.",
-    lead: "Tamga, arayüzlerimizi kurarken kullandığımız bileşen, token ve kural seti. Kendi ürünlerimiz için yazıldı, sonra herkese açıldı.",
-    ctaDocs: "Dokümana git",
+    heroBaslik: "Hesaplar",
+    heroSayi: "1.284",
+    heroDavet: "Davet et",
+    heroSatirlar: [
+      ["Ayşe Demir", "Kurumsal", "Aktif", "2 dk"],
+      ["Mert Aksoy", "Pro", "Davetli", "dün"],
+      ["Zeynep Kaya", "Pro", "Askıda", "3 gün"],
+      ["Can Öztürk", "Ücretsiz", "Aktif", "1 sa"],
+    ] as const,
+    heroAralik: "1–4 / 1.284",
+    heroKpi: "Aktif kullanıcı · 30 gün",
+    heroKpiDeger: "12.480",
+    heroKpiArtis: "+8%",
+    heroOnceki: "Önceki sayfa",
+    heroSonraki: "Sonraki sayfa",
+    canliTitle: "Ekran görüntüsü değil. Kurcala.",
+    canliBody:
+      "Aşağıdaki panel Tamga'nın bileşenleriyle kuruldu ve gerçekten çalışıyor: menüde gezin, hesapları süz, seç, arşivle. Sonra soldan kendi ürününün adını ve marka rengini gir; bütün panel o an senin markana döner.",
+    canli: {
+      masa: "Kontrol masası",
+      canli: "canlı",
+      ad: "Ürününün adı",
+      adIpucu: "Menüde, sekmede ve adres çubuğunda.",
+      renk: "Marka rengin",
+      ozelRenk: "Kendi rengim",
+      kutular: [
+        { hex: "#1e4fd8", label: "Tamga mavisi" },
+        { hex: "#e02938", label: "Kırmızı" },
+        { hex: "#0f766e", label: "Zümrüt" },
+        { hex: "#7c3aed", label: "Mor" },
+        { hex: "#d97706", label: "Kehribar" },
+        { hex: "#0a1f3d", label: "Lacivert" },
+        { hex: "#db2777", label: "Pembe" },
+        { hex: "#65a30d", label: "Yeşil" },
+      ],
+      kontrast: "Kontrast",
+      kontrastIyi: "Düğme yazısı okunuyor.",
+      kontrastZayif: "Düğme yazısı bu renkte zorlanıyor.",
+      temaMenu: "Tema ve menü",
+      acik: "Açık",
+      koyu: "Koyu",
+      dar: "Dar",
+      genis: "Geniş",
+      tasi: "Bunu projene taşı",
+      sifirla: "Baştan başlat",
+      ara: "Panelde ara",
+      hesapAra: "Hesap ara",
+      profil: "Profil",
+      gorunumAyarlari: "Görünüm ayarları",
+      cikis: "Çıkış yap",
+      genelBakis: "Genel bakış",
+      hesaplar: "Hesaplar",
+      ayarlar: "Ayarlar",
+      yeniHesap: "Yeni hesap",
+      kaydet: "Kaydet",
+      kpi: [
+        ["Aktif kullanıcı", "12.480", "son 30 gün"],
+        ["Yeni hesap", "184", "bu hafta"],
+        ["Aylık gelir", "₺842K", "+12%"],
+      ] as const,
+      haftalik: "Haftalık kayıt",
+      gunler: ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"] as const,
+      sonHareketler: "Son hareketler",
+      hareketler: [
+        ["Ayşe Demir kurumsal plana geçti", "2 dk"],
+        ["Mert Aksoy davet edildi", "1 sa"],
+        ["Zeynep Kaya askıya alındı", "3 gün"],
+        ["Yedekleme tamamlandı", "dün"],
+      ] as const,
+      durum: "Durum",
+      durumlar: ["Tümü", "Aktif", "Davetli", "Askıda"] as const,
+      plan: "Plan",
+      son: "Son",
+      hesap: "Hesap",
+      secili: "hesap seçili",
+      arsivle: "Arşivle",
+      vazgec: "Vazgeç",
+      bosSuzgec: "Bu süzgeçle hesap kalmadı.",
+      kapat: "Kapat",
+      detay: "Hesap detayı",
+      gorunum: "Görünüm",
+      panelKapsam: "panel",
+      urunAdi: "Ürün adı",
+      urunAdiNot: "Menüde, sekmede ve adres çubuğunda.",
+      markaRengi: "Marka rengi",
+      markaRengiNot: "Palet ve iki tema bu tek renkten üretilir.",
+      tema: "Tema",
+      temaNot: "Sistem",
+      kenarMenusu: "Kenar menüsü",
+      kenarMenusuNot: "Serbest",
+      bildirimler: "Bildirimler",
+      bildirimSecenek: ["Yeni hesap açılınca", "Plan değişince", "Haftalık özet"] as const,
+      sil: "Sil",
+      silBaslik: "Hesabı sil",
+      silGovde: "{ad} ve bu hesaba bağlı bütün veriler kalıcı olarak silinecek.",
+      silindi: "silindi",
+      logo: "Logo",
+      logoNot: "Geniş menüde duran tam logo.",
+      amblem: "Amblem",
+      amblemNot: "Dar menüdeki kare işaret. Yoksa baş harf çizilir.",
+      ornegeDon: "Örneğe dön",
+      gorsel: {
+        name: "Görsel",
+        upload: "Yükle",
+        replace: "Değiştir",
+        remove: "Kaldır",
+        empty: "Henüz görsel yok",
+        errorType: "Yalnız PNG, JPG ya da SVG.",
+        errorSize: "Dosya çok büyük.",
+        errorUnreadable: "Dosya okunamadı.",
+      },
+      hesapMenu: "Hesap menüsü",
+      arsivlendi: "hesap arşivlendi",
+      kaydedildi: "Yeni hesap oluşturuldu",
+      hesapAdi: "Selin Er",
+      hesapPosta: "selin",
+    },
+    markAdi: "Tamga amblemi",
+    eyebrow: "Açık kaynak · MIT",
+    title: "Yönetim panelleri için açık kaynak tasarım sistemi.",
+    lead: "Bir paneli oluşturan tablo, form, filtre gibi bileşenleri ve bunlardan kurulmuş hazır ekranları tek pakette topluyor. Renkleri kendi markanıza göre ayarlayabilir, dokümanı Türkçe ya da İngilizce okuyabilirsiniz.",
+    ctaDocs: "Bileşenlere göz at",
+    ctaKurulum: "Kuruluma başla",
     ctaRepo: "GitHub",
     headerCta: "Doküman",
-    meta: ["React 19", "MIT lisansı", "Türkçe ve İngilizce belge"],
+    meta: [`${SAYILAR.bilesen} bileşen`, "Hazır ekranlar", "Türkçe ve İngilizce"],
 
     tokenEyebrow: "Token katmanı",
-    tokenTitle: "Ürün değişir, sistem yerinde kalır.",
-    tokenBody:
-      "Boşluk, ölçek ve davranış her üründe sabit. Değişen sadece token dosyası: renk ve yazı ailesi. Aşağıdan bir ürün türü seçin, aynı bileşenlerin nasıl döndüğünü görün.",
-    tokenGroup: "Ürün türü",
-    proofNote: "Yukarıdakiler ekran görüntüsü değil. Hepsi pakete ait, canlı bileşenler.",
 
     whatTitle: "İçinde ne var",
-    whatLead: "Kütüphaneler kod gönderir. Tamga kuralı da gönderiyor.",
-    whatItems: [
-      [
-        "Token'lar",
-        `Renk, tipografi, boşluk ve süre tek dosyada tanımlı. Bileşenler kendi değerlerini uydurmuyor, buradan okuyor: ${S.token} token, ${S.sinif} sınıf.`,
-      ],
-      [
-        `Bileşenler`,
-        `Her bileşenin kendi sayfası var: çalışan örnek, ne zaman kullanılacağı ve tipinden üretilmiş props tablosu. ${S.bilesen} bileşen, ${S.sayfa} sayfa.`,
-      ],
-      [
-        "Desenler",
-        "Form düzeni, doğrulama, boş durum, onay isteme. Bileşenlerin bir arada nasıl davrandığını anlatan katman.",
-      ],
-      [
-        "Temalar",
-        "Her marka bir token bloğu. Yeni bir marka eklemek için kod dalı açılmıyor, dosya yazılıyor.",
-      ],
-      [
-        "Erişilebilirlik",
-        "Klavye gezinmesi, görünür odak ve kontrast eşiği bileşenin kabul kriteri. Sonradan eklenen bir katman değil.",
-      ],
-      [
-        "Değişiklik günlüğü",
-        "Her sürümde neyin değiştiği ve kırıcı değişikliklerde nasıl geçileceği yazılı duruyor.",
-      ],
-    ],
-    gatesNote: `${S.kapi} kapı bunları derleme anında denetliyor: ürün adı sızarsa, ölçek dışına çıkılırsa, bir prop belgelenmeden kalırsa ya da bir renk okunmazsa build duruyor.`,
+    whatLead: "Bir panelin ihtiyaç duyduğu her parça. Hepsi senin renginde.",
 
-    startTitle: "Üç satırda başla",
+    startTitle: "Üç adım. Beş dakika bile sürmüyor.",
     startBody:
-      "Sistem sıradan bir npm paketi olarak geliyor. React 19 bir peer dependency, yani kendi React'ini getirmiyor.",
-    startCta: "Kurulumun tamamı",
+      "Tamga sıradan bir npm paketi. Kur, stilini bağla, ilk bileşeni yaz. Yeni bir proje ya da bir sunucu gerekmiyor; var olan React projen yeterli.",
+    gereksinim: ["React 19", "Tailwind v4", "Node 20+"] as const,
+    baslamak: {
+      adimlar: [
+        ["Kur", "tek bir paket"],
+        ["Stili bağla", "CSS dosyana üç satır"],
+        ["İlk ekranı yaz", "bileşeni içe al, kullan"],
+      ] as const,
+      dosya2: "src/app/globals.css",
+      dosya3: "src/app/page.tsx",
+      adres: "localhost:3000",
+      bekliyor: "bekliyor",
+      calisiyor: "çalışıyor",
+      ipucu1: "Paket kuruldu. Stili bağlayınca bileşenler giyinir.",
+      ipucu2: "Stil bağlandı. İlk bileşeni yazınca burada görünür.",
+      ipucu3: "Kaydet'e bas: senin ilk Tamga ekranın.",
+      kaydet: "Kaydet",
+      yayinda: "Yayında",
+      kaydedildi: "Kaydedildi",
+      rehber: "Kurulum rehberi",
+      sablon: "Hazır ekranla başla",
+    },
 
-    componentsTitle: `${S.bilesen} bileşen, ${S.sayfa} sayfa`,
     componentsBody:
       "Her bileşenin kendi sayfası var: canlı örnek, kurallar, tipten üretilmiş props tablosu ve ilgili bileşenler. Türkçe ve İngilizce.",
-    componentsCta: "Hepsini gör",
 
     nameEyebrow: "Adı nereden geliyor",
     nameTitle: "Bir damganın işi, her yüzeyde aynı kalmaktı.",
@@ -116,9 +231,6 @@ const T = {
     nameP3:
       "Bir bileşenden beklediğimiz de bu. Hangi üründe, hangi ölçekte kullanılırsa kullanılsın kendisi kalması.",
 
-    save: "Kaydet",
-    cancel: "Vazgeç",
-    delete: "Sil",
     live: "Yayında",
     waiting: "Bekliyor",
     quiet: "Sessiz",
@@ -127,64 +239,339 @@ const T = {
     orders: "Sipariş",
     stock: "Stok",
     stockMeta: "48 kalem",
-    edit: "Düzenle",
     cardBody: "Gövde, başlıkla aynı yatay ritmi paylaşır.",
     notify: "Bildirimler",
 
+    /* Bölüm etiketleri numaralı: sayfa bir sıra izliyor ve okuyucu nerede
+       olduğunu numaradan biliyor. */
+    b01: "01 · Canlı önizleme",
+    b02: "02 · Kutunun içi",
+    b03: "03 · Kontroller",
+    b04: "04 · Başlamak",
+    b05: "05 · Adı nereden geliyor",
+    sonSurum: `Son sürüm v${SAYILAR.surum}`,
+    sayiKartlari: [
+      [`${SAYILAR.bilesen}`, "bileşen", "Düğmeden takvime, tablodan diyaloğa."],
+      [`${SAYILAR.sablon}`, "hazır ekran şablonu", "Liste, detay, ayarlar, giriş, pano…"],
+      [`${SAYILAR.sayfa}`, "sayfa doküman", "Her biri Türkçe ve İngilizce."],
+      [`${SAYILAR.ikon}`, "ikon", "Her üründe aynı anlama gelen."],
+    ] as const,
+    zincirTitle: `Her sürüm yayımlanmadan önce ${SAYILAR.kontrol} kontrolden geçiyor.`,
+    zincirBody: `Kontrollerden biri bile takılırsa sürüm npm'e gönderilmiyor. Aşağıdan bir hata seçip kontrolleri çalıştırın, nerede takıldığını görün.`,
+    zincir: {
+      baslik: "Sürüm öncesi kontroller",
+      canlandirma: "canlandırma",
+      komut: "$ pnpm verify",
+      soru: "Bir hata ekleyin",
+      oynat: "Baştan oynat",
+      seritAdi: "{n} kontrol, sırayla",
+      kosuyor: "{n}. kontrol çalışıyor · {ad}",
+      durdu: "{n}. kontrolde takıldı · {kapi}",
+      kalan: "Sonraki {n} kontrol hiç çalışmadı.",
+      gecti: "Bütün kontroller geçti: sürüm yayımlanabilir.",
+      varsayim:
+        "Buradaki hatalar kodda yok, burası bir varsayım. Satırlar gerçek: her biri bir kez kasten yapılıp zincir koşturuldu.",
+      senaryolar: {
+        yok: {
+          ad: "Hata yok",
+          baslik: `${SAYILAR.kontrol} kontrolün hepsi çalıştı, hiçbiri takılmadı.`,
+          sonuc: "",
+        },
+        fizik: {
+          ad: "Gölgeyi kenardan ayır",
+          baslik:
+            "Gölgenin rengi kenarın rengiyle aynı değil. Hiçbir şey hata vermez, yüzey yalnız ucuz hissettirir ve kimse nedenini bulamaz.",
+          sonuc: "Sürüm yayımlanmadı.",
+        },
+        ceviri: {
+          ad: "Bir metni çevirmeden bırak",
+          baslik:
+            "Bir sözlük anahtarı yalnız bir dilde var. Sayfa açılır, o dili kullanan kişi boş bir yer görür ve kimse hata bildirmez.",
+          sonuc: "Sürüm yayımlanmadı.",
+        },
+        tema: {
+          ad: "Koyu temada bir rengi unut",
+          baslik:
+            "Renk açık temada tanımlı, koyuda değil. Patlamaz: sessizce açık temanın değerine düşer, ve marka gece yarım kalır.",
+          sonuc: "Sürüm yayımlanmadı.",
+        },
+        kontrast: {
+          ad: "Okunmayan bir renk seç",
+          baslik:
+            "Yazı zeminin üstünde 2.17 kontrast veriyor, en az 4.5 olmalı. Bu eşiğin altındaki yazı birçok ekranda okunmuyor.",
+          sonuc: "Sürüm yayımlanmadı.",
+        },
+      },
+    },
+    kurulumKomutu: "npm install tamga-ui",
+    kopyala: "Kopyala",
+    kopyalandi: "Kopyalandı",
+    onizlemeBaslik: "Siparişler",
+    onizlemeCiro: "Ciro",
+    onizlemeCiroDeger: "₺48.2K",
+    onizlemeSatirlar: [
+      ["#1042", "Teslim edildi", "positive"],
+      ["#1041", "Hazırlanıyor", "elevated"],
+      ["#1040", "İade sürecinde", "caution"],
+    ] as [string, string, string][],
+    masaBody:
+      "Tablodan takvime, diyalogdan bildirime: hepsi aynı fizikle basılıyor, aynı gölgeyle yükseliyor. Masadaki her parça çalışıyor; bir kategoriye gel, o aile öne çıksın.",
+    masa: {
+      renk: "Rengin",
+      renkDegistir: "değiştir",
+      kategoriler: [
+        "Hepsi",
+        "Veri",
+        "Form",
+        "Eylem",
+        "Blok",
+        "Grafik",
+        "Katman",
+        "Geri bildirim",
+        "Gezinme",
+      ] as const,
+      alt: "{n} bileşenin 15'i",
+      altVurgu: "bu masada. Hepsi aynı token'lardan, hepsi iki temada.",
+      hepsiniGor: "Hepsini gör",
+      karo: {
+        tabloAdi: "Hesap tablosu",
+        hesap: "Hesap",
+        durum: "Durum",
+        mrr: "Aylık",
+        secili: "seçili",
+        sirala: "Sırala",
+        satirSec: "Satırı seç",
+        oncekiAy: "Önceki ay",
+        sonrakiAy: "Sonraki ay",
+        kaydet: "Kaydet",
+        vazgec: "Vazgeç",
+        duzenle: "Düzenle",
+        sil: "Sil",
+        bildirimler: "Bildirimler",
+        otomatikYedek: "Otomatik yedek",
+        aylik: "Aylık",
+        yillik: "Yıllık",
+        fatura: "Faturalama",
+        ara: "Ara",
+        plan: "Plan",
+        tarih: "Tarih",
+        suzgecYok: "Süzgeç yok · bir alana tıkla",
+        tumFiltreler: "Tüm filtreler",
+        hepsiniTemizle: "Hepsini temizle",
+        temizle: "Temizle",
+        uygula: "Uygula",
+        eslesmeYok: "Eşleşen yok",
+        tumu: "Tümü",
+        ac: "seç",
+        kaldir: "filtresini kaldır",
+        baslangic: "Başlangıç",
+        bitis: "Bitiş",
+        gelir: "₺842K",
+        gelirArtis: "+12%",
+        skor: "Sağlık skoru",
+        hesabiSil: "Hesabı sil",
+        hesabiSilGovde: "Ayşe Demir ve 3 aboneliği kalıcı olarak silinecek.",
+        diyalogAc: "Diyaloğu aç",
+        kapat: "Kapat",
+        bildirimYok: "Kaydet'e bas, bir bildirim düşsün.",
+        bildirimBaslik: "Değişiklikler kaydedildi",
+        bildirimAlt: "Yeni ayarlar bütün ekibe uygulandı.",
+        adimlar: ["Hesap", "Ekip", "Ödeme", "Bitti"] as const,
+        devam: "Devam",
+        geri: "Geri",
+        birak: "Dosyayı buraya bırak",
+        secDosya: "bilgisayardan seç",
+        ipucu: "PNG, JPG · en çok 4 MB",
+        dosyaKaldir: "Kaldır",
+        sola: "Sola al",
+        saga: "Sağa al",
+        kapakEtiketi: "kapak",
+        sekmeler: ["Genel", "Ekip", "Faturalar"] as const,
+        segment: ["Gün", "Hafta", "Ay"] as const,
+        esik: "Eşik",
+        artir: "Artır",
+        azalt: "Azalt",
+        yayinda: "Yayında",
+        beklemede: "Beklemede",
+        hata: "Hata",
+        okunmamis: "okunmamış bildirim",
+        proPlan: "Pro plan",
+        eylemler: "Eylemler",
+        kopyala: "Kopyala",
+        arsivle: "Arşivle",
+        kopyalandi: "Kopyalandı",
+        menuIpucu: "Düğmelerin üstüne gel: menü ve ipucu açılır.",
+        durumlar: ["Etkin", "Beklemede", "Askıda"] as const,
+        planlar: ["Ücretsiz", "Pro", "Kurumsal"] as const,
+      },
+    },
+    hepsiniGoster: "Hepsini göster",
     footerNote: "MIT lisansı",
     footerBy: "Mantıksal Yazılım A.Ş.",
     footerRepo: "GitHub'da incele",
   },
   en: {
-    eyebrow: "A design system by Mantıksal",
-    title: "The system our own interfaces are built on.",
-    lead: "Tamga is the set of components, tokens and rules we use to build our own products. We wrote it for ourselves, then opened it up.",
-    ctaDocs: "Read the docs",
+    heroBaslik: "Accounts",
+    heroSayi: "1,284",
+    heroDavet: "Invite",
+    heroSatirlar: [
+      ["Ayşe Demir", "Enterprise", "Active", "2 m"],
+      ["Mert Aksoy", "Pro", "Invited", "yesterday"],
+      ["Zeynep Kaya", "Pro", "Suspended", "3 d"],
+      ["Can Öztürk", "Free", "Active", "1 h"],
+    ] as const,
+    heroAralik: "1–4 of 1,284",
+    heroKpi: "Active users · 30 days",
+    heroKpiDeger: "12,480",
+    heroKpiArtis: "+8%",
+    heroOnceki: "Previous page",
+    heroSonraki: "Next page",
+    canliTitle: "Not a screenshot. Poke at it.",
+    canliBody:
+      "The panel below is built from Tamga's components and really works: walk the menu, filter the accounts, select them, archive them. Then type your own product name and brand colour on the left; the whole panel turns into your brand.",
+    canli: {
+      masa: "Control desk",
+      canli: "live",
+      ad: "Your product's name",
+      adIpucu: "In the menu, the tab and the address bar.",
+      renk: "Your brand colour",
+      ozelRenk: "My own colour",
+      kutular: [
+        { hex: "#1e4fd8", label: "Tamga blue" },
+        { hex: "#e02938", label: "Red" },
+        { hex: "#0f766e", label: "Emerald" },
+        { hex: "#7c3aed", label: "Purple" },
+        { hex: "#d97706", label: "Amber" },
+        { hex: "#0a1f3d", label: "Navy" },
+        { hex: "#db2777", label: "Pink" },
+        { hex: "#65a30d", label: "Green" },
+      ],
+      kontrast: "Contrast",
+      kontrastIyi: "The text on the button is readable.",
+      kontrastZayif: "The text on the button struggles at this colour.",
+      temaMenu: "Theme and menu",
+      acik: "Light",
+      koyu: "Dark",
+      dar: "Narrow",
+      genis: "Wide",
+      tasi: "Take this to your project",
+      sifirla: "Start over",
+      ara: "Search the panel",
+      hesapAra: "Search accounts",
+      profil: "Profile",
+      gorunumAyarlari: "Appearance settings",
+      cikis: "Sign out",
+      genelBakis: "Overview",
+      hesaplar: "Accounts",
+      ayarlar: "Settings",
+      yeniHesap: "New account",
+      kaydet: "Save",
+      kpi: [
+        ["Active users", "12,480", "last 30 days"],
+        ["New accounts", "184", "this week"],
+        ["Monthly revenue", "₺842K", "+12%"],
+      ] as const,
+      haftalik: "Sign-ups this week",
+      gunler: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const,
+      sonHareketler: "Recent activity",
+      hareketler: [
+        ["Ayşe Demir moved to Enterprise", "2 m"],
+        ["Mert Aksoy was invited", "1 h"],
+        ["Zeynep Kaya was suspended", "3 d"],
+        ["Backup finished", "yesterday"],
+      ] as const,
+      durum: "State",
+      durumlar: ["All", "Active", "Invited", "Suspended"] as const,
+      plan: "Plan",
+      son: "Last seen",
+      hesap: "Account",
+      secili: "accounts selected",
+      arsivle: "Archive",
+      vazgec: "Cancel",
+      bosSuzgec: "No account matches this filter.",
+      kapat: "Close",
+      detay: "Account detail",
+      gorunum: "Appearance",
+      panelKapsam: "panel",
+      urunAdi: "Product name",
+      urunAdiNot: "In the menu, the tab and the address bar.",
+      markaRengi: "Brand colour",
+      markaRengiNot: "The palette and both themes come from this one colour.",
+      tema: "Theme",
+      temaNot: "System",
+      kenarMenusu: "Sidebar",
+      kenarMenusuNot: "Free",
+      bildirimler: "Notifications",
+      bildirimSecenek: ["When an account is created", "When a plan changes", "Weekly summary"] as const,
+      sil: "Delete",
+      silBaslik: "Delete the account",
+      silGovde: "{ad} and everything attached to this account will be deleted for good.",
+      silindi: "deleted",
+      logo: "Logo",
+      logoNot: "The full logo, on the wide menu.",
+      amblem: "Mark",
+      amblemNot: "The square sign on the narrow menu. Without it, the initial is drawn.",
+      ornegeDon: "Back to the sample",
+      gorsel: {
+        name: "Image",
+        upload: "Upload",
+        replace: "Replace",
+        remove: "Remove",
+        empty: "No image yet",
+        errorType: "PNG, JPG or SVG only.",
+        errorSize: "The file is too large.",
+        errorUnreadable: "The file could not be read.",
+      },
+      hesapMenu: "Account menu",
+      arsivlendi: "accounts archived",
+      kaydedildi: "New account created",
+      hesapAdi: "Selin Er",
+      hesapPosta: "selin",
+    },
+    markAdi: "The Tamga mark",
+    eyebrow: "Open source · MIT",
+    title: "An open source design system for admin panels.",
+    lead: "It brings the tables, forms and filters a panel is made of, and the ready-made screens built from them, into a single package. You can set the colours to your own brand and read the documentation in Turkish or English.",
+    ctaDocs: "Browse the components",
+    ctaKurulum: "Start the install",
     ctaRepo: "GitHub",
     headerCta: "Docs",
-    meta: ["React 19", "MIT license", "Docs in English and Turkish"],
+    meta: [`${SAYILAR.bilesen} components`, "Ready-made screens", "Turkish and English"],
 
     tokenEyebrow: "The token layer",
-    tokenTitle: "The product changes. The system does not.",
-    tokenBody:
-      "Spacing, scale and behavior hold steady across every product. The only thing that changes is the token file: color and typeface. Pick a product below and watch the same components come out different.",
-    tokenGroup: "Product type",
     proofNote:
       "None of this is a screenshot. Every button, tag and card comes out of the package, and gets redrawn when the theme changes.",
 
     whatTitle: "What's inside",
-    whatLead: "Libraries ship code. Tamga ships the rules too.",
-    whatItems: [
-      [
-        "Tokens",
-        `Color, type, spacing and duration live in one file. Components read from it instead of inventing their own values: ${S.token} tokens, ${S.sinif} classes.`,
-      ],
-      [
-        "Components",
-        `Each one has its own page: a working example, when to reach for it, and a props table generated from the types. ${S.bilesen} components, ${S.sayfa} pages.`,
-      ],
-      [
-        "Patterns",
-        "Form layout, validation, empty states, asking for confirmation. The layer that says how components behave together.",
-      ],
-      ["Themes", "A brand is a token file. Adding one takes a file, not a branch."],
-      [
-        "Accessibility",
-        "Keyboard navigation, visible focus and contrast are acceptance criteria, not a pass we make later.",
-      ],
-      ["Changelog", "What changed in every release, and how to move across a breaking one."],
-    ],
-    gatesNote: `${S.kapi} gates enforce this at build time: if a product name leaks, if something goes off scale, if a prop is left undocumented or if a colour fails contrast, the build stops.`,
+    whatLead: "Every piece a panel needs. All of them in your colour.",
 
-    startTitle: "Start in three lines",
+    startTitle: "Three steps. It takes under five minutes.",
     startBody:
-      "The system arrives as an ordinary npm package. React 19 is a peer dependency, so it does not bring its own.",
-    startCta: "Full installation",
+      "Tamga is an ordinary npm package. Install it, wire up the stylesheet, write your first component. You do not need a new project or a server; the React project you already have is enough.",
+    gereksinim: ["React 19", "Tailwind v4", "Node 20+"] as const,
+    baslamak: {
+      adimlar: [
+        ["Install", "a single package"],
+        ["Wire up the style", "three lines in your CSS file"],
+        ["Write the first screen", "import a component and use it"],
+      ] as const,
+      dosya2: "src/app/globals.css",
+      dosya3: "src/app/page.tsx",
+      adres: "localhost:3000",
+      bekliyor: "waiting",
+      calisiyor: "running",
+      ipucu1: "The package is installed. Wire up the style and the components get dressed.",
+      ipucu2: "The style is wired. Write the first component and it shows up here.",
+      ipucu3: "Press Save: your first Tamga screen.",
+      kaydet: "Save",
+      yayinda: "Live",
+      kaydedildi: "Saved",
+      rehber: "Installation guide",
+      sablon: "Start from a screen",
+    },
 
-    componentsTitle: `${S.bilesen} components, ${S.sayfa} pages`,
     componentsBody:
       "Every component has its own page: a live example, the rules, a props table generated from the types, and what it relates to. In English and Turkish.",
-    componentsCta: "See them all",
 
     nameEyebrow: "Where the name comes from",
     nameTitle: "A tamga had one job: to stay itself on any surface.",
@@ -195,9 +582,6 @@ const T = {
     nameP3:
       "That is what we want from a component. Whatever product it lands in and whatever size it runs at, it stays itself.",
 
-    save: "Save",
-    cancel: "Cancel",
-    delete: "Delete",
     live: "Live",
     waiting: "Waiting",
     quiet: "Quiet",
@@ -206,15 +590,269 @@ const T = {
     orders: "Orders",
     stock: "Stock",
     stockMeta: "48 items",
-    edit: "Edit",
     cardBody: "The body shares the header's horizontal rhythm.",
     notify: "Notifications",
 
+    b01: "01 · Live preview",
+    b02: "02 · What is in the box",
+    b03: "03 · The checks",
+    b04: "04 · Getting started",
+    b05: "05 · Where the name comes from",
+    sonSurum: `Latest release v${SAYILAR.surum}`,
+    sayiKartlari: [
+      [`${SAYILAR.bilesen}`, "components", "From a button to a calendar, a table to a dialog."],
+      [`${SAYILAR.sablon}`, "ready-made screens", "List, detail, settings, sign-in, overview…"],
+      [`${SAYILAR.sayfa}`, "documentation pages", "Every one of them in Turkish and English."],
+      [`${SAYILAR.ikon}`, "icons", "Each meaning the same thing in every product."],
+    ] as const,
+    zincirTitle: `Every release passes ${SAYILAR.kontrol} checks before it is published.`,
+    zincirBody: `If even one check fails, the release is never sent to npm. Pick a mistake below, run the checks, and see where it stops.`,
+    zincir: {
+      baslik: "Pre-release checks",
+      canlandirma: "replay",
+      komut: "$ pnpm verify",
+      soru: "Introduce a mistake",
+      oynat: "Play again",
+      seritAdi: "{n} checks, in order",
+      kosuyor: "Running check {n} · {ad}",
+      durdu: "Stopped at check {n} · {kapi}",
+      kalan: "The remaining {n} checks never ran.",
+      gecti: "Every check passed: the release can ship.",
+      varsayim:
+        "None of these mistakes are in the code; this is a what-if. The lines are real: each one was introduced once and the chain was run.",
+      senaryolar: {
+        yok: {
+          ad: "No mistake",
+          baslik: `All ${SAYILAR.kontrol} checks ran and none of them stopped.`,
+          sonuc: "",
+        },
+        fizik: {
+          ad: "Give the shadow its own colour",
+          baslik:
+            "The shadow no longer matches the border. Nothing errors; the surface merely starts to feel cheap and nobody can say why.",
+          sonuc: "The release did not ship.",
+        },
+        ceviri: {
+          ad: "Leave a string untranslated",
+          baslik:
+            "A dictionary key exists in one language only. The page still opens, the reader of that language sees a blank, and nobody reports it.",
+          sonuc: "The release did not ship.",
+        },
+        tema: {
+          ad: "Forget a colour in dark mode",
+          baslik:
+            "The colour is defined in light and missing in dark. Nothing breaks: it silently falls back to the light value, and the brand is half-finished at night.",
+          sonuc: "The release did not ship.",
+        },
+        kontrast: {
+          ad: "Pick an unreadable colour",
+          baslik:
+            "The text sits at 2.17 contrast against its ground; 4.5 is the floor. Below that line text is unreadable on many screens.",
+          sonuc: "The release did not ship.",
+        },
+      },
+    },
+    kurulumKomutu: "npm install tamga-ui",
+    kopyala: "Copy",
+    kopyalandi: "Copied",
+    onizlemeBaslik: "Orders",
+    onizlemeCiro: "Revenue",
+    onizlemeCiroDeger: "$48.2K",
+    onizlemeSatirlar: [
+      ["#1042", "Delivered", "positive"],
+      ["#1041", "Being prepared", "elevated"],
+      ["#1040", "Return in progress", "caution"],
+    ] as [string, string, string][],
+    masaBody:
+      "From a table to a calendar, a dialog to a notification: all of them are pressed with the same physics and lift with the same shadow. Every piece on the board works; hover a category and that family comes forward.",
+    masa: {
+      renk: "Your colour",
+      renkDegistir: "change",
+      kategoriler: [
+        "All",
+        "Data",
+        "Form",
+        "Action",
+        "Block",
+        "Chart",
+        "Layer",
+        "Feedback",
+        "Navigation",
+      ] as const,
+      alt: "15 of {n} components",
+      altVurgu: "are on this board. All from the same tokens, all in both themes.",
+      hepsiniGor: "See them all",
+      karo: {
+        tabloAdi: "Account table",
+        hesap: "Account",
+        durum: "State",
+        mrr: "Monthly",
+        secili: "selected",
+        sirala: "Sort",
+        satirSec: "Select row",
+        oncekiAy: "Previous month",
+        sonrakiAy: "Next month",
+        kaydet: "Save",
+        vazgec: "Cancel",
+        duzenle: "Edit",
+        sil: "Delete",
+        bildirimler: "Notifications",
+        otomatikYedek: "Automatic backup",
+        aylik: "Monthly",
+        yillik: "Yearly",
+        fatura: "Billing",
+        ara: "Search",
+        plan: "Plan",
+        tarih: "Date",
+        suzgecYok: "No filter · click a field",
+        tumFiltreler: "All filters",
+        hepsiniTemizle: "Clear all",
+        temizle: "Clear",
+        uygula: "Apply",
+        eslesmeYok: "No match",
+        tumu: "All",
+        ac: "select",
+        kaldir: "filter, remove",
+        baslangic: "Start",
+        bitis: "End",
+        gelir: "₺842K",
+        gelirArtis: "+12%",
+        skor: "Health score",
+        hesabiSil: "Delete the account",
+        hesabiSilGovde: "Ayşe Demir and 3 subscriptions will be deleted for good.",
+        diyalogAc: "Open the dialog",
+        kapat: "Close",
+        bildirimYok: "Press Save and a notification drops in.",
+        bildirimBaslik: "Changes saved",
+        bildirimAlt: "The new settings apply to the whole team.",
+        adimlar: ["Account", "Team", "Payment", "Done"] as const,
+        devam: "Continue",
+        geri: "Back",
+        birak: "Drop the file here",
+        secDosya: "or choose from your computer",
+        ipucu: "PNG, JPG · 4 MB at most",
+        dosyaKaldir: "Remove",
+        sola: "Move left",
+        saga: "Move right",
+        kapakEtiketi: "cover",
+        sekmeler: ["General", "Team", "Invoices"] as const,
+        segment: ["Day", "Week", "Month"] as const,
+        esik: "Threshold",
+        artir: "Increase",
+        azalt: "Decrease",
+        yayinda: "Live",
+        beklemede: "Pending",
+        hata: "Failed",
+        okunmamis: "unread notifications",
+        proPlan: "Pro plan",
+        eylemler: "Actions",
+        kopyala: "Copy",
+        arsivle: "Archive",
+        kopyalandi: "Copied",
+        menuIpucu: "Hover the buttons: the menu and the tooltip open.",
+        durumlar: ["Active", "Pending", "Suspended"] as const,
+        planlar: ["Free", "Pro", "Enterprise"] as const,
+      },
+    },
+    hepsiniGoster: "Show all",
     footerNote: "MIT licence",
     footerBy: "Mantıksal Yazılım A.Ş.",
     footerRepo: "Browse on GitHub",
   },
 };
+
+
+
+/**
+ * Hero'nun sağındaki canlı önizleme.
+ *
+ * EKRAN GÖRÜNTÜSÜ DEĞİL, ve bu bütün mesele: bir kit tanıtımının kendi kitini
+ * kullanmaması, söylediği şeyi çürütür. Satırlar kitin `StatusChip`i, çizgi
+ * kitin `Sparkline`ı, kart kitin kendi yüzeyi.
+ *
+ * ÜÇ SATIR, VE ÜÇÜ DE AYRI TON: bir liste ekranının asıl işi "hangisi hangi
+ * hâlde" sorusunu tek bakışta cevaplamak. Tek tonlu üç satır o işi göstermezdi.
+ */
+function HeroOnizleme({
+  t,
+}: {
+  t: {
+    heroBaslik: string;
+    heroSayi: string;
+    heroDavet: string;
+    heroSatirlar: readonly (readonly [string, string, string, string])[];
+    heroAralik: string;
+    heroKpi: string;
+    heroKpiDeger: string;
+    heroKpiArtis: string;
+    heroOnceki: string;
+    heroSonraki: string;
+  };
+}) {
+  const tonlar: Tone[] = ["positive", "caution", "danger", "positive"];
+  return (
+    <div className="relative">
+      <div className="tamga-card overflow-hidden">
+        <div className="tamga-head tamga-gutter flex items-center gap-3 py-3">
+          <strong className="flex-1 text-control font-bold text-ink">{t.heroBaslik}</strong>
+          <span className="tamga-chip tamga-chip-mono">{t.heroSayi}</span>
+          <span className="tamga-btn tamga-btn-primary tamga-btn-sm" aria-hidden>
+            {t.heroDavet}
+          </span>
+        </div>
+        <div className="tamga-gutter flex flex-col py-1">
+          {t.heroSatirlar.map(([ad, plan, durum, ne], i) => (
+            <div
+              key={ad}
+              className="flex items-center gap-3 border-[var(--color-line)] py-3"
+              style={{ borderTopWidth: i === 0 ? 0 : 1, borderTopStyle: "dashed" }}
+            >
+              {/* KARE AVATAR: tam yuvarlak bu kitte yalnız üç yerde, ve biri
+                  avatar değil. */}
+              <span className="home-hero-avatar">
+                {ad
+                  .split(" ")
+                  .map((k) => k[0])
+                  .join("")}
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-body font-semibold text-ink">{ad}</span>
+                <span className="text-caption text-ink-faint">{plan}</span>
+              </span>
+              <StatusChip label={durum} state={tonlar[i] ?? "neutral"} dot />
+              <span className="w-12 text-right font-mono text-caption text-ink-faint">{ne}</span>
+            </div>
+          ))}
+        </div>
+        <div className="tamga-gutter flex items-center gap-2 border-t border-[var(--color-line)] py-3">
+          <span className="tamga-mini-btn" aria-label={t.heroOnceki}>
+            <Icon icon={CaretLeft} size="xs" weight="bold" />
+          </span>
+          <span className="tamga-mini-btn" aria-label={t.heroSonraki}>
+            <Icon icon={CaretRight} size="xs" weight="bold" />
+          </span>
+          <span className="font-mono text-caption text-ink-faint">{t.heroAralik}</span>
+        </div>
+      </div>
+
+      {/* KPI kartı tablonun sağ alt KÖŞESİNE biniyor, satırların üstüne değil:
+          kartın tepesi tablonun ayak şeridiyle aynı hizada. Önce 40 pikseldi ve
+          son iki satırın durum çiplerini örtüyordu; listenin asıl bilgisini
+          kapatan bir süs, süs değil hata. Dar ekranda binme kalkıyor. */}
+      <div
+        className="tamga-raised mt-4 flex flex-col gap-1.5 p-4 lg:absolute lg:-right-5 lg:-bottom-20 lg:mt-0 lg:w-56"
+        style={{ boxShadow: "6px 6px 0 var(--color-accent)" }}
+      >
+        <span className="text-caption text-ink-faint">{t.heroKpi}</span>
+        <span className="flex items-baseline gap-2">
+          <strong className="font-display text-display font-bold text-ink">{t.heroKpiDeger}</strong>
+          <StatusChip label={t.heroKpiArtis} state="positive" />
+        </span>
+        <Sparkline values={[12, 18, 15, 22, 28, 26, 34]} />
+      </div>
+    </div>
+  );
+}
 
 export default async function Home({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
@@ -222,216 +860,226 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
   const t = T[lang];
 
   return (
-    <div className="min-h-dvh bg-page text-ink-soft">
+    <div className="min-h-dvh" style={{ background: "var(--color-band)" }}>
       <SiteHeader
         lang={lang}
         dict={dict}
         duzen="tanitim"
+        bolumler={
+          <>
+            {(
+              [
+                ["#canli", t.b01],
+                ["#icinde", t.b02],
+                ["#kontroller", t.b03],
+                ["#kurulum", t.b04],
+              ] as const
+            ).map(([href, label]) => (
+              <a key={href} href={href} className="home-bolum-link">
+                {/* Şeritte yalnız ADI geçiyor, numarası değil: numara sayfadaki
+                    sırayı söylüyor, şeritteki bağlantı ise nereye gideceğini. */}
+                {label.slice(label.indexOf("·") + 2)}
+              </a>
+            ))}
+          </>
+        }
         cta={
           <Link
             href={yol(lang, "installation")}
-            className={`${buttonVariants({ size: "sm" })} no-underline`}
+            className={`${buttonVariants({ variant: "primary", size: "sm" })} docs-header-cta no-underline`}
           >
             {t.headerCta}
           </Link>
         }
       />
 
-      <main className="mx-auto max-w-(--home-wrap) px-5 sm:px-7">
-        {/* ── Hero ─────────────────────────────────────────────────────
-            Ekranı doldurmuyor. `100vh` bir hero, sayfanın kendisini ilk
-            karenin dışına iter — ve bu sayfanın işi bir şey satmak değil,
-            bir şey GÖSTERMEK. */}
-        <section className="pt-20 pb-16">
-          <p className="docs-eyebrow">{t.eyebrow}</p>
-          <h1 className="home-h1 mt-5">{t.title}</h1>
-          <p className="home-lead mt-6">{t.lead}</p>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <Link
-              href={yol(lang, "installation")}
-              className={`${buttonVariants({ variant: "primary" })} no-underline`}
-            >
-              {t.ctaDocs}
-            </Link>
-            <a
-              href="https://github.com/mantiksal/tamga"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${buttonVariants()} no-underline`}
-            >
-              {t.ctaRepo}
-            </a>
+      <main className="mx-auto max-w-(--home-wrap) px-6">
+        {/* ── Açılış ───────────────────────────────────────────────────
+            EKRANI DOLDURMUYOR. `100vh` bir hero, sayfanın kendisini ilk karenin
+            dışına iter, ve bu sayfanın işi bir şey satmak değil GÖSTERMEK:
+            sağdaki önizleme kitin kendi bileşenleriyle çizili. */}
+        <section className="grid gap-14 pt-16 pb-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center">
+          <div>
+            <p className="docs-eyebrow flex items-center gap-2">
+              <span aria-hidden className="inline-block size-2" style={{ background: "var(--color-accent)" }} />
+              {t.eyebrow}
+            </p>
+            <h1 className="home-h1 mt-5">{t.title}</h1>
+            <p className="home-lead mt-6">{t.lead}</p>
+            {/* İKİ DÜĞME, BİR KOMUT SATIRI DEĞİL: kurulum komutu hero'daydı ve
+                orada erken · ziyaretçi daha ne kurduğunu bilmiyor. Komut artık
+                "04 · Başlamak"ta, ilk adımın içinde. */}
+            <div className="mt-9 flex flex-wrap items-center gap-3">
+              <Link href={yol(lang, "table")} className={`${buttonVariants({ variant: "primary" })} no-underline`}>
+                {t.ctaDocs}
+                <Icon icon={ArrowRight} size="xs" weight="bold" />
+              </Link>
+              <Link href={yol(lang, "installation")} className={`${buttonVariants()} no-underline`}>
+                <Icon icon={TerminalWindow} size="xs" weight="bold" />
+                {t.ctaKurulum}
+              </Link>
+            </div>
+
+            {/* ÜÇ GERÇEK, ROZET DEĞİL. Bunlar bir durum bildirmiyor
+                (`StatusChip` olamazlar) ve bir eylem değiller (düğme
+                olamazlar); okunacak üç bilgi, o yüzden en sessiz biçim. */}
+            <ul className="home-hero-bilgi">
+              {t.meta.map((m, i) => (
+                <li key={m}>
+                  <Icon icon={HERO_GLIF[i]!} size="sm" weight="duotone" />
+                  {m}
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* ÜÇ GERÇEK, ROZET DEĞİL. Bunlar bir durum bildirmiyor (`StatusChip`
-              olamazlar) ve bir eylem değiller (düğme olamazlar); okunacak üç
-              bilgi. O yüzden en sessiz biçim: ince dikey kurallarla ayrılmış
-              bir satır. Bir kutuya alsaydık üç bilgi, altındaki canlı
-              bileşenlerle aynı ağırlığa çıkardı. */}
-          {/* AYIRAÇLAR DAR EKRANDA YOK.
-              Kural çizgisi her öğenin ÖNÜNE giriyor (ilki hariç), ve liste
-              sarınca ikinci satır bir çizgiyle başlıyordu: havada asılı, neyi
-              neyden ayırdığı belirsiz bir işaret. Telefonda boşluk zaten
-              ayırmaya yetiyor; çizgi, üçü tek satıra sığdığı yerde anlamlı. */}
-          <ul className="mt-8 flex list-none flex-wrap items-center gap-x-5 gap-y-2 p-0 text-[length:var(--docs-small)] text-ink-faint sm:gap-x-4">
-            {t.meta.map((m, i) => (
-              <li key={m} className="flex items-center gap-4">
-                {i > 0 && (
-                  <span aria-hidden className="hidden h-3.5 w-px bg-[var(--color-line)] sm:block" />
-                )}
-                {m}
-              </li>
-            ))}
-          </ul>
+          <HeroOnizleme t={t} />
         </section>
 
-        {/* ── Token katmanı ───────────────────────────────────────────
+        {/* ── 01 · Token katmanı ───────────────────────────────────────
             BÖLÜMÜN İDDİASI KENDİ ÜSTÜNDE DENENİYOR. "Ürün değişir, sistem
-            yerinde kalır" cümlesinin altına üç ekran görüntüsü koymak, iddiayı
-            bir söz olarak bırakırdı. Seçici aynı DOM'u yeniden boyuyor:
-            bileşenler yeniden kurulmuyor bile, değişen tek şey kabın üstündeki
-            simge sözlüğü. Kanıt, cümlenin kendisi kadar yer kaplıyor. */}
-        <section id="sistem" className="pb-16">
-          <p className="docs-eyebrow">{t.tokenEyebrow}</p>
-          <h2 className="home-h2 mt-5">{t.tokenTitle}</h2>
-          <p className="mt-5 max-w-2xl text-[length:var(--docs-text)] leading-relaxed text-ink-soft">
-            {t.tokenBody}
-          </p>
-
-          <div className="mt-9">
-            <TokenKatmani
-              lang={lang}
-              labels={{
-                group: t.tokenGroup,
-                save: t.save,
-                cancel: t.cancel,
-                delete: t.delete,
-                edit: t.edit,
-              }}
-            />
-          </div>
-          <p className="mt-4 text-[length:var(--docs-small)] text-ink-faint">{t.proofNote}</p>
+            yerinde kalır" cümlesinin altına üç ekran görüntüsü koymak iddiayı
+            bir söz olarak bırakırdı. Seçici aynı DOM'u yeniden boyuyor. */}
+        
+        {/* 01 · CANLI ÖNİZLEME · sayfanın kalbi. Panel `AppShell` ile
+            çiziliyor, içindeki her şey kitin bileşeni, rengi ziyaretçinin
+            yazdığı hex'ten `makePalette` üretiyor. */}
+        <section id="canli" className="home-bolum">
+          <p className="home-etiket">{t.b01}</p>
+          <h2 className="home-h2 mt-4 max-w-4xl">{t.canliTitle}</h2>
+          <p className="home-lead mt-5 max-w-3xl">{t.canliBody}</p>
+          <CanliOnizleme labels={t.canli} />
         </section>
 
-        {/* ── İçinde ne var ───────────────────────────────────────────
-            ALTI MADDE, VE HİÇBİRİ BAĞLANTI DEĞİL. Dördünün doküman sayfası
-            var, ikisinin (erişilebilirlik, değişiklik günlüğü) yok; dördünü
-            bağlayıp ikisini düz bırakmak, bağlantısı olmayan ikisini eksik
-            gösterirdi. Altısı da bir okuma; gitmek isteyen üst şeritten
-            dokümana giriyor.
+        {/* ── 02 · İçinde ne var ───────────────────────────────────────
+            ALTI KART, VE HİÇBİRİ BAĞLANTI DEĞİL. Dördünün doküman sayfası var,
+            ikisinin (erişilebilirlik, değişiklik günlüğü) yok; dördünü bağlayıp
+            ikisini düz bırakmak, bağlantısı olmayan ikisini eksik gösterirdi.
+            O yüzden altısı da okunan bir kart ve hiçbiri yükselmiyor. */}
+        {/* 02 · KUTUNUN İÇİ. Altı söz kartı buradaydı; yerini masa aldı çünkü
+            aynı şeyi ANLATMAK ile GÖSTERMEK arasındaki fark bu sayfanın
+            tamamının konusu. Kapı şeridi kaldı: altı sözü derleme anında tutan
+            mekanizmanın adı orada, hikâyesi bir alttaki bölümde. */}
+        <section id="icinde" className="home-bolum">
+          <p className="home-etiket">{t.b02}</p>
+          <h2 className="home-h2 mt-4 max-w-4xl">{t.whatLead}</h2>
+          <p className="home-lead mt-5">{t.masaBody}</p>
 
-            SAYILAR CÜMLENİN İÇİNDE, ayrı bir rakam ızgarasında değil. Bir
-            landing'e iri sayılar dizmek, sayının kendisini iddia yapıyor;
-            oysa buradaki sayılar iddiayı DESTEKLEYEN detaylar. */}
-        <section id="icinde" className="home-section">
-          <p className="docs-eyebrow">{t.whatTitle}</p>
-          <h2 className="home-h2 mt-5">{t.whatLead}</h2>
-          <dl className="mt-10 grid gap-x-10 gap-y-7 sm:grid-cols-2">
-            {t.whatItems.map(([term, body]) => (
-              <div key={term} className="border-l-2 border-[var(--color-accent-line)] pl-5">
-                <dt className="text-subhead font-semibold text-ink">{term}</dt>
-                <dd className="mt-1.5 text-[length:var(--docs-small)] leading-relaxed text-ink-soft">
-                  {body}
-                </dd>
+          <Masa
+            labels={t.masa}
+            bilesen={SAYILAR.bilesen}
+            docsHref={yol(lang, "table")}
+          />
+        </section>
+
+        {/* ── 03 · Kurulum ─────────────────────────────────────────────
+            Kod kartı dokümanınkiyle AYNI bileşen: tanıtımda başka bir kod
+            bloğu çizmek, iki yerde iki ayrı doğru üretirdi. */}
+        {/* 03 · KONTROLLER. Ziyaretçinin sözcüğü "kontrol", deponunki "kapı";
+            burada okuyanın sözcüğü geçiyor. Kuralları anlatmıyor, zincirin
+            takıldığını gösteriyor: sıra `verify` betiğinden, hata satırları
+            gerçekten koşturulmuş dört ihlalin çıktısından geliyor. */}
+        <section id="kontroller" className="home-bolum">
+          <div className="home-zincir-ust">
+            <div>
+              <p className="home-etiket">{t.b03}</p>
+              <h2 className="home-h2 mt-4 max-w-4xl">{t.zincirTitle}</h2>
+              <p className="home-lead mt-5">{t.zincirBody}</p>
+            </div>
+            <span className="home-surum-etiket">{t.sonSurum}</span>
+          </div>
+
+          {/* DÖRT SAYI, hepsi `counts.json`dan: bir bileşen eklendiğinde bu
+              kartlar da değişiyor. Elle yazılmış bir sayı ana sayfada en uzun
+              yaşayan yalan. */}
+          <div className="home-sayilar">
+            {t.sayiKartlari.map(([sayi, ad, alt], i) => (
+              <div key={ad} className="home-sayi-kart">
+                <Icon icon={SAYI_GLIF[i]!} size="lg" weight="duotone" />
+                <strong className="home-sayi">{sayi}</strong>
+                <span className="home-sayi-ad">{ad}</span>
+                <span className="home-sayi-alt">{alt}</span>
               </div>
             ))}
-          </dl>
-          {/* KAPILAR BİR MADDE DEĞİL, ALTISININ ALTINDAKİ ÇİZGİ: altı sözün
-              hepsini derleme anında tutan şey aynı mekanizma. */}
-          <p className="mt-9 max-w-2xl border-t border-[var(--color-line)] pt-5 text-[length:var(--docs-small)] leading-relaxed text-ink-faint">
-            {t.gatesNote}
-          </p>
-        </section>
-
-        {/* ── Kurulum ─────────────────────────────────────────────────── */}
-        <section className="home-section grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-center">
-          <div>
-            <h2 className="home-h2">{t.startTitle}</h2>
-            <p className="mt-5 text-[length:var(--docs-text)] leading-relaxed text-ink-soft">
-              {t.startBody}
-            </p>
-            <Link
-              href={yol(lang, "installation")}
-              className={`${buttonVariants()} mt-7 no-underline`}
-            >
-              {t.startCta}
-            </Link>
           </div>
-          <CodeDemo lang={lang} />
+
+          <KapiZinciri
+            zincir={SAYILAR.kontroller}
+            senaryolar={KAPI_DEMO.senaryolar}
+            labels={{
+              ...t.zincir,
+              /* Kontrol adları içerikte, sözlükte değil: `extract-counts` her
+                 build'de hepsinin iki dilde bulunduğunu denetliyor. */
+              adlar: Object.fromEntries(
+                Object.entries(KAPI_DEMO.adlar).map(([anahtar, ad]) => [anahtar, ad[lang]]),
+              ),
+            }}
+          />
         </section>
 
-        {/* ── Bileşenler ──────────────────────────────────────────────
-            Tamamı değil, ilk on iki. Seksen bir kart bir landing'i bir
-            dizine çevirir; dizinin yeri zaten dokümanın kendisi. */}
-        <section className="home-section">
-          <h2 className="home-h2">{t.componentsTitle}</h2>
-          <p className="mt-5 max-w-2xl text-[length:var(--docs-text)] leading-relaxed text-ink-soft">
-            {t.componentsBody}
-          </p>
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {navFor(lang)
-              .slice(0, 12)
-              .map((p) => (
-                <Link
-                  key={p.slug}
-                  href={yol(lang, p.slug)}
-                  className="tamga-card tamga-rise block p-5 no-underline"
-                >
-                  <span className="block text-subhead font-semibold text-ink">{p.title[lang]}</span>
-                  <span className="mt-1 block text-[length:var(--docs-small)] text-ink-faint">
-                    {p.blurb[lang]}
-                  </span>
-                </Link>
+        <section id="kurulum" className="home-bolum">
+          <div className="home-zincir-ust">
+            <div>
+              <p className="home-etiket">{t.b04}</p>
+              <h2 className="home-h2 mt-4">{t.startTitle}</h2>
+              <p className="home-lead mt-5 max-w-3xl">{t.startBody}</p>
+            </div>
+            {/* ÜÇ GEREKSİNİM BAŞLIKLA AYNI SATIRDA: "ne gerekiyor" sorusu
+                adımlardan ÖNCE soruluyor, ve cevabı üç kelime. */}
+            <ul className="home-gereksinim">
+              {t.gereksinim.map((g) => (
+                <li key={g}>{g}</li>
               ))}
+            </ul>
           </div>
-          <Link
-            href={yol(lang, "button")}
-            className={`${buttonVariants({ variant: "primary" })} mt-9 no-underline`}
-          >
-            {t.componentsCta}
-          </Link>
+          <Baslamak
+            labels={t.baslamak}
+            dict={dict}
+            rehberHref={yol(lang, "installation")}
+            sablonHref={yol(lang, "templates")}
+          />
         </section>
 
-        {/* ── Adı nereden geliyor ─────────────────────────────────────
-            SAYFANIN SONUNDA, BAŞINDA DEĞİL. Bir ziyaretçinin ilk sorusu "bu
-            ne" ve "nasıl kuruyorum"; adın hikâyesi ancak o ikisi cevaplandıktan
-            sonra ilgi çekiyor. Başa konsaydı, aradığı şeye giden yolun önünde
-            duran bir paragraf olurdu.
+        {/* ── 04 · Bileşenler ──────────────────────────────────────── */}
 
-            ÖLÇÜ DAR. Bu bölüm okunmak için var, taranmak için değil; sayfanın
-            geri kalanı iki sütunlu ve maddeli, burası tek sütun ve düz metin.
-            Biçim, okuma hızının değiştiğini söylüyor. */}
-        <section className="home-section border-t border-[var(--color-line)]">
-          <p className="docs-eyebrow">{t.nameEyebrow}</p>
-          <h2 className="home-h2 mt-5 max-w-3xl">{t.nameTitle}</h2>
-          <div className="mt-7 flex max-w-[var(--docs-measure)] flex-col gap-5 text-[length:var(--docs-text)] leading-relaxed text-ink-soft">
-            <p>{t.nameP1}</p>
-            <p>{t.nameP2}</p>
-            {/* SON PARAGRAF MÜREKKEP RENGİNDE: hikâye orada bir KURALA
-                dönüşüyor, ve sayfanın bütün iddiası o cümlede toplanıyor. */}
-            <p className="text-ink">{t.nameP3}</p>
+        {/* ── 05 · Adı nereden geliyor ─────────────────────────────────
+            SAYFANIN SONUNDA, BAŞINDA DEĞİL. Bir ziyaretçinin ilk sorusu "bu ne"
+            ve "nasıl kuruyorum"; adın hikâyesi ancak o ikisi cevaplandıktan
+            sonra ilgi çekiyor. */}
+        <section className="home-bolum grid gap-12 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
+          <span className="home-amblem">
+            {/* AMBLEM İKİ RENKLİ VE MARKA RENGİNE DÖNMÜYOR: dış halka ile içteki
+                sekiz kare ayrı renkte, ve bu işaretin kendisi · seçilen renge
+                boyanınca tek renge düşüyor ve Tamga'nın amblemi olmaktan
+                çıkıyordu. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/tamga-mark-light.svg" alt={t.markAdi} className="w-1/2 dark:hidden" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/tamga-mark-dark.svg" alt={t.markAdi} className="hidden w-1/2 dark:block" />
+          </span>
+          <div>
+            <p className="home-etiket">{t.b05}</p>
+            <h2 className="home-h2 mt-4">{t.nameTitle}</h2>
+            <div className="mt-7 flex flex-col gap-5 text-[length:var(--docs-text)] leading-relaxed text-ink-faint">
+              <p className="m-0">{t.nameP1}</p>
+              <p className="m-0">{t.nameP2}</p>
+              {/* SON PARAGRAF MÜREKKEP RENGİNDE: hikâye orada bir KURALA
+                  dönüşüyor, ve sayfanın bütün iddiası o cümlede toplanıyor. */}
+              <p className="m-0 font-semibold text-ink">{t.nameP3}</p>
+            </div>
           </div>
         </section>
       </main>
 
-      <footer className="mt-8 border-t border-[var(--color-line)] py-10">
-        {/* DAR EKRANDA ALT ALTA, GENİŞ EKRANDA İKİ UÇTA.
-            Tek satırdı ve bağlantılar `ml-auto` ile sağa itiliyordu; satır
-            sarınca `ml-auto` ikinci satırda da işliyor ve bağlantılar tek
-            başlarına sağa yapışıyordu. Sonuç, solda bir cümle sağda bir küme
-            ve ikisinin arasında sebebi görünmeyen bir boşluktu. Telefonda iki
-            satır, ikisi de sola hizalı; ikinci satırdaki bağlantılar arası
-            boşluk da 20'den 24'e çıkıyor, çünkü orada dokunma hedefleri
-            birbirine yakın. */}
-        <div className="mx-auto flex max-w-(--home-wrap) flex-col gap-4 px-5 sm:flex-row sm:items-center sm:px-7">
-          <span className="text-[length:var(--docs-small)] text-ink-faint">
+      <footer className="border-t border-[var(--color-edge)] py-8">
+        <div className="mx-auto flex max-w-(--home-wrap) flex-col gap-4 px-6 sm:flex-row sm:items-center">
+          <span className="flex items-center gap-3 text-[length:var(--docs-crumb)] text-ink-faint">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/tamga-mark-light.svg" alt="" className="h-6 w-auto dark:hidden" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/tamga-mark-dark.svg" alt="" className="hidden h-6 w-auto dark:block" />
             {t.footerNote} ·{" "}
-            <a
-              href="https://mantiksal.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="tamga-link"
-            >
+            <a href="https://mantiksal.com" target="_blank" rel="noopener noreferrer" className="tamga-link">
               {t.footerBy}
             </a>
           </span>
@@ -440,7 +1088,7 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
               href="https://github.com/mantiksal/tamga"
               target="_blank"
               rel="noopener noreferrer"
-              className="tamga-link text-[length:var(--docs-small)]"
+              className="tamga-link text-[length:var(--docs-crumb)]"
             >
               {t.footerRepo}
             </a>
@@ -448,7 +1096,7 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
               href="https://www.npmjs.com/package/tamga-ui"
               target="_blank"
               rel="noopener noreferrer"
-              className="tamga-link text-[length:var(--docs-small)]"
+              className="tamga-link text-[length:var(--docs-crumb)]"
             >
               npm
             </a>

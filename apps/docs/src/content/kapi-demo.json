@@ -1,0 +1,104 @@
+{
+  "yakalandi": "2026-09-28",
+  "senaryolar": [
+    {
+      "id": "yok",
+      "kapi": null,
+      "olcum": null
+    },
+    {
+      "id": "fizik",
+      "kapi": "check:physics",
+      "olcum": ".tamga-says-balon · --color-edge-strong / --color-line"
+    },
+    {
+      "id": "ceviri",
+      "kapi": "check:docs-i18n",
+      "olcum": "nav.searchEmpty · tr / en"
+    },
+    {
+      "id": "tema",
+      "kapi": "check:token-parity",
+      "olcum": "--color-ink-faint · :root / .dark"
+    },
+    {
+      "id": "kontrast",
+      "kapi": "check:token-contrast",
+      "olcum": "--color-ink-faint (#9aa7bd) / --color-page (#f4f2ec) = 2.17"
+    }
+  ],
+  "adlar": {
+    "props": {
+      "tr": "Doküman koddan üretiliyor",
+      "en": "The docs are generated from the code"
+    },
+    "check:names": {
+      "tr": "Müşteri adı sızmıyor",
+      "en": "No customer name leaks"
+    },
+    "check:scale": {
+      "tr": "Uydurma ölçü yok",
+      "en": "No invented measurement"
+    },
+    "check:docs-i18n": {
+      "tr": "Her sayfa iki dilde",
+      "en": "Every page in both languages"
+    },
+    "check:prop-coverage": {
+      "tr": "Her seçenek anlatılmış",
+      "en": "Every option is documented"
+    },
+    "check:no-emdash": {
+      "tr": "Noktalama temiz",
+      "en": "Punctuation is clean"
+    },
+    "check:yorum": {
+      "tr": "Kısa açıklamalar",
+      "en": "Comments stay short"
+    },
+    "check:css": {
+      "tr": "CSS sağlam",
+      "en": "The CSS is sound"
+    },
+    "check:physics": {
+      "tr": "Gölge ile kenar uyumlu",
+      "en": "Shadow matches the border"
+    },
+    "check:yuvarlak": {
+      "tr": "Daire yalnız 3 yerde",
+      "en": "Circles in three places only"
+    },
+    "check:olcu-hizasi": {
+      "tr": "Aynı yükseklik",
+      "en": "One control height"
+    },
+    "check:data-props": {
+      "tr": "Test kancaları geçiyor",
+      "en": "Test hooks pass through"
+    },
+    "check:item-hooks": {
+      "tr": "Liste öğeleri eksiksiz",
+      "en": "List items carry the hooks"
+    },
+    "check:kit-class": {
+      "tr": "Her sınıf gerçekten var",
+      "en": "Every class really exists"
+    },
+    "check:token-parity": {
+      "tr": "İki tema eksiksiz",
+      "en": "Both themes are complete"
+    },
+    "check:token-contrast": {
+      "tr": "Yazı okunuyor",
+      "en": "Text stays readable"
+    },
+    "check:tema-cifti": {
+      "tr": "Koyuda kaybolan yok",
+      "en": "Nothing vanishes in dark"
+    },
+    "check:palette": {
+      "tr": "Palet 40 renkle denendi",
+      "en": "The palette is tried on 40 brands"
+    }
+  }
+}

@@ -89,7 +89,7 @@ paneldeki bir ayardan, hesaptan, hiç build almadan.
 **Değişen tek şey renk.** Boşluk, köşe, gölge, tipografi sabit; on panel aynı karakterde. Bu bir
 kısıt değil ürünün kendisi: değişkeni de serbest bırakmak, on ayrı tasarım demek olurdu.
 
-## 5 · Ton, kitin dört rolü
+## 5 · Ton, kitin altı rolü
 
 ```ts
 type Tone = "neutral" | "positive" | "caution" | "danger";

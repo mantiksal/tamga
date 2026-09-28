@@ -12,9 +12,10 @@ Bu dosya hem insanlar hem yapay zekâ için. Ekibe yeni katılan biri (ya da onu
 **Kütüphane, framework değil.** Ekranları tüketen proje kurar; kit parçaları verir.
 
 **Kit mekanizmayı taşır, ürün sözlüğü ve kimliği taşır.** Bu tek cümle en sık başvurulan sınır:
-`TimelineStrip` kite girer, `UptimeBar` girmez; ikisi aynı koddur, biri alan adı taşır. Kit dört
-nötr rol bilir (`neutral · positive · caution · danger`); ürünün "kargoda", "tükendi", "kritik"
-sözlüğü kendi tarafında eşlenir.
+`TimelineStrip` kite girer, `UptimeBar` girmez; ikisi aynı koddur, biri alan adı taşır. Kit altı
+nötr rol bilir (`neutral · positive · caution · elevated · danger · info`); ürünün "kargoda",
+"tükendi", "kritik" sözlüğü kendi tarafında eşlenir. Sayı bir sözleşme: yedincisi eklenince
+`kit.test.ts`teki tripwire düşer, ve düşmesi gerekir.
 
 ## Fazın dışına taşma
 
@@ -72,8 +73,8 @@ Tam adımlar [`docs/02-bilesen-ekleme.md`](docs/02-bilesen-ekleme.md)'de. Özet:
    yeni bir şey icat etme, var olanın etrafına doğru işaretlemeyi koy.
 3. **Metin yazma.** Kit çeviri yapmaz: görünen her metin prop olarak gelir. Bir `aria-label`
    bile.
-4. **Yeni bir kontrol mü?** Kendi choreography'si varsa kendi dosyasına koy; `check-states-stories`
-   dosya bazında çalışıyor ve besteci ile kontrolü ayırt edebilmeli.
+4. **Yeni bir kontrol mü?** Kendi choreography'si varsa kendi dosyasına koy. Bunun kapısı YOK:
+   ölçüt eskiden `check-states-stories` idi, Storybook sökülünce o da gitti.
 5. **Doküman sayfası aynı partide yazılır.** Sonra yazılan doküman yazılmaz.
 
 ## Yorumlar

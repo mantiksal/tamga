@@ -11,17 +11,21 @@ adlandırılması, dağıtım modelinin değişmesi) **implementasyondan önce**
 
 | # | Karar | Durum |
 |---|-------|-------|
-| 0001 | Tasarım sistemi ortak bir kütüphaneye taşındı (K1–K5, K12) | ✅ Kabul edildi · **iç** |
+| [0001](../ozel/0001-ortak-kutuphaneye-tasima.md) | Tasarım sistemi ortak bir kütüphaneye taşındı (K1–K5, K12) | ✅ Kabul edildi · **iç** |
 | [0002](0002-css-oneki.md) | CSS sınıf öneki `tamga-` (K6) | ✅ Kabul edildi |
-| 0003 | Üç katman ve müşteri panelleri (K10, K12) | ✅ Kabul edildi · **iç** |
+| [0003](../ozel/0003-uc-katman-ve-musteri-panelleri.md) | Üç katman ve müşteri panelleri (K10, K12) | ✅ Kabul edildi · **iç** |
 | [0004](0004-sablon-katmani.md) | Şablon katmanı: bir ekranın şekli bir nesne | ✅ Kabul edildi |
 
-**İki kayıt bu depoda değil.** 0001 ve 0003 kararlarını müşteri adlarıyla, onların bugünkü
-teknoloji yığınlarıyla ve iç değerlendirmelerle gerekçelendiriyor. Numaralar boş bırakılmadı,
-çünkü bir ADR dizisi tarihtir ve boşluk "böyle bir karar yok" demektir; kayıtlar duruyor, yalnız
-kamusal değiller. Kararın kendisi zaten yukarıdaki satırda yazılı ve kitin koduna yansımış
-durumda: kit hiçbir ürünün sözlüğünü tanımıyor (`check-names`), ve şablon katmanı ADR-0004'te
-anlatılıyor.
+**İki kayıt bu klasörde değil, `docs/ozel/`de.** 0001 ve 0003 kararlarını müşteri adlarıyla,
+onların bugünkü teknoloji yığınlarıyla ve iç değerlendirmelerle gerekçelendiriyor; `ozel/`
+klasörü yayınlanan doküman sitesine girmiyor, o yüzden oraya konuldular. Numaralar boş
+bırakılmadı, çünkü bir ADR dizisi tarihtir ve boşluk "böyle bir karar yok" demektir. Kararın
+kendisi zaten yukarıdaki satırlarda yazılı ve kitin koduna yansımış durumda: kit hiçbir ürünün
+sözlüğünü tanımıyor (`check-names`), ve şablon katmanı ADR-0004'te anlatılıyor.
+
+> Bu paragraf bir süre "İki kayıt bu depoda **değil**" diyordu ve yanlıştı: ikisi de depoda,
+> yalnız başka klasörde. Bir okuyucunun aradığı dosyayı "yok" sanıp aramayı bırakması, yanlış
+> yerde araması kadar pahalı.
 
 ## Buraya ait olmayan kararlar
 
@@ -29,5 +33,8 @@ Bu depo bir **kütüphanedir** ve ürün kararlarını vermez. Saat dilimi, dil 
 terminoloji ve bilgi mimarisi, hepsi tüketen ürünün kararıdır ve o ürünün kendi ADR'lerine aittir.
 
 Kitin bugünkü görsel kararları tüketen bir ürünün kendi tasarım belgesinde doğdu. Evrensel
-olanların bu depoya taşınması (`docs/03-fizik.md`) açık bir iştir; o ürünün alanına özgü olanlar
-üründe kalır.
+olanlar taşındı ve artık doküman sitesinde yaşıyor (`/docs/fizik`, `/docs/olcu`, `/docs/hareket`);
+o ürünün alanına özgü olanlar üründe kalır.
+
+> Buradaki bağlantı bir süre `docs/03-fizik.md`'ye işaret ediyordu ve öyle bir dosya hiç olmadı:
+> fizik doğrudan doküman sitesine yazıldı.

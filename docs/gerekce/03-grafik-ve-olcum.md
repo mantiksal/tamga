@@ -87,6 +87,15 @@ Son nokta bir kare ile işaretli: gözün nereye bakacağını söyleyen tek şe
 ve "şu an" ile "geçmiş" arasındaki farkı kuran işaret.
 
 
+### Sparkline'ın etkileşimi ve alan dolgusu kalktı.
+
+Hover ya da ipucu eklendiği an okuyucu değeri okumaya çalışıyor, ve bu çizgi
+değeri okutamaz: ekseni yok. Değer gerekiyorsa `LineChart`.
+
+Alan dolgusu ile taban çizgisi de aynı sebeple gitti: ikisi de eksensiz bir
+çizgiye eksen taklidi veriyordu, yani okuyucuya okuyamayacağı bir ölçek
+vadediyordu. Geriye tek soru kalıyor, ve cevabı çizginin yönü.
+
 ---
 
 ## `stacked-bar.tsx`
@@ -126,3 +135,57 @@ that shape for completion would read as history at a glance.
 
 Always neutral. Progress reports completion, not state · a status colour
 here would be a signal that is not true.
+
+### Yığılmış sütun TEK HUE'NUN basamakları.
+
+Yığılmış dilimler aynı ölçünün PARÇALARI: bir günün siparişleri web, mobil ve
+pazaryeri olarak bölünüyor. Kategorik palete boyandığında (mavi, zeytin, teal)
+her dilim ayrı bir ölçü gibi okunuyor ve toplam gözden kayboluyor. Marka
+rampası o yüzden burada: `--color-accent` → `--color-brand-400` →
+`--color-brand-100` → `--color-brand-50`, referansın kendi renkleriyle aynı
+basamaklar.
+
+`seriRenk` ayrı ölçüler için ve orada ayrı renk DOĞRU olan: bir çizgi
+grafiğinde iki seri iki farklı şeyi ölçüyor. `yiginRenk` onun yığılmış
+karşılığı, ve ikisi karışmasın diye ayrı iki ad.
+
+DİLİMİN KENARI VAR, ALT KENARI YOK. Üst üste duran iki dilimin arasında tek bir
+çizgi kalıyor; en alttaki de taban çizgisinin üstüne ikinci bir çizgi
+koymuyor.
+
+### KPI'ın iki biçimi, ve ızgaranın kabı.
+
+`tile` bir KPI ızgarasının kurulduğu karo: solda 40 piksellik ikon kutusu,
+sayının üstünde etiket. `detail` ise yanında bir eğri, altında bir değişim çipi
+taşıyan uzun kart · ikon ve etiket üstte, sayı ile grafik yan yana. Referans
+ikisini ayrı ayrı çiziyor ve ayrımın sebebi yer: bir eğrinin sığacağı kart, dört
+tanesi yan yana duran karodan uzun.
+
+IZGARANIN SÜTUNUNU KAP VERİYOR. Kural üç medya sorgusuydu ve karoları da
+sayıyordu; ölçülen hata şuydu: 1494 piksellik bir EKRANDA, 790 piksellik bir
+sütunun içinde dört sütun açıyor, karo 190 piksele düşüyor ve sayı kırpılıyordu.
+`auto-fit` + 210px tabanı kabın kendi genişliğine bakıyor.
+
+İSKELET DE TAŞMIYOR. `SkeletonKpi`ın çubukları karonun gerçek ölçülerinde (80 ve
+96 piksel) ama `max-w-full` taşıyor: dar bir kapta kutudan çıkmıyorlar · taşan
+bir iskelet, yerini tuttuğu şeyin geometrisini taşımıyor demektir.
+
+## Grafiğin imleç işareti: bir kare, bir hap ve bir hayalet balon
+
+`LineChart`in `viewBox`u 100x100 ve `preserveAspectRatio="none"`: koordinatlar yüzde gibi
+davransın diye. Bu doğru bir karar ama bir bedeli var, ve bedel iki yerde ödendi.
+
+**İşaret kare değil HAP basıyordu.** İmlecin durduğu noktaya çizilen `<rect width={14}
+height={14}>` viewBox biriminde. 1800 piksel genişlikte, 160 piksel yükseklikte çizilen bir
+grafikte bir X birimi ~18 piksel, bir Y birimi 1.6 piksel: kare ekranda **252 x 22 piksel**
+oluyordu. Yanındaki yorum "ölçü `viewBox`tan bağımsız olsun diye `vectorEffect`" diyordu, ama
+`vector-effect: non-scaling-stroke` yalnız ÇİZGİ KALINLIĞINI koruyor, geometriyi değil. İşaret
+artık SVG'nin dışında, HTML katmanında: yüzdeyle konumlanıyor, piksel ölçüsünü koruyor
+(`.tamga-chart-mark`), ve her genişlikte kare kalıyor. Dikey kesik çizgi SVG'de kaldı · sıfır
+genişlikte bir çizgi yatay gerilmeden etkilenmiyor.
+
+**Erişilebilir ad bir ipucu balonu çizdiriyordu.** Ad `<title>` ile veriliyordu
+(`aria-labelledby`), ve tarayıcı SVG'nin `<title>`ını NATIVE BİR İPUCU olarak basıyor: grafiğin
+üstüne gelince kenarda "Kayıt: 14" yazan bir kutu beliriyordu. Üstelik yanlış sayıyla, çünkü
+başlık her zaman SON değeri söylüyor, imlecin durduğu günü değil. Ad artık `aria-label`: ekran
+okuyucu için aynı cümle, ekranda balon yok.

@@ -45,7 +45,7 @@ packages/ui/          kitin kendisi · yayınlanan paket (tamga-ui)
   src/index.ts        KAMUSAL YÜZEY · burada olmayan şey iç detaydır
 
 apps/docs/            doküman sitesi (Next.js, port 6070)
-  src/app/[lang]/     96 sayfa × 2 dil, statik üretiliyor
+  src/app/[lang]/     98 sayfa × 2 dil, statik üretiliyor
   src/components/     sitenin kendi parçaları (Demo · Props · Xref · Shell)
   src/content/        nav.ts (menü) · *.json (ÜRETİLİR, elle düzenleme)
 
@@ -79,10 +79,14 @@ pnpm changeset             # sürüm notu yaz (yayın öncesi)
 
 ---
 
-## On sekiz kapı
+## 22 adım, 18 kontrol
 
-`pnpm verify` şunları sırayla koşturur. **Kapıyı değil kodu düzelt**: bir guard'ı gevşetmek
-gerekiyorsa bu bir karardır: önce dokümandaki karşılığını değiştir, sonra guard'ı.
+`pnpm verify` şunları SIRAYLA koşturur; biri düşerse zincir orada durur. Yirmi iki adımın on
+sekizi bir kuralı denetleyen betik (`props` + `check:*`), dördü derleme işi (typecheck, kitin
+build'i, testler, dokümanın build'i) · ana sayfa ziyaretçiye on sekiziyle konuşuyor.
+
+**Kapıyı değil kodu düzelt**: bir guard'ı gevşetmek gerekiyorsa bu bir karardır: önce dokümandaki
+karşılığını değiştir, sonra guard'ı.
 
 | kapı | ne kanıtlıyor |
 | --- | --- |
@@ -92,18 +96,22 @@ gerekiyorsa bu bir karardır: önce dokümandaki karşılığını değiştir, s
 | `check:docs-i18n` | Her sayfa iki dilli, sözlükler paritede |
 | `check:prop-coverage` | Bir prop'un her seçeneği dokümanda geçiyor; okunmayan seçenek yok sayılır |
 | `check:no-emdash` | Okunan metinde uzun tire yok; tire, iki yargı arasındaki ilişkiyi seçmemenin yolu |
+| `check:yorum` | Kodda bir yorum bloğu altı düzyazı satırını geçmiyor. Anlatının yeri `docs/gerekce/`; yayınlanan gerekçeler (`TR:` taşıyan prop JSDoc'u ve token yorumu) muaf |
 | `check:css` | CSS yapısal olarak sağlam: yorumlar ve bloklar dengeli, bir kural sessizce yutulmuyor |
-| `check:physics` | Yasa 1 duruyor: yükselen her sınıf 1px kenar + sert offset, aynı renkte. Fizik bozulunca hiçbir şey hata vermez, panel yalnız ucuz hissettirir |
+| `check:physics` | Yasa 1 duruyor: yükselen her sınıf 1 ya da 1.5px kenar + sert offset, aynı renkte. Fizik bozulunca hiçbir şey hata vermez, panel yalnız ucuz hissettirir |
+| `check:yuvarlak` | Tam yuvarlak yalnız radyo düğmesi, skor halkası ve halka spinner'da. Kural yazılıydı ve ölçülmüyordu: Slider hem rayını hem topuzunu yuvarlak çiziyordu |
+| `check:olcu-hizasi` | Sekiz taban kontrolün hepsi `--control` yüksekliğini okuyor. `.tamga-segment` yüksekliğini dolgudan alıyordu: 42px, oysa token 40 |
 | `check:data-props` | Sunan eleman çizen her bileşen `data-*` kabul ediyor. Reddeden bileşen tüketiciyi sınıfı elle yazmaya itiyor, o da rolü ve klavyeyi kaybettiriyor |
 | `check:item-hooks` | Liste alan bir bileşenin ÖĞESİ de kanca taşıyor. Aynı asimetri üç kez bulundu ve üçü ayrı sürüme mal oldu |
 | `check:kit-class` | Kullanılan her `tamga-*` sınıfı tanımlı; tarayıcı bilmediği sınıfı sessizce yok sayar |
 | `check:token-parity` | Her token iki temada da tanımlı. Koyuda unutulan token açık temanın değerine düşüyor ve marka gece yarım kalıyor |
 | `check:token-contrast` | Varsayılan palet ölçülüyor: metin WCAG 4.5, yüzey ve çizgi ΔL* eşikleriyle. Üç ayrı soru, üç ayrı matematik |
+| `check:tema-cifti` | Sabit bir zeminle temayla dönen bir mürekkep eşleşmiyor. Üç kez oldu: açık temada doğru, koyuda yazı zemine karışmış |
 | `typecheck` | Tipler tutuyor |
 | `tamga-ui build` | Kit gerçekten derleniyor. Sonraki kapı `dist`ten okuduğu için bu adım ondan önce geliyor |
-| `check:palette` | Palet üreticisi 40 tonu iki temada tarıyor: 880 ölçüm. Üretici bir formül değil bir arama, o yüzden ton ton ölçülüyor |
+| `check:palette` | Palet üreticisi 40 tonu iki temada tarıyor: 1040 ölçüm. Üretici bir formül değil bir arama, o yüzden ton ton ölçülüyor |
 | `test` | Saf mantık sınanıyor: sayfalayıcı aritmetiği, ton rolleri, nabız rütbesi |
-| `build` | Derleniyor, 199 statik sayfa üretiliyor |
+| `build` | Derleniyor, 203 statik sayfa üretiliyor |
 
 Kapılar **CI'da da koşuyor** (`.github/workflows/verify.yml`): yerelde koşturmayı unutan bir dal
 yeşil görünüp kırık gelemez.

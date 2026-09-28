@@ -28,6 +28,48 @@ gönderiyor. Üçü de kendi başına çalışır, veri görmez, karar vermez:
 Sıralamayı, seçimi ve sayfayı ürün tutar; kit onları OKUNUR kılar.
 
 
+### Sıralı olmayan sütunun glifi · ok değil, davet.
+
+YÖN oku yalnız sıralı sütunda ve vurgu renginde: bir tabloda "neye göre sıralı"
+sorusu, sıralamanın kendisinden daha sık sorulur. Ama sıralanabilir sütunlar bir
+süre HİÇ glif taşımadı, ve o hâlde başlığın tıklanabilir olduğu hiçbir yerde
+yazmıyordu · kullanıcı sıralamayı ancak kazara buluyordu.
+
+Üçüncü bir işaret gerekiyordu, ve iki yönlü nötr glif (`Sort`) tam o: yön
+söylemiyor, "bu başlık bir kontrol" diyor. Hepsine aynı YÖN okunu koymak
+hangisinin etkin olduğunu okunmaz yapardı · reddedilen tasarım buydu, ve
+reddedilme sebebi hâlâ geçerli.
+
+
+### Baş kutu kendi kutusunu çizmiyor.
+
+`SelectAll` bir süre `role="checkbox"` taşıyan bir `span`di ve işaretini kendi
+eliyle basıyordu: işaretliyken `Checkbox`ın çentiği yerine düz bir KARE. Aynı
+sütunda iki farklı işaret duruyordu, ve fark yalnız hepsi seçiliyken görünüyordu.
+
+`Checkbox` üçüncü hâli (`indeterminate`) öğrendiği an bu kopyanın gerekçesi
+bitti. Şimdi ikisi de aynı bileşen, aynı ölçü (`compact`), aynı klavye.
+
+
+### Liste satırı ile tablo satırı aynı grileri kullanıyor.
+
+İkisi aynı işi yapıyor ve yan yana durduklarında iki farklı vurgu grisi
+okunuyordu: tablo `--color-hover`, liste `--color-sunk`. Kesik çizgide bir kez
+düzeltilmişti, zeminde kalmış. Yükseklik de `height` iken `min-height` oldu:
+satır iki satırlık (başlık + alt metin) olabiliyor ve sabit yükseklikte alt
+metin kutudan taşıyordu.
+
+
+### Seçim çubuğu bir şerit değil, bir ada.
+
+Kendi genişliği kadar, ortalanmış, yükseltilmiş ve ters zeminde. Tam genişlikte bir
+bant, zaten bantlardan kurulu bir ekranda bir bant daha oluyordu ve taşıdığı sayı
+aralarında kayboluyordu.
+
+`sticky`, yani nereye konursa oraya oturuyor; kaydırılan bir alanın içindeyse altta
+asılı kalıyor. Seçim boşken hiç render edilmiyor, çünkü boş bir çubuk yer kaplıyor
+ve bilgi vermiyor.
+
 ---
 
 ## `pagination.tsx`
@@ -65,6 +107,26 @@ Bir panelde log göstermek `<pre>` yazmaktan ibaret GÖRÜNÜR, ve değildir.
      bilgiyi yok eder.
   3. Ekran okuyucu. Saniyede üç satır akan bir bölgeyi `aria-live` ile
      duyurmak, sesli okuyucuyu kullanılamaz hâle getirir.
+
+FIRLATMAMANIN BEDELİ VAR, ve ödenmesi gerekiyor. Takip yalnız zaten alttaysan
+çalışınca, yukarıda okuyan kişiye gelen satır GÖRÜNMÜYOR: akış durmuş gibi
+duruyor ve kullanıcı sayfayı yeniliyor. "↓ 12 yeni satır" düğmesi tam bu boşluk
+için · sayıyı `labels.newLines` yazıyor çünkü çoğul kuralı dile göre değişiyor,
+ve aşağı inildiği an sayaç sıfırlanıyor.
+
+SAYAÇ BİR `ref`TE DEĞİL STATE'TE DEĞİL · İKİSİ DE. Son görülen satır sayısı bir
+`ref`te (render tetiklemesi gerekmiyor), okunmamış sayısı state'te (düğmenin
+metni o). İkisini de state yapmak her satırda iki render demekti.
+
+SEVİYE ROZETİNİ KİT ÇİZER, SÖZCÜĞÜNÜ ÜRÜN YAZAR. `level` bir string, `tone`
+rengi: "WARN" ile "UYARI" aynı rozet, ve kit hangisinin doğru olduğunu bilemez.
+Rozetin YUVASI sabit genişlikte, rozetin kendisi metni kadar · yoksa mesaj
+sütunu her satırda başka yerden başlıyor ve akış okunmuyor.
+
+AKIŞ AÇIK ZEMİNDE. Tasarım notu "koyu panel" diyor; kitin referans markup'ı ise
+log'u tablolarla aynı açık kartta çiziyor, ve kitte koyu kalan tek yüzey seçim
+çubuğu · o da bir ADA. Sayfanın ortasındaki 320px'lik koyu blok, ekranın ağırlık
+merkezini bir günlüğe verirdi. Markup kazandı.
 
 
 ---

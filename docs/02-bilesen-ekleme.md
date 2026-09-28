@@ -10,7 +10,7 @@
 
 **a) Var olanın varyantı mı?**
 Yeni bir varyant **yeni bir dosya değil**, mevcut `cva` tablosuna bir satır ya da bir prop.
-`Button`'ın altı varyantı, `StatusChip`'in dört rolü, `Skeleton`'ın dokuz hazır kalıbı; hiçbiri
+`Button`'ın altı varyantı, `StatusChip`'in altı rolü, `Skeleton`'ın dokuz hazır kalıbı; hiçbiri
 ayrı bileşen değil.
 
 **b) Sınıfı zaten var mı?**
@@ -27,10 +27,15 @@ ya da üründe bırak.
 
 `packages/ui/src/components/<ad>.tsx`.
 
-**Kendi dosyası mı, var olana mı?** Ölçüt `check-states-stories`: bileşen **yeni bir kontrol**
-getiriyorsa, yani kendi hover/basılma/seçili fiziği varsa, kendi dosyasında olmalı. Guard dosya
-bazında çalışıyor ve bir kontrolü besteci bileşenlerden ayırt edebilmeli. `RailLink` ve `Slider`
-bu yüzden ayrı dosyada.
+**Kendi dosyası mı, var olana mı?** Ölçüt şu: bileşen **yeni bir kontrol** getiriyorsa, yani
+kendi hover/basılma/seçili fiziği varsa, kendi dosyasında olmalı. `RailLink` ve `Slider` bu
+yüzden ayrı dosyada.
+
+> **Bu kuralın kapısı YOK, ve olmadığı yazılı olsun.** Ölçüt bir zamanlar `check-states-stories`
+> idi ve dashboard-v5'in Storybook'una bakıyordu; Storybook söküldüğünde o kapı da gitti
+> (`check-physics`in başındaki not bunu anlatıyor). Kapı gitti, kurala yapılan üç atıf kaldı ve
+> aylarca var olmayan bir guard'a işaret etti. Kural hâlâ doğru; onu tutan şey artık gözden
+> geçirme, bir script değil.
 
 ## Adım 2 · kurallar
 
@@ -81,11 +86,11 @@ Sonra yazılan doküman yazılmaz. Üç dosya:
 `Tooltip` dört yerleşimi destekliyordu, sayfa yalnız varsayılanı gösteriyordu. Okunmayan bir
 seçenek yok sayılır.
 
-## Adım 5 · yeni kontrolse states story
+## Adım 5 · yeni kontrolse altı durumu da göster
 
-`check-states-stories` yeni bir kontrolü yakalarsa **guard'ı susturma**: `dashboard-v5`'in
-`src/stories/` klasörüne bir states story yaz. Altı durum: rest · hover · press · focus-visible ·
-disabled · loading, gerçek olaylarla gösterilir.
+Yeni bir kontrol yazdıysan doküman sayfasında **altı durumun da** görünmesi gerekiyor: rest ·
+hover · press · focus-visible · disabled · loading. Bunu ölçen bir kapı yok (yukarıdaki nota
+bak); gösterilmeyen bir durum, denenmemiş bir durumdur.
 
 ## Adım 6 · kapılar
 

@@ -36,6 +36,56 @@ zemin, kareli kâğıt (8px, layout'un kendi modülü). Kareler iş yapıyor · 
 bir düzleme bırakılan sanat, başka birinin ürününe yapıştırılmış gibi durur.
 
 
+### The speech bubble, and why it is in the system.
+
+It is the one part of the mascot that IS in the system: 1px edge plus a 2px hard
+offset, exactly like every other raised object. That pairing is the whole trick,
+because it lets pixel art sit inside a strict interface without either one
+looking lost.
+
+The line is real text, not decoration, so it is readable. Keep it to one short
+sentence: the bubble is a voice, not a paragraph.
+
+### `EmptyState` · three layouts, one set of content.
+
+They are NOT three styles of the same picture. Each answers a different question
+about the screen underneath:
+
+  banner  wide and horizontal: art left, words centre, action at the far right
+          edge, numbered base plate underneath. Reads as a strip across the top
+          of a working screen.
+  ticket  a narrow tag pinned to a big surface, with a perforation and one
+          full-width action. For a single unambiguous next step.
+  routes  the words and the figure on the left, a list of ways in on the right.
+          Two buttons ask a yes/no question; a list answers "what can I even do
+          here", which is what somebody arriving actually wants to know.
+
+Each one also wants a different drawing. The layout decides the shape; the
+drawing decides what the emptiness FEELS like, and those are two choices, not
+one.
+
+### `EmptyBlank` · no box drawn around the nothing.
+
+This is the one that goes straight onto the page, not inside a card. A bordered
+panel needs content to bound; when the entire screen is empty there is nothing to
+bound, and the border becomes a frame around a void. So there is no border, no
+ground, no offset. The only structure is a hard floor rule as wide as the figure:
+enough to say he is standing somewhere, not enough to be a box.
+
+Reach for it when somebody lands on a section they have never used. For an empty
+area INSIDE a working screen, use `EmptyState` instead: that one has a card
+around it because the rest of the screen does too.
+
+### `EmptyTile` · a real button, and a spine instead of a banner.
+
+It obeys raised physics: 1px edge, 2px offset, lifts under the cursor, presses
+flat when clicked. A template you cannot pick has no business looking like a
+card.
+
+The category colour is a 3px SPINE under the art rather than a coloured banner
+behind it. A wall of coloured banners would out-shout a real event (Yasa 3); a
+rule carries the same grouping and outranks nothing.
+
 ---
 
 ## `error-state.tsx`

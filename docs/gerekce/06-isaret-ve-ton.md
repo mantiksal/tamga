@@ -22,10 +22,25 @@ So the kit speaks in ROLES and the product maps its own states onto them
 (`config/health-tone.ts`). The rule this encodes: the kit carries the
 MECHANISM, the product carries the DICTIONARY.
 
-Collapsing five states into four roles costs nothing: `ok` and `resolved`
-were byte-identical here · the same three variables · because up and
-resolved deliberately share one green (they belong to different domains and
-almost never appear in the same list).
+Collapsing five states into four roles cost nothing at the time: `ok` and
+`resolved` were byte-identical here · the same three variables · because up
+and resolved deliberately share one green (they belong to different domains
+and almost never appear in the same list).
+
+The scale has grown twice since, and each time because a real sentence had
+nowhere to go. `info` came fifth: the other four all answer "is something
+wrong", and a product that only wants to SAY something had to choose between a
+grey that reads as "not reporting" and a green that reads as "solved".
+
+`elevated` came sixth, and it is an INTERVAL rather than a shade. In an order
+list "being prepared" and "return in progress" are two different states and
+neither is a failure; with only `caution` and `danger` available they landed on
+the same colour, and the list showed two things as one. `elevated` sits between
+them: past the warning, not yet the failure.
+
+Each role now carries THREE values, not two: text, mark and wash. A dot has to
+carry at a few pixels and a sentence has to be read, and one colour cannot do
+both · the darkness that makes a dot legible stops it reading as a dot.
 
 Every value is a CSS variable, so the whole product follows the theme.
 
@@ -57,6 +72,43 @@ content arrives; a spinner lives inside a button that is mid-action.
 See docs/acik-sorular.md for why that split is the resolution to a
 contradiction v2 left open.
 
+
+### Eşitlikte ilki kazanıyor.
+
+Nesne anahtar sırası ekleme sırası, ve istekler etki sırasına göre kaydediliyor:
+yani ağaç sırası. Katı bir `>` eşitlerin İLKİNİ tutuyor, ve "ilk" sayfada en yukarı
+demek. (Karar: 2026-08-19, Ercüment.)
+
+Gerekçe şu: işaretin VARLIĞI, onu hangi satırın taşıdığından daha önemli. Her
+alternatif (zaman damgası, alan önceliği) daha hoş bir eşitlik bozma satın alıyor
+ama bedeli çağrı yerlerinin başka türlü ihtiyaç duymadıkları veriyi taşıması.
+
+### Nabız rütbesi bir varsayılan, politika değil.
+
+`rankOf` yalnız `danger`a nefes veriyor, ve gerekçesi kitin hizmet ettiği her alanda
+aynı: çok az işaret, anlamını yitirmiş bir işaretten küçük bir kusur. `caution`
+kendi rengini zaten taşıyor; nabız "buraya, şimdi bak" için saklı.
+
+Durumlarını daha ince sıralayan bir ürün açık bir rütbe geçiyor.
+
+### Rozet, üstüne oturduğu şeyle birlikte gider.
+
+`Badge` bir sarmalayıcı `span` kuruyor ve rozeti mutlak konumla köşeye koyuyor;
+yani rozet, üstüne oturduğu şeyin ÇOCUĞU değil KARDEŞİ. Çocuğu yapmak mümkün
+değil, çünkü `children` herhangi bir eleman olabilir ve onun içine yazmak o
+elemanın kendi düzenine karışmak olur.
+
+Bedeli ölçüldü: ikon düğmesi hover'da `translate(-1px,-1px)` ile kalkıyor, rozet
+yerinde kalıyor ve köşeden kopuyor; basıldığında fark iki katına çıkıyor. Rozet
+artık `:has()` ile aynı yolu gidiyor. İki sayı `.tamga-icon-btn`in kaymalarıyla
+aynı olmak zorunda, ve ikisi kit.css'te yan yana duruyor.
+
+### İkon düğmesinin gölgesi hover'da rengini değiştiriyordu.
+
+Duruşta `--color-edge-strong` (lacivert), hover'da `--color-edge` (açık gri).
+Yani imleç gelince düğme yükseliyor ama gölgesi SOLUYOR, ve göz bunu yükselme
+değil "devre dışı kaldı" diye okuyor. Yasa 1 zaten söylüyor: kenar ile offset
+aynı nesnenin iki yüzü, iki renk olduğunda gölge nesneden kopuyor.
 
 ---
 
@@ -124,3 +176,33 @@ rendered as plain ones for weeks until someone noticed by eye.
 The other half of that guarantee is check-tokens.mjs, which fails the
 build if a class named here is missing from the stylesheet. Between
 them there is no way left for a variant to exist in name only.
+
+## Karonun üstündeki glif: altı ton, altı mürekkep
+
+`Alert`in glifi kendi karesinde duruyor ve o karenin zemini tonun `mark` rengi. Mürekkebi bir
+süre `--color-page` idi: açık temada beyaza yakın olduğu için doğru görünüyordu, koyu temada
+siyaha dönüyor ve glif plakaya gömülüyordu. Kritik tonda ölçüm **2.96**, yani bir grafik nesne
+için geçerli olan 3.0 tabanının bile altında.
+
+Tek bir mürekkep bu sorunu çözmüyor, çünkü altı plaka altı ayrı parlaklıkta. Ölçüldü:
+
+| ton | plaka | beyaz | koyu plaka | seçilen |
+| --- | --- | --- | --- | --- |
+| positive | `#3e9a5c` | 3.51 | 4.69 | koyu |
+| caution | `#d9a93a` | 2.17 | 7.59 | koyu |
+| elevated | `#c8664a` | 3.85 | 4.27 | koyu |
+| danger | `#b8323f` | **5.89** | 2.79 | beyaz |
+| info | döner | 8.26 / 2.02 | 1.99 / 8.14 | **sayfa** |
+| neutral | `#8a8f99` | 3.25 | 5.07 | koyu |
+
+`info` ayrı duruyor çünkü plakası da temayla DÖNEN tek plaka (`#2447a8` → `#9db6f0`): orada
+mürekkebin de dönmesi gerekiyor, ve `--color-page` ikisini birlikte çeviriyor (7.38 / 8.61).
+Ötekilerde plaka sabit, dolayısıyla mürekkep de sabit olmak zorunda.
+
+Eşik metnin 4.5'i değil **3.0**: bir glif grafik bir nesne, ve WCAG onu ayrı ölçüyor. Ayrı bir
+eşik olmasaydı ya bu liste hiç ölçülmezdi ya da metin eşiği kalıp `elevated` (4.27) sebepsiz
+düşerdi.
+
+KAPI KAYNAĞI OKUYOR. İlk hâlinde çiftler `check-token-contrast`e elle yazılmıştı ve kasıtlı bir
+ihlal denendiğinde kapı geçti: ölçtüğü şey `tone.ts`in kullandığı çift değil, kendi listesiydi.
+Şimdi çiftler `tone.ts`ten okunuyor, ve aynı sabotaj kapıyı düşürüyor.

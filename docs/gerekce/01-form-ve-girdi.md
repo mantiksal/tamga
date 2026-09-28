@@ -25,6 +25,50 @@ parolasını görmeye çalışırken formu yollar. Bu, `<button>`'ın varsayıla
 yöneticisine yanlış şeyi kaydettirir.
 
 
+### Maskeli sır alanı · `PasswordInput`un tersi.
+
+Parola alanına bir şey YAZILIR; buraya yazılmaz, okunur ve kopyalanır. O yüzden
+salt-okunur, ve asıl düğmesi kopyalama.
+
+Maske ilk ve son birkaç karakteri bırakıyor. Tamamen gizlemek, kullanıcının
+"hangi anahtar bu" sorusunu cevapsız bırakıyor: üç anahtarı olan biri hangisine
+baktığını bilemez.
+
+### Etiket girdisi.
+
+Enter ya da virgül bir etiketi kapatıyor; boşken Backspace sonuncuyu siliyor.
+İkincisi küçük görünüyor ama en çok kullanılan yol: yanlış yazılan bir etiketi
+silmek için fareye uzanmak, akışı kesen tek şey.
+
+Yinelenen ETİKET SESSİZCE YUTULUYOR, hata verilmiyor. Aynı etiketi iki kez
+yazmak bir hata değil bir tekrar, ve kullanıcı zaten istediğini almış oluyor.
+
+### Çoklu seçim · neden `Combobox` yetmiyor.
+
+`Combobox` tek seçim yapıyor, bu birden çok. Ayrı bileşen olmasının sebebi
+görünüm değil DAVRANIŞ: tek seçimde liste seçince kapanıyor, çoklu seçimde
+KAPANMIYOR. Üç şey seçecek biri listeyi üç kez açmak zorunda kalmamalı.
+
+Seçilenler girdinin İÇİNDE çip olarak duruyor, altında ayrı bir listede değil:
+seçim ile seçilenler arasındaki mesafe arttıkça kullanıcı neyi seçtiğini görmek
+için gözünü iki yere birden koymak zorunda kalıyor.
+
+KLAVYE OLMADAN BU KONTROL YARIM. Etiket eklemenin doğal yolu YAZIP ENTER'A
+BASMAK: kullanıcı "adidas" yazıp Enter, "nike" yazıp Enter diyor ve iki çip
+ekliyor. Önce yalnız fareyle çalışıyordu; yazdıktan sonra listeye uzanıp
+tıklamak gerekiyordu, ve klavyeyle gezen biri hiç seçim yapamıyordu. Tuş
+tablosu kodun yanında duruyor.
+
+### Zamanlama girdisi · neden cron değil.
+
+Bir cron ifadesi (yıldız-eğik-beş biçimi) bir geliştirici için okunur, bir panel
+kullanıcısı için değil. Üstelik yanlış yazılan bir cron ifadesi hata vermiyor,
+sadece yanlış zamanda çalışıyor. Bu bileşen kürasyonlu bir liste sunuyor:
+kürasyonlu seçenek, serbestlik değil.
+
+Aralıklar dakika olarak veriliyor, çevirisi çağıranın: "5 dakika" ile "5
+minutes" arasındaki farkı kit bilemez.
+
 ---
 
 ## `combobox.tsx`
@@ -84,7 +128,37 @@ SIRALAMA OK TUŞLARIYLA DA YAPILIR, yalnız sürükleyerek değil. Sürükle-bı
 klavye kullanan biri için yok hükmündedir; her karta sol/sağ düğmesi koymak
 hem erişilebilir hem dokunmatik ekranda daha güvenilir.
 
-KİT DOSYA YÜKLEMEZ. `onChange` seçilen `File` nesnelerini verir; nereye
+`onReorder(id, hedef)` · ADIM DEĞİL HEDEF SIRA. İlk imza `(id, -1 | 1)` idi
+ve ok düğmeleri için yetiyordu; sürükleme gelince yetmedi, çünkü 4. görseli
+kapak yapmak tek adım değil. İki callback (biri ok, biri sürükleme) bir işi
+iki yerden anlatmak olurdu, o yüzden tek anlam kaldı: "bu ögeyi şu sıraya
+koy". Ok düğmeleri `i - 1` / `i + 1` gönderiyor.
+
+BIRAKMA KUYUSU KARELİ KÂĞIT DEĞİL. Kuyu bir süre `.tamga-art-well` kullanıyordu,
+yani ÇİZİM zemini ("kâğıt üstünde bir alet", bkz. `04-bos-ve-hata.md`). Orada
+kareler iş yapıyor: göze ölçek veriyor ve büyük bir çizimi dekoratif lekeden
+ayırıyor. Bırakma alanında ise bir çizim değil bir CÜMLE ve iki satır ipucu var,
+ve 8 piksellik ızgara sözcüklerle yarışıyor. Kuyunun kendi sınıfı oldu
+(`.tamga-drop-well`): vurgunun en soluk zemini üstünde kesik bir kenar · "buraya
+bırakılabilir" demenin en sessiz yolu. `.tamga-art-well` değişmedi, çizimleri o
+çizmeye devam ediyor.
+
+VE TAKAS DEĞİL KAYDIRMA. Çağıran taraf ögeyi `splice` ile çıkarıp hedefe
+sokuyor; takas yapsa 4. görseli kapak yapmak kapağı 4. sıraya fırlatırdı ve
+kullanıcı "başka bir şey bozuldu" derdi. Kit bunu zorlamıyor ama dokümandaki
+örnek doğru olanı gösteriyor · kopyalanan şey o.
+
+SÜRÜKLENEN KART SOLUK, SAYDAM DEĞİL: `opacity: .45` "taşınıyor" demek için
+yeterli; daha aşağısı kartı silinmiş gibi gösteriyor. Bırakma hedefi ise
+kenarını ve gölgesini `--color-accent-line`a çeviriyor: kitte "buraya
+girecek" işareti bu, yeni bir çizgi icat edilmedi.
+
+KART IZGARASI BIRAKMA ALANININ İÇİNDE DEĞİL, KARDEŞİ. İçinde olsaydı bir
+kartın üstüne bırakmak yukarı çıkıp "dosya bırakıldı" sayılırdı ve `onAdd` boş
+bir listeyle çağrılırdı; `stopPropagation` yazmak yerine iki alanı ayrı
+tutmak, aynı hatayı bir daha yapılamaz kılıyor.
+
+KİT DOSYA YÜKLEMEZ. `onAdd` seçilen `File` nesnelerini verir; nereye
 gideceği, hangi uçla, hangi ilerleme göstergesiyle · ürünün kararı. Kit
 seçmeyi, göstermeyi, sıralamayı ve silmeyi yapar.
 
@@ -144,6 +218,26 @@ bu kitin hiçbir çalışma zamanı bağımlılığı yok ve bir editör uğruna
 kazanılacak şey, ödenecek boyuta değmiyor.
 
 
+### Açık biçim yıkamayla, dolguyla değil.
+
+Araç çubuğunda aynı anda ÜÇ düğme açık olabiliyor (kalın + italik + liste).
+Üçünü de dolu vurguyla boyamak, "sayfada bir birincil eylem" kuralını çiğniyor
+ve çubuğu bir uyarı gibi okutuyor: göz önce oraya gidiyor, oysa oradaki şey bir
+eylem değil, metnin hâli. Açık düğme `--color-accent-bg` yıkaması + koyu kenar
+alıyor, basılı kalıyor; dolgu birincil eyleme ayrılmış durumda.
+
+
+### Çıktı: `<b>` yerine `<strong>`.
+
+Tarayıcının `bold` komutu `<b>` üretiyor, ve `<b>` modern HTML'de hiçbir anlam
+taşımayan bir sunum etiketi; kalın düğmesinin söylediği şey ise "bu önemli", yani
+`<strong>`. Fark akademik değil, ölçüldü: bir vitrinin etiket beyaz listesinde
+`<strong>` vardı, `<b>` yoktu, ve kalın yazılan her şey mağazada sessizce düz
+metne dönüyordu.
+
+`<i>` DOKUNULMADAN KALIYOR: onun aksine `<i>` hâlâ anlamı olan bir etiket (başka
+bir ses tonu, teknik terim, yabancı sözcük) ve tarayıcının doğal çıktısı.
+
 ---
 
 ## `slider.tsx`
@@ -151,9 +245,10 @@ kazanılacak şey, ödenecek boyuta değmiyor.
 ### Kendi dosyasında, çünkü YENİ BİR KONTROL.
 
 Native `<input type="range">` kitin daha önce hiç kullanmadığı bir eleman;
-kendi hover, basılma ve odak durumları var. `check-states-stories` bunu
-doğru yakaladı · ve bir kontrol, durumları bir story'de gösterilmeden kite
-girmez.
+kendi hover, basılma ve odak durumları var. O gün `check-states-stories`
+bunu doğru yakalamıştı; kapı Storybook'la birlikte gitti, kural kaldı: bir
+kontrol, ALTI durumu da bir yerde gösterilmeden kite girmez. Bugün o yer
+doküman sayfası.
 
 ### Kaydırıcı.
 
@@ -194,6 +289,23 @@ ama seçilebilir kalıyorlar; süzme bir görünürlük işi, bir kilit değil.
 
 ## `disclosure.tsx`
 
+### Açılır bölümün iki kılığı, ve kılığı kabın vermesi.
+
+Tasarım ikisini birden çiziyor. `Collapsible` tek başına (ya da bir kartın
+içinde) bir SATIR: kendi kenarı yok, komşusundan tek bir kuralla ayrılıyor.
+`Accordion`un içindeyse bir KART: açık olan 3px taban kazanıyor ve başlığı
+yıkanıyor.
+
+SEBEP ÖLÇÜLDÜ: tek yüzeyin içinde çizgiyle ayrılmış satırlarda hangisinin açık
+olduğu yalnız OKUN YÖNÜNDEN okunuyordu · üç bölümlü bir listede göz her
+seferinde okları taramak zorunda kalıyordu. Açık bölüm taban kazanınca uzaktan
+görünüyor.
+
+KILIĞI KAP VERİYOR (`Accordion look`), her bölüme bir prop koymak yerine: aynı
+kararı her çağrı yerinde tekrar almak, bir listede iki farklı kılık çıkma yolu
+demekti.
+
+
 ### Açılıp kapanan bölümler.
 
 Ürün bunu dört dosyada ham `<details>` ile yazıyordu. `<details>` doğru bir
@@ -211,3 +323,84 @@ desteği verir ama işaretini kontrol ettirmez. Burada `aria-expanded` +
 ARAMA UYARISI: kapalı içerik DOM'da duruyor, yalnız gizli. Tarayıcının
 Ctrl+F'i onu bulamaz. İçinde aranacak metin varsa (uzun bir SSS) bunu
 bilerek kabul et ya da bölümü açık başlat.
+
+
+---
+
+## `square-picker.tsx`
+
+### Logodan amblem seçme · otomatik kesme değil.
+
+Sorulan soru şuydu: yüklenen logoyu ayırıp amblemi kendiliğinden çıkaramaz mıyız?
+Çıkaramayız, ve denememesi gerekiyor.
+
+* Dosyada "amblem" diye işaretli bir şey yok. SVG'de bazen bir grup id'si olur ama
+  bu tasarımcının keyfine bağlı; PNG'de hiç yok.
+* Konum sabit değil: amblem solda, üstte, sağda olabilir, yazının içine gömülü
+  olabilir, ya da hiç olmayabilir (yalnız kelime-logo).
+* Hata SESSİZ ve KALICI olur. Yanlış kesim patlamıyor; yarım bir harf panelin her
+  sayfasının sol üstünde duruyor ve kimse bunun otomatik kesildiğini bilmiyor.
+
+Bu yüzden kesimi İNSAN yapıyor: kare bir çerçeve, sürüklenip boyutlanıyor. Sonuç
+tahmin değil karar.
+
+ÇERÇEVE ORANLA TUTULUYOR (0 ile 1 arası), piksel ile değil: önizleme ekrandan
+ekrana farklı ölçekte çiziliyor, oran her ölçekte aynı yeri gösteriyor. Ekrana
+çizilirken piksele dönüyor ve dönüşüm TEK YERDE (`kenarPx`). Kesim matematiği ile
+çerçevenin CSS'i ayrı ayrı hesaplansaydı kullanıcının gördüğü kare ile kesilen kare
+farklı olurdu, ve fark sessiz olurdu.
+
+
+---
+
+## `radio-group.tsx`
+
+### Üstten hizalı ve tam genişlik.
+
+İkisi de iki satırlık bir seçenek yüzünden değişti. `items-center` tek satırlık
+etiketlerde doğru duruyordu; altına bir açıklama satırı eklenince işaret iki satırın
+ORTASINA kaçıyor ve neyi işaretlediği belirsizleşiyor. İşaret ilk satıra ait.
+
+`w-full` de aynı sebeple: düğme içeriği kadar genişken açıklama erkenden sarıyor ve
+seçenekler farklı genişliklerde tırtıklı bir sütun oluşturuyordu. Tam genişlik
+hepsini aynı sol kenara ve aynı sarma noktasına oturtuyor.
+
+
+---
+
+## `primitives.tsx`
+
+### Uyarının gövdesi bir `div`, `p` değil.
+
+Bir uyarının gövdesi çoğu zaman tek bir cümle değil bir LİSTE oluyor ("üç alan
+eksik", her biri kendi alanına giden bir bağlantı), ve `<p>` içindeki bir `<ul>`
+geçersiz HTML: tarayıcı listeyi paragrafın dışına çıkarıyor, sunucunun ürettiği ağaç
+ile istemcininki ayrışıyor, hidrasyon patlıyor. Hata vermeyen bir kırılma değil,
+konsola düşen bir kırılma, ama sebebi uyarının kendisinde aranmıyordu.
+
+### Etiket kırpılır, ok kırpılmaz.
+
+`.tamga-btn` `white-space: nowrap` taşıyor ve etiketi saran span'in `min-width`i
+`auto`ydu, yani metin kabından uzunsa esnek kutu onu KÜÇÜLTMÜYORDU. Sonuç,
+`justify-between`in dağıtacak boşluğu kalmaması ve okun metnin dibine yapışıp sağ
+dolguyu taşması. Uzun bir seçenek ("Kargoya verilmeyenler") yan yana duran kısa bir
+seçeneğe göre hizasız görünüyordu, ve sebebi hizalama değil TAŞMAYDI.
+
+`min-w-0` + `truncate` etiketi üç noktayla kesiyor, `shrink-0` oku yerinde tutuyor:
+ok artık her kontrolde aynı yerde.
+
+### Çoklu seçimde büyüteç sabit, çiplerin peşinde değil.
+
+Önce esnek kutunun SON çocuğuydu: çipler sarınca satır atlıyor ve ikinci, üçüncü
+satırın sağ altına düşüyordu. Bir simge bir yer işaretidir; yeri her seçimde
+değişiyorsa işaret olmaktan çıkıyor. Kitin kendi `data-leading` mekanizmasıyla sol başa
+sabitlendi (`.tamga-input[data-leading]` 40 piksel sol dolgu açıyor) ve ilk satıra
+hizalı duruyor: kutu büyüdükçe simge yerinde kalıyor.
+
+### Ağaç seçicide kaydırma alanının iç boşluğu şart.
+
+Ağacın en solundaki açma oku kutunun sol sınırına yapışıyordu, ve `.tamga-mini-btn`
+hover'da `translate(-1px,-1px)` ile kalkıyor: o bir piksel kaydırma kabının dışına
+çıkıyor ve `overflow-y: auto` onu kırpıyor (bir eksen `visible` değilse öteki de
+olamaz). Düğmenin gölgesi de sağa aşağı 2 piksel, o da kırpılıyordu. Dört piksellik iç
+boşluk, kontrolün kendi fiziğine yer açıyor.

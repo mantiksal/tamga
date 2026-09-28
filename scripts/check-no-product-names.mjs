@@ -98,6 +98,21 @@ if (!LISTE_KAYNAGI) {
   process.exit(1);
 }
 
+/**
+ * SÖZLÜĞÜN KENDİSİ TARANMIYOR — bir yasak sözcük listesi, o sözcüklerin geçtiği
+ * bir yer değildir.
+ *
+ * Bu kapı CI'da HİÇ yeşil olmadı ve sebebi buydu: gerçek liste `.gitignore`da,
+ * yani CI'da yok; kapı örnek listeye düşüyor, sonra depoyu tararken örneğin
+ * KENDİSİNİ okuyup içindeki sahte müşteri adlarını yakalıyordu. Yerelde
+ * görünmüyordu, çünkü yerelde sözcükler gerçek listeden geliyor ve örneğin
+ * uydurma adlarıyla eşleşmiyor: kapı kendi sözlüğünü ihlal sanıyordu.
+ */
+const SOZLUK = new Set([
+  join(root, "scripts", "urun-adlari.json"),
+  join(root, "scripts", "urun-adlari.example.json"),
+]);
+
 /** Kelime sınırıyla eşleşir: tam kelime yakalanır, içinde geçtiği uzun bir
     kelime yakalanmaz. */
 const rx = (w) => new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
@@ -172,7 +187,7 @@ const elenen = yoksayilanlar(tumu.map((f) => relative(root, f)));
 
 const hits = [];
 {
-  for (const file of tumu.filter((f) => !elenen.has(f))) {
+  for (const file of tumu.filter((f) => !elenen.has(f) && !SOZLUK.has(f))) {
     const lines = readFileSync(file, "utf8").split("\n");
     lines.forEach((line, i) => {
       for (const w of NAMES) if (rx(w).test(line)) hits.push([relative(root, file), i + 1, w, "ürün/müşteri adı", line]);

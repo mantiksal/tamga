@@ -7,8 +7,14 @@ dist
 .git
 .github
 .changeset
+# `*.md` dışarıda ama İKİ DOSYA İSTİSNA, ve ikincisi bir kesintiden doğdu:
+# `extract-counts.mjs` build sırasında `GELISTIRME.md`nin kapı tablosunu okuyup
+# zincirle karşılaştırıyor. Tablo README'den oraya taşınınca imaj build'i
+# `ENOENT` ile düştü — kaynak doğruydu, dosya build bağlamında yoktu.
+# Build zamanı okunan bir .md eklersen buraya da ekle.
 *.md
 !README.md
+!GELISTIRME.md
 apps/docs/src/content/props.json
 apps/docs/src/content/tokens.json
 apps/docs/src/content/icons.json

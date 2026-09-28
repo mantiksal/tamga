@@ -1,4 +1,5 @@
-import { Button } from "tamga-ui";
+import { Button, Icon } from "tamga-ui";
+import { ArrowRight, Plus } from "tamga-ui/icons";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -41,6 +42,41 @@ const T = {
       <>
         Altı varyant, ve hepsi <em>aynı şekil artı bir renk</em>. Yeni bir varyant yeni bir dosya
         değil, mevcut <code>cva</code> tablosuna bir satırdır.
+      </>
+    ),
+    quietH: "`quiet`: bir listenin içinde yaşayan düğme",
+    quietP: (
+      <>
+        <code>ghost</code> duruşta da hover&apos;da da bir düğmedir, yalnız kenarsız.{" "}
+        <code>quiet</code> ise bir LİSTEDE yaşar: otuz satırın her birinde bir düğme varsa otuz
+        düğme ekranı yönetir ve satırın asıl içeriği · kaydın kendisi · onların arasında
+        kaybolur. Sessiz hâlde metin gibi durur, imleç geldiğinde kenarını ve tabanını kazanıp ne
+        olduğunu söyler. Yükselmesi küçük (2px): satırın İÇİNDE duran bir şey, üstünde duran bir
+        şey değil.
+      </>
+    ),
+    ship: "Kargola",
+    yeniUrun: "Yeni ürün",
+    devamEt: "Devam et",
+    yukleniyor: "Tıkla, yüklensin",
+    pasif: "Pasif",
+    buyuk: "Büyük",
+    bekleniyor: "Yükleniyor",
+    ikinciSatir: (
+      <>
+        İkon <strong>eylemin yönünü</strong> söylüyor: ekleme solda (<code>+</code> sözcükten
+        önce gelir), ilerleme sağda (ok cümleden sonra). Süren bir düğme{" "}
+        <strong>genişliğini korur</strong> · etiket yerinde kalıp görünmez oluyor, yoksa
+        satırdaki öteki düğmeler kayıyor. Pasif olan kesikli: bu kitte kesik kenar
+        &quot;henüz gerçek değil&quot; demek.
+      </>
+    ),
+    yumusak: (
+      <>
+        <code>soft</code> birincil ile ikincil <strong>arasında bir basamak</strong>: vurgunun
+        açık tonunda dolu. &ldquo;Bunu da yapabilirsin&rdquo; diyen ama sayfanın tek dolu
+        düğmesiyle yarışmayan eylem · bir kartın içindeki ikinci eylem, bir şeridin yanındaki
+        toplu işlem.
       </>
     ),
     rules: "Kurallar",
@@ -88,6 +124,40 @@ const T = {
         is not a new file; it is one more row in the existing <code>cva</code> table.
       </>
     ),
+    quietH: "`quiet`: a button that lives inside a list",
+    quietP: (
+      <>
+        <code>ghost</code> is a button at rest and on hover, only without an edge.{" "}
+        <code>quiet</code> lives in a LIST: with a button on each of thirty rows, thirty buttons
+        run the screen and the row&apos;s actual content · the record itself · is lost among
+        them. At rest it reads as text; under the cursor it gains its edge and its offset and
+        says what it is. The lift is small (2px): a thing INSIDE the row, not on top of it.
+      </>
+    ),
+    ship: "Ship",
+    yeniUrun: "New product",
+    devamEt: "Continue",
+    yukleniyor: "Click to load",
+    pasif: "Disabled",
+    buyuk: "Large",
+    bekleniyor: "Loading",
+    ikinciSatir: (
+      <>
+        The glyph says <strong>which way the action goes</strong>: adding sits on the left (a{" "}
+        <code>+</code> comes before the word), moving forward on the right (an arrow after the
+        sentence). A busy button <strong>keeps its width</strong> · the label stays in place and
+        turns invisible, otherwise every other button on the row shifts. The disabled one is
+        dashed: in this kit a dashed edge means &quot;not real yet&quot;.
+      </>
+    ),
+    yumusak: (
+      <>
+        <code>soft</code> is a <strong>step between</strong> primary and secondary: filled in the
+        accent&apos;s light tone. The action that says &ldquo;you can also do this&rdquo; without
+        competing with the page&apos;s one filled button · a second action inside a card, a bulk
+        action beside a strip.
+      </>
+    ),
     rules: "Rules",
     oneFilled: (
       <>
@@ -129,24 +199,60 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
   return (
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
-      <ButtonPlayground labels={dict.demo} label={t.save} />
       <P>{t.lead}</P>
       <Demo
         labels={dict.demo}
         code={`<Button variant="primary">${t.save}</Button>
 <Button>${t.cancel}</Button>
+<Button variant="soft">${t.ship}</Button>
 <Button variant="success">${t.confirm}</Button>
 <Button variant="danger">${t.remove}</Button>
 <Button variant="ghost">${t.close}</Button>
-<Button variant="link">${t.details}</Button>`}
+<Button variant="link">${t.details}</Button>
+<Button variant="quiet">${t.details}</Button>`}
       >
         <Button variant="primary">{t.save}</Button>
         <Button>{t.cancel}</Button>
+        <Button variant="soft">{t.ship}</Button>
         <Button variant="success">{t.confirm}</Button>
         <Button variant="danger">{t.remove}</Button>
         <Button variant="ghost">{t.close}</Button>
         <Button variant="link">{t.details}</Button>
+        <Button variant="quiet">{t.details}</Button>
       </Demo>
+
+      <Demo
+        labels={dict.demo}
+        code={`<Button variant="primary"><Icon icon={Plus} size="xs" />${t.yeniUrun}</Button>
+<Button>${t.devamEt}<Icon icon={ArrowRight} size="xs" /></Button>
+<Button variant="primary" busy busyLabel="${t.bekleniyor}">${t.yukleniyor}</Button>
+<Button disabled>${t.pasif}</Button>
+<Button variant="primary" size="lg">${t.buyuk}</Button>`}
+      >
+        <Button variant="primary">
+          <Icon icon={Plus} size="xs" />
+          {t.yeniUrun}
+        </Button>
+        <Button>
+          {t.devamEt}
+          <Icon icon={ArrowRight} size="xs" />
+        </Button>
+        <Button variant="primary" busy busyLabel={t.bekleniyor}>
+          {t.yukleniyor}
+        </Button>
+        <Button disabled>{t.pasif}</Button>
+        <Button variant="primary" size="lg">
+          {t.buyuk}
+        </Button>
+      </Demo>
+      <P>{t.ikinciSatir}</P>
+
+      <P>{t.yumusak}</P>
+
+      <ButtonPlayground labels={dict.demo} label={t.save} />
+
+      <H2>{t.quietH}</H2>
+      <P>{t.quietP}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.oneFilled}</Note>

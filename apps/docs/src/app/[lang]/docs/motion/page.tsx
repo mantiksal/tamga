@@ -1,4 +1,11 @@
-import { Button, Skeleton, StatusChip } from "tamga-ui";
+import { Button } from "tamga-ui";
+import {
+  AzaltilmisOrnegi,
+  DonguOrnegi,
+  EgriOrnegi,
+  KademeOrnegi,
+  SinyalOrnegi,
+} from "./ornek";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -43,6 +50,33 @@ const T = {
       </>
     ),
 
+    demo: {
+      names: ["Basma", "Renk ve ton", "Panel ve bildirim", "Rota açılışı"],
+      play: "Oynat",
+      reset: "Geri al",
+      signature: "İmza eğrisi",
+      overshoot: "Overshoot · böyle değil",
+      live: "Yayında",
+      loading: "Yükleniyor",
+      breath: "iskelet nefesi",
+      beacon: "canlı işaret nabzı",
+      bar: "yükleme çubukları",
+      setting: "Azaltılmış hareket",
+      save: "Kaydet",
+      onlyColour: "yalnız renk",
+      colourDot: "renk + nokta",
+      full: "renk + nokta + metin",
+      stepsHint: "Dördü aynı anda çıkar; hangisinin ne iş için olduğu hızından okunur.",
+      curvesHint: "Kesik çizgi hedef. Overshoot hedefi geçip geri döner; kitte tanımlı değil.",
+    },
+    ipucu: {
+      steps: "Oynat: aynı mesafe, dört kademe.",
+      press: "Üstüne gel, bas: basma kademesi.",
+      curves: "Oynat: imza eğrisi ile tanımlanmamış overshoot yan yana.",
+      loops: "İskelet nefes alır, canlı işaret nabız atar, çubuklar yürür.",
+      reduced: "Anahtarı aç: döngüler durur, iskelet ortada park eder, buton hâlâ basılır.",
+      colour: "Hareket kapansa da bilgi aynı: renk, nokta ve metin birlikte.",
+    },
     steps: "Dört süre kademesi",
     stepsP: (
       <>
@@ -147,6 +181,33 @@ const T = {
       </>
     ),
 
+    demo: {
+      names: ["Press", "Colour and tone", "Panel and toast", "Route transition"],
+      play: "Play",
+      reset: "Reset",
+      signature: "The signature curve",
+      overshoot: "Overshoot · not this",
+      live: "Live",
+      loading: "Loading",
+      breath: "the skeleton's breath",
+      beacon: "the live mark's pulse",
+      bar: "loading bars",
+      setting: "Reduced motion",
+      save: "Save",
+      onlyColour: "colour only",
+      colourDot: "colour + dot",
+      full: "colour + dot + text",
+      stepsHint: "All four leave at once; which one is for which job is read off its speed.",
+      curvesHint: "The dashed line is the target. Overshoot passes it and comes back; the kit has no such curve.",
+    },
+    ipucu: {
+      steps: "Play: same distance, four steps.",
+      press: "Hover, then press: the press step.",
+      curves: "Play: the signature curve next to an undefined overshoot.",
+      loops: "The skeleton breathes, the live mark pulses, the bars walk.",
+      reduced: "Flip the switch: the loops stop, the skeleton parks mid-sweep, the button still presses.",
+      colour: "With motion off the information is the same: colour, dot and text together.",
+    },
     steps: "Four duration steps",
     stepsP: (
       <>
@@ -245,7 +306,18 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.steps}</H2>
       <P>{t.stepsP}</P>
+      {/* SAYFADA DEĞER LİSTESİ YOK: demo token'ın yalnız ADINI gösteriyor,
+          animasyon arkada gerçek değerle koşuyor · süreler Token'lar
+          sayfasında duruyor ve iki yerde iki gerçek olmasın. */}
       <Demo
+        ipucu={t.ipucu.steps} labels={dict.demo} align="start" code={`transition: transform var(--duration-press) var(--ease-instrument);
+transition: transform var(--duration-quick) var(--ease-instrument);
+transition: transform var(--duration-base)  var(--ease-instrument);
+transition: transform var(--duration-slow)  var(--ease-instrument);`}>
+        <KademeOrnegi labels={t.demo} />
+      </Demo>
+      <Demo
+        ipucu={t.ipucu.press}
         labels={dict.demo}
         code={`<Button variant="primary">${t.save}</Button>
 <Button>${t.cancel}</Button>`}
@@ -257,24 +329,42 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.curves}</H2>
       <P>{t.curvesP}</P>
+      <Demo
+        ipucu={t.ipucu.curves} labels={dict.demo} align="start" code={`/* ${t.demo.signature} */
+transition-timing-function: var(--ease-instrument);
+
+/* ${t.demo.overshoot} */
+transition-timing-function: cubic-bezier(.34, 1.56, .64, 1);`}>
+        <EgriOrnegi labels={t.demo} />
+      </Demo>
       <Note>{t.noOvershoot}</Note>
 
       <H2>{t.loops}</H2>
       <P>{t.loopsP}</P>
-      <Demo labels={dict.demo} code={`<Skeleton />
-<StatusChip label="${t.live}" state="positive" dot live />`}>
-        <span className="flex w-full flex-col gap-4">
-          <Skeleton />
-          <StatusChip label={t.live} state="positive" dot live />
-        </span>
+      <Demo
+        ipucu={t.ipucu.loops} labels={dict.demo} align="start" code={`<Skeleton />
+<StatusChip label="${t.live}" state="positive" dot live severity={50} />
+<Spinner look="bars" label="${t.demo.loading}" />`}>
+        <DonguOrnegi labels={t.demo} />
       </Demo>
 
       <H2>{t.reduced}</H2>
       <P>{t.reducedP}</P>
+      <Demo
+        ipucu={t.ipucu.reduced} labels={dict.demo} align="start" code={`@media (prefers-reduced-motion: reduce) {
+  .tamga-skeleton::after { animation: none; opacity: 0.42 }
+  .tamga-beacon[data-live="true"] { animation: none }
+}`}>
+        <AzaltilmisOrnegi labels={t.demo} />
+      </Demo>
       <P>{t.reducedSkeleton}</P>
 
       <H2>{t.colour}</H2>
       <P>{t.colourP}</P>
+      <Demo
+        ipucu={t.ipucu.colour} labels={dict.demo} align="start" code={`<StatusChip label="${t.live}" state="positive" dot />`}>
+        <SinyalOrnegi labels={t.demo} />
+      </Demo>
 
       <Note>
         {t.tokensNote} <Xref to="tokens">{t.tokensLink}</Xref> ·{" "}

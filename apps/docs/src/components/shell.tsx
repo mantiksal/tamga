@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { cn, Icon, Select, Sheet, Switch, ThemeToggle } from "tamga-ui";
-import { Menu } from "tamga-ui/icons";
+import { cn, Icon, Sheet } from "tamga-ui";
+import { ArrowLeft, ArrowRight, CaretRight, GithubLogo, Menu, Moon, Sun } from "tamga-ui/icons";
 import sayilar from "@/content/counts.json";
-import { navGruplari } from "@/content/nav";
+import { findPage, grupAdi, komsular, navGruplari } from "@/content/nav";
 import { icSlug, yol } from "@/content/yollar";
+import { DocsSearch } from "@/components/docs-search";
 import { Toc } from "@/components/toc";
+import { useTema } from "@/components/tema";
 import { endonym, locales, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/get-dictionary";
 
@@ -53,28 +55,20 @@ function LogoMark() {
 }
 
 /**
- * Dil değiştirici.
+ * Dil değiştirici — TR / EN segmenti.
  *
- * Aynı sayfanın öteki dildeki hâline gider — ana sayfaya değil. Bir okuyucuyu
+ * Aynı sayfanın öteki dildeki hâline gider, ana sayfaya değil: bir okuyucuyu
  * dil değiştirdiği için başa göndermek, okuduğu yeri kaybettirmektir.
  *
- * NEDEN SWITCH, VE BU BİR İSTİSNA. Kitin kuralı (Yasa 2) net: akranlar arası
- * seçim `Segmented`'in işi, `Switch` bir şeyin açık mı kapalı mı olduğunu
- * söyler. TR ve EN akrandır; kurala harfiyen uyulsaydı burada Segmented
- * dururdu. Bilerek sapıldı: bu sitede tam olarak İKİ dil var ve ikisi de
- * kalıcı — üçüncü bir dil eklendiği gün bu kontrol Segmented'a döner. İki
- * kalıcı seçenek arasında anahtar, bir seçim listesinden daha az yer kaplıyor
- * ve üst şeritte tema düğmesiyle aynı ağırlıkta duruyor.
+ * NEDEN SEGMENT. Bir süre anahtardı (`Switch`) ve yanındaki tema anahtarıyla
+ * karışıyordu: iki anahtar yan yana, hangisinin dili hangisinin temayı
+ * değiştirdiği bakarak anlaşılmıyordu. İkisi de segment olunca şerit tek bir
+ * dil konuşuyor, ve seçili olan kendi adıyla yazılı duruyor.
  *
- * Etiketler kod ("TR" · "EN"), endonim değil. Bu kontrolde iki etiket YAN YANA
- * duruyor; "Türkçe" ve "English" yan yana yazıldığında anahtarın kendisi
- * ikisinin arasında sıkışıp kayboluyordu. Menüde ya da bir dil listesinde
- * endonim doğru cevaptır — kayan bir anahtarın iki ucunda değil.
- *
- * Anahtarın erişilebilir adı sözlükten geliyor; iki harflik etiketler
- * `aria-hidden`. Ekran okuyucu "Dil, anahtar, açık" duyar ve neyin açık
- * olduğunu hemen ardından `lang` özniteliğinden bilir. Etiketleri de okutmak
- * aynı bilgiyi üç kez tekrarlardı.
+ * Etiketler kod ("TR" · "EN"), endonim değil: iki etiket YAN YANA duruyor ve
+ * "Türkçe"/"English" yan yana yazıldığında segment iki kat yer kaplıyor. Menüde
+ * ya da bir dil listesinde endonim doğru cevaptır, iki hücreli bir segmentte
+ * değil.
  */
 function LocaleSwitcher({ lang, dict }: { lang: Locale; dict: Dictionary }) {
   const pathname = usePathname();
@@ -89,63 +83,24 @@ function LocaleSwitcher({ lang, dict }: { lang: Locale; dict: Dictionary }) {
     parcalar[2] === "docs" && parcalar[3] ? (icSlug(lang, parcalar[3]) ?? parcalar[3]) : null;
   const rest = pathname.replace(new RegExp(`^/${lang}`), "") || "";
 
-  /* Anahtarın "açık" ucu VARSAYILAN OLMAYAN dil. Varsayılanı (tr) kapalı uçta
-     tutmak, siteye ilk gelenin anahtarı dokunulmamış görmesini sağlıyor. */
-  const on = lang === "en";
-
-  function go(next: boolean) {
-    const target: Locale = next ? "en" : "tr";
-    if (target === lang) return;
-    router.push(bulunanSlug ? yol(target, bulunanSlug) : `/${target}${rest}`);
-  }
-
   return (
-    <>
-      {/* DAR EKRANDA SEÇİM KUTUSU, ANAHTAR DEĞİL.
-
-          Anahtar "TR [•] EN" olarak 89 piksel yer kaplıyordu ve şeridin sağ
-          ucunda tema anahtarıyla yan yana durunca iki anahtar birbirine
-          karışıyordu: hangisinin dili hangisinin temayı değiştirdiği
-          okunmuyordu. Kutu hem dar hem de ne olduğunu kendi söylüyor.
-
-          İki ayrı kontrol render ediliyor ve biri gizleniyor: aynı bileşenin
-          iki farklı biçimi değil, iki farklı bileşen. Tek bir işaretle
-          ("mobilse şunu göster") yapılamıyor çünkü karar CSS kırılımında,
-          JavaScript'te değil; `useEffect` ile ölçseydik ilk boyamada yanlış
-          olanı gösterirdik. */}
-      <span className="sm:hidden">
-        <Select
-          options={locales.map((l) => l.toUpperCase())}
-          value={lang.toUpperCase()}
-          onChange={(v) => go(v.toLowerCase() === "en")}
-          placeholder={lang.toUpperCase()}
-          aria-label={dict.chrome.language}
-          className="w-20"
-        />
-      </span>
-
-      <span className="hidden shrink-0 items-center gap-2 sm:flex">
-        {locales.map((l) => (
-          <span
-            key={l}
-            aria-hidden
-            /* Etkin olmayan taraf soluk: anahtarın topuzu nerede olursa olsun,
-               hangi dilde olduğun okunabilir kalıyor. */
-            className={
-              l === lang
-                ? "font-mono text-small tracking-wide text-ink"
-                : "font-mono text-small tracking-wide text-ink-faint"
-            }
-            /* Sırayı kaynaktan değil anahtardan alıyoruz: kapalı uç solda. */
-            style={{ order: l === "tr" ? 0 : 2 }}
-            title={endonym[l]}
-          >
-            {l.toUpperCase()}
-          </span>
-        ))}
-        <Switch on={on} onChange={go} label={dict.chrome.language} className="order-1" />
-      </span>
-    </>
+    <div className="hidden dil:flex docs-seg" role="radiogroup" aria-label={dict.chrome.language}>
+      {locales.map((l) => (
+        <button
+          key={l}
+          type="button"
+          role="radio"
+          aria-checked={l === lang}
+          className="docs-seg-btn"
+          onClick={() => {
+            if (l === lang) return;
+            router.push(bulunanSlug ? yol(l, bulunanSlug) : `/${l}${rest}`);
+          }}
+        >
+          {l.toUpperCase()}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -170,12 +125,15 @@ function NavLink({
   slug,
   pathname,
   children,
+  tur,
   onGit,
 }: {
   lang: Locale;
   slug: string;
   pathname: string;
   children: ReactNode;
+  /** Bileşen satırı bir tık küçük: aynı rayda 78 tanesi var. */
+  tur?: "bilesen";
   /* ÇEKMECEDE TIKLAMA ÇEKMECEYİ KAPATIYOR. Next yönlendirmesi sayfayı
      yeniden yüklemiyor, yani çekmece açık kalıyordu: kullanıcı bağlantıya
      basıyor, hiçbir şey olmuyor sanıyor ve ikinci kez basıyor. Rayda bu geri
@@ -192,6 +150,7 @@ function NavLink({
       href={href}
       className="docs-nav-link no-underline"
       data-active={here}
+      data-tur={tur}
       aria-current={here ? "page" : undefined}
       onClick={onGit}
     >
@@ -204,23 +163,28 @@ function NavLink({
  * Paylaşılan üst şerit.
  *
  * İKİ DÜZEN VAR ve şerit ikisinde de aynı: tanıtım sayfasında ve dokümanda.
- * Ayrı yazılsalardı biri güncellenip öteki unutulurdu — ve bir sitenin
- * başlığının iki sayfada farklı olması, ziyaretçiye iki ayrı siteye
- * girmiş hissi verir.
+ * Ayrı yazılsalardı biri güncellenip öteki unutulurdu, ve bir sitenin
+ * başlığının iki sayfada farklı olması ziyaretçiye iki ayrı siteye girmiş hissi
+ * verir.
  *
- * `cta` yalnız tanıtım tarafında doluyor: dokümanın içindeyken "dokümana git"
- * demek anlamsız.
+ * `cta` ile `bolumler` yalnız tanıtım tarafında doluyor: dokümanın içindeyken
+ * "dokümana git" demek anlamsız, ve doküman sayfasının bölümleri rayda.
+ *
+ * Gerekçe: docs/07-dokuman-sitesi.md
  */
 export function SiteHeader({
   lang,
   dict,
   cta,
+  bolumler,
   onMenu,
   duzen = "dokuman",
 }: {
   lang: Locale;
   dict: Dictionary;
   cta?: ReactNode;
+  /** Tanıtım sayfasının bölüm bağlantıları. Dokümanda rayın işi. */
+  bolumler?: ReactNode;
   /** Verilirse dar ekranda bir menü düğmesi çıkıyor. Tanıtım sayfası vermiyor. */
   onMenu?: () => void;
   /**
@@ -229,26 +193,22 @@ export function SiteHeader({
    */
   duzen?: "tanitim" | "dokuman";
 }) {
+  const [tema, setTema] = useTema();
   return (
     <header
-      className="sticky top-0 z-20 border-b border-[var(--color-line)]"
-      style={{ height: "var(--docs-top)", background: "var(--color-shell)" }}
+      className="sticky top-0 z-20 border-b border-[var(--color-edge)]"
+      style={{ background: "var(--color-band)" }}
     >
-      {/* KAP DA İÇERİKLE AYNI, dolgu da. Dolgu (`px-5 sm:px-7`) baştan
-          böyleydi ve gerekçesi yazılıydı: bir ara `px-4` denendi, şerit 390
-          pikselde sığdı ama logo altındaki metinden dört piksel sola kaydı:
-          kazanılan yer kaybedilen hizaya değmiyor.
-
-          AYNI GEREKÇE GENİŞLİKTE ATLANMIŞTI. Şerit iki düzende de
-          `--docs-wrap` (1400px) kullanıyordu; tanıtım sayfasının gövdesi ise
-          `--home-wrap` (1160px). Fark 120 piksel ve tamamı logoyu h1'in soluna
-          kaydırıyordu. Alt bilgi zaten `--home-wrap` kullanıyor, yani hizasız
-          olan tek parça şeritti. */}
+      {/* TEK SATIR, VE SARMIYOR. Şeritteki her şey `flex:none`; esneyen tek şey
+          arama kutusu (`flex:0 1 300px`), yani yer daraldığında kısalan o
+          oluyor. Sarması, sticky yüksekliğinin değişmesi demek: rayın ve
+          içindekilerin `top`u kaçar. */}
       <div
         className={cn(
-          "mx-auto flex h-full items-center gap-2 px-5 sm:gap-4 sm:px-7",
+          "mx-auto flex items-center gap-3 px-6",
           duzen === "tanitim" ? "max-w-(--home-wrap)" : "max-w-(--docs-wrap)",
         )}
+        style={{ minHeight: "var(--docs-top)" }}
       >
         {/* MENÜ DÜĞMESİ SOLDA, LOGONUN ÖNÜNDE. Telefonda gezinme aracı ilk
             ulaşılan şey olmalı; sağ üst köşe başparmağın en uzak noktası. */}
@@ -257,51 +217,61 @@ export function SiteHeader({
             type="button"
             onClick={onMenu}
             aria-label={dict.nav.menuAc}
-            className="tamga-icon-btn shrink-0 md:hidden"
+            className="tamga-icon-btn shrink-0 ray:hidden"
           >
             <Icon icon={Menu} size="sm" />
           </button>
         ) : null}
 
-        {/* MENÜ DÜĞMESİ VARKEN LOGO DAR EKRANDA YOK.
-            İkisi yan yana durunca şeridin solunda iki işaret oluyordu: biri
-            gezinme aracı, öteki marka, ve ikisi de tıklanabilir. Hangisinin
-            menüyü açacağı bakarak anlaşılmıyordu. Marka çekmecenin tepesine
-            taşındı; menüyü açan kişi zaten oraya bakıyor. Menü düğmesi
-            olmayan tanıtım sayfasında logo yerinde kalıyor. */}
-        <Link
-          href={`/${lang}`}
-          className={cn("min-w-0 no-underline", onMenu && "hidden md:inline-flex")}
-        >
+        <Link href={`/${lang}`} className="flex-none no-underline">
           <LogoMark />
         </Link>
 
-        <span className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
-          {/* CTA DAR EKRANDA GİZLİ, VE KAYBOLMUYOR: tanıtım sayfasındaki
-              "Doküman" düğmesi, hemen altındaki kahramanın kendi düğmesiyle
-              aynı yere gidiyor. Şeritte tutmak, 390 pikselde üç kontrolü
-              birbirine yapıştırmak demekti. */}
-          {cta ? <span className="hidden sm:inline-flex">{cta}</span> : null}
-          <span className="hidden font-mono text-body text-ink-faint sm:inline">v{sayilar.surum}</span>
-          <LocaleSwitcher lang={lang} dict={dict} />
-          {/* TELEFONDA KUTU, MASAÜSTÜNDE ANAHTAR.
-              Dil kutu, tema anahtar olunca ikisi yan yana iki ayrı dilden
-              konuşuyordu: biri kenarlı ve okluydu, öteki iki simge arasında
-              bir topuz. Telefonda ikisi de kutu; ne olduklarını sözcükle
-              söylüyorlar ve aynı şekli paylaşıyorlar. Geniş ekranda yer bol,
-              anahtar duruyor: orada tema durumu hiç açmadan görünüyor. */}
-          <span className="sm:hidden">
-            <ThemeToggle
-              variant="select"
-              labels={dict.chrome.themeState}
-              storageKey="docs-theme"
-              className="w-24"
-            />
-          </span>
-          <span className="hidden sm:inline-flex">
-            <ThemeToggle variant="switch" labels={dict.chrome.theme} storageKey="docs-theme" />
-          </span>
-        </span>
+        {/* SÜRÜM ETİKETİ MONO VE KUTULU: bir sürüm numarası okunan bir sözcük
+            değil, karşılaştırılan bir sayı. Sayı `counts.json`dan geliyor. */}
+        <span className="docs-surum hidden dil:inline-flex">v{sayilar.surum}</span>
+
+        {bolumler ? <nav className="hidden bolum:flex items-center gap-1">{bolumler}</nav> : null}
+
+        <span className="flex-1" />
+
+        {duzen === "dokuman" ? <DocsSearch lang={lang} dict={dict} /> : null}
+        <LocaleSwitcher lang={lang} dict={dict} />
+        {/* İKİ HÜCRE: açık ve koyu. Kitin `ThemeToggle`u bir de "sistem"
+            tutuyor ve ölçüsü panel kontrolü (40px); şeridin ölçüsü 36. Glifler
+            tek başına anlam taşımıyor, `sr-only` etiket ekran okuyucuya adı
+            veriyor. */}
+        <div className="docs-seg" role="radiogroup" aria-label={dict.chrome.language}>
+          {(
+            [
+              ["light", Sun, dict.chrome.themeState.light],
+              ["dark", Moon, dict.chrome.themeState.dark],
+            ] as const
+          ).map(([deger, glif, ad]) => (
+            <button
+              key={deger}
+              type="button"
+              role="radio"
+              aria-checked={tema === deger}
+              data-glif
+              className="docs-seg-btn"
+              onClick={() => setTema(deger)}
+              title={ad}
+            >
+              <Icon icon={glif} size="sm" weight={deger === "light" ? "fill" : "regular"} />
+              <span className="sr-only">{ad}</span>
+            </button>
+          ))}
+        </div>
+        <a
+          href="https://github.com/mantiksal/tamga"
+          className="docs-ikon-btn no-underline"
+          title="GitHub"
+          aria-label="GitHub"
+        >
+          <Icon icon={GithubLogo} size="sm" />
+        </a>
+        {cta ? <span className="hidden flex-none sm:inline-flex">{cta}</span> : null}
       </div>
     </header>
   );
@@ -322,82 +292,145 @@ function MenuGovdesi({
   onGit?: () => void;
 }) {
   return (
-    <>
-          {/* ANA SAYFA, menünün ilk satırı ve grupsuz.
+    <div className="flex flex-col gap-(--docs-grup-gap)">
+      {/* ANA SAYFA, menünün ilk satırı ve grupsuz.
 
-              Logo zaten oraya gidiyor — ama bir logo bir MARKA işaretidir,
-              gezinme öğesi değil; ve menüde karşılığı olmayan bir sayfa,
-              menüye bakan biri için var olmayan bir sayfadır. */}
-          <div className="mb-5">
-            <NavLink lang={lang} slug="" pathname={pathname} onGit={onGit}>
-              {dict.nav.home}
-            </NavLink>
-          </div>
+          Logo zaten oraya gidiyor, ama bir logo bir MARKA işaretidir, gezinme
+          öğesi değil; ve menüde karşılığı olmayan bir sayfa, menüye bakan biri
+          için var olmayan bir sayfadır. */}
+      <div className="flex flex-col gap-0.5">
+        <NavLink lang={lang} slug="" pathname={pathname} onGit={onGit}>
+          {dict.nav.home}
+        </NavLink>
+      </div>
 
-          {/* GRUPLAR: gerekçe content/nav.ts'te. Kısaca: sayfa sayısı 92'ye
-              çıktı ve 78'i bileşen; Kurulum, Token'lar ve Bloklar o listenin
-              içinde kayboluyordu. Gruplama bileşenleri BÖLMÜYOR, tek bir
-              satıra katlıyor. */}
-          {navGruplari(lang).map((g) => {
-            return (
-              <div key={g.key} className="mb-5">
-                {g.katlanir ? (
-                  /* AÇIK GELİYOR, VE KATLANIR OLMASI BUNU DEĞİŞTİRMİYOR.
-                     Önce "o anki sayfa bu grupta mı" sorusuna bağlıydı, yani
-                     siteye ilk giren kapalı bir liste görüyordu: menüde tek
-                     satır duruyor ve arkasında ne olduğu ancak tıklayınca
-                     anlaşılıyordu. Bir doküman menüsünün ilk işi neyin VAR
-                     olduğunu söylemek; katlama, yer açmak isteyen okuyucu
-                     için duruyor, karşılama hâli olarak değil. */
-                  <details open className="docs-nav-grup">
-                    <summary className="docs-nav-baslik">
-                      {g.baslik[lang]}
-                      <span className="ml-auto font-mono text-[length:var(--text-caption)] tabular-nums">
-                        {g.sayfalar.length}
-                      </span>
-                    </summary>
-                    <div className="mt-1">
-                      {g.sayfalar.map((page) => (
-                        <NavLink key={page.slug} lang={lang} slug={page.slug} pathname={pathname} onGit={onGit}>
-                          {page.title[lang]}
-                        </NavLink>
-                      ))}
-                    </div>
-                  </details>
-                ) : (
-                  <>
-                    <p className="docs-nav-baslik">{g.baslik[lang]}</p>
-                    {g.sayfalar.map((page) => (
-                      <NavLink key={page.slug} lang={lang} slug={page.slug} pathname={pathname} onGit={onGit}>
-                        {page.title[lang]}
-                      </NavLink>
-                    ))}
-                  </>
-                )}
+      {/* GRUPLAR: gerekçe content/nav.ts'te. Kısaca: sayfa sayısı 96'ya çıktı
+          ve 78'i bileşen; Kurulum, Token'lar ve Bloklar o listenin içinde
+          kayboluyordu. Gruplama bileşenleri BÖLMÜYOR, tek bir satıra katlıyor. */}
+      {navGruplari(lang).map((g) => (
+        <div key={g.key} className="flex flex-col gap-0.5">
+          {g.katlanir ? (
+            /* AÇIK GELİYOR, VE KATLANIR OLMASI BUNU DEĞİŞTİRMİYOR. Bir doküman
+               menüsünün ilk işi neyin VAR olduğunu söylemek; katlama, yer açmak
+               isteyen okuyucu için duruyor, karşılama hâli olarak değil. */
+            <details open className="docs-nav-grup">
+              <summary className="docs-nav-baslik">
+                <span className="flex-1">{g.baslik[lang]}</span>
+                <span className="font-mono tabular-nums">{g.sayfalar.length}</span>
+              </summary>
+              <div className="mt-1 flex flex-col gap-0.5">
+                {g.sayfalar.map((page) => (
+                  <NavLink
+                    key={page.slug}
+                    lang={lang}
+                    slug={page.slug}
+                    pathname={pathname}
+                    onGit={onGit}
+                    tur="bilesen"
+                  >
+                    {page.title[lang]}
+                  </NavLink>
+                ))}
               </div>
-            );
-          })}
-    </>
+            </details>
+          ) : (
+            <>
+              <p className="docs-nav-baslik pb-1.5">{g.baslik[lang]}</p>
+              {g.sayfalar.map((page) => (
+                <NavLink key={page.slug} lang={lang} slug={page.slug} pathname={pathname} onGit={onGit}>
+                  {page.title[lang]}
+                </NavLink>
+              ))}
+            </>
+          )}
+        </div>
+      ))}
+    </div>
   );
 }
 
 /**
- * Doküman düzeni — üç sütun.
+ * Rotadan sayfanın iç slug'u.
  *
- * Tanıtım sayfası bunu KULLANMIYOR: bir landing'in rayı olmaz, ve 81 satırlık
+ * Adres çevriliyor (`/tr/docs/ikonlar` · `/en/docs/icons`), o yüzden segment
+ * doğrudan slug değil: `icSlug` onu iç ada çeviriyor. Doküman dışındaki bir
+ * yolda `undefined` dönüyor ve iki bileşen de hiç çizilmiyor.
+ */
+function slugOf(lang: Locale, pathname: string): string | undefined {
+  const p = pathname.split("/");
+  if (p[2] !== "docs" || !p[3]) return undefined;
+  return icSlug(lang, p[3]) ?? p[3];
+}
+
+/** `Doküman › Grup › Sayfa`. Grup adı nav.ts'ten; elle yazılmıyor. */
+function Breadcrumb({ lang, pathname, dict }: { lang: Locale; pathname: string; dict: Dictionary }) {
+  const slug = slugOf(lang, pathname);
+  const sayfa = slug ? findPage(slug) : undefined;
+  if (!sayfa || !slug) return null;
+  const grup = grupAdi(lang, slug);
+  return (
+    <nav className="docs-crumb mb-5" aria-label={dict.nav.crumbRoot}>
+      <Link href={`/${lang}`}>{dict.nav.crumbRoot}</Link>
+      {grup ? (
+        <>
+          <Icon icon={CaretRight} size="xs" weight="bold" />
+          <span>{grup}</span>
+        </>
+      ) : null}
+      <Icon icon={CaretRight} size="xs" weight="bold" />
+      <strong>{sayfa.title[lang]}</strong>
+    </nav>
+  );
+}
+
+/** Okuma sırası nav.ts'ten; iki kart da onun komşularından. */
+function PrevNext({ lang, pathname, dict }: { lang: Locale; pathname: string; dict: Dictionary }) {
+  const slug = slugOf(lang, pathname);
+  if (!slug) return null;
+  const { onceki, sonraki } = komsular(lang, slug);
+  if (!onceki && !sonraki) return null;
+  return (
+    <nav className="docs-pn">
+      {onceki ? (
+        <Link href={yol(lang, onceki.sayfa.slug)} className="docs-pn-card" data-yon="onceki">
+          <span className="docs-pn-yon">
+            <Icon icon={ArrowLeft} size="xs" weight="bold" />
+            {dict.nav.prev}
+          </span>
+          <strong>{onceki.sayfa.title[lang]}</strong>
+        </Link>
+      ) : (
+        <span />
+      )}
+      {sonraki ? (
+        <Link href={yol(lang, sonraki.sayfa.slug)} className="docs-pn-card" data-yon="sonraki">
+          <span className="docs-pn-yon">
+            {dict.nav.next}
+            <Icon icon={ArrowRight} size="xs" weight="bold" />
+          </span>
+          <strong>{sonraki.sayfa.title[lang]}</strong>
+          <span className="docs-crumb">{sonraki.sayfa.blurb[lang]}</span>
+        </Link>
+      ) : null}
+    </nav>
+  );
+}
+
+/**
+ * Doküman düzeni — üç sütun, ve ikisi ölçüye göre kayboluyor.
+ *
+ * Tanıtım sayfası bunu KULLANMIYOR: bir landing'in rayı olmaz, ve 96 satırlık
  * bir menü "bu nedir" diye gelen birine hiçbir şey anlatmaz. İkisi ayrı
- * `layout.tsx` altında yaşıyor — `/docs` bunu alıyor, `/` almıyor.
+ * `layout.tsx` altında yaşıyor.
  */
 export function DocsShell({ children, lang, dict }: { children: ReactNode; lang: Locale; dict: Dictionary }) {
   const pathname = usePathname();
-  /* MENÜ DAR EKRANDA BİR ÇEKMECE. Ray `md:` altında gizliydi ve yerine hiçbir
-     şey konmamıştı: 92 sayfalık bir doküman sitesi telefonda GEZİLEMİYORDU.
-     Ne menü ne arama; okuyucu ancak dışarıdan bir bağlantıyla gelebiliyor,
-     geldiği sayfadan da hiçbir yere gidemiyordu. */
+  /* MENÜ DAR EKRANDA BİR ÇEKMECE. Ray gizliydi ve yerine hiçbir şey
+     konmamıştı: 96 sayfalık bir doküman sitesi telefonda GEZİLEMİYORDU. */
   const [menuAcik, setMenuAcik] = useState(false);
 
   return (
-    <div className="min-h-dvh bg-page text-ink-soft">
+    <div className="min-h-dvh" style={{ background: "var(--color-band)" }}>
       <SiteHeader lang={lang} dict={dict} onMenu={() => setMenuAcik(true)} />
 
       {/* Kitin kendi `Sheet`i: doküman sitesi kitin bileşenini kullanmazsa
@@ -409,23 +442,20 @@ export function DocsShell({ children, lang, dict }: { children: ReactNode; lang:
         title={dict.nav.docs}
         closeLabel={dict.nav.menuKapat}
       >
-        {/* MARKA ÇEKMECENİN TEPESİNDE, şeritte değil. Çekmece açıkken şerit
-            zaten görünmüyor; marka buraya gelince hem yerini koruyor hem de
-            ana sayfaya giden yol menünün içinde kalıyor. */}
-        <Link
-          href={`/${lang}`}
-          onClick={() => setMenuAcik(false)}
-          className="mb-6 inline-flex no-underline"
-        >
+        {/* MARKA ÇEKMECENİN TEPESİNDE, şeritte değil: çekmece açıkken şerit
+            görünmüyor, ve ana sayfaya giden yol menünün içinde kalıyor. */}
+        <Link href={`/${lang}`} onClick={() => setMenuAcik(false)} className="mb-6 inline-flex no-underline">
           <LogoMark />
         </Link>
         <MenuGovdesi lang={lang} dict={dict} pathname={pathname} onGit={() => setMenuAcik(false)} />
       </Sheet>
 
-      <div className="mx-auto flex max-w-(--docs-wrap) items-start gap-0 px-5 sm:px-7">
-        {/* ① Rail — kilitli menü, content/nav.ts'ten map'leniyor */}
+      <div className="mx-auto flex max-w-(--docs-wrap) items-start">
+        {/* ① Ray — kilitli menü, content/nav.ts'ten map'leniyor. Kendi içinde
+            kayıyor: sayfa kayarken menünün de kayması, uzun bir listede
+            okuyucunun yerini kaybettiriyor. */}
         <nav
-          className="sticky hidden shrink-0 overflow-y-auto py-9 pr-7 md:block"
+          className="sticky hidden shrink-0 overflow-y-auto border-r border-[var(--color-edge)] px-4 pt-6 pb-10 ray:block"
           style={{
             width: "var(--docs-rail)",
             top: "var(--docs-top)",
@@ -436,16 +466,20 @@ export function DocsShell({ children, lang, dict }: { children: ReactNode; lang:
           <MenuGovdesi lang={lang} dict={dict} pathname={pathname} />
         </nav>
 
-        {/* ② İçerik */}
-        <main className="min-w-0 flex-1 py-10 md:border-x md:border-[var(--color-line)] md:px-10">
-          <div className="mx-auto" style={{ maxWidth: "var(--docs-measure)" }}>
+        {/* ② İçerik. Kırıntı yolu ve önceki/sonraki BURADA, sayfalarda değil:
+            ikisi de rotadan türüyor, yani 96 sayfaya elle yazıldığında 96 kez
+            unutulabilecek şeyler. Sayfa yalnız kendi gövdesini yazıyor. */}
+        <main className="min-w-0 flex-1 px-5 pt-11 pb-24 sm:px-(--docs-govde-pad)">
+          <article className="mx-auto flex flex-col" style={{ maxWidth: "var(--docs-measure)" }}>
+            <Breadcrumb lang={lang} pathname={pathname} dict={dict} />
             {children}
-          </div>
+            <PrevNext lang={lang} pathname={pathname} dict={dict} />
+          </article>
         </main>
 
         {/* ③ İçindekiler — geniş ekranda, sayfanın kendi başlıklarından.
             Sütunun kendisi Toc içinde: başlık yoksa sütun da yok. */}
-        <Toc key={pathname} label={dict.nav.toc} />
+        <Toc key={pathname} label={dict.nav.toc} ornek={dict.nav.example} />
       </div>
     </div>
   );

@@ -30,61 +30,129 @@
 @source "../../../../packages/ui/src";
 
 /* ==============================================================
-   SİTENİN KENDİ OKUMA ÖLÇEĞİ.
+   DOKÜMAN KABUĞUNUN TASARIM KATMANI.
 
-   Kitin tip skalası bir gösterge paneli için ölçüldü: 13px gövde, sıkı satır
-   aralığı, ekrana çok satır sığsın diye. Bir doküman sitesinde aynı değerler
-   kısılmış ve yorucu görünür — burada her satır baştan sona OKUNUR.
+   TEK YENİ RENK YOK, ve bu bir iddia değil ölçüm: kabuğun ihtiyaç duyduğu on
+   beş rengin on beşi de kitte tanımlı. Aşağıdaki takma adlar o eşlemeyi
+   GÖRÜNÜR yapıyor, çünkü bir doküman sayfası yazan kişi "kart zemini" diye
+   düşünüyor, "--color-shell" diye değil.
 
-   O yüzden site kitin RENKLERİNİ ve FİZİĞİNİ alıyor, tipografisini almıyor.
-   Doğru katman ayrımı: tip skalası ürün yoğunluğu içindir, düzyazı ayrı iştir.
+   eşleme (tasarım adı → kit token'ı):
+     kabuk zemini  --color-band / --color-rail     ikincil zemin  --color-page
+     kart/girdi    --color-shell                   başlık satırı  --color-hover
+     metin         --color-ink                     ikincil metin  --color-ink-faint
+     1px kenar     --color-edge                    kart içi ayraç --color-div
+     kesik çizgi   --color-line                    segment zemini --color-sunk
+     1.5px kenar   --color-edge-strong             seçili zemin   --color-accent-bg
+     vurgu         --color-accent                  vurgu soft     --color-accent-soft
+     kod zemini    --color-inverse (iki temada da koyu)
+
+   TİPOGRAFİ KİTTEN AYRI, RENK DEĞİL. Kitin ölçeği bir gösterge paneli için
+   ölçüldü (13px gövde, sıkı satır); burada her satır baştan sona OKUNUR.
    ============================================================== */
+/* İKİ KIRILIM, VE İKİSİ DE SÜTUN SAYISI HAKKINDA. Tailwind'in `md`/`lg`
+   adımları burada yanlış yerde duruyordu: ray 768'de açılıyor ama 264 piksellik
+   ray + 760 piksellik okuma sütunu 900'den önce sığmıyor, ve içindekiler
+   üçüncü sütun olarak ancak 1240'ta yer buluyor. Kırılım ölçüden geliyor,
+   hazır adımdan değil. */
+@theme {
+  --breakpoint-ray: 900px;
+  --breakpoint-toc: 1240px;
+  /* Tanıtım şeridindeki bölüm bağlantıları: dört bağlantı, arama kutusu
+     olmadığı için dokümandan erken sığıyor. */
+  --breakpoint-bolum: 1100px;
+  /* Şeritte sürüm etiketi ile dil segmentinin sığdığı yer. Altında şerit
+     yalnız gezinmeyi taşıyor: menü, logo, arama, tema, GitHub. */
+  --breakpoint-dil: 760px;
+}
+
 :root {
-  /* Üç sütun + iç boşluklar. Daha geniş olsaydı içerik ekranın ortasından
-     kayardı; dar olsaydı içindekiler sıkışırdı. */
-  --docs-wrap: 1400px;
-  --docs-rail: 260px;
+  /* Kabuk geometrisi. Üçü birbirine bağlı: ray ve içindekiler sticky
+     başlığın altından başlıyor, yani ikisinin `top`u da başlık yüksekliği. */
+  --docs-top: 63px;
+  --docs-wrap: 1440px;
+  --docs-rail: 264px;
   --docs-toc: 220px;
-  --docs-measure: 68ch;
-  --docs-top: 68px;
+  /* Okuma sütunu. `ch` değil piksel: kod blokları ve tablolar da bu sütunda
+     duruyor ve onların genişliği metnin karakter genişliğine bağlı değil. */
+  --docs-measure: 760px;
+  /* Bir bölüm başlığı sticky başlığın altında kalmasın: 63 + 21 nefes. */
+  --docs-scroll: 84px;
 
   /* LOGO: iki tema iki DOSYA, ve ikisi aynı tuvalde değil. Aynı çizimi
      taşıyorlar ama ızgara adımı light'ta 55/390 birim, dark'ta 27,375/224.
-     Aynı CSS yüksekliği verilirse dark %13 küçük kalıyor; ikinci değer o farkı
-     kapatıyor (44 × 224/390 × 55/27,375 ≈ 51).
+     Aynı `height` verilirse dark %13 küçük kalıyor; ikinci değer o farkı
+     kapatıyor (30 × 224/390 × 55/27,375 ≈ 35).
 
-     BU BİR TELAFİ, ÇÖZÜM DEĞİL. Dosyalar ortak tuval ve ortak boşlukla
-     yeniden dışa aktarılırsa iki token da tek değere döner ve buradaki
-     hesap silinir. */
-  --docs-logo: 44px;
-  --docs-logo-dark: 51px;
+     BU BİR TELAFİ, ÇÖZÜM DEĞİL: dosyalar ortak tuvalle yeniden dışa
+     aktarılırsa iki token tek değere döner ve buradaki hesap silinir. */
+  --docs-logo: 30px;
+  --docs-logo-dark: 35px;
 
-  /* Okuma ölçeği */
-  --docs-text: 17px;
-  --docs-lead: 20px;
-  --docs-h1: clamp(2.25rem, 1.6rem + 2vw, 3rem);
-  --docs-h2: 1.625rem;
-  --docs-h3: 1.1875rem;
+  /* Okuma ölçeği. Her satırın tek bir işi var; bir başlık "bir tık büyük
+     dursun" diye ara değer eklenmiyor. */
+  --docs-h1: clamp(38px, 5vw, 56px);
+  --docs-h2: 27px;
+  --docs-h3: 19px;
+  --docs-lead: 19px;
+  --docs-text: 16px;
   --docs-small: 15px;
-  --docs-code: 14px;
-  --docs-line: 1.75;
+  --docs-cell: 14.5px;
+  --docs-nav: 14px;
+  --docs-crumb: 13.5px;
+  --docs-code: 13.5px;
+  --docs-inline: 14px;
+  --docs-micro: 11.5px;
+  --docs-label: 12px;
+  --docs-line: 1.65;
 
-  /* Ölçek dışında kalan üç değer, gerekçeleriyle — bir sayıyı doğrudan
-     `className`'e yazmak yerine buraya koymak, onu bir KARAR hâline getiriyor.
+  /* Ölçeğin dışında kalan üç değer, gerekçeleriyle — bir sayıyı doğrudan
+     `className`'e yazmak yerine buraya koymak onu bir KARAR yapıyor.
      `check-scale` uydurulmuş sayıyı yakalar, token biçimini geçirir. */
 
-  /* Marka yazısı. Okuma ölçeğinin bir parçası değil: bir logotype metin
-     değil, bir işaret — ve boyutu işaretin kendi oranından geliyor. */
-  --docs-brand: 19px;
-  /* Bir prop açıklamasının satır uzunluğu. Gövde metni 68ch okunur, ama bir
+  /* Bir prop açıklamasının satır uzunluğu. Gövde metni 760px okunur, ama bir
      tablo hücresinde aynı uzunluk sütunu ezer; yarısı hücreye sığan ölçü. */
   --docs-prop-doc: 34ch;
   /* Yalnız ScrollX örneğinde: kabı taşırmak için kasten geniş bir blok.
      Bir ölçü değil, bir gösteri. */
   --docs-overflow-demo: 900px;
+  /* KOD BLOĞUNUN İKİ RENGİ, ve kitte karşılıkları yok. Kitin ters yüzey
+     ailesi üç üye taşıyor (`--color-inverse`, `-ink`, `-edge`); bir ayraç ve
+     bir ikincil mürekkep yok, çünkü kitin tek ters yüzeyi olan bildirim
+     ikisine de ihtiyaç duymuyor. Değerler koyu temanın kendi ayracı ve soluk
+     mürekkebi: ikinci bir tüketici çıktığı gün kite taşınır.
+     Doküman: docs/gerekce/10-kit-css.md */
+  --docs-cb-line: #22314b;
+  --docs-cb-muted: #9aa7bd;
+  /* KAPI ÇIKTISININ ÜÇ RENGİ. Kutu her iki temada da koyu (bir terminal
+     penceresi temayla dönmüyor), o yüzden bunlar koyu temanın değerleri ve
+     TEMAYA GÖRE DEĞİŞMİYORLAR: açık temanın kritik kırmızısı bu zeminde
+     3.0'ın altında ölçülüyordu. */
+  --docs-cb-fail: #f0a3a9;
+  /* Koşan karenin mavisi · geçenle (yeşil) takılanın (pembe) arasında üçüncü
+     bir hâl, ve o hâl bir SIRA: "şu an bu deneniyor". */
+  --docs-cb-run: #5c86e6;
+  --docs-cb-pass: #8fd1a4;
+  --docs-cb-path: #a8cdf7;
+
+  /* Ray gruplarının arası. Satır aralığından (2px) BİR BASAMAK değil bir
+     SINIR: aynı grubun satırları birbirine yakın, gruplar birbirinden uzak.
+     Küçültülürse dört grup tek bir liste gibi okunuyor. */
+  --docs-grup-gap: 22px;
+  /* Gövdenin yan boşluğu. Ekranla birlikte büyüyor, çünkü okuma sütunu sabit
+     (760px): dar ekranda kenara yapışmamalı, geniş ekranda sütun ortada
+     kalmalı. Üç sayının tamamı bir karar. */
+  --docs-govde-pad: clamp(20px, 4vw, 56px);
+
+  /* Adım numarası kutusu ve onun hizaladığı sütun. İkisi bir arada bir
+     ızgara tanımlıyor: 40px kutu, 44px sütun (kutu + 4px nefes). */
+  --docs-step-box: 40px;
+  --docs-step-col: 44px;
 }
 
 body {
+  background: var(--color-band);
+  color: var(--color-ink);
   font-size: var(--docs-text);
   line-height: var(--docs-line);
 }
@@ -92,11 +160,10 @@ body {
 /* ==============================================================
    CANLI ÖRNEK ADASI — kitin kendi ölçeği.
 
-   BULUNAN HATA. Site `body`ye 17px ve 1.75 satır yüksekliği veriyor, çünkü
-   düzyazı okunacak. Ama canlı örneklerin içindeki kit bileşenleri kendi yazı
-   boyutunu yazmayan her yerde bunu MİRAS ALIYORDU: kitin gövde ölçeği 13px,
-   ekranda 17px görünüyordu. Sonuç, doküman sitesindeki hiçbir örneğin gerçek
-   panele benzememesiydi — şablonlar, bloklar, bileşen örnekleri, hepsi.
+   BULUNAN HATA. Site gövdeye kendi okuma ölçeğini veriyor, çünkü düzyazı
+   okunacak. Ama canlı örneklerin içindeki kit bileşenleri kendi yazı boyutunu
+   yazmayan her yerde bunu MİRAS ALIYORDU: kitin gövde ölçeği 13px, ekranda
+   16px görünüyordu ve hiçbir örnek gerçek panele benzemiyordu.
 
    Site kitin RENKLERİNİ ve FİZİĞİNİ alıp tipografisini almıyor; doğru karar,
    ama örnek kutularının içi siteye değil KİTE ait. Bu sınıf o sınırı çiziyor.
@@ -106,179 +173,821 @@ body {
   line-height: 1.5;
 }
 
-/* ---- Başlıklar ---- */
-/* MARKA YÜZÜ YALNIZ BURADA VE `.home-h1`DE. Chakra Petch bir display yüzü:
-   köşeleri kırpılmış, kare karakterli, büyük punto için çizilmiş. `--docs-h2`
-   (26px) ve `--docs-h3` (19px) onun iyi çalıştığı boyların altında, ve site
-   96 sayfa düzyazı taşıyor; her başlıkta techno bir doku, kod bloklarıyla
-   ve prop tablolarıyla yarışır. Marka sesi en büyük tierde zaten duyuluyor.
-
-   AĞIRLIK 650 DEĞİL 600: Chakra Petch değişken değil, 650 kesimi yok ve
-   tarayıcı sentetik kalın üretirdi. Yedek yüz de aynı kuralı kullanıyor,
-   o yüzden font inmezse başlık 600'de kalıyor: bozulmuyor, inceliyor. */
+/* ---- Başlıklar ----
+   BAŞLIKLAR AYNI YÜZÜN KALINI: ayrı bir display kesimi yok. Site bir ara
+   Chakra Petch taşıyordu (Google'dan çekilen dördüncü bir yüz); kitin üç
+   yüzü pakette geliyor ve dördüncüsü hem bir istek hem bir çelişkiydi. */
 .docs-h1 {
   color: var(--color-ink);
-  font-family: var(--font-brand), var(--font-display);
+  font-family: var(--font-display);
   font-size: var(--docs-h1);
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 1.08;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 1;
   text-wrap: balance;
 }
 .docs-lead {
   color: var(--color-ink-faint);
   font-size: var(--docs-lead);
-  line-height: 1.55;
-  margin-top: 14px;
-  max-width: 46ch;
+  line-height: 1.5;
 }
+/* SAYFANIN DİKEY RİTMİ YALNIZ ÜST BOŞLUKLA kuruluyor: her blok kendinden
+   öncekine olan mesafesini söylüyor, kendinden sonrakine değil. Alt boşluk da
+   verilseydi ikisi toplanırdı (gövde bir flex sütunu, orada kenar boşlukları
+   BİRLEŞMİYOR) ve aralar iki katına çıkardı. Ölçüler referanstan: başlık 44,
+   paragraf 18, blok 14, örnek kutusu 22. */
 .docs-h2 {
-  border-bottom: 1px solid var(--color-line);
   color: var(--color-ink);
+  font-family: var(--font-display);
   font-size: var(--docs-h2);
-  font-weight: 650;
+  font-weight: 800;
   letter-spacing: -0.02em;
-  line-height: 1.25;
-  margin-block: 64px 18px;
-  padding-bottom: 12px;
-  scroll-margin-top: 88px;
+  line-height: 1.15;
+  margin-top: 44px;
+  scroll-margin-top: var(--docs-scroll);
   text-wrap: balance;
 }
+/* SAYFANIN TEK KALIN ÇİZGİSİ BAŞLIK BLOĞUNUN ALTINDA, bölüm başlıklarında
+   değil. Her H2'nin altına çizgi çekmek sayfayı yatay şeritlere bölüyordu ve
+   adım numaralarının dikey çizgisiyle yarışıyordu; sıralı bir işi okuyan göz
+   aşağı iner, sağa kesilmez. */
 .docs-h3 {
   color: var(--color-ink);
   font-size: var(--docs-h3);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.01em;
-  margin-block: 36px 10px;
+  margin-top: 28px;
 }
 .docs-p {
-  margin-block: 18px;
+  color: var(--color-ink-faint);
+  margin-top: 18px;
+  text-wrap: pretty;
 }
-.docs-p:first-child {
+/* Kutuların ilk çocuğu boşluk almıyor: kutunun kendi dolgusu zaten var. */
+.docs-p:first-child,
+.docs-h2:first-child,
+.docs-h3:first-child {
   margin-top: 0;
 }
-
-/* Vurgulu not — sayfanın akışını kesen tek şey, o yüzden nadir kullanılır. */
-.docs-note {
-  background: var(--color-accent-bg);
-  border-left: 3px solid var(--color-accent-line);
-  margin-block: 28px;
-  padding: 18px 22px;
-}
-.docs-note > :first-child {
-  margin-top: 0;
-}
-.docs-note > :last-child {
-  margin-bottom: 0;
+.docs-p strong {
+  color: var(--color-ink);
+  font-weight: 700;
 }
 
-/* Satır içi kod: gövde metninden ayrılsın ama bağırmasın. */
+/* Satır içi kod: gövde metninden ayrılsın ama bağırmasın. Mürekkep rengi,
+   çünkü bir dosya adı cümlenin içindeki en somut şeydir. */
 .docs-p code,
-.docs-note code,
+.docs-callout code,
+.docs-table-val code,
 li code {
-  background: var(--color-sunk);
-  border: 1px solid var(--color-line);
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-mark);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: var(--docs-inline);
+  font-weight: 700;
+  padding: 1px 6px;
+}
+
+/* ---- Kırıntı yolu ---- */
+.docs-crumb {
+  align-items: center;
+  color: var(--color-ink-faint);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: var(--docs-crumb);
+  gap: 8px;
+}
+.docs-crumb a {
+  color: inherit;
+  text-decoration: none;
+}
+.docs-crumb a:hover {
+  color: var(--color-ink);
+}
+.docs-crumb strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+/* ---- Başlık bloğu ---- */
+.docs-head {
+  border-bottom: 1.5px solid var(--color-edge-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 28px;
+}
+/* Gereksinim etiketi: sayfanın neye ihtiyaç duyduğunu BAŞLIKTA söylüyor,
+   üçüncü paragrafta değil. */
+.docs-req {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-mark);
+  display: inline-flex;
+  font-size: var(--docs-crumb);
+  font-weight: 600;
+  gap: 6px;
+  padding: 3px 9px;
+}
+
+/* Başlığın yanındaki sembol: `<Badge>`. Kutulu ve mono, çünkü okunan bir
+   sözcük değil kopyalanan bir işaret. */
+.docs-sembol {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
   border-radius: var(--radius-mark);
   font-family: var(--font-mono);
-  font-size: 0.88em;
-  padding: 1px 5px;
+  font-size: var(--docs-label);
+  font-weight: 700;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+
+/* ---- Numaralı adım ----
+   İki sütun: numara ve iş. Numaranın altından bir sonraki adıma inen kesik
+   çizgi, sıranın kendisini çiziyor — "bu bir liste" demeyi metne bırakmıyor. */
+.docs-step {
+  display: grid;
+  gap: 0 18px;
+  grid-template-columns: var(--docs-step-col) minmax(0, 1fr);
+  padding-top: 40px;
+  scroll-margin-top: var(--docs-scroll);
+}
+.docs-step-rail {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+.docs-step-num {
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-ctl);
+  box-shadow: 3px 3px 0 var(--color-edge-strong);
+  display: grid;
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--docs-h3);
+  font-weight: 900;
+  height: var(--docs-step-box);
+  place-items: center;
+  width: var(--docs-step-box);
+}
+/* AÇIK ADIM DOLU, ötekiler değil: sayfada tek bir dolu vurgu olur (Yasa 2). */
+.docs-step-num[data-current="true"] {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+.docs-step-line {
+  border-left: 1.5px dashed var(--color-edge);
+  flex: 1;
+  margin-top: 10px;
+  width: 0;
+}
+/* RİTİM TEK MEKANİZMADAN: burada da `gap` değil üst boşluk. İkisi bir arada
+   olduğunda aralar toplanıyordu (kod bloğu ile notun arası 14 yerine 28). */
+.docs-step-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-bottom: 4px;
+}
+/* Numarasız bölüm: başlığın kendi 44'ü ilk çocukta sıfırlandığı için boşluk
+   bölümün kendi dolgusundan geliyor. */
+.docs-bolum {
+  padding-top: 44px;
 }
 
 /* ---- Kod bloğu ----
-   Kitin kartıyla aynı kenar, ama sunk zeminde: kod okunacak bir yüzey,
-   basılacak bir kontrol değil. */
-.docs-code {
-  background: var(--color-sunk);
-  border: 1px solid var(--color-edge);
+   İKİ TEMADA DA KOYU, ve bu bilinçli: kod okunan bir yüzey, sayfanın bir
+   parçası değil. Açık temada da koyu kalması onu bir ALINTI gibi ayırıyor,
+   ve iki temada aynı görünmesi bir ekran görüntüsünü her yere taşıtıyor. */
+.docs-cb {
+  background: var(--color-inverse);
+  margin-top: 14px;
+  border: 1.5px solid var(--color-edge-strong);
   border-radius: var(--radius-card);
-  color: var(--color-ink-soft);
+  box-shadow: 5px 5px 0 var(--color-edge);
+  overflow: hidden;
+}
+.docs-cb[data-vurgu] {
+  box-shadow: 8px 8px 0 var(--color-accent);
+}
+.docs-cb-bar {
+  align-items: center;
+  border-bottom: 1px solid var(--docs-cb-line);
+  display: flex;
+  gap: 6px;
+  min-height: 42px;
+  padding: 8px 10px 8px 14px;
+}
+.docs-cb-tab {
+  border: 1px solid transparent;
+  border-radius: var(--radius-mark);
+  color: var(--docs-cb-muted);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+  font-weight: 700;
+  padding: 4px 10px;
+}
+.docs-cb-tab[data-active="true"] {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-soft);
+  color: var(--color-inverse);
+}
+.docs-cb-file {
+  color: var(--docs-cb-muted);
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+}
+/* Kopyala düğmesi vurgu soft zeminde: koyu bloğun üstünde tek açık nesne, ve
+   sayfanın birincil eylemiyle yarışmıyor çünkü rengi dolgu değil yıkama. */
+.docs-cb-copy {
+  align-items: center;
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-soft);
+  border-radius: var(--radius-mark);
+  color: var(--color-inverse);
+  cursor: pointer;
+  display: flex;
+  font-size: var(--docs-label);
+  font-weight: 700;
+  gap: 6px;
+  padding: 4px 10px;
+}
+.docs-cb-copy:hover {
+  background: var(--color-shell);
+  border-color: var(--color-shell);
+}
+.docs-cb-pre {
+  color: var(--color-inverse-ink);
   font-family: var(--font-mono);
   font-size: var(--docs-code);
-  line-height: 1.7;
+  line-height: 1.75;
+  margin: 0;
   overflow-x: auto;
-  padding: 20px 22px;
+  padding: 16px 18px;
   tab-size: 2;
-  white-space: pre;
 }
 
-/* Kareli kâğıt — kitin boş-durum kuyusuyla aynı 8px modül. Göze ölçek verir,
-   böylece bir bileşen boşlukta yüzüyormuş gibi durmaz. */
-.docs-grid {
-  background-image:
-    linear-gradient(to right, var(--color-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--color-line) 1px, transparent 1px);
-  background-size: 8px 8px;
-  background-position: -1px -1px;
+/* ---- Örnek kutusu ----
+   KIRPMIYOR, ve bu bir düzeltme. Referansta `overflow: hidden` var; burada
+   kutunun içinde açılan paneller var (Combobox listesi, DatePicker takvimi,
+   MultiSelect seçenekleri) ve kırpma onları hücre sınırında kesiyordu. Köşeleri
+   şeridin kendi zemini ve alt kuralı zaten kapatıyor. */
+.docs-demo {
+  background: var(--color-shell);
+  margin-top: 22px;
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-card);
+  box-shadow: 5px 5px 0 var(--color-edge);
+}
+.docs-demo-bar {
+  align-items: center;
+  background: var(--color-hover);
+  border-bottom: 1px solid var(--color-div);
+  /* İÇ YARIÇAP DIŞ YARIÇAPTAN KENAR KADAR KÜÇÜK. Kutu 1.5px kenarlı ve 8px
+     köşeli; şerit de 8px kullanınca köşede kenarla zemin arasında ince bir
+     boşluk kalıyordu · "köşeler boşluklu" görünen şey buydu. */
+  border-top-left-radius: calc(var(--radius-card) - 1.5px);
+  border-top-right-radius: calc(var(--radius-card) - 1.5px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 10px 8px 12px;
+}
+/* NOKTALI IZGARA, KARELİ KÂĞIT DEĞİL: bir bileşenin boşlukta yüzmediğini
+   söylüyor ama çizgili bir zemin gibi bileşenin kendi kenarlarıyla yarışmıyor.
+   16px modül, kitin 8px'inin iki katı: örnek kutusu bir panel değil bir sahne. */
+/* Örnek kutusunun kopyala düğmesi · referansta 5px köşe, 12px metin, 2px taban.
+   Kitin küçük düğmesi 32px ve yanındaki segmentten (28) uzun kalıyor; şeridin
+   yüksekliğini en uzun çocuğu belirlediği için bar bir basamak şişiyordu. */
+.docs-demo-kopya {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: calc(var(--radius) - 1px);
+  box-shadow: 2px 2px 0 var(--color-edge-strong);
+  color: var(--color-ink);
+  cursor: pointer;
+  display: flex;
+  flex: none;
+  font-size: var(--docs-label);
+  font-weight: 700;
+  gap: 6px;
+  height: 28px;
+  padding-inline: 10px;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard);
+}
+.docs-demo-kopya:hover {
+  background: var(--color-hover);
+}
+.docs-demo-kopya:active {
+  box-shadow: 0 0 0 var(--color-edge-strong);
+  transform: translate(2px, 2px);
+}
+
+/* SON ÇOCUK KUTUNUN KÖŞESİNİ ALIYOR. Kutu kırpmıyor (yukarıdaki gerekçe) ve
+   önizlemenin noktalı zemini kare kalıyordu: 1.5px'lik yuvarlak kenarın
+   altından kare bir zemin taşıyor, köşeler "boşluklu" görünüyordu. */
+.docs-demo > :last-child {
+  border-bottom-left-radius: calc(var(--radius-card) - 1.5px);
+  border-bottom-right-radius: calc(var(--radius-card) - 1.5px);
+}
+
+.docs-demo-grid {
+  background-color: var(--color-page);
+  background-image: radial-gradient(var(--color-line) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+/* "Dene" şeridi: önizlemeden KESİK çizgiyle ayrılıyor, çünkü altındaki şey
+   örneğin parçası değil örneği DEĞİŞTİREN şey. */
+.docs-demo-dene {
+  align-items: center;
+  border-top: 1px dashed var(--color-line);
+  display: flex;
+  gap: 14px 22px;
+  padding: 12px 16px;
+}
+
+/* ---- Not ----
+   Kod bloğunun hemen altına, ilgili olduğu adımın İÇİNE konur. Bir uyarı
+   sayfanın sonunda okunmaz; okunduğu yer, ihlal edilebileceği yerdir. */
+.docs-callout {
+  background: var(--color-warn-bg);
+  margin-top: 14px;
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-ctl);
+  color: var(--color-warn);
+  display: flex;
+  font-size: var(--docs-small);
+  gap: 12px;
+  line-height: 1.6;
+  padding: 14px 16px;
+  text-wrap: pretty;
+}
+.docs-callout strong {
+  font-weight: 800;
+}
+.docs-callout > svg {
+  color: var(--color-warn-mark);
+  flex: none;
+  margin-top: 1px;
+}
+
+/* ---- Sebep kartı ---- */
+.docs-neden {
+  align-items: flex-start;
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  color: var(--color-ink-faint);
+  display: flex;
+  font-size: var(--docs-cell);
+  gap: 12px;
+  line-height: 1.6;
+  padding: 14px 16px;
+  text-wrap: pretty;
+}
+.docs-neden-no {
+  background: var(--color-accent-bg);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-ctl);
+  color: var(--color-ink);
+  display: grid;
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--docs-cell);
+  font-weight: 900;
+  height: 28px;
+  place-items: center;
+  width: 28px;
+}
+
+/* ---- Referans tablosu ----
+   Düz metinle verilen "ad + açıklama" listeleri her zaman bu tabloya çevrilir:
+   iki sütun hizalı olduğunda göz ada değil FARKA bakıyor. */
+.docs-table {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  box-shadow: 5px 5px 0 var(--color-edge);
+  margin-top: 14px;
+  overflow: hidden;
+}
+.docs-table-head {
+  background: var(--color-hover);
+  border-bottom: 1px solid var(--color-div);
+  color: var(--color-ink-faint);
+  font-size: var(--docs-label);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.docs-table-row {
+  border-bottom: 1px dashed var(--color-line);
+}
+.docs-table-row:last-child {
+  border-bottom: 0;
+}
+.docs-table-cell {
+  display: grid;
+  gap: 4px 16px;
+  grid-template-columns: minmax(0, 1fr);
+  padding: 12px 18px;
+}
+@media (min-width: 40rem) {
+  .docs-table-cell {
+    align-items: center;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
+  }
+}
+.docs-table-key {
+  font-family: var(--font-mono);
+  font-size: var(--docs-code);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.docs-table-val {
+  align-items: center;
+  color: var(--color-ink-faint);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: var(--docs-cell);
+  gap: 10px;
+}
+/* Kenarı var: yıkama koyu temada yüzeyden ayrılmıyor ve etiket kayboluyordu. */
+.docs-tag {
+  background: var(--color-accent-bg);
+  border: 1px solid var(--color-accent-line);
+  border-radius: var(--radius-mark);
+  color: var(--color-ink);
+  font-size: var(--docs-micro);
+  font-weight: 700;
+  padding: 1px 7px;
+}
+
+/* ---- Props tablosu ----
+   Dört sütun ve sabit genişlikler: prop adları ile tipler alt alta hizalı
+   olduğunda göz satırı değil FARKI tarıyor. Dar ekranda tablo kendi içinde
+   kayıyor, sayfa gövdesi yana kaymıyor. */
+.docs-props {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  box-shadow: 5px 5px 0 var(--color-edge);
+  margin-top: 14px;
+  overflow-x: auto;
+}
+/* Etiket tablonun İÇİNDE, üstünde ayrı bir satır olarak: dışarıda dursaydı
+   kartın gölgesiyle arasında sebebi görünmeyen bir boşluk kalırdı. */
+.docs-props-etiket {
+  border-bottom: 1px solid var(--color-div);
+  display: block;
+  padding: 10px 18px;
+}
+.docs-props-min {
+  min-width: 560px;
+}
+.docs-props-row {
+  align-items: baseline;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 120px 130px 80px minmax(0, 1fr);
+  padding: 12px 18px;
+}
+.docs-props-ad {
+  font-family: var(--font-mono);
+  font-size: var(--docs-code);
+  font-weight: 700;
+}
+/* ZORUNLU bir uyarı değil bir NİTELİK: vurgu yıkamasında duruyor, durum
+   renklerinde değil. Kırmızı bir etiket "bir şey yanlış" der. */
+/* ROZETİN KENARI VAR: yıkaması koyu temada yüzeyden 1.28 kontrastta kalıyor
+   ve çip kayboluyordu · çizgi onu iki temada da bir kutu yapıyor. */
+.docs-props-zorunlu {
+  background: var(--color-accent-bg);
+  border: 1px solid var(--color-accent-line);
+  border-radius: var(--radius-mark);
+  color: var(--color-ink);
+  font-size: var(--docs-micro);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 1px 5px;
+  text-transform: uppercase;
+}
+.docs-props-tip {
+  color: var(--color-accent-line);
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+  overflow-wrap: anywhere;
+}
+.docs-props-var {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+}
+.docs-props-aciklama {
+  color: var(--color-ink-faint);
+  font-size: var(--docs-inline);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+/* ---- Önceki / Sonraki ----
+   Okuma sırası nav.ts'ten geliyor. Kart hover'da kenarını sertleştirip
+   yükseliyor: bir bağlantı kartı basılacak bir şey değil, GİDİLECEK bir şey. */
+.docs-pn {
+  border-top: 1px solid var(--color-edge);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 64px;
+  padding-top: 28px;
+}
+.docs-pn-card {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  box-shadow: 4px 4px 0 var(--color-edge);
+  color: var(--color-ink);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px 18px;
+  text-decoration: none;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard),
+    border-color var(--duration-press) var(--ease-standard);
+}
+.docs-pn-card:hover {
+  border-color: var(--color-edge-strong);
+  box-shadow: 6px 6px 0 var(--color-edge-strong);
+  color: var(--color-ink);
+  transform: translate(-2px, -2px);
+}
+.docs-pn-card[data-yon="sonraki"] {
+  align-items: flex-end;
+  text-align: right;
+}
+.docs-pn-yon {
+  align-items: center;
+  color: var(--color-ink-faint);
+  display: flex;
+  font-size: var(--docs-crumb);
+  gap: 6px;
+}
+
+/* Sürüm etiketi: okunan bir sözcük değil karşılaştırılan bir sayı. */
+.docs-surum {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-chip);
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--docs-micro);
+  font-weight: 700;
+  line-height: 1.4;
+  padding: 2px 8px;
+}
+
+/* ---- Şerit kontrolleri ----
+   ÖLÇÜ KİTİN DEĞİL ŞERİDİN. Kitin kontrol yüksekliği 40 piksel ve bir panel
+   formu için doğru; bir site şeridinde aynı yükseklik kaba duruyor, çünkü orada
+   kontrol bir iş değil bir ARAÇ. Referansın ölçüsü: segment 36 (hücre 28),
+   arama ve GitHub 38. Üçü aynı hizada durmak zorunda, yoksa şerit tırtıklanıyor.
+
+   Bu yüzden şeritte kitin `Segmented`ı kullanılmıyor: ölçü farkı bir varyant
+   değil bir katman farkı, ve kite bir "şerit boyu" eklemek panel ölçeğini
+   ikiye bölerdi. */
+.docs-seg {
+  background: var(--color-sunk);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-btn);
+  display: flex;
+  flex: none;
+  gap: 3px;
+  padding: 3px;
+}
+.docs-seg-btn {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-chip);
+  color: var(--color-ink);
+  cursor: pointer;
+  display: flex;
+  font-size: var(--docs-label);
+  font-weight: 700;
+  gap: 5px;
+  height: 28px;
+  justify-content: center;
+  padding-inline: 9px;
+}
+.docs-seg-btn[aria-checked="true"],
+.docs-seg-btn[aria-selected="true"] {
+  background: var(--color-shell);
+  border-color: var(--color-edge);
+  box-shadow: 2px 2px 0 var(--color-edge);
+}
+/* Tema hücresi yalnız glif taşıyor: metin yok, o yüzden kare. */
+.docs-seg-btn[data-glif] {
+  padding-inline: 0;
+  width: 32px;
+}
+
+/* Şeritteki ikon düğmesi: kitin `tamga-icon-btn`i 40 piksel, bu 38. */
+.docs-ikon-btn {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-btn);
+  box-shadow: 3px 3px 0 var(--color-edge-strong);
+  color: var(--color-ink);
+  display: flex;
+  flex: none;
+  height: 38px;
+  justify-content: center;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard);
+  width: 38px;
+}
+.docs-ikon-btn:hover {
+  box-shadow: 4px 4px 0 var(--color-edge-strong);
+  transform: translate(-1px, -1px);
+}
+.docs-ikon-btn:active {
+  box-shadow: 0 0 0 var(--color-edge-strong);
+  transform: translate(3px, 3px);
+}
+
+/* ---- Arama ----
+   Şeritteki şey aramanın kendisi değil onu AÇAN düğme; gerçek girdi diyalogda.
+   Kutuya benziyor, çünkü okuyucu orada bir kutu arıyor. */
+.docs-search-btn {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge);
+  /* Köşe ve yükseklik bir süre AŞAĞIDA, ikinci bir `.docs-search-btn` bloğunda
+     duruyordu; ikisi birleşti. `check-css` artık ikinci tanımı yakalıyor. */
+  border-radius: var(--radius-btn);
+  color: var(--color-ink-faint);
+  cursor: pointer;
+  display: flex;
+  flex: 0 1 300px;
+  gap: 8px;
+  height: 38px;
+  min-width: 0;
+  padding: 0 10px;
+}
+.docs-search-btn:hover {
+  border-color: var(--color-edge-strong);
+  color: var(--color-ink);
+}
+.docs-search-btn-text {
+  flex: 1;
+  font-size: var(--docs-nav);
+  overflow: hidden;
+  padding-block: 8px;
+  text-align: start;
+  white-space: nowrap;
+}
+.docs-search-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  max-height: 52vh;
+  overflow-y: auto;
+  padding: 0;
+}
+/* VURGU FARE VE KLAVYEDE AYNI YER: iki ayrı işaret (biri hover, biri seçili)
+   olsaydı Enter'ın hangisini açacağı okunmazdı. */
+.docs-search-row {
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-ctl);
+  color: var(--color-ink);
+  display: grid;
+  gap: 0 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 8px 10px;
+  text-decoration: none;
+}
+.docs-search-row[data-vurgu="true"] {
+  background: var(--color-accent-bg);
+  border-color: var(--color-edge-strong);
+}
+.docs-search-row-ad {
+  font-size: var(--docs-nav);
+  font-weight: 700;
+}
+.docs-search-row-grup {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--docs-micro);
+  font-weight: 700;
+}
+.docs-search-row-blurb {
+  color: var(--color-ink-faint);
+  font-size: var(--docs-crumb);
+  grid-column: 1 / -1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.docs-search-empty {
+  border: 1px dashed var(--color-edge);
+  border-radius: var(--radius-ctl);
+  color: var(--color-ink-faint);
+  font-size: var(--docs-small);
+  padding: 20px;
+  text-align: center;
 }
 
 /* ---- Gezinme ----
-   Menü de OKUNAN bir metindir, tablo satırı değil. Sol kural sürekli;
-   aktif satır o kuralı boyar (Yasa 2: dolgu eylem demek, "buradasın" eylem değil). */
+   SEÇİLİ SATIR ÇERÇEVEYLE VE YÜKSELEREK söylüyor, dolu bir blokla değil:
+   `kit.css`'te `.tamga-rail-link`'in başında "outlined and lifted when active,
+   never a solid fill" yazıyor. Zemin `--color-accent-bg` bir yıkama, dolgu
+   değil; dolgu sayfanın tek birincil eylemine ait. */
+.docs-nav-baslik,
+.docs-toc-baslik {
+  align-items: center;
+  color: var(--color-ink-faint);
+  display: flex;
+  font-size: var(--docs-micro);
+  font-weight: 800;
+  gap: 8px;
+  letter-spacing: 0.08em;
+  padding-inline: 10px;
+  text-transform: uppercase;
+}
+.docs-nav-link {
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-ctl);
+  color: var(--color-ink);
+  display: block;
+  font-size: var(--docs-nav);
+  font-weight: 500;
+  line-height: 1.4;
+  padding: 7px 10px;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard);
+}
+.docs-nav-link:hover {
+  background: var(--color-shell);
+  color: var(--color-ink);
+}
+.docs-nav-link[data-active="true"] {
+  background: var(--color-accent-bg);
+  border-color: var(--color-edge-strong);
+  box-shadow: 3px 3px 0 var(--color-edge-strong);
+  font-weight: 700;
+}
+.docs-nav-link[data-active="true"]:hover {
+  background: var(--color-accent-bg);
+}
+/* Bileşen satırı bir tık küçük: aynı rayda 78 tanesi var ve hepsi aynı
+   ağırlıkta yazıldığında ray bir metin duvarı oluyor. */
+.docs-nav-link[data-tur="bilesen"] {
+  font-size: var(--docs-crumb);
+  padding-block: 5px;
+}
+
+/* İçindekiler daha sessiz: nerede olduğunu söyler, nereye gidileceğini değil.
+   Sol kural sürekli; aktif satır o kuralı boyar (Yasa 2). */
 .docs-toc-link {
-  border-left: 2px solid transparent;
+  border-left: 2px solid var(--color-edge);
   color: var(--color-ink-faint);
   display: block;
-  font-size: var(--docs-small);
-  line-height: 1.45;
-  margin-left: -1px;
-  padding: 8px 12px 8px 16px;
+  font-size: var(--docs-crumb);
+  line-height: 1.35;
+  padding: 5px 0 5px 12px;
   transition: color var(--duration-quick) var(--ease-instrument);
 }
 .docs-toc-link:hover {
   color: var(--color-ink);
 }
-/* Menü satırı — rail'in dilinin metin ölçeğindeki karşılığı.
-
-   Seçili satır DOLGU almıyor: `kit.css`'te `.tamga-rail-link`'in üstünde
-   "outlined and lifted when active — never a solid fill" yazıyor, ve Yasa 2
-   aynı şeyi söylüyor. Kitin `.tamga-option`'ı burada denendi ve yanlıştı — o
-   bir açılır listedeki satır, orada dolgu bir DEĞER atandığını söyler; bir
-   menüde aynı dolgu rayı boydan boya kaplayan ağır bir blok oluyor. */
-.docs-nav-link {
-  display: block;
-  border: 1px solid transparent;
-  border-radius: var(--radius-ctl);
-  color: var(--color-ink-faint);
-  font-size: var(--docs-small);
-  line-height: 1.4;
-  margin-right: 12px;
-  padding: 7px 12px;
-  transition:
-    color var(--duration-press) var(--ease-standard),
-    background var(--duration-press) var(--ease-standard);
-}
-.docs-nav-link:hover {
-  background: var(--color-nav-hover-bg);
-  color: var(--color-nav-hover);
-}
-.docs-nav-link[data-active="true"] {
-  background: var(--color-shell);
-  border-color: var(--color-accent-line);
-  box-shadow: 2px 2px 0 var(--color-accent-line);
-  color: var(--color-accent-line);
-  font-weight: 500;
-}
-.docs-nav-link[data-active="true"]:hover {
-  background: var(--color-shell);
-  color: var(--color-accent-line);
-}
-
-/* İçindekiler daha sessiz: nerede olduğunu söyler, nereye gidileceğini değil. */
-.docs-toc-link {
-  font-size: 14px;
-  padding-block: 6px;
-}
 .docs-toc-link[aria-current="true"] {
-  border-left-color: var(--color-accent-line);
+  border-left-color: var(--color-accent);
   color: var(--color-ink);
+  font-weight: 700;
 }
 
 .docs-eyebrow {
   color: var(--color-ink-faint);
   font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
+  font-size: var(--docs-label);
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -291,7 +1000,11 @@ li code {
    de bu: kaçak değerler değil, sergilenen numuneler. Kaçak olsalardı
    `check-scale` onları yakalardı; burada olmaları bilinçli.
    ------------------------------------------------------------------------ */
+/* YANLIŞ ÖRNEKLERİN ZEMİNİ SABİT AÇIK (ihlalin kendisi o renklerde yazılı),
+   o yüzden mürekkebi de sabit koyu: sayfanın mürekkebini miras alınca koyu
+   temada açık-üstüne-açık oluyor ve "yapma" örneği okunmuyordu. */
 .docs-wrong {
+  color: var(--color-accent-soft-ink);
   display: inline-flex;
   height: 40px;
   align-items: center;
@@ -329,48 +1042,124 @@ li code {
   border-radius: 999px;
 }
 
-/* ---- Tanıtım sayfası ölçeği --------------------------------------------
+/* ---- Tanıtım sayfası -----------------------------------------------------
    Landing, dokümanla AYNI token'ları kullanıyor ama kendi tip ölçeğini
-   kuruyor — tıpkı dokümanın kitin gösterge paneli ölçeğinden ayrıldığı gibi.
+   kuruyor, tıpkı dokümanın kitin panel ölçeğinden ayrıldığı gibi.
 
-   Gerekçe aynı: bir doküman satırı OKUNUR (17px, 1.75), bir landing başlığı
-   ise BİR SANİYEDE görülür. Aynı ölçeği ikisine dayatmak, birini yorucu
-   ötekini cılız yapar.
-   ------------------------------------------------------------------------ */
+   Gerekçe aynı: bir doküman satırı OKUNUR, bir landing başlığı BİR SANİYEDE
+   görülür. Aynı ölçeği ikisine dayatmak birini yorucu ötekini cılız yapar.
+   -------------------------------------------------------------------------- */
 :root {
-  --home-h1: clamp(2.75rem, 1.9rem + 3.2vw, 4.25rem);
-  --home-h2: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem);
-  --home-lead: clamp(1.125rem, 1rem + 0.4vw, 1.375rem);
-  --home-wrap: 1160px;
-  --home-section: 96px;
+  --home-wrap: 1240px;
+  /* Bir tık küçük: 76'da üç satırlık Türkçe bir cümle ekranı dolduruyor ve
+     harfler birbirine giriyordu. */
+  --home-h1: clamp(40px, 5.2vw, 64px);
+  --home-h2: clamp(32px, 4vw, 48px);
+  --home-section: 80px;
+  /* Hero'nun iki sütunu: altında kalan sütun okunamayacak kadar daralmasın
+     diye taban genişlik. Izgara `auto-fit` ile tek sütuna iniyor. */
+  --home-kol: 460px;
+  /* Kapı sayısının puntosu. Okuma ölçeğinin parçası DEĞİL: bu bir cümle değil
+     bir rakam, ve şeridin içinde tek başına duruyor. H2 ile aynı yapılsaydı
+     bölüm başlığıyla yarışırdı. */
+  --home-sayi: 36px;
 }
 
 .home-h1 {
-  font-family: var(--font-brand), var(--font-display);
-  font-size: var(--home-h1);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.04;
-  text-wrap: balance;
   color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: var(--home-h1);
+  font-weight: 900;
+  /* ARALIK -0.035 İDİ VE HARFLER BİRBİRİNE GİRİYORDU: "Yö"de Y'nin kolu ö'nün
+     noktalarına değiyordu, ve 0.98'lik satır yüksekliğinde bir üst satırın
+     inen harfi alttakinin noktasına dokunuyordu. Türkçede noktalı harf çok
+     (ö, ü, ı, i, ç, ş), yani bu dilde sıkı bir başlık daha çabuk çakışıyor. */
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  /* KERNING KAPALI, VE YALNIZ BURADA. Red Hat Display "Y"den sonra gelen
+     yuvarlağı Y'nin kolunun ALTINA çekiyor: 64 pikselde ölçüldü, "Yö" çifti
+     9.3 piksel kısalıyor ve ö'nün sol noktası kolun üstüne biniyor. Gövde
+     metninde fark yok ("tasarım" 0.3 piksel), yani bedeli bu tek başlıkta
+     bir çiftin doğru durması. */
+  font-kerning: none;
+  text-wrap: balance;
 }
 .home-h2 {
-  font-size: var(--home-h2);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-  text-wrap: balance;
   color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: var(--home-h2);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  text-wrap: balance;
 }
 .home-lead {
-  font-size: var(--home-lead);
+  color: var(--color-ink-faint);
+  font-size: var(--docs-lead);
   line-height: 1.55;
-  color: var(--color-ink-soft);
   max-width: 46ch;
 }
-.home-section {
+/* BÖLÜM SINIRI 1.5px: sayfanın ritmini bu çizgi veriyor, ve doküman
+   sayfasındaki tek kalın çizgiyle aynı ağırlıkta — ikisi de "yeni bir şey
+   başlıyor" diyor. */
+.home-bolum {
+  border-top: 1.5px solid var(--color-edge-strong);
   padding-block: var(--home-section);
-  border-top: 1px solid var(--color-line);
+  scroll-margin-top: var(--docs-scroll);
+}
+/* Şeritteki bölüm bağlantısı: hover'da yüzey kazanıyor, çünkü tıklanabilir
+   olduğunu ancak o zaman söylemesi gerekiyor (Yasa 2). */
+.home-bolum-link {
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-ctl);
+  color: var(--color-ink);
+  font-size: var(--docs-nav);
+  font-weight: 600;
+  padding: 6px 10px;
+  text-decoration: none;
+}
+.home-bolum-link:hover {
+  background: var(--color-shell);
+  border-color: var(--color-edge);
+}
+.home-etiket {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+  font-weight: 700;
+}
+
+/* Kart: içinde-ne-var ve bileşen ızgarasının ortak fiziği. */
+.home-kart {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  box-shadow: 4px 4px 0 var(--color-edge);
+  color: var(--color-ink);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  text-decoration: none;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard),
+    border-color var(--duration-press) var(--ease-standard);
+}
+
+/* Amblem kutusu: adın hikâyesinin yanındaki tek görsel. Kare, çünkü bir damga
+   bir mühür izidir; yuvarlatılmış bir kutu onu bir uygulama simgesi yapardı. */
+.home-amblem {
+  align-items: center;
+  aspect-ratio: 1;
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-panel);
+  box-shadow: 10px 10px 0 var(--color-edge-strong);
+  display: flex;
+  justify-content: center;
+  max-width: 280px;
+  width: 100%;
 }
 
 /* ==============================================================
@@ -384,112 +1173,419 @@ li code {
    sayfasının tek işi rengi GÖSTERMEK; 28 piksel bir rengi göstermiyor, ima
    ediyor.
    ============================================================== */
-.token-row {
-  display: grid;
-  gap: 20px 28px;
-  grid-template-columns: minmax(0, 1fr);
-  padding-block: 22px;
-  border-bottom: 1px solid var(--color-line);
+.token-galeri {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 28px;
+  scroll-margin-top: var(--docs-scroll);
 }
-@media (min-width: 62rem) {
-  .token-row {
-    grid-template-columns: 208px minmax(0, 1fr) 240px;
-    align-items: start;
-  }
+
+/* ŞERİT BAŞLIĞIN ALTINA YAPIŞIYOR: yüz kırk beş satırlık bir listede filtre
+   yukarıda kalırsa, bir grubu görmek için her seferinde başa dönmek gerekiyor.
+   `top` kabuğun kendi yüksekliği · iki sayı ayrışmasın diye token. */
+.token-serit {
+  background: var(--color-band);
+  border-bottom: 1px solid var(--color-edge);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-block: 12px;
+  position: sticky;
+  top: var(--docs-top);
+  z-index: 5;
+}
+.token-serit-ust {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.token-ara {
+  align-items: center;
+  display: flex;
+  flex: 1 1 260px;
+  position: relative;
+}
+/* SÜZME AÇIKKEN KUTU BUNU SÖYLÜYOR. Kitin girdisinin odak fiziği duruyor;
+   üstüne yalnız "dolu" hâli ekleniyor, çünkü okuyucu sayfayı aşağı
+   kaydırdığında odak gitmiş oluyor ama filtre duruyor. Sayacı da var, ama bir
+   sayı bir kenar kadar hızlı okunmuyor. */
+.token-ara[data-dolu] .tamga-input {
+  border-color: var(--color-edge-strong);
+  box-shadow: 3px 3px 0 var(--color-accent-soft);
+}
+.token-temizle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--color-ink-faint);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  right: 8px;
+}
+.token-temizle:hover {
+  color: var(--color-ink);
+}
+.token-sayac {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.token-cipler {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+.token-cip-btn {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge);
+  border-radius: var(--radius-mark);
+  color: var(--color-ink);
+  cursor: pointer;
+  display: flex;
+  flex: none;
+  font-size: var(--docs-crumb);
+  font-weight: 700;
+  gap: 6px;
+  height: 30px;
+  padding-inline: 10px;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard);
+}
+/* Seçili çip YÜKSELİYOR, renk değiştirmiyor: on üç çipten biri dolu bir
+   plakaya dönseydi şerit bir menü değil bir uyarı gibi okunurdu. */
+.token-cip-btn[data-secili] {
+  background: var(--color-accent-bg);
+  border-color: var(--color-edge-strong);
+  box-shadow: 2px 2px 0 var(--color-edge-strong);
+  transform: translate(-1px, -1px);
+}
+.token-cip-n {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+  font-variant-numeric: tabular-nums;
+}
+.token-bos {
+  border: 1.5px dashed var(--color-edge);
+  border-radius: var(--radius-card);
+  color: var(--color-ink-faint);
+  padding: 32px;
+  text-align: center;
+}
+
+.token-grup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* Şerit + başlık: bir gruba atlarken hedef şeridin altında kalmasın. */
+  scroll-margin-top: 180px;
+}
+.token-grup-bas {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 14px;
+}
+.token-h {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.token-grup-n {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+  font-variant-numeric: tabular-nums;
+}
+.token-grup-alt {
+  color: var(--color-ink-faint);
+  line-height: 1.55;
+  margin: 0;
+  text-wrap: pretty;
+}
+.token-kart {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  box-shadow: 4px 4px 0 var(--color-edge);
+  overflow: hidden;
+}
+
+/* SATIR ÜÇ SÜTUN, ve dar ekranda kendiliğinden alt alta: `auto-fit` bir
+   kırılım noktası yazmadan yapıyor · aynı satır bir tablette iki, telefonda
+   tek sütun oluyor. */
+.token-row {
+  align-items: start;
+  border-bottom: 1px dashed var(--color-line);
+  display: grid;
+  gap: 14px 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  padding: 14px 16px;
+}
+.token-kart > :last-child {
+  border-bottom: 0;
+}
+.token-ornek {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.token-aciklama code {
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  white-space: nowrap;
+}
+.token-aciklama {
+  color: var(--color-ink-faint);
+  line-height: 1.55;
+  margin: 0;
+  min-width: 0;
+  text-wrap: pretty;
+}
+.token-sag {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
 }
 
 /* Renk bloğu İKİYE BÖLÜNMÜŞ: solda açık, sağda koyu. Nord'un tek bloğu var
    çünkü tek teması var; bizim iki temamız aynı anda görünmeli, yoksa okuyucu
    sayfayı iki kez gezmek zorunda. */
-/* Örnek hücresinin yüksekliği. Bir ölçek adımı DEĞİL, bir kap boyu: renk
-   bloğu, gölge yüzeyi ve yazı örneği aynı hizada dursun diye tek bir sayı.
-   Doğrudan `h-[92px]` diye yazılıyordu ve `check-scale` haklı olarak durdurdu:
-   iki yerde tekrarlanan uydurma bir sayı, bir karar değil bir kazadır. */
-:root {
-  --token-ornek-h: 92px;
-}
-
-.token-ornek {
-  height: var(--token-ornek-h);
-}
-
 .token-swatch {
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-ctl);
   display: grid;
   grid-template-columns: 1fr 1fr;
-  height: var(--token-ornek-h);
-  border: 1px solid var(--color-edge);
-  border-radius: var(--radius-card);
-  box-shadow: 2px 2px 0 0 var(--color-edge);
+  height: 64px;
   overflow: hidden;
 }
 .token-swatch-solo {
   grid-template-columns: 1fr;
 }
+/* ROZET YARININ GENİŞLİĞİNİ ALIYOR, kendi metnine SARILMIYOR · ve bu bir
+   düzeltme. İçeriğine sarılan bir rozet her satırda başka genişlikte çıkıyordu
+   ("14.7" ile "16.31" bir karakter farklı) · solunda hep 6px, sağında 6 ile
+   9.5 arası değişen bir boşluk kalıyordu, ve doksan bir rozetin sağ kenarı
+   tırtıklı bir sütun oluyordu. Gerilince iki boşluk da 6px, ve rozetler
+   hizalanıyor. */
 .token-swatch > span {
   display: flex;
-  align-items: flex-end;
-  padding: 8px;
-}
-.token-swatch > span + span {
-  border-left: 1px solid var(--color-edge);
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 6px;
 }
 
-/* Okunurluk rozeti: rengin İÇİNDE duruyor, çünkü ölçtüğü şey o rengin
-   üstündeki okunabilirlik. Yanına konsaydı hangi bloğa ait olduğu
-   sorulurdu. */
-/* DOLGU YOK. Dolu bir plaka okunuyordu ama rengin üstüne ikinci bir kart
-   çiziyordu: blok artık rengi değil kutuyu gösteriyordu. Kenar `currentColor`,
-   yani ölçülerek seçilmiş yazı rengiyle aynı. */
+/* Okunurluk rozeti rengin İÇİNDE duruyor, çünkü ölçtüğü şey o rengin
+   üstündeki okunabilirlik. Yanına konsaydı hangi bloğa ait olduğu sorulurdu.
+   DOLGU YOK: dolu bir plaka rengin üstüne ikinci bir kart çiziyordu. */
+/* ROZET SARIYOR, KIRPILMIYOR · ve bu bir düzeltme. `white-space: nowrap` ile
+   tek parça bir metindi; en uzun rozet 117.6px istiyor, yarının içi 101.3px
+   veriyor, ve `overflow: hidden` farkı kesiyordu ("ΔL* 11 sayfad…"). Sayı ile
+   "neye karşı" artık iki ayrı parça: sığdığında yan yana, sığmadığında alt
+   alta. `check-css` bunu sınıyor. */
 .token-badge {
-  display: inline-flex;
   align-items: center;
-  gap: 5px;
+  /* Gerilen rozetin metni SOLDA kalıyor: ortalanmış bir sayı, yanındaki
+     rozetin sayısıyla hizalanmıyor ve sütun okunmuyor. */
+  justify-content: flex-start;
   border: 1px solid currentColor;
   border-radius: var(--radius-mark);
-  padding: 1px 6px;
+  display: inline-flex;
+  flex-wrap: wrap;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--text-caption);
   font-variant-numeric: tabular-nums;
-  line-height: 1.5;
+  font-weight: 700;
+  gap: 0 5px;
+  line-height: 1.45;
+  padding-block: 1px;
+  padding-inline: 5px;
 }
-
+.token-badge > span {
+  white-space: nowrap;
+}
 /* Eşiği geçmeyen rozet: aynı renk, kalın kenar. Ayrımı renk değil AĞIRLIK
    taşıyor, çünkü ölçülen rengin üstünde ikinci bir renge yer yok. */
 .token-badge-kotu {
   border-width: 2px;
-  font-weight: 600;
+}
+
+.token-deger,
+.token-mono {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+}
+.token-deger {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
 }
 
 /* Gölge örneği: gerçek gölgeyi taşıyan bir yüzey. Bir gölgeyi anlatmak,
    göstermekten uzun. */
-.token-shadow-demo {
-  display: flex;
-  height: var(--token-ornek-h);
+.token-golge {
   align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-card);
-  background: var(--color-sunk);
+  display: flex;
+  height: 64px;
+  padding-left: 6px;
 }
-.token-shadow-demo > span {
-  height: 40px;
-  width: 84px;
-  border: 1px solid var(--color-edge);
-  border-radius: var(--radius-ctl);
+.token-golge > span {
   background: var(--color-shell);
+  border: 1px solid var(--color-edge-strong);
+  border-radius: var(--radius-ctl);
+  height: 40px;
+  width: 48px;
 }
 
-.token-code {
+/* YÜZ ÖRNEĞİ: bir yazı yığınının DEĞERİ okunacak bir şey değil · on aileli
+   bir yedek zinciri örnek kutusunda altı satır kaplıyordu ve gösterdiği şey
+   yüz değil bir metin bloğuydu. Gösterilen şey yüzün kendisi, ve adı. */
+.token-yuz {
+  align-items: baseline;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: space-between;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-ctl);
-  background: var(--color-sunk);
-  padding: 6px 6px 6px 10px;
+  gap: 10px;
+  min-height: 44px;
+  min-width: 0;
+}
+.token-yuz > span:first-child {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.token-yuz > code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.token-yazi {
+  align-items: baseline;
+  display: flex;
+  gap: 10px;
+  min-height: 44px;
+  overflow: hidden;
+}
+.token-yazi > span:first-child {
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+/* İÇERİĞİNE SARILIYOR, SÜTUNA YAYILMIYOR · ve bu bir düzeltme. Dikey bir
+   flex kabında çocuklar varsayılan olarak geriliyor, yani `500` yazan bir
+   değer rozeti sütunun tamamı kadar genişleyip sayıyı sol köşesinde bırakıyordu:
+   ekranda bir rozet değil, içinde kaymış bir yazı olan boş bir kutu. */
+.token-olcu {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: center;
+  min-height: 44px;
+}
+/* Yarıçap kutusu: gösterilen şey köşe, o yüzden kenar var ve dolgu yok. */
+.token-yaricap {
+  background: var(--color-accent-bg);
+  border: 1.5px solid var(--color-edge-strong);
+  display: block;
+  height: 28px;
+  width: 44px;
+}
+.token-cubuk {
+  background: var(--color-accent-bg);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: 2px;
+  display: block;
+  height: 12px;
+  max-width: 100%;
+}
+/* Değer rozeti: kendi metninin boyunda. `max-width` kabı, çünkü uzun bir
+   `calc()` sütunu taşırmamalı. */
+.token-cip {
+  max-width: 100%;
+  background: var(--color-hover);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-mark);
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--docs-crumb);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  padding: 3px 8px;
+}
+
+/* HAREKET ÖRNEĞİ ÜSTÜNE GELİNCE KOŞUYOR. Durum CSS'te: on bir satırın her biri
+   için bir React state'i tutmak, hiçbir şey kazandırmayan on bir yeniden çizim
+   demek. */
+.token-iz {
+  background: var(--color-page);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-ctl);
+  display: block;
+  height: 34px;
+  position: relative;
+}
+.token-iz-kare {
+  background: var(--color-accent);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-mark);
+  display: block;
+  height: 20px;
+  left: 6px;
+  position: absolute;
+  top: 6px;
+  transition-property: left;
+  width: 20px;
+}
+.token-iz:hover .token-iz-kare {
+  left: calc(100% - 28px);
+}
+
+/* Ad düğmesi: kopyalanacak şey ad, ve basıldığında çöküyor · kitin basma
+   fiziği burada da geçerli. */
+.token-ad {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-ctl);
+  box-shadow: 2px 2px 0 var(--color-edge-strong);
   color: var(--color-ink);
+  cursor: pointer;
+  display: flex;
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+  font-weight: 700;
+  gap: 8px;
+  max-width: 100%;
+  padding: 4px 8px;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard);
+}
+.token-ad:active {
+  box-shadow: 0 0 0 var(--color-edge-strong);
+  transform: translate(2px, 2px);
+}
+.token-util {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  overflow-wrap: anywhere;
 }
 
 /* ==============================================================
@@ -547,15 +1643,18 @@ li code {
   box-shadow: 0 0 0 0 var(--color-edge);
 }
 
-/* Önizleme kuyusu: çökük zemin, ki kartın kendisi yükselirken içindeki örnek
-   üstünde DURSUN, içine gömülmesin. */
+/* Önizleme kuyusu NOKTALI ZEMİNDE, düz çökük yüzeyde değil: bir blok bir
+   SAHNEDE duruyor, bir kuyunun içine gömülü değil · doküman sitesinin örnek
+   kutusuyla aynı zemin, yani okuyucu ikisini aynı şey olarak tanıyor. */
 .galeri-onizleme {
-  position: relative;
+  background-color: var(--color-page);
+  background-image: radial-gradient(var(--color-line) 1px, transparent 1px);
+  background-size: 16px 16px;
+  border-bottom: 1px solid var(--color-line);
   height: 190px;
   overflow: hidden;
-  border-bottom: 1px solid var(--color-line);
-  background: var(--color-sunk);
   padding: 16px;
+  position: relative;
 }
 
 /* SAHNE: önizleme GERÇEK EKRAN GENİŞLİĞİNDE çiziliyor, sonra kırpılıyor.
@@ -603,14 +1702,35 @@ li code {
 /* Modaldeki ekranın çerçevesi. Şablonların bir kısmı `h-dvh` taşıyor (oturum,
    kamusal, kabuk) ve sınırsız bir kapta diyaloğu taşırıyordu. Kırpmak
    ölçeklemekten dürüst: metin gerçek boyunda kalıyor. */
+/* ÇERÇEVE KAYIYOR, KIRPMIYOR · ve bu bir düzeltme. `overflow: hidden`di: bir
+   ekran çerçeveden uzunsa gerisi ULAŞILAMIYORDU. Durum sayfasının olay geçmişi
+   ve giriş kartının altı böyle kayboluyordu. Bir çerçeve bir GÖRÜNTÜ ALANI, ve
+   kayamayan bir görüntü alanı görüntü alanı değil: gerçek tarayıcı da kaydırır. */
 .galeri-ekran {
   height: min(72vh, 42rem);
-  overflow: hidden;
+  overflow-y: auto;
+  /* `overscroll-behavior`: çerçevenin sonuna gelince kaydırma ARKADAKİ
+     sayfaya geçmiyor · modal açıkken sayfanın kayması okuyucuyu kaybediyor. */
+  overscroll-behavior: contain;
   /* TEK ÇİZGİ, kart değil: kaydırma gölgesi ve yükselme burada yanlış olurdu.
      Bir ekran görüntüsünün çerçevesi bir nesne değil bir SINIR — nerede
      bittiğini söylüyor, üstünde durduğunu değil. */
   border: 1px solid var(--color-edge);
   border-radius: var(--radius-card);
+}
+
+/* ORTALANAN İÇERİĞİN ÜSTÜ KAYBOLUYORDU, ve sebebi bir CSS tuzağı: oturum ve
+   kamusal ekranlar içeriğini `align-items: center` ile dikeyde ortalıyor, ve
+   ortalanan bir öğe kabından uzunsa taşma iki uca EŞİT dağılıyor · üst yarıya
+   kaydırarak ulaşılamıyor, çünkü `scrollTop` negatife inemez. Giriş ekranının
+   logosu ve başlığının yarısı tam olarak orada kalıyordu.
+
+   `safe center` bunun için var: sığdığında ortalıyor, sığmadığında başa
+   yaslıyor. Kitin kendi sınıfına dokunulmuyor · kural yalnız bu çerçevenin
+   içinde, ve zaten `min-h-dvh` kancası burada kullanılıyor. */
+.galeri-ekran [class~="min-h-dvh"],
+.galeri-ekran [class~="h-dvh"] {
+  align-items: safe center;
 }
 
 /* Dar ekranda sahne kartı taşırmasın diye ölçekleniyor: burada ölçeklemek
@@ -648,66 +1768,145 @@ li code {
   gap: 4px;
   padding: 14px 16px;
 }
+/* Bileşen adı: "Kullanıcılar" ekranın ne olduğunu söylüyor, `ListTemplate`
+   hangi şablondan çıktığını · ve okuyucunun aradığı çoğu zaman ikincisi. */
+.galeri-bilesen {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+}
 
-/* Filtre çipleri: seçili olan dolu değil ÇERÇEVELİ (Yasa 2, dolgu eylem
+/* PENCERENİN GEZİNME ŞERİDİ: bir katalogda ikinci ekrana bakmak için pencereyi
+   kapatıp yeniden açmak gerekmiyor. Ok tuşları da aynı işi yapıyor. */
+.galeri-gezinme {
+  align-items: center;
+  border-bottom: 1px dashed var(--color-line);
+  display: flex;
+  gap: 8px;
+  padding-bottom: 12px;
+}
+.galeri-gezinme-ad {
+  align-items: center;
+  color: var(--color-ink-faint);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: var(--docs-crumb);
+  gap: 4px 10px;
+  min-width: 0;
+}
+.galeri-gezinme-ad > code {
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+.galeri-gezinme-sira {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  margin-inline-start: auto;
+}
+
+/* ŞERİT BAŞLIĞIN ALTINA YAPIŞIYOR: on dört kartlık bir katalogda filtre
+   yukarıda kalırsa bir gruba bakmak için her seferinde başa dönmek gerekiyor.
+   Token ve ikon sayfalarındaki şeritle aynı geometri. */
+.galeri-serit {
+  align-items: center;
+  background: var(--color-band);
+  border-bottom: 1px solid var(--color-edge);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-block: 12px;
+  position: sticky;
+  top: var(--docs-top);
+  z-index: 5;
+}
+/* Filtre çipleri: seçili olan YÜKSELİYOR, dolmuyor (Yasa 2 · dolgu eylem
    demek). Ray bağlantısıyla aynı dil. */
 .galeri-cip {
-  display: inline-flex;
   align-items: center;
-  border: 1px solid var(--color-edge);
-  border-radius: var(--radius-ctl);
   background: var(--color-shell);
-  padding: 5px 12px;
-  font-size: var(--text-small);
-  color: var(--color-ink-soft);
-  cursor: pointer;
-  transition: color var(--duration-press) var(--ease-standard);
-}
-.galeri-cip:hover {
+  border: 1.5px solid var(--color-edge);
+  border-radius: var(--radius-mark);
   color: var(--color-ink);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--docs-crumb);
+  font-weight: 700;
+  gap: 6px;
+  height: 30px;
+  padding-inline: 10px;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard);
 }
 .galeri-cip[data-active="true"] {
-  border-color: var(--color-accent-line);
-  box-shadow: 2px 2px 0 var(--color-accent-line);
-  color: var(--color-accent-line);
-  font-weight: 500;
+  background: var(--color-accent-bg);
+  border-color: var(--color-edge-strong);
+  box-shadow: 2px 2px 0 var(--color-edge-strong);
+  transform: translate(-1px, -1px);
+}
+.galeri-cip-n {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+  font-variant-numeric: tabular-nums;
+}
+/* LEJANT: iki kare, iki cümle yerine. Rozetin dolu mu çerçeveli mi olduğu
+   kartlarda görülüyor ama ne DEMEK olduğu görülmüyor. */
+.galeri-lejant {
+  color: var(--color-ink-faint);
+  display: flex;
+  font-size: var(--docs-crumb);
+  gap: 10px;
+  margin-inline-start: auto;
+}
+.galeri-lejant > span {
+  align-items: center;
+  display: flex;
+  gap: 5px;
+}
+.galeri-lejant-kare {
+  border-radius: 2px;
+  display: block;
+  height: 9px;
+  width: 9px;
+}
+.galeri-lejant-kare[data-tur="paket"] {
+  background: var(--color-accent);
+}
+.galeri-lejant-kare[data-tur="tarif"] {
+  border: 1.5px solid var(--color-edge-strong);
 }
 
 /* Öğe rozeti: paketten mi geliyor, kopyalanacak bir tarif mi. Okuyucunun ilk
    sorusu bu; ikisini ayırmayan bir katalog, hangi satırın bir API olduğunu
    gizler. */
+/* PAKET DOLU, TARİF ÇERÇEVELİ · ve fark bir renk tonu değil bir DOLGU.
+   İkisi de çerçeveliyken ayrım yalnız yazı renginden okunuyordu ve bir
+   katalogda taranan şey renk değil biçim. Dolgu burada Yasa 2'yi çiğnemiyor:
+   rozet bir eylem değil ama bir SINIF, ve iki sınıfı ayıran en hızlı işaret
+   dolu/boş karşıtlığı · lejant da aynı iki kareyi gösteriyor. */
 .galeri-rozet {
-  display: inline-flex;
   align-items: center;
-  border: 1px solid currentColor;
+  border: 1px solid var(--color-edge-strong);
   border-radius: var(--radius-mark);
-  padding: 0 6px;
+  color: var(--color-ink);
+  display: inline-flex;
   font-family: var(--font-mono);
   font-size: var(--text-caption);
+  font-weight: 700;
   line-height: 1.7;
-  color: var(--color-ink-faint);
+  padding: 0 7px;
 }
 .galeri-rozet[data-tur="paket"] {
-  color: var(--color-accent-line);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-ink);
 }
 
 /* ---- Menü grupları ----
    Başlık bir satır değil bir ETİKET: tıklanmıyor (katlanır grup hariç), o
    yüzden bağlantı diliyle yazılmıyor. Küçük, seyrek harfli, sessiz. */
-.docs-nav-baslik {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-  padding-inline: 12px;
-  color: var(--color-ink-faint);
-  font-family: var(--font-mono);
-  font-size: var(--text-caption);
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
 /* Katlanır grup: yalnız bileşenler. Ok işareti başlığın solunda değil, çünkü
    solda zaten menünün kendi hizası var; sağdaki sayı hem "kaç tane" diyor hem
    de tıklanacak bir hedef veriyor. */
@@ -733,4 +1932,2681 @@ li code {
 }
 .docs-nav-grup[open] > summary::after {
   content: "−";
+}
+
+/* YER TUTUCU GÖRSEL: çapraz tarama. Tasarımın kendi dosyası da böyle yapıyor,
+   ve sebebi boş bir kutunun "görsel buraya gelecek" dememesi · taranmış bir
+   alan hem doluyu taklit etmiyor hem de yeri gösteriyor. Avatarın fotoğrafı,
+   logo karosu ve ürün şeridi aynı taramayı paylaşıyor. */
+.docs-gorsel {
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--color-sunk) 0 6px,
+    var(--color-band) 6px 12px
+  );
+}
+
+/* ---- Kod bloğu ----
+   `.docs-code` sayfalarda kullanılıyordu ama HİÇBİR YERDE TANIMLI DEĞİLDİ: beş
+   sayfada kod, gövde metniyle aynı zeminde, dolgusuz bir `<pre>` olarak
+   çıkıyordu (ölçüldü: saydam zemin, 0 dolgu). Kutu kitin ters yüzeyinde ·
+   iki temada da koyu kalan tek yüzey, ve kod okunan değil ALINAN bir şey. */
+.docs-code {
+  background: var(--color-inverse);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-card);
+  color: var(--color-inverse-ink);
+  font-family: var(--font-mono);
+  font-size: var(--docs-code);
+  line-height: 1.75;
+  overflow-x: auto;
+  padding: 16px 18px;
+  tab-size: 2;
+}
+
+/* Tema sayfasının renk kutusu: seçili olan yükseliyor ve onay işaretini
+   taşıyor · beş kutu arasında hangisinin açık olduğunu yalnız renk söyleyemez. */
+.docs-renk-kutu {
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: grid;
+  height: 28px;
+  place-items: center;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard);
+  width: 28px;
+}
+.docs-renk-kutu[data-on] {
+  box-shadow: 3px 3px 0 var(--color-edge-strong);
+  transform: translate(-2px, -2px);
+}
+
+/* Önizlemenin zemini noktalı: üstündeki panelin bir EKRAN değil bir örnek
+   olduğunu söyleyen tek şey. */
+.docs-nokta-zemin {
+  background-color: var(--color-page);
+  background-image: radial-gradient(var(--color-line) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* TEMA SAYFASININ İKİ ZEMİNİ · bilerek tema token'ı DEĞİL. Parite örneği açık
+   ve koyu temayı YAN YANA gösteriyor: "token koyuda tanımlı mı" sorusunun
+   cevabı, o an hangi temada olduğundan bağımsız. Tema değişkeniyle çizilseydi
+   iki kutu da aynı tarafı gösterirdi ve örnek hiçbir şey söylemezdi. */
+.docs-tema-acik {
+  background: #fffefb;
+}
+.docs-tema-koyu {
+  background: #16233a;
+}
+.docs-tema-koyu-kenar {
+  border-color: #02060d;
+}
+
+/* ---- Fizik sayfası ----
+   DÖRT YASA KARTI: sayfanın haritası. Kart bir BAĞLANTI, o yüzden yükselen
+   fizikte: imleç altında kalkıyor ve kenarı sertleşiyor · okunan bir kart
+   kalkmaz, gidilen bir kart kalkar (Yasa 1). */
+.docs-yasa-kart {
+  background: var(--color-shell);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: 4px 4px 0 var(--color-line);
+  color: var(--color-ink);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  text-decoration: none;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard),
+    border-color var(--duration-press) var(--ease-standard);
+}
+.docs-yasa-kart:hover {
+  border-color: var(--color-edge-strong);
+  box-shadow: 6px 6px 0 var(--color-edge-strong);
+  color: var(--color-ink);
+  transform: translate(-2px, -2px);
+}
+.docs-yasa-no {
+  align-items: center;
+  background: var(--color-accent-bg);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-btn);
+  display: grid;
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  font-weight: 900;
+  height: 32px;
+  justify-content: center;
+  width: 32px;
+}
+
+/* "Ne değiliz" etiketi: yasak listesi TARANIR, okunmaz · aynı on bir madde bir
+   paragraf olarak duruyordu ve kimse sonuna varmıyordu. */
+.docs-degil {
+  align-items: center;
+  background: var(--color-band);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-mark);
+  display: inline-flex;
+  font-size: var(--docs-label);
+  font-weight: 600;
+  gap: 6px;
+  padding: 3px 9px;
+}
+
+/* ---- Hareket sayfası ----
+   İZ: kademelerin ve eğrilerin koştuğu yol. Aynı mesafe, farklı süre · bir
+   hız ancak başka bir hızın yanında okunuyor.
+
+   ADI KAPI, SATIR DEĞİL: `minmax(0,11rem)` sabit bir etiket sütunu veriyor, ve
+   sabit olması şart · etiketler kendi genişliklerini alınca dört iz dört ayrı
+   yerde başlıyor ve karşılaştırma bitiyor. */
+.docs-hr-satir {
+  align-items: center;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+}
+.docs-hr-oynat {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 4px;
+}
+/* Eğrinin doğru/yanlış etiketi: bu bir durum çipi DEĞİL, bir yargı · çip
+   olsaydı "yanlış" bir sistem durumu gibi okunurdu. */
+.docs-hr-etiket {
+  align-items: center;
+  display: flex;
+  font-size: var(--docs-label);
+  font-weight: 800;
+  gap: 6px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+/* KENARI `--color-edge`, `--color-line` DEĞİL · ve bu bir düzeltme. Tasarımın
+   `--line`ı bizim `--color-edge`imiz, bizim `--color-line`ımız ise onun
+   `--dash`ı: adlar çakışıyor, değerler çakışmıyor. Solgun olanla çizilen iz
+   noktalı zeminin üstünde hiç görünmüyordu. */
+.docs-iz {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-ctl);
+  height: 30px;
+  overflow: hidden;
+  position: relative;
+}
+/* KARE `left` İLE YÜRÜYOR, `transform` İLE DEĞİL · ve bu da bir düzeltme:
+   `translateX(calc(100% - 20px))` yazılmıştı, oysa transform'da yüzde ELEMANIN
+   KENDİ genişliğine göre çözülüyor (20px), yani hareket sıfır çıkıyordu.
+   `left`in yüzdesi kapsayan kutuya, yani izin kendisine bakıyor. */
+.docs-iz-kare {
+  background: var(--color-accent);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-mark);
+  display: block;
+  height: 20px;
+  position: absolute;
+  top: 4px;
+  transition-property: left;
+  transition-timing-function: var(--ease-instrument);
+  width: 20px;
+}
+/* YALNIZ DOLGU DEĞİŞİYOR, KENAR DEĞİL. Yanlış kare doğru olanla aynı mavide
+   çizilince "iki hız" gibi okunuyordu; ama kenarı da kritik renge çevirmek onu
+   ayrı bir NESNE yapıyordu. Kenar ikisinde de aynı: karşılaştırılan şey kutu
+   değil hareket. */
+.docs-iz-kare[data-yanlis] {
+  background: var(--color-critical-bg);
+}
+/* HEDEFLİ İZ KIRPMIYOR ve bir basamak yüksek: overshoot hedefi GEÇİYOR, ve
+   kırpan bir iz tam olarak görülmesi gereken şeyi yutuyor. */
+.docs-iz-hedefli {
+  height: 34px;
+  overflow: visible;
+}
+.docs-iz-hedefli .docs-iz-kare {
+  top: 6px;
+}
+/* Hedef çizgisi: overshoot ancak durulacak yer işaretliyken görünüyor. */
+.docs-iz-hedefli::after {
+  border-left: 1.5px dashed var(--color-edge);
+  bottom: 0;
+  content: "";
+  position: absolute;
+  right: 30px;
+  top: 0;
+}
+
+/* İSKELET KENDİ KARTINDA: üç çubuk çıplak durduğunda "yükleniyor" değil "üç
+   çizgi" gibi okunuyor · yer tutucu, yerini tuttuğu kutuya ihtiyaç duyuyor. */
+.docs-hr-iskelet {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  width: 100%;
+}
+/* Nabız ve dönen gösterge yan yana · 22px, çünkü ikisi aynı cümlenin iki
+   kelimesi değil iki ayrı döngü. */
+.docs-hr-canli {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+}
+.docs-hr-token {
+  align-items: center;
+  background: var(--color-hover);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-mark);
+  display: inline-flex;
+  font-size: var(--docs-crumb);
+  font-weight: 600;
+  gap: 6px;
+  padding: 2px 8px;
+}
+.docs-hr-sinyal {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 10px;
+}
+.docs-hr-sinyal-ad {
+  color: var(--color-ink-faint);
+  font-size: var(--docs-crumb);
+  text-align: center;
+}
+
+/* AZALTILMIŞ HAREKET · demo anahtarı açıkken. Döngüler duruyor ama nesneler
+   YOK OLMUYOR: iskelet çubuğu nefesinin ortasına yakın bir yerde park ediyor
+   (.72), çünkü sönük uçta duran bir yer tutucu boş bir kutu gibi okunuyor. */
+[data-azalt] *,
+[data-azalt] *::before,
+[data-azalt] *::after {
+  animation-play-state: paused !important;
+}
+[data-azalt] .tamga-skeleton::after {
+  animation: none !important;
+  opacity: 0.72;
+}
+
+/* ---- Ölçü sayfası ----
+   YARIÇAP DEMOSU CANLI: kaydırıcı çevrilince beş köşe birlikte kayıyor, ve
+   kaymanın GÖRÜNMESİ şart · anında değişen bir köşe "türedi" demiyor.
+   Kitin kendi geçişini yeniden yazan tek kural aşağıda, ve listesi TAM:
+   düğmenin basma geçişi olduğu gibi duruyor, ucuna `border-radius` ekleniyor.
+   Yalnız bu demonun içinde; kitin kuralı değişmiyor. */
+.docs-ol-kart,
+.docs-ol-kart .tamga-card,
+.docs-ol-kart .tamga-input,
+.docs-ol-kart .tamga-chip,
+.docs-ol-kare {
+  transition: border-radius var(--duration-quick) var(--ease-instrument);
+}
+.docs-ol-kart .tamga-btn {
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard),
+    background var(--duration-press) var(--ease-standard),
+    border-color var(--duration-press) var(--ease-standard),
+    border-radius var(--duration-quick) var(--ease-instrument);
+}
+/* Kaydırıcının kartı: demonun kendisi değil onu ÇEVİREN şey, o yüzden köşesi
+   sabit · çevrilenle çeviren aynı anda değişince neyin değiştiği okunmuyor. */
+.docs-ol-knob {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 420px;
+  padding: 12px 14px;
+  width: 100%;
+}
+.docs-ol-rol {
+  align-items: center;
+  background: var(--color-hover);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-mark);
+  display: inline-flex;
+  font-size: var(--docs-label);
+  gap: 6px;
+  padding: 2px 7px;
+}
+/* Rolün kendi köşesini taşıyan küçük kare: bir token adı bir yarıçap
+   göstermiyor, örnek gösteriyor. */
+.docs-ol-kare {
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  display: inline-block;
+  flex: none;
+  /* 22px, 14 DEĞİL · ve bu ölçüldü: 14 piksellik bir karede 8'lik bir yarıçap
+     tam daire oluyor, yani üst üç rol (btn · card · panel) aynı daireyi
+     gösteriyordu. 22'de en büyük yarıçap (10) hâlâ düz kenar bırakıyor. */
+  height: 22px;
+  width: 22px;
+}
+
+/* Doğru/yanlış ikilisi: iki kart yan yana, dar ekranda alt alta. */
+.docs-ol-ikili {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  width: 100%;
+}
+.docs-ol-kutu {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px;
+}
+/* Bir yargı, bir durum DEĞİL: çip olsaydı "yanlış" bir sistem durumu gibi
+   okunurdu. Hareket sayfasındaki eğri etiketiyle aynı ölçü. */
+.docs-ol-yargi {
+  align-items: center;
+  display: flex;
+  font-size: var(--docs-label);
+  font-weight: 800;
+  gap: 6px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.docs-ol-alt {
+  color: var(--color-ink-faint);
+  font-size: var(--docs-crumb);
+}
+/* Hap: kitin üretMEdiği şey. Ölçüsü `--radius-full`, çünkü gösterilen şey tam
+   olarak o token'ın yanlış yerde kullanılmış hâli. */
+.docs-ol-hap {
+  align-items: center;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  font-size: var(--docs-crumb);
+  font-weight: 800;
+  padding: 3px 11px;
+}
+
+/* Kenar demosunun tablosu · kalınlık ve renk bileşenden geliyor. */
+.docs-ol-tablo {
+  background: var(--color-shell);
+  border-radius: var(--radius-card);
+  border-style: solid;
+  overflow: hidden;
+}
+.docs-ol-satir {
+  align-items: center;
+  border-bottom-style: solid;
+  display: grid;
+  font-size: var(--docs-crumb);
+  gap: 10px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  height: 40px;
+  padding-inline: 12px;
+}
+
+/* Ritim kartı KIRPIYOR: ızgara çizgileri kartın dışına taşarsa ölçtüğü şeyin
+   sınırı da belirsizleşiyor. */
+.docs-ol-ritim {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+.docs-ol-ritim-ic {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: var(--gutter);
+}
+.docs-ol-liste {
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.docs-ol-liste > :last-child {
+  border-bottom: 0;
+}
+/* 8 PİKSELLİK IZGARA · %18 opaklık bilerek: daha koyusu ölçtüğü satırları
+   okunmaz yapıyor, daha açığı hiç görünmüyor. */
+.docs-ol-izgara {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-accent) 18%, transparent) 0,
+    color-mix(in srgb, var(--color-accent) 18%, transparent) 1px,
+    transparent 1px,
+    transparent 8px
+  );
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+.docs-ol-oluk {
+  border-left: 1.5px dashed var(--color-accent);
+  bottom: 0;
+  left: var(--gutter);
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+}
+.docs-ol-oluk-ad {
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+  font-weight: 700;
+  left: calc(var(--gutter) + 4px);
+  pointer-events: none;
+  position: absolute;
+  top: 4px;
+}
+
+/* Yarım piksel demosu: ÖLÇÜLERİ TOKEN DEĞİL, ve olamaz · gösterilen şey
+   skalanın dışına çıkmanın ekranda nasıl basıldığı. */
+.docs-ol-cizgi {
+  border-top: 1px solid var(--color-ink);
+  display: block;
+  height: 0;
+}
+.docs-ol-cizgi-8 {
+  margin-top: 8px;
+}
+.docs-ol-yarim {
+  border-top-width: 0.5px;
+  transform: translateY(0.5px);
+}
+.docs-ol-kalin {
+  border-top-width: 1.5px;
+  margin-top: 7.5px;
+  transform: translateY(0.25px);
+}
+
+/* KAPI ÇIKTISI HER İKİ TEMADA DA KOYU: bir terminal penceresi temayla
+   dönmüyor, ve dönseydi "bu bir çıktı" demeyi bırakırdı. */
+.docs-ol-kapi {
+  background: var(--color-inverse);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-card);
+  color: var(--color-inverse-ink);
+  overflow: hidden;
+  width: 100%;
+}
+.docs-ol-kapi-bar {
+  align-items: center;
+  border-bottom: 1px solid var(--docs-cb-line);
+  color: var(--docs-cb-muted);
+  display: flex;
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+  gap: 8px;
+  padding: 8px 12px;
+}
+.docs-ol-kapi-satir {
+  display: grid;
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+  gap: 8px;
+  grid-template-columns: 18px minmax(0, 1fr);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  padding: 6px 12px;
+}
+.docs-ol-kapi-satir > span:first-child {
+  color: var(--docs-cb-fail);
+  font-weight: 700;
+}
+.docs-ol-kapi-satir > span:first-child[data-gecti] {
+  color: var(--docs-cb-pass);
+}
+.docs-ol-kapi-yer {
+  color: var(--docs-cb-path);
+}
+
+/* ---- Tipografi sayfası ----
+   SKALA ALT ALTA, YAN YANA DEĞİL: bir skala ancak sırayla okunduğunda skala
+   gibi görünüyor · on örnek bir satıra dizilince on ayrı etiket oluyor. */
+.docs-tip-skala {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  width: 100%;
+}
+/* SATIR BİR DÜĞME: seçmek okumanın parçası · tıklanan kademe rolüyle birlikte
+   öne çıkıyor, ve seçili olanın SOLUNDA bir çizgi var çünkü zemin tek başına
+   bir satırı işaretlemeye yetmiyor. */
+.docs-tip-satir {
+  align-items: baseline;
+  background: var(--color-shell);
+  border: 0;
+  border-bottom: 1px dashed var(--color-line);
+  border-left: 3px solid transparent;
+  color: var(--color-ink);
+  cursor: pointer;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr);
+  padding: 12px 16px;
+  text-align: start;
+  width: 100%;
+}
+.docs-tip-satir:last-child {
+  border-bottom: 0;
+}
+.docs-tip-satir:hover {
+  background: var(--color-hover);
+}
+/* ZEMİN `--color-accent-bg`, `--color-accent-soft` DEĞİL, ve bu bir düzeltme.
+   `-soft` her iki temada da AÇIK mavi (#a8cdf7) ve kendi koyu mürekkebini
+   (`-soft-ink`) istiyor; koyu temada satırın açık mürekkebiyle birlikte 1.2'ye
+   düşüyordu. `-accent-bg` seçili satırın kendi token'ı ve temayla dönüyor:
+   #dce9fb / #0e2458 · ikisinde de sayfanın mürekkebiyle okunuyor. */
+.docs-tip-satir[data-secili] {
+  background: var(--color-accent-bg);
+  border-left-color: var(--color-accent);
+}
+.docs-tip-rol {
+  color: var(--color-ink-faint);
+  font-size: var(--docs-crumb);
+  line-height: 1.35;
+}
+/* ÖRNEK TAŞMIYOR, KIRPIYOR: 40 pikselik bir kademede uzun bir örnek satırı
+   sardırıyor ve on satırlık skalanın ritmi bozuluyordu. */
+.docs-tip-ornek {
+  line-height: 1.2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ÜÇ YÜZ ÜÇ SÜTUN OKUNMALI · 200px'lik taban ölçüldü ve örnek kutusunda
+   2+1'e düşüyordu ("üç yüz" diyen bir demo ikiyle bir gösteriyordu). 180'de
+   üçü sığıyor, dar ekranda yine alt alta iniyor. */
+.docs-tip-uclu {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  width: 100%;
+}
+/* Yüz kartı KENDİ GÖLGESİNİ taşıyor: üç yüz bir karşılaştırma, ve
+   karşılaştırılan şeyin bir nesne olması gerekiyor. */
+.docs-tip-yuz {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  box-shadow: 4px 4px 0 var(--color-edge);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+}
+/* 44px · skalanın bir kademesi DEĞİL, ve olmamalı: burada gösterilen şey bir
+   boy değil bir YÜZ, ve harf biçimi ancak bu ölçekte okunuyor. */
+.docs-tip-aa {
+  font-size: 44px;
+  line-height: 1;
+}
+.docs-tip-ad {
+  font-size: var(--text-control);
+  font-weight: 800;
+}
+.docs-tip-is {
+  color: var(--color-ink-faint);
+  font-size: var(--text-small);
+  line-height: 1.45;
+}
+.docs-tip-cumle {
+  border-top: 1px solid var(--color-div);
+  font-size: var(--text-control);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  padding-top: 10px;
+}
+/* KANIT SATIRI TEK SATIR KALIYOR: 13px'te en geniş kartta (mono) sarıyordu ve
+   sarılmış bir alfabe "eksik harf var" gibi okunuyor · tam da yanlış anlaşılması
+   istenmeyen şey. */
+.docs-tip-harfler {
+  color: var(--color-ink-faint);
+  font-size: var(--text-caption);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+/* Token adı KISALMIYOR: esnek bir kapta `code` tire hizasından bölünüyor ve
+   `--font-display` iki satıra düşüyordu. */
+.docs-tip-yuz code {
+  flex: none;
+  white-space: nowrap;
+}
+
+.docs-tip-ikili {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  width: 100%;
+}
+.docs-tip-tablo {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.docs-tip-tablo-bas {
+  background: var(--color-hover);
+  border-bottom: 1px solid var(--color-div);
+  color: var(--color-ink-faint);
+  font-size: var(--docs-crumb);
+  font-weight: 800;
+  padding: 8px 14px;
+}
+.docs-tip-tablo-satir {
+  border-bottom: 1px dashed var(--color-line);
+  display: flex;
+  font-size: var(--text-body);
+  gap: 10px;
+  justify-content: space-between;
+  padding: 8px 14px;
+}
+.docs-tip-tablo-satir:last-child {
+  border-bottom: 0;
+}
+
+.docs-tip-yargi {
+  align-items: center;
+  display: flex;
+  font-size: var(--docs-crumb);
+  font-weight: 800;
+  gap: 6px;
+}
+/* 28px · yine bir kademe değil: i/İ farkının görülebilmesi için harfin
+   noktası bir gövde boyunda okunmuyor. */
+.docs-tip-buyuk {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+/* SAYFADAKİ TEK `uppercase`, VE BİR KARŞI ÖRNEK. `lang="tr"` ile birlikte
+   tarayıcı "limit"i LİMİT basıyor · sayfanın bütün savı bu satırda. */
+.docs-tip-donusen {
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ---- Tailwind sayfası ----
+   DENEME KUTUSU: kural iki koşul, ve kutu ikisini AYRI AYRI gösteriyor. Bir
+   kural metni okunuyor ama denenmiyor · burada yazılan ad hangi koşula
+   takıldığını ve yerine ne yazılacağını söylüyor. */
+.tw-dene {
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-card);
+  box-shadow: 5px 5px 0 var(--color-edge);
+  margin-top: 22px;
+  overflow: hidden;
+  scroll-margin-top: var(--docs-scroll);
+}
+.tw-dene-bar {
+  align-items: center;
+  background: var(--color-hover);
+  border-bottom: 1px solid var(--color-div);
+  display: flex;
+  font-size: var(--text-small);
+  gap: 8px;
+  padding: 10px 14px;
+}
+.tw-dene-ic {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+}
+/* İKİ TİRE GİRDİNİN DIŞINDA: her token onunla başlıyor, yani yazdırmak
+   kullanıcıya bir şey sormuyor · yalnız yanlış yazılmasına izin veriyor. */
+.tw-dene-girdi {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+.tw-dene-girdi > code {
+  color: var(--color-ink-faint);
+  flex: none;
+  font-family: var(--font-mono);
+}
+.tw-ornek {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-mark);
+  color: var(--color-ink);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+  font-weight: 700;
+  padding: 3px 8px;
+}
+.tw-ornek[data-secili] {
+  background: var(--color-accent-bg);
+  border-color: var(--color-edge-strong);
+}
+.tw-kosullar {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+}
+.tw-kosul {
+  align-items: flex-start;
+  background: var(--color-hover);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-btn);
+  display: flex;
+  font-size: var(--text-small);
+  gap: 10px;
+  padding: 12px;
+}
+/* NUMARA KUTUSU BİR ROZET DEĞİL BİR SONUÇ: geçen koşul tonunun zeminini
+   alıyor, bakılmayan sessiz kalıyor · üç hâl, üç zemin. */
+.tw-kosul-n {
+  background: var(--color-sunk);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-ctl);
+  color: var(--color-ink-faint);
+  display: grid;
+  flex: none;
+  font-family: var(--font-display);
+  /* 15px, --text-small DEĞİL: 26 piksellik bir kutunun ortasındaki 13px'lik
+     bir ① daire gibi okunuyordu, numara gibi değil. */
+  font-size: 15px;
+  font-weight: 900;
+  height: 26px;
+  place-items: center;
+  width: 26px;
+}
+.tw-kosul-alt {
+  color: var(--color-ink-faint);
+  font-size: var(--docs-crumb);
+  line-height: 1.45;
+}
+.tw-sonuc {
+  align-items: flex-start;
+  background: var(--color-hover);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-btn);
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+}
+.tw-sonuc-kod {
+  align-self: flex-start;
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-mark);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  padding: 2px 8px;
+}
+
+.tw-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 18px;
+}
+.tw-bolum {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tw-h {
+  align-items: center;
+  display: flex;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  gap: 10px;
+  margin: 0;
+}
+.tw-h-n {
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-ctl);
+  display: grid;
+  flex: none;
+  height: 26px;
+  place-items: center;
+  width: 26px;
+}
+.tw-h-sayi {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+.tw-kart {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  box-shadow: 4px 4px 0 var(--color-edge);
+  overflow: hidden;
+}
+.tw-satir {
+  align-items: start;
+  border-bottom: 1px dashed var(--color-line);
+  display: grid;
+  gap: 8px 16px;
+  grid-template-columns: minmax(0, 13rem) minmax(0, 1fr);
+  padding: 10px 16px;
+}
+.tw-satir-orta {
+  align-items: center;
+}
+.tw-kart > :last-child {
+  border-bottom: 0;
+}
+.tw-baslik {
+  background: var(--color-hover);
+  border-bottom: 1px solid var(--color-div);
+  color: var(--color-ink-faint);
+  font-size: var(--docs-crumb);
+  font-weight: 800;
+  padding: 8px 16px;
+}
+.tw-ad {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+.tw-ad > code,
+.tw-ad-kod {
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+/* Renk token'ının yanındaki küçük kare: bir `bg-*` utility'sinin ne bastığı
+   ancak rengiyle birlikte okunuyor. */
+.tw-kare {
+  border: 1px solid var(--color-edge-strong);
+  border-radius: 3px;
+  flex: none;
+  height: 14px;
+  width: 14px;
+}
+/* UTILITY ÇİPİ BİR DÜĞME: bu sayfaya gelen kişi bir sınıf adı arıyor, ve
+   bulduğunda yapacağı tek şey onu kopyalamak. */
+.tw-util {
+  background: var(--color-hover);
+  border: 1px solid var(--color-edge);
+  border-radius: 3px;
+  color: var(--color-ink);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  padding: 1px 6px;
+}
+.tw-util[data-alindi] {
+  background: var(--color-resolved-bg);
+  border-color: var(--color-resolved);
+  color: var(--color-resolved);
+}
+.tw-daha {
+  background: transparent;
+  border: 1px dashed var(--color-edge);
+  border-radius: 3px;
+  color: var(--color-accent-line);
+  cursor: pointer;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  padding: 1px 7px;
+}
+.tw-neden {
+  color: var(--color-ink-faint);
+  font-size: var(--text-caption);
+}
+.tw-kacis {
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-ctl);
+  box-shadow: 2px 2px 0 var(--color-edge-strong);
+  color: var(--color-ink);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+  font-weight: 700;
+  justify-self: start;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 3px 8px;
+  text-align: start;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard);
+}
+.tw-kacis:active {
+  box-shadow: 0 0 0 var(--color-edge-strong);
+  transform: translate(2px, 2px);
+}
+.tw-kacis[data-alindi] {
+  background: var(--color-resolved-bg);
+  color: var(--color-resolved);
+}
+
+/* ---- İkonlar sayfası ---- */
+.ik-set {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 24px;
+  scroll-margin-top: var(--docs-scroll);
+}
+.ik-ayar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+.ik-ayar-grup {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+.ik-ayar-grup > code {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+}
+.ik-grup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ik-izgara {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+}
+/* KUTU BİR KART, mini düğme değil: bir ikon ızgarasında tıklanan şey bir
+   eylem değil bir AD, ve kart fiziği (üstüne gelince kalkma) onu bir
+   seçenek gibi okutuyor. */
+.ik-kutu {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  color: var(--color-ink);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px 8px 10px;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard),
+    border-color var(--duration-press) var(--ease-standard);
+}
+.ik-kutu:hover {
+  border-color: var(--color-edge-strong);
+  box-shadow: 4px 4px 0 var(--color-edge-strong);
+  transform: translate(-2px, -2px);
+}
+.ik-kutu:active {
+  box-shadow: 0 0 0 var(--color-edge-strong);
+  transform: translate(2px, 2px);
+}
+.ik-kutu[data-alindi] {
+  background: var(--color-resolved-bg);
+  border-color: var(--color-resolved);
+  color: var(--color-resolved);
+}
+/* GLİF ALANI SABİT: boyut şeridi 14'ten 32'ye çıkıyor, alan da onunla
+   büyüseydi ızgara her seçimde yeniden dizilirdi. */
+.ik-glif {
+  display: grid;
+  height: 36px;
+  place-items: center;
+}
+.ik-ad {
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+  font-weight: 700;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* PHOSPHOR SATIRI BOŞKEN DE YER KAPLIYOR: kırk sekiz rol kendi adını taşıyor
+   ve satır kaybolunca ızgaranın alt kenarı tırtıklı oluyordu. */
+.ik-ph {
+  color: var(--color-ink-faint);
+  font-size: var(--text-caption);
+  max-width: 100%;
+  min-height: 1lh;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Phosphor'un tamamı bir IZGARA değil bir KAPI: bin beş yüz glif basmak
+   sayfayı donduruyor, ve o listede gezinerek bir şey bulunmuyor. */
+.ik-kapi {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  box-shadow: 4px 4px 0 var(--color-edge);
+  color: var(--color-ink);
+  display: flex;
+  gap: 14px;
+  padding: 14px 16px;
+  text-decoration: none;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard),
+    border-color var(--duration-press) var(--ease-standard);
+}
+.ik-kapi:hover {
+  border-color: var(--color-edge-strong);
+  box-shadow: 6px 6px 0 var(--color-edge-strong);
+  transform: translate(-2px, -2px);
+}
+.ik-kapi-karo {
+  background: var(--color-accent-bg);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-btn);
+  display: grid;
+  flex: none;
+  height: 40px;
+  place-items: center;
+  width: 40px;
+}
+.ik-kapi-alt {
+  color: var(--color-ink-faint);
+  font-size: var(--text-small);
+}
+
+/* Rol ↔ Phosphor tablosu */
+.ik-tablo {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  box-shadow: 4px 4px 0 var(--color-edge);
+  margin-top: 18px;
+  overflow: hidden;
+}
+.ik-tablo-satir {
+  align-items: center;
+  border-bottom: 1px dashed var(--color-line);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 36px minmax(0, 1fr) 24px minmax(0, 1fr);
+  padding: 9px 16px;
+}
+.ik-tablo-bas {
+  background: var(--color-hover);
+  border-bottom: 1px solid var(--color-div);
+  color: var(--color-ink-faint);
+  font-size: var(--docs-crumb);
+  font-weight: 800;
+  padding: 8px 16px;
+}
+.ik-rol {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  font-weight: 700;
+}
+/* ESKİ AD ÜSTÜ ÇİZİLİ: tablo bir eşleme değil bir DEĞİŞTİRME anlatıyor ·
+   çizgi, o adın çağrı yerinde artık yazılmadığını söylüyor. */
+.ik-eski {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  text-decoration: line-through;
+  text-decoration-color: var(--color-edge);
+}
+.ik-tablo-alt {
+  color: var(--color-ink-faint);
+  font-size: var(--docs-crumb);
+  margin: 0;
+  padding: 9px 16px;
+}
+
+/* Ağırlık kartları */
+.ik-agirlik {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  margin-top: 18px;
+}
+.ik-kart {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+.ik-kart-bas {
+  align-items: center;
+  display: flex;
+  font-size: var(--docs-crumb);
+  font-weight: 800;
+  gap: 8px;
+}
+.ik-etiket {
+  background: var(--color-hover);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-mark);
+  font-family: var(--font-mono);
+  padding: 0 6px;
+}
+.ik-etiket-acik {
+  background: var(--color-accent-bg);
+  border-color: var(--color-accent-bg);
+}
+.ik-sira {
+  color: var(--color-ink);
+  display: flex;
+  gap: 16px;
+}
+.ik-kart-alt {
+  color: var(--color-ink-faint);
+  font-size: var(--docs-crumb);
+}
+
+/* Boy merdiveni */
+.ik-merdiven {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  box-shadow: 4px 4px 0 var(--color-edge);
+  margin-top: 18px;
+  overflow: hidden;
+}
+.ik-merdiven-satir {
+  align-items: center;
+  border-bottom: 1px dashed var(--color-line);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 5rem 48px minmax(0, 1fr);
+  padding: 10px 16px;
+}
+.ik-merdiven-satir:last-child,
+.ik-tablo-satir:last-of-type {
+  border-bottom: 0;
+}
+.ik-boy-ad {
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+  font-weight: 700;
+}
+.ik-yaninda {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* ---- Yeni panel sayfası ---- */
+.yp-uclu {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  margin-top: 18px;
+}
+/* KÜME KARTI: başlık şeridi tonun zeminini alıyor, gövde sessiz. Renk burada
+   bir süs değil bir izin: yeşil "değiştir", kırmızı "dokunma". */
+.yp-kume {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0 0 14px;
+}
+.yp-kume-bas {
+  align-items: center;
+  display: flex;
+  font-size: var(--docs-crumb);
+  font-weight: 800;
+  gap: 6px;
+  padding: 8px 14px;
+}
+.yp-kume-ne {
+  font-weight: 600;
+  padding-inline: 14px;
+}
+.yp-kume-neden {
+  color: var(--color-ink-faint);
+  font-size: var(--text-small);
+  line-height: 1.5;
+  padding-inline: 14px;
+}
+
+/* AYARLAR DEMOSU · sayfanın iddiası bir renkten bir panel çıktığı, ve bunu
+   ancak renk değişince rayın ve düğmenin birlikte dönmesi gösteriyor. */
+.yp-ayar {
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-card);
+  box-shadow: 5px 5px 0 var(--color-edge);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 16px;
+}
+.yp-ayar-bas {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+.yp-kapsam {
+  background: var(--color-hover);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-mark);
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  padding: 1px 7px;
+}
+.yp-ayar-izgara {
+  display: flex;
+  flex-direction: column;
+}
+/* BAŞLIK KONTROLÜN ÜSTÜNDE, YANINDA DEĞİL · ve kitin kendi Görünüm ekranında
+   yanında duruyor. Sebep ölçü: bu demo doküman sütununda yaşıyor (kart 474 px)
+   ve iki sütuna bölününce kontrole 252 px kalmıyor; üç minyatür kart (3x170 +
+   2x16 = 542) ikinci satıra sarıyor, okunan şey "üç seçenek" değil "iki artı
+   bir" oluyordu. Kesik çizgi alanları yine ayırıyor. */
+.yp-alan {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px 0;
+}
+.yp-alan + .yp-alan {
+  border-top: 1px dashed var(--color-line);
+}
+.yp-alan-bas {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 460px;
+}
+.yp-alan-bas strong {
+  font-size: var(--text-body);
+  font-weight: 700;
+}
+.yp-alan-bas span {
+  color: var(--color-ink-soft);
+  font-size: var(--text-small);
+  line-height: 1.55;
+}
+.yp-gorseller {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+/* Önizlemedeki geniş ray logoyu ham boyutunda değil ray yüksekliğinde
+   gösteriyor: yüklenen dosya 512 px olabilir. */
+.yp-logo-onizleme {
+  max-height: 22px;
+  max-width: 96px;
+  object-fit: contain;
+  width: auto;
+}
+
+.yp-onizleme-bas {
+  border-top: 1px dashed var(--color-line);
+  color: var(--color-ink-faint);
+  font-size: var(--docs-crumb);
+  font-weight: 700;
+  padding-top: 12px;
+}
+/* ÖNİZLEME KENDİ PALETİNİ TAŞIYOR: içindeki her renk satır içi, çünkü
+   gösterilen şey sayfanın teması değil SEÇİLEN rengin paleti. */
+.yp-onizleme {
+  border: 1px solid;
+  border-radius: var(--radius-card);
+  display: flex;
+  min-height: 190px;
+  overflow: hidden;
+}
+.yp-ray {
+  align-items: center;
+  border-right: 1px solid;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 8px;
+  width: 48px;
+}
+.yp-ray[data-genis] {
+  align-items: flex-start;
+  flex-direction: row;
+  width: 150px;
+}
+.yp-amblem {
+  align-items: center;
+  border-radius: var(--radius-ctl);
+  display: flex;
+  flex: none;
+  font-family: var(--font-display);
+  font-weight: 900;
+  height: 28px;
+  justify-content: center;
+  overflow: hidden;
+  width: 28px;
+}
+.yp-tutamak {
+  background: transparent;
+  border: 1px solid;
+  border-radius: var(--radius-mark);
+  cursor: pointer;
+  display: grid;
+  height: 22px;
+  margin-inline-start: auto;
+  place-items: center;
+  width: 22px;
+}
+.yp-govde {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px;
+}
+.yp-btn {
+  border: 1.5px solid;
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  font-size: var(--text-small);
+  font-weight: 700;
+  padding: 7px 14px;
+}
+.yp-satirlar {
+  border: 1px solid;
+  border-radius: var(--radius-ctl);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.yp-satirlar > span {
+  border-bottom: 1px solid;
+  font-size: var(--text-small);
+  padding: 7px 12px;
+}
+.yp-satirlar > span:last-child {
+  border-bottom: 0;
+}
+
+.yp-palet {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+}
+.yp-palet-sutun {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.yp-palet-bas {
+  background: var(--color-hover);
+  border-bottom: 1px solid var(--color-div);
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+  font-weight: 700;
+  padding: 6px 12px;
+}
+.yp-palet-satir {
+  align-items: center;
+  border-bottom: 1px dashed var(--color-line);
+  display: flex;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  gap: 8px;
+  min-width: 0;
+  padding: 5px 12px;
+}
+.yp-palet-satir:last-child {
+  border-bottom: 0;
+}
+.yp-palet-kare {
+  border: 1px solid var(--color-edge-strong);
+  border-radius: 3px;
+  flex: none;
+  height: 14px;
+  width: 14px;
+}
+.yp-ipucu {
+  color: var(--color-ink-faint);
+  font-size: var(--text-small);
+  margin: 0;
+}
+
+/* Kontrast kartı · oran bir sayı, eşiğin neresinde durduğu bir karar. */
+.yp-kontrast {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px;
+}
+.yp-kontrast-ornek {
+  align-items: center;
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-ctl);
+  display: flex;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  height: 56px;
+  justify-content: center;
+}
+.yp-kontrast-hex {
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+  font-weight: 700;
+}
+.yp-kontrast-rozet {
+  align-items: center;
+  border-radius: var(--radius-mark);
+  display: inline-flex;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  gap: 4px;
+  padding: 1px 7px;
+}
+.yp-bar {
+  background: var(--color-sunk);
+  border-radius: 2px;
+  display: block;
+  height: 8px;
+  overflow: visible;
+  position: relative;
+}
+.yp-bar > span:first-child {
+  border-radius: 2px;
+  display: block;
+  height: 100%;
+}
+/* AA EŞİĞİ ÇUBUĞUN ÜSTÜNDE BİR ÇİZGİ: 4.5 bir sayı değil bir SINIR. */
+.yp-bar-esik {
+  background: var(--color-edge-strong);
+  bottom: -3px;
+  position: absolute;
+  top: -3px;
+  width: 1.5px;
+}
+
+.yp-logo-zemin {
+  align-items: center;
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-ctl);
+  display: flex;
+  height: 64px;
+  justify-content: center;
+  margin-inline: 14px;
+}
+.yp-logo-cizim {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+/* DEMONUN İPUCU SATIRI: kutunun altında, kesik bir çizgiyle ayrılmış tek
+   cümle · örnekte ne yapılacağını ya da neye bakılacağını söylüyor. Kutunun
+   İÇİNDE duruyor, çünkü paragrafa yazılan bir yönerge okunmuyor. */
+.docs-demo-ipucu {
+  align-items: center;
+  border-top: 1px dashed var(--color-line);
+  color: var(--color-ink-faint);
+  display: flex;
+  font-size: var(--docs-crumb);
+  gap: 8px;
+  margin: 0;
+  padding: 10px 16px;
+}
+.docs-demo-ipucu svg {
+  color: var(--color-ink);
+  flex: none;
+}
+
+/* GÖRÜNÜM SAYFASI · şablonun beş parçası, beş bağlantı kartı. Fizik
+   `.home-kart`tan geliyor: bu bir GİDİLECEK kart, ve ana sayfadaki kartlarla
+   aynı şeyi yaptığı için aynı yükselmeyi yapmalı. Burada değişen yalnız ölçü ·
+   beş kart tek sayfa sütununa sığıyor. */
+.gr-parcalar {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  margin-top: 18px;
+}
+.gr-parca {
+  gap: 6px;
+  padding: 14px;
+}
+.gr-parca svg {
+  color: var(--color-accent);
+}
+.gr-parca-ad {
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+  font-weight: 700;
+}
+.gr-parca-ne {
+  color: var(--color-ink-soft);
+  font-size: var(--docs-crumb);
+  line-height: 1.5;
+}
+
+/* LİSTE EKRANI · numaralı sayım ve parça çipleri.
+   `.docs-neden` DEĞİL, ve ikisi bilerek ayrı duruyor: o bir SEBEP listesi (tek
+   paragraf, vurgulu numara), bu bir SAYIM (ad + açıklama, sessiz numara). Aynı
+   sayfada ikisi de bulunabiliyor ve numaranın ağırlığı hangisini okuduğunu
+   söylüyor. */
+.docs-sayim {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+.docs-sayim > li {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+}
+/* Numara DOLGU, kenar değil: bir sayım satırının içindeki ikinci bir çerçeve
+   satırın kendi çerçevesiyle yarışıyor. */
+.docs-sayim-no {
+  align-items: center;
+  background: var(--color-ink);
+  border-radius: var(--radius-mark);
+  color: var(--color-shell);
+  display: grid;
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+  font-weight: 700;
+  height: 26px;
+  place-items: center;
+  width: 26px;
+}
+.docs-sayim-ad {
+  font-size: var(--docs-cell);
+  font-weight: 700;
+}
+.docs-sayim-ac {
+  color: var(--color-ink-soft);
+  font-size: var(--docs-crumb);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+/* Parça çipleri: sayfanın sonunda "bunları kullandım" listesi. Çip bir
+   ETİKET değil bir KAPI · o yüzden gölgesi var ve hover'da yükseliyor. */
+.docs-parca-cip {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-ctl);
+  box-shadow: 3px 3px 0 var(--color-edge);
+  color: var(--color-ink);
+  display: inline-flex;
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+  font-weight: 700;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  text-decoration: none;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard),
+    border-color var(--duration-press) var(--ease-standard);
+}
+.docs-parca-cip:hover {
+  border-color: var(--color-edge-strong);
+  box-shadow: 4px 4px 0 var(--color-edge-strong);
+  transform: translate(-1px, -1px);
+}
+.docs-parcalar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* ANA SAYFA · SÜRÜM ÖNCESİ ZİNCİR.
+   Ziyaretçiye kuralları değil DURMAYI gösteriyor. Üst yarı normal yüzeyde
+   (soru sorulan yer), alt yarı ters yüzeyde (çıktının okunduğu yer) · ana
+   sayfanın tek ters zemini zaten kapı şeridiydi, aynı idiom. */
+.home-zincir {
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-card);
+  box-shadow: 5px 5px 0 var(--color-edge-strong);
+  display: flex;
+  flex-direction: column;
+  margin-top: 28px;
+  overflow: hidden;
+}
+.home-zincir-bas {
+  align-items: center;
+  border-bottom: 1px solid var(--color-line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding: 16px 20px;
+}
+.home-zincir-ad {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.home-zincir-ad strong {
+  font-family: var(--font-display);
+  font-size: var(--docs-h3);
+  font-weight: 800;
+}
+/* "Canlandırma" rozeti: bu kutu gerçekten bir şey koşturmuyor, ve bunu
+   ziyaretçiden saklamak sayfanın tek iddiasını çürütürdü. */
+.home-zincir-rozet {
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-mark);
+  color: var(--color-ink-faint);
+  font-size: var(--docs-micro);
+  padding: 2px 7px;
+}
+.home-zincir-komut {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+}
+.home-zincir-oynat {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-btn);
+  box-shadow: 2px 2px 0 var(--color-edge-strong);
+  color: var(--color-ink);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--docs-crumb);
+  font-weight: 700;
+  gap: 6px;
+  /* Kitin küçük kontrol yüksekliği (`.tamga-btn-sm`): bu kutu kitin dilini
+     konuşuyor, kendi ölçüsünü uydurmuyor. */
+  height: 32px;
+  margin-inline-start: auto;
+  padding-inline: 12px;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard);
+}
+.home-zincir-oynat:active {
+  box-shadow: 0 0 0 var(--color-edge-strong);
+  transform: translate(2px, 2px);
+}
+.home-zincir-secim {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 20px;
+}
+.home-zincir-soru {
+  font-size: var(--docs-crumb);
+  font-weight: 700;
+  margin-inline-end: 4px;
+}
+/* Seçili senaryo YÜKSELİYOR: bu bir eylem değil bir SEÇİM, ve seçilen öne
+   çıkar (Yasa 2'nin okunuşu · dolgu eylemdir). */
+.home-zincir-sec {
+  background: transparent;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-btn);
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  font-size: var(--docs-crumb);
+  font-weight: 600;
+  height: 32px;
+  padding-inline: 12px;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard),
+    border-color var(--duration-press) var(--ease-standard);
+}
+.home-zincir-sec:hover {
+  color: var(--color-ink);
+}
+.home-zincir-sec[aria-checked="true"] {
+  border-color: var(--color-edge-strong);
+  box-shadow: 3px 3px 0 var(--color-edge-strong);
+  color: var(--color-ink);
+  transform: translate(-1px, -1px);
+}
+.home-zincir-alt {
+  background: var(--color-inverse);
+  color: var(--color-inverse-ink);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px 20px 20px;
+}
+/* ŞERİT: on sekiz kare, 44 px, sarıyor. Izgara değil şerit, çünkü sayılacak
+   bir şey değil AKAN bir şey · kareler dar ekranda alt satıra geçiyor. */
+.home-zincir-serit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.home-zincir-serit > li {
+  border-radius: var(--radius-mark);
+  flex: 1 1 32px;
+  height: 44px;
+  max-width: 64px;
+  min-width: 0;
+  transition:
+    background var(--duration-quick) var(--ease-standard),
+    box-shadow var(--duration-quick) var(--ease-standard),
+    transform var(--duration-quick) var(--ease-standard);
+}
+.home-zincir-serit > li[data-durum="kosmadi"] {
+  background: transparent;
+  border: 1px dashed var(--docs-cb-line);
+}
+.home-zincir-serit > li[data-durum="gecti"] {
+  background: var(--docs-cb-line);
+}
+.home-zincir-serit > li[data-durum="tamam"] {
+  background: var(--docs-cb-pass);
+}
+/* Koşan kare MAVİ ve kalkık: o an bakılacak yer orası. Yeşil "geçti", mavi
+   "şu an bunu deniyor" · ikisi aynı renk olsaydı akış bir dolgu çubuğuna
+   dönerdi ve sıranın nerede olduğu okunmazdı. */
+.home-zincir-serit > li[data-durum="kosuyor"] {
+  background: var(--docs-cb-run);
+  transform: translateY(-4px);
+}
+/* Takılan kare TEK BAŞINA renkli ve en yüksekte · Yasa 3: renk sapmayı
+   işaretliyor, ve sapan tek şey bu kontrol. Çift halka onu şeritten ayırıyor. */
+.home-zincir-serit > li[data-durum="takildi"] {
+  background: var(--docs-cb-fail);
+  box-shadow:
+    0 0 0 3px var(--color-inverse),
+    0 0 0 5px var(--docs-cb-fail);
+  transform: translateY(-8px);
+}
+.home-zincir-uc {
+  color: var(--docs-cb-muted);
+  display: flex;
+  font-family: var(--font-mono);
+  font-size: var(--docs-micro);
+  justify-content: space-between;
+}
+.home-zincir-sonuc {
+  border-inline-start: 3px solid var(--docs-cb-pass);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  min-height: 92px;
+  padding-inline-start: 14px;
+}
+.home-zincir-sonuc[data-dustu] {
+  border-inline-start-color: var(--docs-cb-fail);
+}
+.home-zincir-sonuc strong {
+  align-items: center;
+  display: flex;
+  font-size: var(--docs-cell);
+  gap: 8px;
+}
+.home-zincir-sonuc[data-dustu] strong {
+  color: var(--docs-cb-fail);
+}
+.home-zincir-sonuc:not([data-dustu]) strong {
+  color: var(--docs-cb-pass);
+}
+.home-zincir-sonuc > span {
+  color: var(--color-inverse-ink);
+  font-size: var(--docs-crumb);
+  line-height: 1.55;
+}
+.home-zincir-sonuc code {
+  color: var(--docs-cb-path);
+  font-family: var(--font-mono);
+  font-size: var(--docs-micro);
+  overflow-wrap: anywhere;
+}
+.home-zincir-kalan {
+  color: var(--docs-cb-muted);
+}
+.home-zincir-kosuyor {
+  color: var(--docs-cb-run);
+  font-family: var(--font-mono);
+}
+.home-zincir-sonuc:not([data-dustu]):has(.home-zincir-kosuyor) {
+  border-inline-start-color: var(--docs-cb-run);
+}
+.home-zincir-varsayim {
+  border-top: 1px dashed var(--docs-cb-line);
+  color: var(--docs-cb-muted);
+  font-size: var(--docs-micro);
+  line-height: 1.6;
+  margin: 14px 0 0;
+  padding-top: 12px;
+}
+
+/* Bölüm başlığı ile "son sürüm" etiketi aynı satırda: sürüm bir başlık değil
+   bir künye, ve başlığın altına konduğunda cümlenin parçası gibi okunuyordu. */
+.home-zincir-ust {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+}
+.home-surum-etiket {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-mark);
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+  padding: 5px 10px;
+  white-space: nowrap;
+}
+.home-sayilar {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  margin-top: 28px;
+}
+.home-sayi-kart svg {
+  color: var(--color-accent);
+  margin-bottom: 10px;
+}
+.home-sayi-kart {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px;
+}
+.home-sayi {
+  font-family: var(--font-display);
+  font-size: var(--home-sayi);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.home-sayi-ad {
+  font-size: var(--docs-cell);
+  font-weight: 700;
+}
+.home-sayi-alt {
+  color: var(--color-ink-soft);
+  font-size: var(--docs-crumb);
+  line-height: 1.5;
+}
+
+/* ANA SAYFA · MASA (02 · Kutunun içi).
+   On beş parça, ziyaretçinin seçtiği renkte. Masanın zemini paletin SAYFA
+   rengi: karolar onun üstünde duran yüzeyler, yani gösterilen şey bir
+   bileşen dizisi değil bir PANELİN içi. */
+.masa-bas {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+.masa-renk {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-btn);
+  box-shadow: 3px 3px 0 var(--color-edge-strong);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--docs-crumb);
+  gap: 8px;
+  height: 38px;
+  padding-inline: 12px;
+  position: relative;
+}
+.masa-renk-ad {
+  font-weight: 700;
+}
+.masa-renk-kare {
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-mark);
+  height: 18px;
+  width: 18px;
+}
+.masa-renk code {
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+}
+.masa-renk-degistir {
+  align-items: center;
+  border-inline-start: 1px solid var(--color-line);
+  color: var(--color-ink-faint);
+  display: inline-flex;
+  gap: 5px;
+  margin-inline-start: 2px;
+  padding-inline-start: 10px;
+}
+.masa-kategoriler {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 18px;
+}
+/* HER KATEGORİ BİR KART, seçili olan dolgu ve sert gölge alıyor. Kenarsız
+   dururken şerit bir düğme dizisi değil bir metin satırı gibi okunuyordu. */
+.masa-kategori {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-btn);
+  box-shadow: 2px 2px 0 var(--color-line);
+  color: var(--color-ink);
+  cursor: pointer;
+  display: flex;
+  font-size: var(--docs-cell);
+  font-weight: 700;
+  gap: 8px;
+  height: 38px;
+  padding-inline: 13px;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard),
+    background var(--duration-press) var(--ease-standard),
+    border-color var(--duration-press) var(--ease-standard);
+}
+.masa-kategori:hover {
+  border-color: var(--color-edge);
+  box-shadow: 3px 3px 0 var(--color-edge);
+}
+.masa-kategori[aria-pressed="true"] {
+  background: var(--color-accent-bg);
+  border: 1.5px solid var(--color-edge-strong);
+  box-shadow: 4px 4px 0 var(--color-edge-strong);
+  transform: translate(-1px, -1px);
+}
+.masa-kategori svg {
+  flex: none;
+}
+.masa-kategori-sayi {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--docs-crumb);
+}
+.masa-kap {
+  container-type: inline-size;
+  margin-top: 18px;
+}
+.masa {
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-card);
+  display: grid;
+  gap: 14px;
+  grid-auto-flow: dense;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  padding: 18px;
+  transition: box-shadow var(--duration-slow) var(--ease-standard);
+}
+/* Karo ölçüleri veriden geliyor (`data-w` · `data-h`), sınıf adından değil:
+   on beş karonun on beş sınıfı olurdu ve biri değişince ikisi ayrışırdı. */
+.masa > [data-w="2"] {
+  grid-column: span 2;
+}
+.masa > [data-w="3"] {
+  grid-column: span 3;
+}
+.masa > [data-w="6"] {
+  grid-column: span 6;
+}
+.masa > [data-h="2"] {
+  grid-row: span 2;
+}
+@container (max-width: 1100px) {
+  .masa {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .masa > [data-w="3"],
+  .masa > [data-w="6"] {
+    grid-column: span 4;
+  }
+  .masa > [data-w="1"] {
+    grid-column: span 2;
+  }
+}
+@container (max-width: 700px) {
+  .masa {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* Seçici `[data-w]` TAŞIYOR, `*` değil: `.masa > *` daha zayıf kalıyor ve
+     `[data-w="3"]`in span'i tek sütunlu ızgarada üç ÖRTÜK sütun açıyordu ·
+     ölçüldü, 390 px'te masa dört sütun genişliğinde kalıyordu. */
+  .masa > [data-w] {
+    grid-column: span 1;
+    grid-row: auto;
+  }
+}
+.masa-karo {
+  background: var(--color-shell);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-ctl);
+  color: var(--color-ink);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px;
+  transition:
+    opacity var(--duration-quick) var(--ease-standard),
+    transform var(--duration-quick) var(--ease-standard),
+    box-shadow var(--duration-quick) var(--ease-standard);
+}
+/* AİLE ÖNE ÇIKIYOR, ötekiler sönüyor: "bir kategoriye gel, o aile öne çıksın"
+   cümlesinin ekrandaki karşılığı. Sönen karo GİZLENMİYOR · masanın kaç parça
+   taşıdığı hâlâ görünüyor. */
+.masa-karo[data-sonuk="true"] {
+  opacity: 0.28;
+}
+.masa-karo[data-one="true"] {
+  border-color: var(--color-edge);
+  transform: translate(-2px, -2px);
+}
+.masa-karo-bas {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+.masa-karo-bas > span:first-child,
+.masa-karo-bas code {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--docs-micro);
+  font-weight: 700;
+}
+.masa-karo-cizgi {
+  border-top: 1px dashed var(--color-line);
+  flex: 1;
+  height: 0;
+}
+.masa-karo-govde {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+.masa-karo-govde > * {
+  min-width: 0;
+}
+.masa-ipucu {
+  color: var(--color-ink-faint);
+  font-size: var(--docs-crumb);
+}
+.masa-sayi {
+  font-family: var(--font-display);
+  font-size: var(--docs-h3);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+.masa-alt {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-top: 22px;
+}
+.masa-alt > span {
+  color: var(--color-ink-soft);
+  font-size: var(--docs-small);
+}
+.masa-alt strong {
+  color: var(--color-ink);
+}
+.masa-hepsi {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-btn);
+  box-shadow: 3px 3px 0 var(--color-edge-strong);
+  color: var(--color-ink);
+  display: inline-flex;
+  font-size: var(--docs-cell);
+  font-weight: 700;
+  gap: 8px;
+  padding: 9px 14px;
+  text-decoration: none;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard);
+}
+.masa-hepsi:hover {
+  box-shadow: 4px 4px 0 var(--color-edge-strong);
+  transform: translate(-1px, -1px);
+}
+
+/* Hero'nun üç bilgisi: bir durum bildirmiyor, bir eylem değil · okunacak üç
+   satır, o yüzden en sessiz biçim. Ayraç yerine glif, çünkü glif bilgiyi
+   ayırmıyor ADLANDIRIYOR. */
+.home-hero-bilgi {
+  color: var(--color-ink-faint);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: var(--docs-cell);
+  gap: 10px 22px;
+  list-style: none;
+  margin: 32px 0 0;
+  padding: 0;
+}
+.home-hero-bilgi > li {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+.home-hero-bilgi svg {
+  color: var(--color-accent);
+}
+.home-hero-avatar {
+  align-items: center;
+  background: var(--color-accent-bg);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-mark);
+  color: var(--color-ink);
+  display: grid;
+  flex: none;
+  font-size: var(--docs-label);
+  font-weight: 800;
+  height: 34px;
+  place-items: center;
+  width: 34px;
+}
+
+/* ANA SAYFA · BAŞLAMAK (04). Solda sıralı üç iş, sağda sonucu gösteren bir
+   pencere. Numaralar arasında kesik dikey çizgi: adımlar bağımsız değil,
+   biri ötekinin üstüne biniyor. */
+.bas-izgara {
+  display: grid;
+  gap: 40px;
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: 30px;
+}
+@media (min-width: 1000px) {
+  .bas-izgara {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  }
+}
+.bas-adimlar {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.bas-adimlar > li {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 40px minmax(0, 1fr);
+  position: relative;
+}
+/* Çizgi numaraların ARASINDA, satırın tamamında değil: bir adımın gövdesi
+   uzadıkça çizgi de uzuyor, ve sonuncudan sonra hiç çizilmiyor. */
+.bas-adimlar > li:not(:last-child)::before {
+  border-left: 1.5px dashed var(--color-edge);
+  bottom: -22px;
+  content: "";
+  left: 20px;
+  position: absolute;
+  top: 44px;
+}
+.bas-no {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-btn);
+  box-shadow: 3px 3px 0 var(--color-edge-strong);
+  color: var(--color-ink);
+  cursor: pointer;
+  display: flex;
+  font-family: var(--font-display);
+  font-size: var(--docs-h3);
+  font-weight: 900;
+  height: 40px;
+  justify-content: center;
+  transition:
+    background var(--duration-press) var(--ease-standard),
+    color var(--duration-press) var(--ease-standard);
+  width: 40px;
+}
+.bas-adimlar > li[data-secili] .bas-no {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+.bas-govde {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding-bottom: 4px;
+}
+.bas-ad {
+  font-size: var(--docs-h3);
+  font-weight: 800;
+}
+.bas-alt {
+  color: var(--color-ink-soft);
+  font-size: var(--docs-cell);
+  margin-bottom: 6px;
+}
+/* SAĞ SÜTUN YAPIŞIYOR · ve `align-self` olmadan yapışmıyordu: ızgara ögesi
+   varsayılan olarak satırın tamamına geriliyor, gerilmiş bir öge de hiç
+   kaymıyor. */
+.bas-yan {
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: sticky;
+  top: 96px;
+}
+.bas-pencere {
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-card);
+  box-shadow: 6px 6px 0 var(--color-edge-strong);
+  overflow: hidden;
+}
+.bas-cubuk {
+  align-items: center;
+  background: var(--color-band);
+  border-bottom: 1px solid var(--color-line);
+  display: flex;
+  gap: 7px;
+  padding: 10px 14px;
+}
+/* Pencere noktaları TAM YUVARLAK DEĞİL: kitin kuralı burada da geçerli, ve
+   bir tarayıcı süsü için istisna açılmaz. */
+.bas-nokta {
+  background: var(--color-line);
+  border-radius: var(--radius-mark);
+  height: 9px;
+  width: 9px;
+}
+.bas-adres {
+  background: var(--color-shell);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-mark);
+  color: var(--color-ink-faint);
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+  margin-inline-start: 6px;
+  padding: 3px 9px;
+}
+.bas-sahne {
+  align-items: center;
+  background: var(--color-page);
+  display: flex;
+  justify-content: center;
+  min-height: 190px;
+  padding: 24px;
+}
+.bas-bos {
+  align-items: center;
+  color: var(--color-ink-faint);
+  display: flex;
+  flex-direction: column;
+  font-size: var(--docs-cell);
+  gap: 10px;
+  max-width: 34ch;
+  text-align: center;
+}
+.bas-ipucu {
+  color: var(--color-ink-faint);
+  font-size: var(--docs-crumb);
+}
+.bas-btn {
+  align-items: center;
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-btn);
+  box-shadow: 3px 3px 0 var(--color-edge-strong);
+  color: var(--color-ink);
+  display: inline-flex;
+  font-size: var(--docs-cell);
+  font-weight: 700;
+  gap: 8px;
+  padding: 10px 16px;
+  text-decoration: none;
+  transition:
+    transform var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard);
+}
+.bas-btn:hover {
+  box-shadow: 4px 4px 0 var(--color-edge-strong);
+  transform: translate(-1px, -1px);
+}
+.bas-btn-birincil {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+.home-gereksinim {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.home-gereksinim > li {
+  background: var(--color-shell);
+  border: 1px solid var(--color-edge);
+  border-radius: var(--radius-mark);
+  color: var(--color-ink-soft);
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+  padding: 5px 10px;
+}
+
+/* ANA SAYFA · CANLI ÖNİZLEME (01). Solda kontrol masası, sağda sahte bir
+   tarayıcı penceresinde gerçek `AppShell`. Panelin token'ları kabında
+   bildiriliyor: sayfa açık temada dururken panel koyu olabiliyor. */
+.canli-izgara {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: 26px;
+}
+@media (min-width: 1060px) {
+  .canli-izgara {
+    grid-template-columns: 320px minmax(0, 1fr);
+  }
+}
+.canli-masa {
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-card);
+  box-shadow: 5px 5px 0 var(--color-edge-strong);
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  overflow: hidden;
+}
+.canli-masa-bas {
+  align-items: center;
+  background: var(--color-hover);
+  border-bottom: 1px solid var(--color-line);
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+}
+.canli-masa-bas strong {
+  flex: 1;
+  font-size: var(--docs-cell);
+}
+/* "Canlı" noktası: bu kutunun gerçekten çalıştığını söyleyen tek işaret, ve
+   nabız atmıyor · sayfada bir tane nabız var, o da bu değil (Yasa 4). */
+.canli-nokta {
+  background: var(--color-positive-mark);
+  border-radius: var(--radius-mark);
+  box-shadow: 0 0 0 3px var(--color-positive-bg);
+  height: 9px;
+  width: 9px;
+}
+.canli-etiket {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--docs-micro);
+}
+.canli-masa-govde {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 16px;
+}
+.canli-kod {
+  background: var(--color-inverse);
+  border-radius: var(--radius-ctl);
+  color: var(--color-inverse-ink);
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+  overflow-wrap: anywhere;
+  padding: 10px 12px;
+}
+.canli-pencere {
+  background: var(--color-shell);
+  border: 1.5px solid var(--color-edge-strong);
+  border-radius: var(--radius-card);
+  box-shadow: 6px 6px 0 var(--color-edge-strong);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+.canli-cubuk {
+  align-items: center;
+  background: var(--color-band);
+  border-bottom: 1px solid var(--color-line);
+  display: flex;
+  gap: 7px;
+  padding: 10px 14px;
+}
+.canli-pencere-nokta {
+  background: var(--color-line);
+  border-radius: var(--radius-mark);
+  height: 9px;
+  width: 9px;
+}
+.canli-adres {
+  background: var(--color-shell);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-mark);
+  color: var(--color-ink-faint);
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: var(--docs-label);
+  margin-inline-start: 6px;
+  padding: 3px 9px;
+}
+.canli-panel {
+  min-height: 520px;
+  position: relative;
+}
+.canli-sayfa {
+  padding: 18px;
+}
+.canli-marka {
+  align-items: center;
+  display: flex;
+  font-weight: 800;
+  gap: 10px;
+  min-width: 0;
+}
+.canli-amblem {
+  align-items: center;
+  border-radius: var(--radius-ctl);
+  display: flex;
+  flex: none;
+  font-family: var(--font-display);
+  font-weight: 900;
+  height: 30px;
+  justify-content: center;
+  width: 30px;
+}
+.canli-topbar {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+.canli-arama {
+  align-items: center;
+  background: var(--color-sunk);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-ctl);
+  color: var(--color-ink-faint);
+  display: flex;
+  flex: 1;
+  font-size: var(--docs-crumb);
+  gap: 8px;
+  max-width: 320px;
+  padding: 7px 10px;
+}
+.canli-arama :last-child {
+  margin-inline-start: auto;
+}
+/* Hesap düğmesi KARE ve marka renginde: dar rayda amblemle aynı dili
+   konuşuyor. */
+.canli-hesap {
+  align-items: center;
+  border-radius: var(--radius-ctl);
+  display: flex;
+  flex: none;
+  font-size: var(--docs-label);
+  font-weight: 800;
+  height: 34px;
+  justify-content: center;
+  margin-inline-start: auto;
+  width: 34px;
+}
+.canli-ikili {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+.canli-hareket {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.canli-hareket > li {
+  border-bottom: 1px dashed var(--color-line);
+  display: flex;
+  font-size: var(--docs-crumb);
+  gap: 12px;
+  justify-content: space-between;
+  padding-bottom: 10px;
+}
+.canli-hareket > li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.canli-zaman {
+  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.canli-ara {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  position: relative;
+}
+.canli-ara svg {
+  color: var(--color-ink-faint);
+  inset-inline-start: 10px;
+  pointer-events: none;
+  position: absolute;
+}
+.canli-secim {
+  align-items: center;
+  background: var(--color-accent-bg);
+  border: 1px solid var(--color-accent-line);
+  border-radius: var(--radius-ctl);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 12px;
+}
+.canli-toast {
+  inset-inline: 16px;
+  bottom: 16px;
+  position: absolute;
+}
+.canli-amblem-gorsel {
+  flex: none;
+  height: 30px;
+  object-fit: contain;
+  width: 30px;
+}
+/* YÜKSEKLİK SABİT, GENİŞLİK ONDAN · `max-height` ile bırakıldığında esnek
+   kutunun içinde genişlik 0'a çöküyordu (ölçüldü: logo 0x0 çizildi ve marka
+   alanı boş göründü). */
+.canli-logo-gorsel {
+  flex: none;
+  height: 24px;
+  max-width: 160px;
+  object-fit: contain;
+  width: auto;
+}
+.canli-hesap-kap {
+  margin-inline-start: auto;
+}
+
+/* Başlıktaki "Doküman" düğmesi GitHub düğmesiyle aynı yükseklikte: ikisi yan
+   yana duruyor ve iki piksellik fark şeridi eğri gösteriyordu. */
+.docs-header-cta {
+  height: 38px;
+  padding-inline: 14px;
+}
+/* Anahtarın görünür satırı: kitin `Switch`i metin taşımıyor. */
+.canli-anahtar,
+.masa-anahtar {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  font-size: var(--docs-cell);
+  gap: 10px;
+}
+.masa-cipler {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+/* Sayaç rozeti zilin köşesine biniyor: sarmalayıcı o çıkıntıya yer açıyor,
+   yoksa rozet komşusunun üstüne düşüyor. */
+.masa-rozet {
+  display: inline-flex;
+  padding: 4px 8px 0 0;
+}
+/* Menü karosu açık bir menü taşıyor, ve menü mutlak konumlu: karo kendi
+   yüksekliğini içeriğinden alamıyor, o yüzden yeri burada açılıyor. */
+/* Menü karosu kendi satırında ve açık bir menü taşıyor: yüksekliği menünün
+   boyundan geliyor, ve menü mutlak konumlu olduğu için buradan veriliyor. */
+/* Ölçü İKİ SATIRLIK ipucuna göre: cümle dilden dile ve genişlikten genişliğe
+   bir ya da iki satır oluyor, ve bir satıra göre ayarlanan yükseklik İngilizce
+   sayfada 760 pikselde menüyü taşırıyordu. */
+.masa-karo[data-karo="menu"] {
+  min-height: 276px;
+}
+
+/* Menü mutlak konumlu, yani gövdenin ortalaması onu saymıyor · içerik yukarı
+   hizalanmazsa karonun tepesinde boşluk, dibinde menü kalıyor. */
+.masa-karo[data-karo="menu"] .masa-karo-govde {
+  justify-content: flex-start;
 }

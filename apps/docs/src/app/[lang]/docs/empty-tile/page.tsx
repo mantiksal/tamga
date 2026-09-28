@@ -1,4 +1,5 @@
 import { EmptyTile } from "tamga-ui";
+import { Plus } from "tamga-ui/icons";
 /* Vitrin için basit bir yer tutucu çizim: kit "ne çizildiğini" sormaz. */
 const box = ({ size }: { size: number; float: boolean }) => (
   <span
@@ -71,6 +72,19 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    urunEkle: "Ürün ekle",
+    seramik: "Seramik kupa",
+    havlu: "Pamuk havlu",
+    gorsel: "ürün görseli",
+    ekleP: (
+      <>
+        <code>icon</code> verildiğinde karo ızgaranın <strong>boş hücresi</strong> oluyor:
+        beklerken kesik kenarlı ve zeminsiz, imleç altında kesiksiz, yükselmiş ve kendi
+        yüzeyinde. Kesik kenar &quot;henüz içerik değil&quot; diyor, yükselme &quot;bu bir
+        kontrol&quot;. Yüksekliği komşu kartlardan alıyor · ızgaranın hücresi olduğu için kendi
+        boyunu dayatmıyor.
+      </>
+    ),
     related: "İlgili",
   },
   en: {
@@ -106,6 +120,19 @@ const T = {
       </>
     ),
     rules: "Rules",
+    urunEkle: "Add a product",
+    seramik: "Ceramic mug",
+    havlu: "Cotton towel",
+    gorsel: "product image",
+    ekleP: (
+      <>
+        With <code>icon</code>, the tile becomes the grid's <strong>empty cell</strong>: dashed
+        and groundless while it waits, solid, raised and on its own surface under the pointer.
+        The dashed edge says &quot;not content yet&quot;, the lift says &quot;this is a
+        control&quot;. It takes its height from the cards beside it · being a cell of the grid,
+        it does not impose its own.
+      </>
+    ),
     related: "Related",
   },
 };
@@ -129,6 +156,19 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         <EmptyTile art={box} tone={3} kicker={t.kicker} title={t.sample} />
       </Demo>
       <P>{t.line}</P>
+
+      <Demo labels={dict.demo} align="start" code={`<EmptyTile icon={Plus} title="${t.urunEkle}" onClick={add} />`}>
+        <div className="grid w-full gap-4 sm:grid-cols-3">
+          {[t.seramik, t.havlu].map((ad) => (
+            <span key={ad} className="tamga-card flex min-h-40 flex-col overflow-hidden">
+              <span className="docs-gorsel flex-1 border-b border-line" />
+              <span className="px-3 py-2.5 text-small font-bold">{ad}</span>
+            </span>
+          ))}
+          <EmptyTile icon={Plus} title={t.urunEkle} />
+        </div>
+      </Demo>
+      <P>{t.ekleP}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.which}</Note>

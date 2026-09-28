@@ -1,6 +1,8 @@
 import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { CodeBlock } from "@/components/kod";
 import { PageHead, H2, P, Note } from "@/components/prose";
-import { IkonIzgarasi } from "@/components/icons-grid";
+import { AdTablosu, AgirlikKartlari, BoyMerdiveni, IkonIzgarasi } from "@/components/icons-grid";
 import { findPage } from "@/content/nav";
 import counts from "@/content/counts.json";
 
@@ -190,6 +192,7 @@ const ICONS: Record<string, IconGlyph> = { order: OrderIcon };`,
 
 export default async function Page({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
+  const dict = await getDictionary(lang);
   const p = findPage("icons")!;
   const t = T[lang];
 
@@ -202,17 +205,20 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.adH}</H2>
       <P>{t.adP}</P>
+      <AdTablosu lang={lang} />
 
       <H2>{t.agirlikH}</H2>
       <P>{t.agirlikP}</P>
+      <AgirlikKartlari lang={lang} />
       <Note>{t.agirlikN}</Note>
 
       <H2>{t.boyutH}</H2>
       <P>{t.boyutP}</P>
+      <BoyMerdiveni lang={lang} />
 
       <H2>{t.disariH}</H2>
       <P>{t.disariP}</P>
-      <pre className="docs-code my-4">{t.disariK}</pre>
+      <CodeBlock code={t.disariK} file="icons.ts" dict={dict} />
       <Note>{t.disariN}</Note>
 
       <H2>{t.girenH}</H2>

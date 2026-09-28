@@ -1,4 +1,4 @@
-import { Rise, Surface } from "tamga-ui";
+import { RiseOrnek } from "./ornek";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -13,96 +13,117 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: Loc
 }
 
 /**
- * Sayfa metni, iki dilli.
- *
- * Neden burada ve sözlükte değil: bir doküman paragrafını JSON anahtarına
- * çevirmek onu okunamaz hâle getirir ve yapıyı metinden koparır. Sözlük ARAYÜZ
- * metinleri içindir ("Kopyala", "Önizleme"); sayfa içeriği sayfayla yaşar.
- *
- * İkisi aynı dosyada, çünkü asıl risk çeviri değil AYRIŞMA: Türkçesi
- * güncellenip İngilizcesi unutulursa iki farklı gerçek doğar. Yan yana
- * durduklarında bu unutuş görünür olur.
- *
- * ÖRNEKLERİN İÇİ DE ÇEVRİLİYOR — buton yazıları, yer tutucular, örnek veri.
- * Bir İngilizce sayfada "Kaydet" yazan bir buton, çevrilmemiş bir sayfadan
- * daha kötüdür: sayfa çevrilmiş görünür, ama ekrandaki şey değildir.
+ * Sayfa metni, iki dilli. Gerekçesi öteki sayfalarla aynı: sözlük ARAYÜZ
+ * metinleri içindir, sayfa içeriği sayfayla yaşar.
  */
 const T = {
   tr: {
     lead: (
       <>
-        Aşağıdan giren blok: sekiz piksel aşağıdan, sönükten. <strong>Bir hover etkisi
-        değil</strong>: adı yanıltıcı olabilir, bu bir <em>giriş</em> animasyonu.
+        Değişim göstergesi: sayı <strong>sıfırdan hedefe yükselerek</strong> geliyor, yanındaki
+        çip yönü ve işareti söylüyor. Bir panonun açılışında gözü sayıya götüren şey bu.
       </>
     ),
-    row: (n: number) => `Satır ${n}`,
-    delay: (
+    label: "Bugünkü ciro",
+    replay: "Tekrar oynat",
+    better: "+12,4%",
+    worse: "−3,1%",
+    flat: "0,0%",
+    bicim: (
       <>
-        <code>delay</code> bir listeyi sırayla açmak için. Basamak <strong>küçük</strong>
-        tutulmalı: otuz satırlık bir listede 60ms&apos;lik bir gecikme, sonuncuyu iki saniye sonra
-        gösterir ve bekleme hissi yaratır.
+        <code>format</code> sayının <strong>yolda</strong> nasıl yazıldığını da belirliyor,
+        yalnız sonunda değil: kit ne para birimi bilir ne binlik ayracı, ve biçimlenmemiş bir ara
+        değer (28460,318) tırmanışı okunmaz yapıyor.
+      </>
+    ),
+    yavas: (
+      <>
+        Tırmanış <strong>yavaşlayarak</strong> varıyor. Sabit hızla artan bir sayaç, sayı
+        durduğunda &ldquo;kesildi&rdquo; gibi duruyor; son çeyrekte yavaşlayan bir sayı{" "}
+        <em>vardı</em> diyor.
       </>
     ),
     motion: (
       <>
-        Azaltılmış harekette CSS animasyonu tamamen kapatıyor; blok olduğu yerde, tam
-        görünürlükte belirir. Bu bir zarafet kaybı değil: hareket duyarlılığı olan biri için
-        kayan bir sayfa okunamaz hâle gelir.
+        <strong>Azaltılmış harekette tırmanış yok:</strong> sayı hedefinde beliriyor. Değişen bir
+        sayı, hareket duyarlılığı olan biri için kayan bir sayfadan daha yorucu · göz onu okumaya
+        çalışıyor.
       </>
     ),
-    rel: (
+    delta: "Delta: değişimin kendisi",
+    deltaP: (
       <>
-        Veri beklenirken yer tutmak için <Xref to="skeleton">Skeleton</Xref>; bu, veri{" "}
-        <em>geldikten sonra</em> onu göstermek için.
-      </>
-    ),
-    gap: (
-      <>
-        <strong>Bu bileşen yeni bir şey icat etmiyor.</strong> Sınıfı kitte zaten vardı; eksik
-        olan, doğru işaretlemenin tek bir yerde durmasıydı. <code>.tamga-rise</code> kitte yıllarca
-        vardı ve işaretlemesini her çağıran kendi yazıyordu; bedeli görünmezdi ama gerçekti.
+        Çip <strong>dolu</strong>, yıkamalı değil: bir KPI&apos;ın yanında duran bu çip küçük ve
+        sönük bir yıkamayla görünmüyor. İyi haber <strong>vurgu renginde</strong>, yeşilde değil ·
+        yeşil bir DURUM rengi (&ldquo;çözüldü&rdquo;), oysa yükselen bir ciro bir durum değil bir
+        hareket. Kötü haber kırmızı kalıyor.{" "}
+        <code>better</code> zorunlu ve bir tercih değil bir <strong>anlam</strong>: artış ciroda
+        iyi, yanıt süresinde kötü. <strong>Duran değişim renksiz</strong> · sıfır ne iyi ne kötü.
       </>
     ),
     rules: "Kurallar",
     related: "İlgili",
+    rel: (
+      <>
+        Sayının kendisi için <Xref to="kpi">Kpi</Xref>; blokların aşağıdan girmesi için{" "}
+        <Xref to="reveal">Reveal</Xref>.
+      </>
+    ),
   },
   en: {
     lead: (
       <>
-        A block that enters from below: eight pixels up, from faint. <strong>Not a hover
-        effect</strong>: the name can mislead; this is an <em>entrance</em>.
+        The change indicator: the number arrives by <strong>climbing from zero to its target</strong>,
+        and the chip beside it says the direction and the sign. It is what takes the eye to the
+        number when a dashboard opens.
       </>
     ),
-    row: (n: number) => `Row ${n}`,
-    delay: (
+    label: "Revenue today",
+    replay: "Play again",
+    better: "+12.4%",
+    worse: "−3.1%",
+    flat: "0.0%",
+    bicim: (
       <>
-        <code>delay</code> is for opening a list in sequence. Keep the step <strong>small</strong>:
-        in a thirty-row list a 60ms delay shows the last one two seconds later, and that reads as
-        waiting.
+        <code>format</code> decides how the number is written <strong>on the way up</strong>, not
+        only at the end: the kit knows no currency and no thousands separator, and an unformatted
+        intermediate value (28460.318) makes the climb unreadable.
+      </>
+    ),
+    yavas: (
+      <>
+        The climb <strong>slows as it arrives</strong>. A counter rising at a constant speed looks
+        <em> cut off</em> when it stops; one that eases in the last quarter says it{" "}
+        <em>arrived</em>.
       </>
     ),
     motion: (
       <>
-        Under reduced motion the CSS turns the animation off entirely; the block appears in
-        place, at full opacity. That is not a loss of polish: for someone sensitive to motion, a
-        sliding page becomes unreadable.
+        <strong>With reduced motion there is no climb:</strong> the number appears at its target.
+        A changing number is harder on someone sensitive to motion than a sliding page · the eye
+        keeps trying to read it.
       </>
     ),
-    rel: (
+    delta: "Delta: the change itself",
+    deltaP: (
       <>
-        To hold the place while data is loading, <Xref to="skeleton">Skeleton</Xref>; this is for
-        showing it <em>after</em> it arrives.
-      </>
-    ),
-    gap: (
-      <>
-        <strong>This component invents nothing.</strong> The class was already in the kit; what
-        was missing was one place holding the correct markup. <code>.tamga-rise</code> was in the kit for
-        years and every caller wrote its markup by hand: the cost was invisible but real.
+        The chip is <strong>filled</strong>, not washed: it stands beside a KPI, it is small, and
+        a faint wash does not show. Good news takes the <strong>accent</strong>, not green · green
+        is a STATE colour (&ldquo;resolved&rdquo;), while a rising revenue is not a state but a
+        movement. Bad news stays red.{" "}
+        <code>better</code> is required and it is not a taste but a <strong>meaning</strong>: a
+        rise is good for revenue and bad for response time. <strong>A flat change has no
+        colour</strong> · zero is neither good nor bad.
       </>
     ),
     rules: "Rules",
     related: "Related",
+    rel: (
+      <>
+        For the number itself, <Xref to="kpi">Kpi</Xref>; for blocks entering from below,{" "}
+        <Xref to="reveal">Reveal</Xref>.
+      </>
+    ),
   },
 };
 
@@ -115,25 +136,30 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
-      <Demo labels={dict.demo} align="start" code={`{rows.map((r, i) => (
-  <Rise key={r.id} delay={i * 40}>…</Rise>
-))}`}>
-        <div className="flex w-full flex-col gap-2">
-          {[0, 1, 2, 3].map((i) => (
-            <Rise key={i} delay={i * 60}>
-              <Surface className="p-3 text-body text-ink-soft">{t.row(i + 1)}</Surface>
-            </Rise>
-          ))}
-        </div>
+      <Demo yuzey labels={dict.demo} align="start" grid={false} code={`<Rise value={28460} format={(n) => \`₺\${Math.round(n).toLocaleString("tr-TR")}\`} />
+
+<Delta value="${t.better}" better />
+<Delta value="${t.worse}" better={false} />`}>
+        <RiseOrnek
+          label={t.label}
+          replay={t.replay}
+          better={t.better}
+          worse={t.worse}
+          flat={t.flat}
+        />
       </Demo>
-      <P>{t.delay}</P>
+      <P>{t.bicim}</P>
+      <P>{t.yavas}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.motion}</Note>
-      <Note>{t.gap}</Note>
 
       <H2>Props</H2>
-      <Props of="Rise" lang={lang} />
+      <Props of="Rise" lang={lang} etiketli />
+
+      <H2>{t.delta}</H2>
+      <P>{t.deltaP}</P>
+      <Props of="Delta" lang={lang} etiketli />
 
       <H2>{t.related}</H2>
       <P>{t.rel}</P>

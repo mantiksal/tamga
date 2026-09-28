@@ -35,6 +35,14 @@ const T = {
         &quot;Buradasın&quot; bir eylem değildir.
       </>
     ),
+    boy: (
+      <>
+        İki boy: <code>base</code> (varsayılan) bir ekranın içinde tek başına duran şerit,{" "}
+        <code>sm</code> ise bir <strong>araç çubuğunda</strong> duranı · bir kart başlığı ya da
+        bu sayfadaki örnek kutusunun şeridi. Sebebi ölçü: taban boy 13,5 pikselle çiziliyor ve
+        şerit, içinde durduğu satırdan uzun kalıyor.
+      </>
+    ),
     rules: "Kurallar",
     notTabs: (
       <>
@@ -56,6 +64,14 @@ const T = {
       <>
         <strong>Seated</strong> physics: the selected option does not lift, it settles.
         &quot;You are here&quot; is not an action.
+      </>
+    ),
+    boy: (
+      <>
+        Two sizes: <code>base</code> (the default) for a strip standing on its own inside a
+        screen, <code>sm</code> for one in a <strong>toolbar</strong>: a card header, or the
+        example box on this page. The reason is measurement: the base size is drawn at 13.5px
+        and the strip ends up taller than the row it sits in.
       </>
     ),
     rules: "Rules",
@@ -94,6 +110,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         <SegmentedDemo lang={lang} />
       </Demo>
       <P>{t.seated}</P>
+      <P>{t.boy}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.notTabs}</Note>

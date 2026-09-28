@@ -1,4 +1,6 @@
 import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { CodeBlock } from "@/components/kod";
 import { PageHead, H2, P, Note } from "@/components/prose";
 import { Xref } from "@/components/xref";
 import { Utilityler } from "@/components/utilities";
@@ -102,6 +104,7 @@ const T = {
 
 export default async function Page({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
+  const dict = await getDictionary(lang);
   const p = findPage("tailwind")!;
   const t = T[lang];
 
@@ -112,7 +115,9 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.kurulumH}</H2>
       <P>{t.kurulumP}</P>
-      <pre className="docs-code my-4">{KURULUM}</pre>
+      {/* Dosya adı şeridi ve kopyala düğmesiyle: üç satırın nereye gideceği
+          kodun kendisi kadar önemli, ve çıplak bir `pre` onu söylemiyordu. */}
+      <CodeBlock code={KURULUM} file="src/app/globals.css" dict={dict} />
 
       <H2>{t.kuralH}</H2>
       <P>{t.kuralP}</P>

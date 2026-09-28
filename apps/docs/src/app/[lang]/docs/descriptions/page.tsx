@@ -70,6 +70,24 @@ const T = {
         <code>className</code> ile eziyordu; ezilen bir varsayılan, varsayılan değildir.
       </>
     ),
+    customer: "Müşteri",
+    siparisNo: "Sipariş no",
+    tarihDeger: "24 Eylül 2026, 14:02",
+    odeme: "Ödeme",
+    odemeDeger: "Kredi kartı · **** 4418",
+    kargo: "Kargo",
+    kargoDeger: "Yurtiçi Kargo · 1–2 gün",
+    takipNo: "Takip no",
+    araToplam: "Ara toplam",
+    toplam: "Toplam",
+    bolme: (
+      <>
+        <code>split</code> listeyi <strong>sığdığı kadar sütuna</strong> bölüyor: sayfa
+        genişliğinde altı satırlık bir künye sağ yarıyı boş bırakıyor, bölününce uzun bir liste
+        değil iki kısa liste okunuyor. Her sütun kendi etiket sütununu koruyor, yani değerler
+        yine hizalı.
+      </>
+    ),
     rules: "Kurallar",
     related: "İlgili",
     rel: (
@@ -122,6 +140,24 @@ const T = {
         are not read, they are matched.
       </>
     ),
+    customer: "Customer",
+    siparisNo: "Order no",
+    tarihDeger: "24 September 2026, 14:02",
+    odeme: "Payment",
+    odemeDeger: "Credit card · **** 4418",
+    kargo: "Shipping",
+    kargoDeger: "Yurtiçi Kargo · 1–2 days",
+    takipNo: "Tracking no",
+    araToplam: "Subtotal",
+    toplam: "Total",
+    bolme: (
+      <>
+        <code>split</code> breaks the list into <strong>as many columns as fit</strong>: at page
+        width a six-row list leaves the right half empty, and split it reads as two short lists
+        rather than one long one. Each column keeps its own label column, so the values still
+        line up.
+      </>
+    ),
     rules: "Rules",
     related: "Related",
     rel: (
@@ -149,18 +185,41 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
   ]}
 />`}>
         <div className="w-full">
+          {/* Altı satır ve `split`: sayfa genişliğinde iki sütun, dar ekranda
+              tek · referansın künyesi de böyle bölünüyor. */}
+          <Descriptions
+            split
+            items={[
+              { term: t.siparisNo, value: "#TG-10482", mono: true },
+              { term: t.date, value: t.tarihDeger },
+              { term: t.customer, value: "Mert Aksoy" },
+              { term: t.odeme, value: t.odemeDeger },
+              { term: t.kargo, value: t.kargoDeger },
+              { term: t.takipNo, value: "YK-8830-2291-TR", mono: true },
+              { term: t.araToplam, value: "₺1.791,00", mono: true },
+              { term: t.toplam, value: "₺1.840,00", mono: true },
+            ]}
+          />
+        </div>
+      </Demo>
+      <P>{t.bolme}</P>
+      <P>{t.mono}</P>
+
+      <Demo labels={dict.demo} align="start" code={`<Descriptions
+  items={[
+    { term: "${t.state}", value: <StatusChip label="${t.shipped}" state="caution" dot /> },
+    { term: "${t.addr}", value: "${t.addrValue}" },
+  ]}
+/>`}>
+        <div className="w-full">
           <Descriptions
             items={[
-              { term: t.order, value: "ORD-4471", mono: true },
-              { term: t.date, value: "15.04.2026", mono: true },
               { term: t.state, value: <StatusChip label={t.shipped} state="caution" dot /> },
-              { term: t.total, value: "1.249,90 ₺", mono: true },
               { term: t.addr, value: t.addrValue },
             ]}
           />
         </div>
       </Demo>
-      <P>{t.mono}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.dl}</Note>

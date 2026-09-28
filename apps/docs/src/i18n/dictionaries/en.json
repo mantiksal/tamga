@@ -4,7 +4,14 @@
     "docs": "Documentation menu",
     "toc": "On this page",
     "menuAc": "Open menu",
-    "menuKapat": "Close menu"
+    "menuKapat": "Close menu",
+    "search": "Search the docs",
+    "searchAria": "Search documentation pages",
+    "searchEmpty": "No results",
+    "prev": "Previous",
+    "next": "Next",
+    "crumbRoot": "Docs",
+    "example": "Example"
   },
   "chrome": {
     "theme": {
@@ -24,6 +31,7 @@
     "copy": "Copy",
     "copied": "Copied",
     "copyAria": "Copy code",
-    "controls": "Example controls"
+    "controls": "Example controls",
+    "try": "Try it"
   }
 }

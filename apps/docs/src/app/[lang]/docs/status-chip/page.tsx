@@ -1,4 +1,6 @@
 import { StatusChip, LiveScope } from "tamga-ui";
+import type { Tone } from "tamga-ui";
+import { SiparisCipleri } from "./ornek";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -54,10 +56,38 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    siparisH: "Bir siparişin yolu",
+    kilikP: (
+      <>
+        Üç kılık, üç yer: <code>wash</code> kenarsız ve varsayılan · otuz satırlık bir tabloda
+        her çipe kenar koymak durum sütununu <strong>kutu</strong> sütununa çeviriyor.{" "}
+        <code>outline</code> yüzeyin üstünde tonu bir çizgi olarak taşıyor, tek başına duran çip
+        için. <code>solid</code> tonun plakası ve kendi mürekkebi · satırın hikâyesini bitiren{" "}
+        <strong>son durum</strong> için, ve Yasa 2 ile (&quot;dolgu eylemdir&quot;) gerilimde
+        olduğu için isteğe bağlı.
+      </>
+    ),
+    siparisP: (
+      <>
+        Yedi durum, altı rol: ürünün sözlüğü kitin rollerine <strong>eşleniyor</strong>, ve
+        eşleme ürün tarafında duruyor. İkon rengi tek başına taşımıyor · &quot;kargoda&quot; ile
+        &quot;teslim edildi&quot; aynı mavinin iki tonuysa, ayıran şey kamyon ile onay işareti
+        olmalı.
+      </>
+    ),
+    siparis: [
+      { state: "neutral", label: "Yeni", look: "outline" },
+      { state: "caution", label: "Ödeme bekliyor" },
+      { state: "info", label: "Hazırlanıyor", look: "outline" },
+      { state: "info", label: "Kargoda" },
+      { state: "positive", label: "Teslim edildi", look: "solid" },
+      { state: "danger", label: "İade", look: "solid" },
+      { state: "neutral", label: "İptal" },
+    ] as { state: Tone; label: string; look?: "wash" | "outline" | "solid" }[],
     roles: (
       <>
-        <strong>Roller senin sözlüğün değil.</strong> Kit dört rol bilir:{" "}
-        <code>neutral · positive · caution · danger</code>. Senin ürünün durumları
+        <strong>Roller senin sözlüğün değil.</strong> Kit altı rol bilir:{" "}
+        <code>neutral · positive · caution · elevated · danger · info</code>. Senin ürünün durumları
         (<em>teslim edildi · kargoda · iptal</em>) bu rollere kendi tarafında eşlenir: tek bir
         dosyada, tek bir tabloyla. Kit hangi alanda çalıştığını bilmez ve bilmemeli.
       </>
@@ -97,10 +127,38 @@ const T = {
       </>
     ),
     rules: "Rules",
+    siparisH: "The path of an order",
+    kilikP: (
+      <>
+        Three looks, three places: <code>wash</code> has no edge and is the default · in a table
+        of thirty rows, an edge on every chip turns the status column into a column of{" "}
+        <strong>boxes</strong>. <code>outline</code> carries the tone as a line on the surface,
+        for a chip standing alone. <code>solid</code> is the tone&apos;s plate with its own ink ·
+        for the <strong>terminal state</strong> that ends the row&apos;s story, and opt-in
+        because it stands in tension with Law 2 (&quot;a fill means action&quot;).
+      </>
+    ),
+    siparisP: (
+      <>
+        Seven states, six roles: the product&apos;s vocabulary is <strong>mapped</strong> onto
+        the kit&apos;s roles, and the map lives on the product&apos;s side. The glyph is not
+        decoration · if &quot;shipping&quot; and &quot;delivered&quot; are two shades of the
+        same blue, what tells them apart has to be the truck and the check.
+      </>
+    ),
+    siparis: [
+      { state: "neutral", label: "New", look: "outline" },
+      { state: "caution", label: "Awaiting payment" },
+      { state: "info", label: "Preparing", look: "outline" },
+      { state: "info", label: "Shipping" },
+      { state: "positive", label: "Delivered", look: "solid" },
+      { state: "danger", label: "Returned", look: "solid" },
+      { state: "neutral", label: "Cancelled" },
+    ] as { state: Tone; label: string; look?: "wash" | "outline" | "solid" }[],
     roles: (
       <>
-        <strong>The roles are not your vocabulary.</strong> The kit knows four:{" "}
-        <code>neutral · positive · caution · danger</code>. Your product&apos;s states
+        <strong>The roles are not your vocabulary.</strong> The kit knows six:{" "}
+        <code>neutral · positive · caution · elevated · danger · info</code>. Your product&apos;s states
         (<em>delivered · shipping · cancelled</em>) map onto them on your side: one file, one
         table. The kit does not know what field it is working in, and it must not.
       </>
@@ -145,6 +203,17 @@ export const ORDER_TONE: Record<OrderState, Tone> = {
   cancelled: "danger",
   draft:     "neutral",
 };`}</pre>
+
+      <H2>{t.siparisH}</H2>
+      <Demo
+        labels={dict.demo}
+        code={`<StatusChip label="${t.siparis[3]?.label}" state="info" icon={Truck} />
+<StatusChip label="${t.siparis[4]?.label}" state="positive" icon={Check} />`}
+      >
+        <SiparisCipleri durumlar={t.siparis} />
+      </Demo>
+      <P>{t.siparisP}</P>
+      <P>{t.kilikP}</P>
 
       <H2>{t.noDot}</H2>
       <P>{t.noDotWhy}</P>

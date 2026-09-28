@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  Alert,
   Avatar,
   Button,
   Card,
@@ -20,15 +21,16 @@ import {
   Pagination,
   PasswordInput,
   Progress,
+  Segmented,
   Select,
   SelectAll,
   SelectRow,
   SortHeader,
-  Sparkline,
   StatusChip,
   Switch,
   Table,
   Textarea,
+  TimelineStrip,
 } from "tamga-ui";
 import { CountRow, SaveBar } from "tamga-ui/blocks";
 import {
@@ -277,12 +279,25 @@ const S = {
       ["3 Ağustos", "Planlı bakım", "neutral", "Tamamlandı"],
     ] as const,
     calismaSuresi: "Çalışma süresi",
+    doksanGunOnce: "90 gün önce",
+    bugun: "Bugün",
+    gunDurumu: (n: number, ton: string) =>
+      `${n}. gün: ${ton === "positive" ? "kesintisiz" : ton === "caution" ? "yavaş" : "kesinti"}`,
+    olayDurumu: "Durum",
+    sifremiUnuttum: "Şifremi unuttum",
 
     /* dört durum: etiketler durumun ADI, cümlesi değil */
-    durumYukleniyor: "iskelet satırlar",
-    durumBos: "ekranın kendi cümlesi",
-    durumHata: "code · request_id",
-    durumHazir: "çağıranın tablosu",
+    durumYukleniyor: "Yükleniyor",
+    durumBos: "Boş",
+    durumHata: "Hata",
+    durumHazir: "Hazır",
+    durumSecici: "Ekran durumu",
+    durumAciklama: {
+      loading: "İskelet satırlar: tablonun kendi ölçüsünde, çünkü yer tutucu yerini tuttuğu şeyin boyunda durur.",
+      empty: "Ekranın kendi cümlesi ve tek bir çıkış yolu · boş bir liste bir hata değil.",
+      error: "Kod ve istek kimliği: destek için yazılacak tek şey bu satır.",
+      ready: "Çağıranın tablosu. Şablon onu ÇİZMİYOR, yerini veriyor.",
+    },
   },
   en: {
     hata: { title: "Could not load", body: "This section could not be fetched.", retry: "Try again" },
@@ -500,12 +515,28 @@ const S = {
       ["27 August", "Short outage at the payment provider", "caution", "Resolved"],
       ["3 August", "Planned maintenance", "neutral", "Completed"],
     ] as const,
-    calismaSuresi: "Çalışma süresi",
+    /* "Çalışma süresi" yazıyordu: İngilizce sözlükte Türkçe metin. Karşılığı
+       nötr seçiliyor: izleme ürününün alan sözlüğü `check-names` ile kitin
+       deposunun dışında tutuluyor. */
+    calismaSuresi: "Availability",
+    doksanGunOnce: "90 days ago",
+    bugun: "Today",
+    gunDurumu: (n: number, ton: string) =>
+      `Day ${n}: ${ton === "positive" ? "no interruption" : ton === "caution" ? "slow" : "interrupted"}`,
+    olayDurumu: "Status",
+    sifremiUnuttum: "Forgot password",
 
-    durumYukleniyor: "skeleton rows",
-    durumBos: "the screen's own sentence",
-    durumHata: "code · request_id",
-    durumHazir: "the caller's table",
+    durumYukleniyor: "Loading",
+    durumBos: "Empty",
+    durumHata: "Error",
+    durumHazir: "Ready",
+    durumSecici: "Screen state",
+    durumAciklama: {
+      loading: "Skeleton rows at the table's own measure: a placeholder stands in the size of the thing it stands for.",
+      empty: "The screen's own sentence and a single way out · an empty list is not an error.",
+      error: "The code and the request id: this line is the only thing worth writing to support.",
+      ready: "The caller's table. The template does not DRAW it, it gives it a place.",
+    },
   },
 } as const;
 
@@ -699,13 +730,16 @@ function KullaniciTablosu({ lang }: { lang: Dil }) {
   );
 }
 
+/** Bir liste ekranının dört hâli · `ListTemplate`in `state`i. */
+export type EkranDurumu = "ready" | "loading" | "empty" | "error";
+
 export function KullaniciListesi({
   lang,
   durum,
   cercevesiz,
 }: {
   lang: Dil;
-  durum?: "ready" | "loading" | "empty" | "error";
+  durum?: EkranDurumu;
   cercevesiz?: boolean;
 }) {
   const s = S[lang];
@@ -775,28 +809,40 @@ export function KullaniciListesi({
 }
 
 /** Dört durum yan yana; dördü de kendi çerçevesinde, dışarıda çerçeve yok. */
+/**
+ * DÖRT DURUM TEK EKRANDA, dört ekran yan yana DEĞİL · ve bu bir düzeltme.
+ *
+ * Dördü bir ızgaraya dizilmişti ve her biri kendi kutusunda kırpılıyordu:
+ * dört dev "Kullanıcılar" başlığı, altlarında birkaç satırlık parça. Bir
+ * durumu ötekiyle karşılaştırmak için ikisini de GÖRMEK gerekiyor, ve
+ * kırpılmış dört ekran hiçbirini göstermiyor. Segment aynı ekranı çeviriyor:
+ * başlık, filtreler ve şerit sabit kalıyor, yalnız gövde değişiyor · zaten
+ * şablonun iddiası da bu.
+ */
 export function Durumlar({ lang }: { lang: Dil }) {
   const s = S[lang];
+  const [durum, setDurum] = useState<EkranDurumu>("loading");
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      {(
-        [
-          ["loading", s.durumYukleniyor],
-          ["empty", s.durumBos],
-          ["error", s.durumHata],
-          ["ready", s.durumHazir],
-        ] as const
-      ).map(([d, ad]) => (
-        <figure key={d} className="m-0 flex min-w-0 flex-col gap-2">
-          <figcaption className="flex items-baseline gap-2">
-            <code className="font-mono text-caption text-ink">{d}</code>
-            <span className="text-small text-ink-faint">{ad}</span>
-          </figcaption>
-          <div className="tamga-card h-96 overflow-hidden">
-            <KullaniciListesi lang={lang} durum={d} cercevesiz />
-          </div>
-        </figure>
-      ))}
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <Segmented
+          size="sm"
+          label={s.durumSecici}
+          value={durum}
+          onChange={setDurum}
+          options={[
+            { value: "loading" as const, label: s.durumYukleniyor },
+            { value: "error" as const, label: s.durumHata },
+            { value: "empty" as const, label: s.durumBos },
+            { value: "ready" as const, label: s.durumHazir },
+          ]}
+        />
+        <code className="font-mono text-caption text-ink-faint">state=&quot;{durum}&quot;</code>
+      </div>
+      {/* Seçilen durumun ne anlattığı bir cümleyle: dört kelimelik bir etiket
+          ("iskelet satırlar") neyin neden öyle olduğunu söylemiyor. */}
+      <p className="m-0 text-small text-ink-soft">{s.durumAciklama[durum]}</p>
+      <KullaniciListesi lang={lang} durum={durum} />
     </div>
   );
 }
@@ -1300,9 +1346,19 @@ export function Giris({ lang }: { lang: Dil }) {
         <Field label={s.eposta} htmlFor="gr-eposta">
           <Input id="gr-eposta" full type="email" defaultValue="ada@ornek.com" />
         </Field>
-        <Field label={s.parola} htmlFor="gr-parola">
-          <PasswordInput labels={{ show: s.goster, hide: s.gizle }} />
-        </Field>
+        <span className="flex flex-col gap-1.5">
+          <Field label={s.parola} htmlFor="gr-parola">
+            <PasswordInput labels={{ show: s.goster, hide: s.gizle }} />
+          </Field>
+          {/* "Şifremi unuttum" PAROLA ALANINA BİTİŞİK, formun dibinde değil:
+              aranan an, alanın boş kaldığı an · aşağıya konunca kullanıcı önce
+              yanlış parolayı deniyor. Alanın KENDİ etiket satırına giremiyor
+              çünkü `Field`in oradaki yeri (`note`) bir sözcük alıyor, bir
+              düğüm değil. */}
+          <a className="tamga-link self-end text-small" href="#sifre">
+            {s.sifremiUnuttum}
+          </a>
+        </span>
         {/* Anahtar DEĞİL onay kutusu: `Switch`in etiketi yalnız erişilebilir
             ad, ekranda metin taşımıyor — formun ortasında adsız bir topuz
             kalıyordu. Bir onay kutusunun etiketi görünür. */}
@@ -1364,6 +1420,18 @@ export function Kayit({ lang }: { lang: Dil }) {
 
 /* --------------------------------------------------------------- kamusal -- */
 
+/**
+ * Bir servisin son doksan günü.
+ *
+ * VERİ UYDURULMUYOR, TÜRETİLİYOR: servisin bugünkü tonu neyse geçmişinde de o
+ * tonda birkaç gün var, gerisi kesintisiz. Rastgele olsaydı her çizimde başka
+ * bir geçmiş çıkardı ve ekran görüntüsü alınamazdı.
+ */
+function gunler(ton: Ton): Ton[] {
+  const kotu = ton === "positive" ? [31] : ton === "caution" ? [12, 13, 47] : [4, 5, 6, 40];
+  return Array.from({ length: 90 }, (_, i) => (kotu.includes(i) ? ton : "positive"));
+}
+
 export function DurumSayfasi({ lang }: { lang: Dil }) {
   const s = S[lang];
   return (
@@ -1376,27 +1444,42 @@ export function DurumSayfasi({ lang }: { lang: Dil }) {
       labels={ortak(s)}
     >
       <div className="flex flex-col gap-4">
+        {/* GENEL DURUM BİR ŞERİT, bir çip değil · ve bu bir düzeltme. Bir durum
+            sayfasına gelen kişinin TEK sorusu var: "çalışıyor mu". Cevabı bir
+            kartın başlığına iliştirilmiş küçük bir çip olarak vermek, o soruyu
+            aramaya çeviriyor. Alert tonun zeminini ve glifini birlikte
+            taşıyor: uzaktan bakınca bile okunuyor. */}
+        <Alert state="positive" title={s.hepsiCalisiyor}>
+          {s.kamusalAlt}
+        </Alert>
+
         <Card>
           <CardHead>
-            <span className="flex items-center gap-2">
-              <StatusChip label={s.hepsiCalisiyor} state="positive" live />
-            </span>
+            <h3 className="text-subhead font-semibold text-ink">{s.calismaSuresi}</h3>
           </CardHead>
           {s.servisler.map(([ad, ton, durum, oran]) => (
-            <ListRow key={ad}>
-              <span className="min-w-0 flex-1 truncate text-ink">{ad}</span>
-              <span className="hidden w-40 sm:block">
-                <Sparkline
-                  values={[100, 100, 99.9, 100, 99.4, 100, 100]}
-                  tone={ton as Ton}
-                  height={18}
-                />
+            /* SERVİS SATIRI ALT ALTA İKİ PARÇA: üstte ad ve durum, altta 90
+               günlük şerit. Yan yana sıkıştırıldığında şerit kırk pikselde
+               kalıyor ve böyle bir şeridin tek işi GÜN GÜN okunmak. */
+            <div key={ad} className="tamga-list-row flex-col items-stretch gap-2 py-3">
+              <span className="flex items-center gap-3">
+                <span className="min-w-0 flex-1 truncate font-medium text-ink">{ad}</span>
+                <span className="font-mono text-small tabular-nums text-ink-faint">
+                  {oran.toFixed(2)}%
+                </span>
+                <StatusChip label={durum} state={ton as Ton} />
               </span>
-              <span className="w-16 text-right tabular-nums text-ink-faint">
-                {oran.toFixed(2)}%
-              </span>
-              <StatusChip label={durum} state={ton as Ton} />
-            </ListRow>
+              {/* DOKSAN KOVA, BİR ÇİZGİ DEĞİL · ve sparkline burada yanlış
+                  araçtı: bir çizgi grafik "kaç" sorusunu cevaplıyor, oysa bir
+                  durum sayfasının sorusu "hangi GÜN". Kova, tıklanabilir ve
+                  tek tek okunabilir bir gün. */}
+              <TimelineStrip
+                data={gunler(ton as Ton)}
+                height={22}
+                labels={[s.doksanGunOnce, s.bugun]}
+                describe={(i, t) => s.gunDurumu(i + 1, t)}
+              />
+            </div>
           ))}
         </Card>
 
@@ -1404,12 +1487,17 @@ export function DurumSayfasi({ lang }: { lang: Dil }) {
           <CardHead>
             <h3 className="text-subhead font-semibold text-ink">{s.gecmis}</h3>
           </CardHead>
+          {/* OLAY SATIRI DA İKİ PARÇA: bir olayın başlığı bir tabloda değil bir
+              GÜNLÜKTE duruyor · tarih üstte, cümle altta, sonuç sağda. */}
           {s.olaylar.map(([tarih, olay, ton, sonuc]) => (
-            <ListRow key={olay}>
-              <span className="w-28 shrink-0 text-ink-faint">{tarih}</span>
-              <span className="min-w-0 flex-1 truncate text-ink">{olay}</span>
-              <StatusChip label={sonuc} state={ton as Ton} />
-            </ListRow>
+            <div key={olay} className="tamga-list-row flex-col items-stretch gap-1 py-3">
+              <span className="flex items-center gap-3">
+                <span className="font-mono text-caption text-ink-faint">{tarih}</span>
+                <span className="flex-1" />
+                <StatusChip label={sonuc} state={ton as Ton} />
+              </span>
+              <span className="text-ink">{olay}</span>
+            </div>
           ))}
         </Card>
       </div>

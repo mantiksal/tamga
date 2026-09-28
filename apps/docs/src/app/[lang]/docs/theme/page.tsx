@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { PageHead, H2, P, Note } from "@/components/prose";
 import { findPage } from "@/content/nav";
+import { KatmanListesi, KontrastTablosu, MarkaKutusu, ParityKartlari, TemaAlani } from "./ornek";
 import counts from "@/content/counts.json";
 import type { Locale } from "@/i18n/config";
 
@@ -42,6 +43,45 @@ const T = {
         Bir ürün token&apos;ı açık temada ezip koyuda unutursa, o token koyu temada kitin
         varsayılanına düşer ve marka yarım kalır. <code>check-token-parity</code> guard&apos;ı bunu
         CI&apos;da yakalar.
+      </>
+    ),
+    marka: {
+      accentLabel: "Vurgu rengi",
+      radiusLabel: "Köşe yarıçapı",
+      names: ["pembe", "mavi", "yeşil", "mor", "sarı"],
+      radiusNotes: { 4: "kurumsal: daha keskin", 8: "kitin varsayılanı", 12: "perakende: daha yumuşak" },
+      product: "urun",
+      title: "Mağaza",
+      live: "Yayında",
+      field: "Fiyat",
+      toggle: "Stok uyarısı",
+      cancel: "Vazgeç",
+      save: "Kaydet",
+    },
+    katman: {
+      names: ["Ham rampa", "Semantik", "Bileşen"] as [string, string, string],
+      who: ["ürün yazar", "kit bağlar", "hiç değişmez"] as [string, string, string],
+    },
+    parity: { ok: "İki temada da tanımlı", bad: "Koyu tema unutulmuş" },
+    kapi: {
+      measure: "Ölçüm",
+      rule: "Kural",
+      value: "Değer",
+      result: "Sonuç",
+      pass: "geçti",
+      fail: "kaldı",
+      rows: [
+        "Accent üstünde metin",
+        "Zeminde accent metin",
+        "Kenar / zemin",
+        "Kural çizgisi / zemin",
+      ] as [string, string, string, string],
+    },
+    kapiIpucu: (
+      <>
+        Yukarıdaki örnekten accent&apos;i değiştir; ölçümler seçilen renkle yeniden hesaplanır.
+        Sarı, kapıdan <strong>geçmeyen</strong> renk örneği. Sayfadaki dört satır açıklayıcı:
+        gerçek kapı her tema için 44 ölçüm yapıyor.
       </>
     ),
     s4: "Kontrast kapısı",
@@ -90,6 +130,45 @@ const T = {
         <code>check-token-parity</code> guard catches this in CI.
       </>
     ),
+    marka: {
+      accentLabel: "Accent colour",
+      radiusLabel: "Corner radius",
+      names: ["pink", "blue", "green", "purple", "yellow"],
+      radiusNotes: { 4: "corporate: sharper", 8: "the kit default", 12: "retail: softer" },
+      product: "product",
+      title: "Store",
+      live: "Live",
+      field: "Price",
+      toggle: "Stock alert",
+      cancel: "Cancel",
+      save: "Save",
+    },
+    katman: {
+      names: ["Raw ramp", "Semantic", "Component"] as [string, string, string],
+      who: ["product writes", "kit wires", "never changes"] as [string, string, string],
+    },
+    parity: { ok: "Defined in both themes", bad: "Dark theme forgotten" },
+    kapi: {
+      measure: "Measurement",
+      rule: "Rule",
+      value: "Value",
+      result: "Result",
+      pass: "pass",
+      fail: "fail",
+      rows: [
+        "Text on accent",
+        "Accent text on ground",
+        "Edge / ground",
+        "Rule line / ground",
+      ] as [string, string, string, string],
+    },
+    kapiIpucu: (
+      <>
+        Change the accent in the example above; the measurements recompute with the chosen
+        colour. Yellow is a colour that <strong>fails</strong> the gate. The four rows here are
+        illustrative: the real gate takes 44 measurements per theme.
+      </>
+    ),
     s4: "The contrast gate",
     p4: (
       <>
@@ -100,7 +179,11 @@ const T = {
       </>
     ),
   },
-} satisfies Record<Locale, Record<string, ReactNode>>;
+/* `satisfies` kalktı: sözlük artık yalnız metin değil, örneklerin etiket
+   demetlerini de taşıyor (renk adları, ızgara başlıkları). Bir `ReactNode`
+   kısıtı onları reddediyordu; diller arası parite `check-docs-i18n`de zaten
+   ölçülüyor. */
+};
 
 export default async function Page({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
@@ -112,30 +195,35 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
 
-      <H2>{t.s1}</H2>
-      <pre className="docs-code my-4">{`/* <urun>/src/globals.css */
-@import "tailwindcss";
-@import "tamga-ui/styles.css";
-@source "../../node_modules/tamga-ui/dist";
+      {/* DÖRT BÖLÜM TEK SEÇİMİ PAYLAŞIYOR: yukarıdan rengi değiştirince aşağıdaki
+          kontrast tablosu da yeniden hesaplanıyor, ve sayfanın iddiası bu. */}
+      <TemaAlani>
+        <H2>{t.s1}</H2>
+        <div className="my-4">
+          <MarkaKutusu labels={t.marka} />
+        </div>
+        <P>{t.p1}</P>
 
-:root {
-  --color-accent: #d6336c;   /* ${lang === "tr" ? "pembe" : "pink"} */
-  --radius: 12px;            /* ${lang === "tr" ? "perakende: daha yumuşak" : "retail: softer" } */
-}`}</pre>
-      <P>{t.p1}</P>
+        <H2>{t.s2}</H2>
+        <div className="my-4">
+          <KatmanListesi labels={t.katman} />
+        </div>
+        <P>{t.p2}</P>
 
-      <H2>{t.s2}</H2>
-      <pre className="docs-code my-4">{`① ${lang === "tr" ? "ham rampa   " : "raw ramp    "} --color-brand-500: #2069c9
-② ${lang === "tr" ? "semantik    " : "semantic    "} --color-accent: var(--color-brand-500)
-③ ${lang === "tr" ? "bileşen     " : "component   "} .tamga-btn-primary { background: var(--color-accent) }`}</pre>
-      <P>{t.p2}</P>
+        <H2>{t.s3}</H2>
+        <P>{t.p3}</P>
+        <div className="my-4">
+          <ParityKartlari labels={t.parity} />
+        </div>
+        <Note>{t.note}</Note>
 
-      <H2>{t.s3}</H2>
-      <P>{t.p3}</P>
-      <Note>{t.note}</Note>
-
-      <H2>{t.s4}</H2>
-      <P>{t.p4}</P>
+        <H2>{t.s4}</H2>
+        <P>{t.p4}</P>
+        <div className="my-4">
+          <KontrastTablosu labels={t.kapi} />
+        </div>
+        <P>{t.kapiIpucu}</P>
+      </TemaAlani>
     </>
   );
 }

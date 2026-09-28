@@ -40,6 +40,20 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    veya: "VEYA",
+    siparisler: "Siparişler",
+    urunler: "Ürünler",
+    musteriler: "Müşteriler",
+    bicimler: (
+      <>
+        Dört yatay biçim: <code>plain</code> iki satır arasındaki sessiz kural, <code>dashed</code>{" "}
+        <strong>geçici</strong> olan (tahmin satırı, taslağın sonu), <code>strong</code> iki{" "}
+        <strong>bölümü</strong> ayıran · bu yüzden çizgi rengini değil <strong>kenar</strong>{" "}
+        rengini alıyor, ve <code>label</code> ortasında bir sözcük taşıyan. Sözcük ayracı bir
+        kesinti değil bir <strong>seçim</strong> yapıyor; bir çizginin üstüne sözcük koymanın
+        başka sebebi yok.
+      </>
+    ),
     grouping: (
       <>
         Bir ayraç <strong>gruplandırma</strong> anlamına gelir, dekorasyon değil. İki şey arasına
@@ -67,6 +81,21 @@ const T = {
       </>
     ),
     rules: "Rules",
+    veya: "OR",
+    siparisler: "Orders",
+    urunler: "Products",
+    musteriler: "Customers",
+    bicimler: (
+      <>
+        Four horizontal looks: <code>plain</code>, the quiet rule between two rows;{" "}
+        <code>dashed</code>, the <strong>provisional</strong> one (a forecast row, the end of a
+        draft); <code>strong</code>, the one that separates two <strong>sections</strong> and
+        therefore takes the <strong>edge</strong> colour rather than the line colour; and{" "}
+        <code>label</code>, which carries a word in the middle. The word turns the separator
+        into a <strong>choice</strong> rather than a break, which is the only reason to put one
+        on a line.
+      </>
+    ),
     grouping: (
       <>
         A separator means <strong>grouping</strong>, not decoration. Putting a line between two
@@ -93,16 +122,25 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <Demo labels={dict.demo} code={`<Separator />
+<Separator look="dashed" />
+<Separator look="strong" />
+<Separator label="${t.veya}" />
 <Separator vertical />`}>
-        <div className="flex w-full max-w-80 flex-col gap-4">
-          <span className="text-[length:var(--docs-small)]">{t.above}</span>
+        <div className="flex w-full max-w-100 flex-col gap-6">
           <Separator />
-          <span className="text-[length:var(--docs-small)]">{t.below}</span>
-          <span className="mt-4 flex items-center gap-4 text-[length:var(--docs-small)]">
-            {t.left} <Separator vertical /> {t.right}
+          <Separator look="dashed" />
+          <Separator look="strong" />
+          <Separator label={t.veya} />
+          <span className="text-body flex items-center gap-3.5 font-semibold">
+            {t.siparisler}
+            <Separator vertical />
+            {t.urunler}
+            <Separator vertical />
+            {t.musteriler}
           </span>
         </div>
       </Demo>
+      <P>{t.bicimler}</P>
       <P>{t.vertical}</P>
 
       <H2>{t.rules}</H2>

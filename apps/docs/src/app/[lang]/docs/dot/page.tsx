@@ -1,4 +1,5 @@
-import { Dot, LiveScope } from "tamga-ui";
+import { Dot, LiveScope, Separator } from "tamga-ui";
+import type { Tone } from "tamga-ui";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -36,6 +37,21 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    durumlar: [
+      ["info", "Aktif"],
+      ["positive", "Planlandı"],
+      ["caution", "Taslak"],
+      ["danger", "Durduruldu"],
+      ["neutral", "Arşiv"],
+    ],
+    boyP: (
+      <>
+        Üç boy: <code>sm</code> sıkışık bir tablo hücresinde, <code>base</code> bir metin
+        satırının yanında, <code>lg</code> tek başına duran işaret · büyüğü{" "}
+        <strong>kenar ve taban</strong> alıyor, çünkü 14 pikselde düz bir kare bir durumdan çok
+        bir <em>renk örneği</em> gibi okunuyor.
+      </>
+    ),
     alone: (
       <>
         <strong>Tek başına yeterli değil.</strong> Renk tek taşıyıcı olduğunda bilgi renk körü
@@ -59,6 +75,21 @@ const T = {
       </>
     ),
     rules: "Rules",
+    durumlar: [
+      ["info", "Active"],
+      ["positive", "Scheduled"],
+      ["caution", "Draft"],
+      ["danger", "Stopped"],
+      ["neutral", "Archived"],
+    ],
+    boyP: (
+      <>
+        Three sizes: <code>sm</code> inside a dense table cell, <code>base</code> beside a line
+        of text, <code>lg</code> a mark standing on its own · the large one takes an{" "}
+        <strong>edge and a base</strong>, because at 14px a flat square reads as a{" "}
+        <em>swatch</em> rather than a status.
+      </>
+    ),
     alone: (
       <>
         <strong>Not enough on its own.</strong> When colour is the only carrier, the information
@@ -86,20 +117,30 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <Demo
         labels={dict.demo}
-        code={`<Dot state="positive" />
-<Dot state="caution" />
-<Dot state="danger" live />
-<Dot state="neutral" />`}
+        code={`<Dot state="info" />
+<Dot state="danger" size="sm" />
+<Dot state="info" size="lg" />
+<Dot state="danger" live />`}
       >
-        <span className="flex items-center gap-4">
-          <Dot state="positive" />
-          <Dot state="caution" />
+        <span className="text-body flex flex-wrap items-center gap-7 font-semibold">
+          {t.durumlar.map(([ton, etiket]) => (
+            <span key={etiket} className="inline-flex items-center gap-2">
+              <Dot state={ton as Tone} />
+              {etiket}
+            </span>
+          ))}
+          <Separator vertical />
+          <span className="inline-flex items-center gap-2.5">
+            <Dot state="info" size="sm" />
+            <Dot state="info" />
+            <Dot state="info" size="lg" />
+          </span>
           <LiveScope>
             <Dot state="danger" live />
           </LiveScope>
-          <Dot state="neutral" />
         </span>
       </Demo>
+      <P>{t.boyP}</P>
       <P>{t.tables}</P>
 
       <H2>{t.rules}</H2>

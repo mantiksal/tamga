@@ -13,6 +13,7 @@
 export const TRANSLATED: readonly string[] = [
   "accordion",
   "alert",
+  "announcement",
   "avatar",
   "avatar-stack",
   "badge",
@@ -74,6 +75,7 @@ export const TRANSLATED: readonly string[] = [
   "progress",
   "radio-group",
   "rail-link",
+  "reveal",
   "rise",
   "says-bubble",
   "schedule-input",

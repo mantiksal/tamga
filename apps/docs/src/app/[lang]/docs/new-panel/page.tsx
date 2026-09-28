@@ -1,4 +1,7 @@
+import { AyarlarDemosu, KontrastKartlari, LogoKartlari, UcKume } from "./ornek";
 import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { CodeBlock } from "@/components/kod";
 import { PageHead, H2, H3, P, Note } from "@/components/prose";
 import { Xref } from "@/components/xref";
 import { findPage } from "@/content/nav";
@@ -107,6 +110,100 @@ const T = {
       </>
     ),
     ucH: "Üç küme",
+    demo: {
+      baslik: "Ayarlar · Görünüm",
+      kapsam: "panel",
+      varliklar: "Marka varlıkları",
+      varliklarNot:
+        "Logo geniş rayda, amblem dar rayda görünüyor. Birini yükle, aşağıdaki önizleme onu okuyor.",
+      logo: {
+        name: "Logo",
+        upload: "Logo yükle",
+        replace: "Değiştir",
+        remove: "Kaldır",
+        empty: "Henüz logo yok",
+        errorType: "Yalnız PNG, JPG ya da SVG.",
+        errorSize: "Dosya çok büyük.",
+        errorUnreadable: "Dosya okunamadı.",
+      },
+      amblem: {
+        name: "Amblem",
+        upload: "Amblem yükle",
+        replace: "Değiştir",
+        remove: "Kaldır",
+        empty: "Henüz amblem yok",
+        errorType: "Yalnız PNG, JPG ya da SVG.",
+        errorSize: "Dosya çok büyük.",
+        errorUnreadable: "Dosya okunamadı.",
+      },
+      renk: "Marka rengi",
+      renkNot: "Tek renk. Paletin iki temadaki otuz token'ı bundan üretiliyor.",
+      kutular: [
+        { hex: "#1e4fd8", label: "Tamga mavisi" },
+        { hex: "#0f766e", label: "Zümrüt" },
+        { hex: "#9e2a3a", label: "Bordo" },
+        { hex: "#b45309", label: "Kehribar" },
+        { hex: "#5b21b6", label: "Mor" },
+        { hex: "#0a1f3d", label: "Lacivert" },
+      ] as const,
+      ozelRenk: "Kendi rengim",
+      ozelAd: "Özel renk",
+      tema: "Tema",
+      temaNot: "Panelin açılış teması.",
+      acik: "Açık",
+      koyu: "Koyu",
+      sistem: "Sistem",
+      acikNot: "Gündüz çalışan ekran",
+      koyuNot: "Karanlık odada göz yormuyor",
+      sistemNot: "İşletim sistemi ne derse",
+      ray: "Kenar çubuğu",
+      rayNot: "Menü ne kadar yer kaplasın.",
+      rayDar: "Hep dar",
+      rayGenis: "Hep geniş",
+      raySecsin: "Kullanıcı seçsin",
+      rayDarNot: "Yalnız simgeler",
+      rayGenisNot: "Simge ve ad",
+      raySecsinNot: "Tutamak kullanıcıda",
+      markaAdi: "Marka",
+      onizleme: "Önizleme",
+      ornekBaslik: "Siparişler",
+      ornekEylem: "Yeni sipariş",
+      ornekBaglanti: "Tümünü gör",
+      ornekSatir: ["#4821 · Ayşe Demir", "#4820 · Mert Aksoy", "#4819 · Zeynep Kaya"] as const,
+      tokenlar: [
+        ["--color-accent", "accent"],
+        ["--color-accent-ink", "accentInk"],
+        ["--color-accent-line", "accentLine"],
+        ["--color-accent-bg", "accentBg"],
+        ["--color-page", "page"],
+        ["--color-shell", "shell"],
+        ["--color-ink", "ink"],
+        ["--color-edge", "edge"],
+      ] as const,
+      paletBaslik: "Üretilen palet",
+      paletIpucu:
+        "Otuz token, iki tema, tek bir hex'ten. Ürünün değiştirdiği tek şey soldaki renk; gerisini `makePalette` üretiyor, ve kapı da aynı çıktıyı ölçüyor.",
+    },
+    kontrast: {
+      resmi: "Markanın resmi kırmızısı",
+      birBasamak: "Bir basamak koyusu",
+      kiyas: "Kitin kendi mavisi, kıyas için",
+      gecti: "geçer",
+      kaldi: "kalır",
+      rol: [
+        "Dolgu olamıyor: üstünde beyaz yazı AA'nın altında. Çizgi ve işaret olarak kalıyor.",
+        "Aynı kırmızı, bir basamak koyu. Düğme dolgusu olabiliyor ve marka tanınıyor.",
+        "Kitin varsayılanı. Kıyas için burada, bir hedef olarak değil.",
+      ] as const,
+    },
+    logo: {
+      acik: "Açık zemin",
+      koyu: "Koyu zemin",
+      yama: "Yama",
+      acikNot: "Aynı logo, sorun yok.",
+      koyuNot: "Gri yarı 3.0'a düşüyor: koyu zeminde okunmuyor.",
+      yamaNot: "Parlaklık filtresi okunur yapıyor ama markanın rengini de değiştiriyor. Doğrusu: müşteriden koyu zemin için ikinci bir dosya istemek.",
+    },
     uc: [
       [
         "Değiştir",
@@ -219,6 +316,100 @@ const T = {
       </>
     ),
     ucH: "Three sets",
+    demo: {
+      baslik: "Settings · Appearance",
+      kapsam: "panel",
+      varliklar: "Brand assets",
+      varliklarNot:
+        "The logo shows on a wide rail, the mark on a narrow one. Upload either and the preview below reads it.",
+      logo: {
+        name: "Logo",
+        upload: "Upload logo",
+        replace: "Replace",
+        remove: "Remove",
+        empty: "No logo yet",
+        errorType: "PNG, JPG or SVG only.",
+        errorSize: "The file is too large.",
+        errorUnreadable: "The file could not be read.",
+      },
+      amblem: {
+        name: "Mark",
+        upload: "Upload mark",
+        replace: "Replace",
+        remove: "Remove",
+        empty: "No mark yet",
+        errorType: "PNG, JPG or SVG only.",
+        errorSize: "The file is too large.",
+        errorUnreadable: "The file could not be read.",
+      },
+      renk: "Brand colour",
+      renkNot: "One colour. The palette's thirty tokens, in two themes, come from it.",
+      kutular: [
+        { hex: "#1e4fd8", label: "Tamga blue" },
+        { hex: "#0f766e", label: "Emerald" },
+        { hex: "#9e2a3a", label: "Claret" },
+        { hex: "#b45309", label: "Amber" },
+        { hex: "#5b21b6", label: "Purple" },
+        { hex: "#0a1f3d", label: "Navy" },
+      ] as const,
+      ozelRenk: "My own colour",
+      ozelAd: "Custom colour",
+      tema: "Theme",
+      temaNot: "The theme the panel opens with.",
+      acik: "Light",
+      koyu: "Dark",
+      sistem: "System",
+      acikNot: "A screen that works by day",
+      koyuNot: "Easy on the eyes in a dark room",
+      sistemNot: "Whatever the operating system says",
+      ray: "Sidebar",
+      rayNot: "How much room the menu takes.",
+      rayDar: "Always narrow",
+      rayGenis: "Always wide",
+      raySecsin: "Let the user choose",
+      rayDarNot: "Icons only",
+      rayGenisNot: "Icon and name",
+      raySecsinNot: "The handle is the user's",
+      markaAdi: "Brand",
+      onizleme: "Preview",
+      ornekBaslik: "Orders",
+      ornekEylem: "New order",
+      ornekBaglanti: "See all",
+      ornekSatir: ["#4821 · Ayşe Demir", "#4820 · Mert Aksoy", "#4819 · Zeynep Kaya"] as const,
+      tokenlar: [
+        ["--color-accent", "accent"],
+        ["--color-accent-ink", "accentInk"],
+        ["--color-accent-line", "accentLine"],
+        ["--color-accent-bg", "accentBg"],
+        ["--color-page", "page"],
+        ["--color-shell", "shell"],
+        ["--color-ink", "ink"],
+        ["--color-edge", "edge"],
+      ] as const,
+      paletBaslik: "The generated palette",
+      paletIpucu:
+        "Thirty tokens, two themes, from one hex. The only thing a product changes is the colour on the left; `makePalette` derives the rest, and the gate measures the same output.",
+    },
+    kontrast: {
+      resmi: "The brand's official red",
+      birBasamak: "One step darker",
+      kiyas: "The kit's own blue, for comparison",
+      gecti: "passes",
+      kaldi: "fails",
+      rol: [
+        "It cannot be a fill: white text on it sits under AA. It stays a line and a mark.",
+        "The same red, one step darker. It can carry a button, and the brand is still recognised.",
+        "The kit's default. Here for comparison, not as a target.",
+      ] as const,
+    },
+    logo: {
+      acik: "Light ground",
+      koyu: "Dark ground",
+      yama: "The patch",
+      acikNot: "The same logo, no problem.",
+      koyuNot: "The grey half drops to 3.0: unreadable on a dark ground.",
+      yamaNot: "A brightness filter makes it readable but changes the brand's colour too. The right answer: ask the customer for a second file for dark grounds.",
+    },
     uc: [
       [
         "Change",
@@ -319,6 +510,7 @@ for (const [alan, deger] of Object.entries(light)) {
 
 export default async function Page({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
+  const dict = await getDictionary(lang);
   const p = findPage("new-panel")!;
   const t = T[lang];
 
@@ -328,29 +520,35 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <P>{t.lead}</P>
 
       <H2>{t.ucH}</H2>
-      <Kumeler rows={t.uc} />
+      {/* ÜÇ KÜME BİR TABLO DEĞİL ÜÇ KART: tablo 720 piksel taban genişliği
+          istiyor ve üçüncü sütun dar ekranda dışarı düşüyordu. */}
+      <UcKume rows={t.uc} />
 
       <H2>{t.ayarH}</H2>
       <P>{t.ayarP}</P>
-      <Kumeler rows={t.ayarListe} />
+      {/* DÖRT MADDELİK LİSTE ÇALIŞIR HÂLE GELDİ: bir rengin bütün paneli
+          çevirdiği okunmuyor, görülüyor. */}
+      <AyarlarDemosu labels={t.demo} />
       <Note>{t.ayarN}</Note>
 
       <H2>{t.paletH}</H2>
       <P>{t.paletP}</P>
-      <pre className="docs-code my-4">{PALET}</pre>
+      <CodeBlock code={PALET} file="src/theme/palette.ts" dict={dict} />
       <Note>{t.paletN}</Note>
 
       <H2>{t.blokH}</H2>
       <P>{t.blokP}</P>
-      <pre className="docs-code my-4">{BLOK}</pre>
+      <CodeBlock code={BLOK} file="src/brand/brand.css" dict={dict} />
 
       <H2>{t.dersH}</H2>
       <P>{t.dersP}</P>
+      <KontrastKartlari labels={t.kontrast} />
       <P>{t.dersP2}</P>
       <Note>{t.dersN}</Note>
 
       <H3>{t.logoH}</H3>
       <P>{t.logoP}</P>
+      <LogoKartlari labels={t.logo} />
     </>
   );
 }

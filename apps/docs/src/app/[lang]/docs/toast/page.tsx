@@ -175,8 +175,8 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <Note>{t.notError}</Note>
 
       <H2>Props</H2>
-      <Props of="Toast" lang={lang} />
-      <Props of="ToastViewport" lang={lang} />
+      <Props of="Toast" lang={lang} etiketli />
+      <Props of="ToastViewport" lang={lang} etiketli />
 
       <H2>{t.related}</H2>
       <P>{t.rel}</P>

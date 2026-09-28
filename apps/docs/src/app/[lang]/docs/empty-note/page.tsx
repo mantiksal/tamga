@@ -1,4 +1,5 @@
-import { EmptyNote, Button } from "tamga-ui";
+import { EmptyNote, Button, Link, SectionHead } from "tamga-ui";
+import { NoteBlank } from "tamga-ui/icons";
 /* Vitrin için basit bir yer tutucu çizim: kit "ne çizildiğini" sormaz. */
 const box = ({ size }: { size: number; float: boolean }) => (
   <span
@@ -65,6 +66,16 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    siparisNotlari: "Sipariş notları",
+    tekSatir: "Bu siparişe henüz not eklenmedi.",
+    notEkle: "Not ekle",
+    tekSatirP: (
+      <>
+        <code>icon</code> verildiğinde not <strong>tek satıra</strong> iniyor: dolu bir ekranın
+        içindeki boş bir kart resim değil bir <strong>cümle</strong> hak ediyor. Eylem satırın
+        sonunda ve sessiz · burada okunacak şey kartın neden boş olduğu, düğme değil.
+      </>
+    ),
     related: "İlgili",
   },
   en: {
@@ -94,6 +105,17 @@ const T = {
       </>
     ),
     rules: "Rules",
+    siparisNotlari: "Order notes",
+    tekSatir: "No notes on this order yet.",
+    notEkle: "Add a note",
+    tekSatirP: (
+      <>
+        With <code>icon</code>, the note collapses to a <strong>single line</strong>: a card that
+        is empty inside an otherwise full screen deserves a <strong>sentence</strong>, not a
+        picture. The action sits quietly at the end of the row · what is read here is why the
+        card is empty, not the button.
+      </>
+    ),
     related: "Related",
   },
 };
@@ -106,6 +128,25 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
   return (
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
+      <Demo
+        labels={dict.demo}
+        align="start"
+        code={`<Card>
+  <SectionHead title="${t.siparisNotlari}" />
+  <EmptyNote icon={NoteBlank} action={<Link href="/notes">${t.notEkle}</Link>}>
+    ${t.tekSatir}
+  </EmptyNote>
+</Card>`}
+      >
+        <div className="tamga-card w-full max-w-130 overflow-hidden">
+          <SectionHead title={t.siparisNotlari} />
+          <EmptyNote icon={NoteBlank} action={<Link href="#empty-note">{t.notEkle}</Link>}>
+            {t.tekSatir}
+          </EmptyNote>
+        </div>
+      </Demo>
+      <P>{t.tekSatirP}</P>
+
       <Note>{t.art}</Note>
       <Demo
         labels={dict.demo}

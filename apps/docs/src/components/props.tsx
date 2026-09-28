@@ -24,8 +24,24 @@ import type { Locale } from "@/i18n/config";
  */
 
 const L = {
-  tr: { prop: "prop", type: "tip", def: "varsayılan", required: "zorunlu", none: "–", empty: "Bu bileşenin kendi prop'u yok." },
-  en: { prop: "prop", type: "type", def: "default", required: "required", none: "–", empty: "This component takes no props of its own." },
+  tr: {
+    prop: "Prop",
+    type: "Tip",
+    def: "Varsayılan",
+    desc: "Açıklama",
+    required: "zorunlu",
+    none: "–",
+    empty: "Bu bileşenin kendi prop'u yok.",
+  },
+  en: {
+    prop: "Prop",
+    type: "Type",
+    def: "Default",
+    desc: "Description",
+    required: "required",
+    none: "–",
+    empty: "This component takes no props of its own.",
+  },
 } as const;
 
 type Prop = {
@@ -37,7 +53,22 @@ type Prop = {
   docTr: string | null;
 };
 
-export function Props({ of, lang }: { of: string; lang: Locale }) {
+export function Props({
+  of,
+  lang,
+  etiketli = false,
+}: {
+  of: string;
+  lang: Locale;
+  /**
+   * Tablonun üstünde `<BileşenAdı>` etiketi.
+   *
+   * Yalnız bir sayfada BİRDEN ÇOK tablo varsa veriliyor: tek tablolu bir
+   * sayfada etiket, başlığın yanındaki sembolü ikinci kez söylemek olur. İki
+   * tablolu bir sayfada ise "bu satırlar hangi bileşenin" sorusunun tek cevabı.
+   */
+  etiketli?: boolean;
+}) {
   const rows = (props as Record<string, Prop[]>)[of];
   const t = L[lang];
   const gerekce = (p: Prop) => (lang === "tr" ? p.docTr : p.doc) ?? p.doc;
@@ -49,41 +80,35 @@ export function Props({ of, lang }: { of: string; lang: Locale }) {
     /* Dar ekranda tablo KENDİ içinde kayar; sayfa gövdesi yana kaymaz. Uzun bir
        birleşim tipi (`secondary · primary · success · danger · ghost · link`)
        bunu her zaman tetikler, o yüzden sarmalayıcı isteğe bağlı değil. */
-    <div className="tamga-card my-6 overflow-x-auto">
-      <table className="w-full text-body">
-        <thead>
-          <tr className="border-b border-[var(--color-line)] text-left">
-            <th className="p-3 font-medium text-ink">{t.prop}</th>
-            <th className="p-3 font-medium text-ink">{t.type}</th>
-            <th className="p-3 font-medium text-ink">{t.def}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((p, i) => (
-            <tr key={p.name} className={i < rows.length - 1 ? "border-b border-[var(--color-line)]" : undefined}>
-              <td className="p-3 align-top">
-                <code className="font-mono text-caption text-ink">{p.name}</code>
-                {/* Zorunluluk renkle DEĞİL kelimeyle söyleniyor: bir tabloda
-                    kırmızı bir hücre "hata" diye okunur, "gerekli" diye değil. */}
-                {p.required ? (
-                  <span className="ml-2 font-mono text-caption tracking-wide text-ink-faint uppercase">
-                    {t.required}
-                  </span>
-                ) : null}
-                {gerekce(p) ? (
-                  <p className="mt-1 max-w-[var(--docs-prop-doc)] text-caption text-ink-faint">
-                    {gerekce(p)}
-                  </p>
-                ) : null}
-              </td>
-              <td className="p-3 align-top font-mono text-caption text-ink-soft">{p.type}</td>
-              <td className="p-3 align-top font-mono text-caption text-ink-faint">
-                {p.default ?? t.none}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="docs-props">
+      {etiketli ? (
+        <span className="docs-props-etiket">
+          <code className="docs-sembol">{`<${of}>`}</code>
+        </span>
+      ) : null}
+      <div className="docs-props-min">
+        <div className="docs-props-row docs-table-head">
+          <span>{t.prop}</span>
+          <span>{t.type}</span>
+          <span>{t.def}</span>
+          <span>{t.desc}</span>
+        </div>
+        {rows.map((p) => (
+          <div key={p.name} className="docs-props-row docs-table-row">
+            <span className="flex flex-wrap items-center gap-1.5">
+              <code className="docs-props-ad">{p.name}</code>
+              {/* Zorunluluk renkle DEĞİL kelimeyle söyleniyor: bir tabloda
+                  kırmızı bir hücre "hata" diye okunur, "gerekli" diye değil. */}
+              {p.required ? <span className="docs-props-zorunlu">{t.required}</span> : null}
+            </span>
+            <code className="docs-props-tip">{p.type}</code>
+            <code className="docs-props-var">{p.default ?? t.none}</code>
+            {/* Gerekçe yoksa hücre BOŞ kalıyor: uydurulmuş bir açıklama,
+                açıklaması olmayan bir proptan kötü. */}
+            <span className="docs-props-aciklama">{gerekce(p) ?? ""}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

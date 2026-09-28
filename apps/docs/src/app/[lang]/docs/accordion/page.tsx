@@ -59,6 +59,15 @@ const T = {
         imkânsız kılar. Gerekiyorsa çağıran kendi durumunu tutar.
       </>
     ),
+    kiliklar: (
+      <>
+        İki kılık: <code>cards</code> (varsayılan) her bölümü kendi kartı yapıyor ve{" "}
+        <strong>açık olan yükseliyor</strong> · bir listede hangisinin açık olduğu uzaktan
+        okunuyor. <code>list</code> ise tek bir yüzeyin içindeki sessiz yığın, kenarı zaten olan
+        bir kartın içi için. Kılığı <strong>kap veriyor</strong>: her bölüme prop koymak, aynı
+        kararı her çağrı yerinde tekrar almak olurdu.
+      </>
+    ),
     rules: "Kurallar",
     related: "İlgili",
     rel: (
@@ -100,6 +109,15 @@ const T = {
         it impossible. If you need it, the caller holds the state.
       </>
     ),
+    kiliklar: (
+      <>
+        Two looks: <code>cards</code> (the default) makes each section its own card and{" "}
+        <strong>the open one rises</strong> · in a list, which one is open can be read from
+        across the screen. <code>list</code> is the quiet stack inside one surface, for a card
+        that already has an edge. <strong>The container decides</strong>: a prop on every section
+        would be the same decision taken again at every call site.
+      </>
+    ),
     rules: "Rules",
     related: "Related",
     rel: (
@@ -129,14 +147,16 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         </div>
       </Demo>
 
+      <P>{t.kiliklar}</P>
+
       <H2>{t.rules}</H2>
       <Note>{t.whyNotDetails}</Note>
       <Note>{t.search}</Note>
       <P>{t.single}</P>
 
       <H2>Props</H2>
-      <Props of="Collapsible" lang={lang} />
-      <Props of="Accordion" lang={lang} />
+      <Props of="Collapsible" lang={lang} etiketli />
+      <Props of="Accordion" lang={lang} etiketli />
 
       <H2>{t.related}</H2>
       <P>{t.rel}</P>

@@ -38,9 +38,11 @@ const T = {
     ),
     arrow: (
       <>
-        Yön oku <strong>yalnız sıralı sütunda</strong> görünür. Her başlıkta soluk bir ok
-        göstermek, hangisinin etkin olduğunu okunmaz hâle getirir, ve bir tabloda &quot;neye göre
-        sıralı&quot; sorusu, sıralamanın kendisinden daha sık sorulur.
+        <strong>Yön</strong> oku yalnız sıralı sütunda, ve vurgu renginde: bir tabloda &quot;neye
+        göre sıralı&quot; sorusu, sıralamanın kendisinden daha sık sorulur. Sıralı olmayan
+        sütunlar yön değil, iki yönlü <strong>nötr bir glif</strong> taşıyor · o bir ok değil bir
+        davet: &quot;bu başlık tıklanabilir&quot;. Hepsine aynı oku koymak hangisinin etkin
+        olduğunu okunmaz yapardı; hiç glif koymamak da başlığın bir kontrol olduğunu gizliyordu.
       </>
     ),
     noEngine: (
@@ -74,9 +76,11 @@ const T = {
     ),
     arrow: (
       <>
-        The arrow appears <strong>only on the sorted column</strong>. A faint arrow on every header
-        makes it unreadable which one is active, and in a table, &quot;sorted by what&quot; is
-        asked more often than sorting itself.
+        The <strong>direction</strong> arrow appears only on the sorted column, in the accent
+        colour: in a table, &quot;sorted by what&quot; is asked more often than sorting itself.
+        Unsorted columns carry a <strong>neutral two-way glyph</strong> instead · not an arrow but
+        an invitation: &quot;this header is clickable&quot;. The same arrow on every header would
+        make it unreadable which one is active; no glyph at all hid that the header is a control.
       </>
     ),
     noEngine: (

@@ -1,9 +1,10 @@
-import { Badge, Icon, IconButton } from "tamga-ui";
-import { Bell } from "tamga-ui/icons";
+import { Tag } from "tamga-ui";
+import { NoktaRozeti } from "./ornek";
+import { Demo } from "@/components/demo";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
-import { Demo } from "@/components/demo";
+import { BadgeDemo } from "@/components/interactive";
 import { Xref } from "@/components/xref";
 import { Props } from "@/components/props";
 import { findPage } from "@/content/nav";
@@ -57,7 +58,30 @@ const T = {
         olduğunu yalnız o metin söyler.
       </>
     ),
+    yeni: "YENİ",
+    etiketH: "Etiket rozeti: sayı değil durum",
+    etiketP: (
+      <>
+        <code>Tag</code> bir özelliğin durumunu taşıyor: BETA, YENİ, PRO. <strong>Sayacın
+        kardeşi ama aynı şey değil</strong> · sayaç bir MİKTAR taşır ve okununca kaybolur,
+        etiket bir DURUM taşır ve yerinde durur. Üç biçim: <code>dashed</code> henüz gerçek
+        değil (kesik kenar kitin her yerinde bunu söylüyor), <code>solid</code> şu anda yeni
+        olan, <code>outline</code> ise sessiz duran gerçek · bir plan adı, bir kademe. Sözcüğü
+        ürün yazıyor, biçimi kit veriyor.
+      </>
+    ),
     rules: "Kurallar",
+    sepet: "Sepet",
+    yeniUrun: "Sepette yeni ürün var",
+    noktaH: "Sayısız rozet",
+    noktaP: (
+      <>
+        <code>dot</code> sayı taşımayan işaret: cevap &quot;dört tane var&quot; değil{" "}
+        <strong>&quot;yeni bir şey var&quot;</strong> olduğunda. Kimsenin üzerine hareket
+        etmeyeceği bir sayı, kimsenin okumadığı bir sayıdır · ve sayı gittiğinde işaret de
+        küçülüyor. Ekran okuyucuya söyleyen şey yine <code>label</code>.
+      </>
+    ),
     related: "İlgili",
     rel: (
       <>
@@ -94,7 +118,31 @@ const T = {
         reader. Only that text says three of what.
       </>
     ),
+    yeni: "NEW",
+    etiketH: "The label badge: a state, not a number",
+    etiketP: (
+      <>
+        <code>Tag</code> carries the state of a feature: BETA, NEW, PRO. <strong>A sibling of
+        the counter, not the same thing</strong> · a counter carries a QUANTITY and disappears
+        once read, a tag carries a STATE and stays. Three looks: <code>dashed</code> for what is
+        not real yet (a dashed edge says this everywhere in the kit), <code>solid</code> for what
+        is new right now, and <code>outline</code> for the quiet standing fact · a plan name, a
+        tier. The product writes the word, the kit gives the shape.
+      </>
+    ),
     rules: "Rules",
+    sepet: "Cart",
+    yeniUrun: "There is something new in the cart",
+    noktaH: "The badge with no number",
+    noktaP: (
+      <>
+        <code>dot</code> is the mark with no number: for when the answer is{" "}
+        <strong>&quot;there is something new&quot;</strong> rather than &quot;there are
+        four&quot;. A number nobody will act on is a number nobody reads · and with the number
+        gone, the mark gets smaller too. What speaks to a screen reader is still{" "}
+        <code>label</code>.
+      </>
+    ),
     related: "Related",
     rel: (
       <>
@@ -114,27 +162,27 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
-      <Demo labels={dict.demo} code={`<Badge count={3} label="${t.unread}">
-  <IconButton aria-label="${t.notifications}"><Icon icon={Bell} size="sm" /></IconButton>
-</Badge>`}>
-        <Badge count={3} label={t.unread}>
-          <IconButton aria-label={t.notifications}>
-            <Icon icon={Bell} size="sm" />
-          </IconButton>
-        </Badge>
-        <Badge count={140} label={t.unread}>
-          <IconButton aria-label={t.notifications}>
-            <Icon icon={Bell} size="sm" />
-          </IconButton>
-        </Badge>
-        <Badge count={0} label={t.unread}>
-          <IconButton aria-label={t.notifications}>
-            <Icon icon={Bell} size="sm" />
-          </IconButton>
-        </Badge>
-        <Badge count={7} tone="caution" label={t.unread} />
-      </Demo>
+      <BadgeDemo lang={lang} labels={dict.demo} unread={t.unread} notifications={t.notifications} />
       <P>{t.max}</P>
+
+      <H2>{t.noktaH}</H2>
+      <Demo labels={dict.demo} code={`<Badge dot tone="info" label="${t.yeniUrun}">
+  <IconButton aria-label="${t.sepet}"><Icon icon={ShoppingCart} size="sm" /></IconButton>
+</Badge>`}>
+        <NoktaRozeti sepet={t.sepet} yeniUrun={t.yeniUrun} />
+      </Demo>
+      <P>{t.noktaP}</P>
+
+      <H2>{t.etiketH}</H2>
+      <P>{t.etiketP}</P>
+      <Demo labels={dict.demo} code={`<Tag look="dashed">BETA</Tag>
+<Tag look="solid">${t.yeni}</Tag>
+<Tag look="outline">PRO</Tag>`}>
+        <Tag look="dashed">BETA</Tag>
+        <Tag look="solid">{t.yeni}</Tag>
+        <Tag look="outline">PRO</Tag>
+      </Demo>
+      <Props of="Tag" lang={lang} etiketli />
 
       <H2>{t.rules}</H2>
       <Note>{t.zero}</Note>

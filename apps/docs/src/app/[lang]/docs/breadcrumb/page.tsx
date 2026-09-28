@@ -88,7 +88,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
   return (
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
-      <Demo labels={dict.demo} align="start" code={`<Breadcrumb
+      <Demo yuzey labels={dict.demo} align="start" code={`<Breadcrumb
   label="…"
   items={[
     { label: "${t.products}", href: "/products" },

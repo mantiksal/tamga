@@ -75,7 +75,7 @@ const START: DocPage[] = [
      yalan söylemesi demek. */
   k("motion", ["Hareket", "Dört süre, üç eğri, beş döngü"], ["Motion", "Four durations, three curves, five loops"]),
   k("measure", ["Ölçü", "İki yarıçap, 8 piksel ritmi, sabit yükseklikler"], ["Measure", "Two radii, an 8px rhythm, fixed heights"]),
-  k("type", ["Tipografi", "On kademe, tek yüz"], ["Typography", "Ten steps, one face"]),
+  k("type", ["Tipografi", "On kademe, üç yüz"], ["Typography", "Ten steps, three faces"]),
   /* DÖRDÜNCÜ SAYFA BİR KALIP, bileşen değil: kitin parçaları bir EKRANDA nasıl
      bir araya geliyor. Buraya girdi çünkü okuma sırası bozulmuyor — kur,
      markanı geçir, fiziği anla, bir ekran kur — ve alfabetik bileşen
@@ -204,6 +204,31 @@ export function navGruplari(lang: Locale): NavGrubu[] {
 }
 
 /**
+ * OKUMA SIRASI, ve önceki/sonraki kartlarının tek kaynağı.
+ *
+ * Menünün sırası ile okuma sırası AYNI şey: ray zaten "kur, markanı geçir,
+ * sonra dili öğren" diye diziliyor, ve o sırayı ikinci bir dizide tekrar yazmak
+ * onu bir gün ayrıştırmak demekti. Gruplar düzleştiriliyor, hepsi bu.
+ *
+ * Sayfanın kendi grubu da buradan çıkıyor (kırıntı yolu onu yazıyor).
+ */
+export function okumaSirasi(lang: Locale): { sayfa: DocPage; grup: string }[] {
+  return navGruplari(lang).flatMap((g) => g.sayfalar.map((sayfa) => ({ sayfa, grup: g.baslik[lang] })));
+}
+
+/** Bir sayfanın komşuları. Listenin ucunda `undefined` döner: kart çizilmez. */
+export function komsular(lang: Locale, slug: string) {
+  const sira = okumaSirasi(lang);
+  const i = sira.findIndex((x) => x.sayfa.slug === slug);
+  return { onceki: i > 0 ? sira[i - 1] : undefined, sonraki: i >= 0 ? sira[i + 1] : undefined };
+}
+
+/** Kırıntı yolunun ortasındaki grup adı. */
+export function grupAdi(lang: Locale, slug: string): string | undefined {
+  return okumaSirasi(lang).find((x) => x.sayfa.slug === slug)?.grup;
+}
+
+/**
  * Sayfalar — TEK düz liste, bölüm yok, bileşen başına bir satır.
  *
  * İKİ KARARIN ÜST ÜSTE GELDİĞİ YER BURASI.
@@ -221,7 +246,7 @@ export function navGruplari(lang: Locale): NavGrubu[] {
  * dashboard-v5'in Storybook'u aynı ayrımı yapıyor: her bileşen kendi satırı.
  *
  * SINIR: ayrı sayfa = ayrı bileşen. Aynı bileşenin VARYANTI sayfayı bölmez —
- * `Button`'ın altı varyantı, `StatusChip`'in dört rolü, `Skeleton`'ın hazır
+ * `Button`'ın altı varyantı, `StatusChip`'in altı rolü, `Skeleton`'ın hazır
  * kalıpları tek sayfada kalır. Bölünen şey ad, ayarlanan şey prop.
  *
  * Kaynak sırası alfabetik; kaynağı okuyanın bir sayfayı ararken `navFor`'u
@@ -229,6 +254,12 @@ export function navGruplari(lang: Locale): NavGrubu[] {
  */
 const PAGES: DocPage[] = [
   c("alert", "Alert", "Sayfada duran uyarı", "A warning that stays on the page"),
+  c(
+    "announcement",
+    "Announcement",
+    "Sayfanın tepesindeki duyuru şeridi",
+    "The announcement strip at the top of the page",
+  ),
   c("avatar", "Avatar", "Baş harfler ya da görsel", "Initials, or an image"),
   c("avatar-stack", "Avatar stack", "Üst üste binen ekip", "A team, overlapping"),
   c("beacon", "Beacon", "Nabzın çıplak hâli", "The pulse, with nothing on it"),
@@ -258,7 +289,7 @@ const PAGES: DocPage[] = [
   c("popover", "Popover", "Akışı kesmeyen küçük bir iş", "A small job that does not break the flow"),
   c("progress", "Progress", "Ne kadar kaldığını söyler", "It says how much is left"),
   c("radio-group", "Radio group", "Üç seçenekten biri", "One out of three"),
-  c("says-bubble", "Says bubble", "Çizim bir cümle söylediğinde", "When the drawing says a line"),
+  c("says-bubble", "Says bubble", "Konuşma balonu", "The conversation bubble"),
   c("score-matrix", "Score matrix", "Skorun kare ızgara hâli", "The score as a square grid"),
   c("score-meter", "Score meter", "Skorun yatık hâli", "The score, laid flat"),
   c("score-ring", "Score ring", "0-100 arası bir okuma", "A reading from 0 to 100"),
@@ -300,7 +331,8 @@ const PAGES: DocPage[] = [
   c("password-input", "Password input", "Göster, çünkü yazdığını göremezsin", "Reveal it, because you cannot see what you typed"),
   c("rich-text", "Rich text", "Biçimlendirilebilir metin; düğmeleri ürün seçer", "Formatted text; the product picks the buttons"),
   c("rail-link", "Rail link", "İkon raylı gezinme", "Icon rail navigation"),
-  c("rise", "Rise", "Aşağıdan giren blok", "A block that enters from below"),
+  c("reveal", "Reveal", "Aşağıdan giren blok", "A block that enters from below"),
+  c("rise", "Rise", "Sıfırdan hedefe yükselen sayı", "A number climbing from zero to its target"),
   c("schedule-input", "Schedule input", "Cron değil, kürasyonlu aralık", "Not cron; a curated interval"),
   c("scroll-x", "Scroll x", "Klavyeyle de kayan taşma", "Overflow that a keyboard can scroll too"),
   c("secret-field", "Secret field", "Maskeli, okunur, kopyalanır", "Masked, read, copied"),

@@ -1,4 +1,5 @@
-import { Card, CardHead, CardBody, Label, Button } from "tamga-ui";
+import { Card, CardHead, CardBody, Icon, MiniButton } from "tamga-ui";
+import { More } from "tamga-ui/icons";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -34,6 +35,23 @@ const T = {
     count: "48 kalem",
     edit: "Düzenle",
     body: "Gövde, başlıkla aynı yatay ritmi paylaşır.",
+    temelAd: "Temel kart",
+    temelGovde: "Kısa bir açıklama ve içerik için sade kap.",
+    baslikliAd: "Başlıklı kart",
+    baslikliGovde: "Başlık şeridi ve eylem butonu olan kart.",
+    urunAd: "Keten gömlek · Kum",
+    urunSatis: "412 satış",
+    urunFiyat: "₺1.249",
+    urunGorsel: "ürün görseli",
+    ucBicim: (
+      <>
+        <strong>Üç biçim, tek bileşen.</strong> Sade kap; başlık şeridi olan (
+        <code>CardHead</code>); ve <strong>bir yere götüren</strong> kart (<code>href</code>).
+        Sonuncusu yükselen fiziği alıyor · işaretçinin altında kalkıyor, tıklanınca tabanına
+        oturuyor, ve gerçekten bir <code>&lt;a&gt;</code> oluyor: tıklanabilir bir{" "}
+        <code>div</code> klavyeye görünmez, ekran okuyucuya sessizdir.
+      </>
+    ),
     overflow: (
       <>
         <strong>Kart varsayılan olarak KIRPAR</strong> (<code>overflow=&quot;clip&quot;</code>):
@@ -78,6 +96,23 @@ const T = {
   en: {
     lead: "The kit's one raised surface: a 1px edge plus a 2px hard offset.",
     stock: "Stock",
+    temelAd: "Plain card",
+    temelGovde: "A quiet box for a short description and some content.",
+    baslikliAd: "Card with a head",
+    baslikliGovde: "A card with a title strip and an action button.",
+    urunAd: "Linen shirt · Sand",
+    urunSatis: "412 sold",
+    urunFiyat: "£1,249",
+    urunGorsel: "product image",
+    ucBicim: (
+      <>
+        <strong>Three shapes, one component.</strong> The plain box; the one with a title strip
+        (<code>CardHead</code>); and the card that <strong>leads somewhere</strong> (
+        <code>href</code>). The last takes the raised physics · it lifts under the pointer and
+        presses flat, and it really becomes an <code>&lt;a&gt;</code>: a clickable{" "}
+        <code>div</code> is invisible to the keyboard and silent to a screen reader.
+      </>
+    ),
     count: "48 items",
     edit: "Edit",
     body: "The body shares the header's horizontal rhythm.",
@@ -133,23 +168,58 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
-      <Demo labels={dict.demo} align="start" code={`<Card>
-  <CardHead action={<Button size="sm">${t.edit}</Button>}>
-    <h3 className="text-subhead font-semibold text-ink">${t.stock}</h3>
-    <Label>${t.count}</Label>
+      <Demo labels={dict.demo} align="start" grid={false} code={`<Card>…</Card>
+
+<Card>
+  <CardHead action={<MiniButton aria-label="…"><Icon icon={More} size="xs" /></MiniButton>}>
+    <h3 className="text-subhead font-semibold text-ink">${t.baslikliAd}</h3>
   </CardHead>
-  <CardBody>${t.body}</CardBody>
-</Card>`}>
-        <div className="w-full max-w-md">
+  <CardBody>${t.baslikliGovde}</CardBody>
+</Card>
+
+<Card href="/products/keten-gomlek">…</Card>`}>
+        <div className="grid w-full gap-5 sm:grid-cols-2 xl:grid-cols-3">
           <Card>
-            <CardHead action={<Button size="sm">{t.edit}</Button>}>
-              <h3 className="text-subhead font-semibold text-ink">{t.stock}</h3>
-              <Label>{t.count}</Label>
+            <CardBody className="flex flex-col gap-2">
+              <strong className="font-display text-subhead font-extrabold text-ink">
+                {t.temelAd}
+              </strong>
+              <span className="text-body leading-relaxed text-ink-faint">{t.temelGovde}</span>
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHead
+              action={
+                <MiniButton aria-label={t.edit}>
+                  <Icon icon={More} size="xs" />
+                </MiniButton>
+              }
+            >
+              <h3 className="text-subhead font-semibold text-ink">{t.baslikliAd}</h3>
             </CardHead>
-            <CardBody>{t.body}</CardBody>
+            <CardBody className="text-body leading-relaxed text-ink-faint">
+              {t.baslikliGovde}
+            </CardBody>
+          </Card>
+
+          {/* Tıklanabilir kart: görsel alanı çağıranın içeriği, kartın işi onu
+              taşımak ve bir yere götürdüğünü söylemek. */}
+          <Card href="#card">
+            <span className="tamga-art-well flex h-30 items-center justify-center rounded-none border-0 border-b border-[var(--color-line)] font-mono text-caption text-ink-faint">
+              {t.urunGorsel}
+            </span>
+            <span className="flex flex-col gap-1 px-4 py-3.5">
+              <strong className="text-control font-semibold text-ink">{t.urunAd}</strong>
+              <span className="flex justify-between text-small text-ink-faint">
+                {t.urunSatis}
+                <span className="font-mono font-bold text-ink">{t.urunFiyat}</span>
+              </span>
+            </span>
           </Card>
         </div>
       </Demo>
+      <P>{t.ucBicim}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.head}</Note>
@@ -157,8 +227,8 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <Note>{t.element}</Note>
 
       <H2>Props</H2>
-      <Props of="Card" lang={lang} />
-      <Props of="CardHead" lang={lang} />
+      <Props of="Card" lang={lang} etiketli />
+      <Props of="CardHead" lang={lang} etiketli />
 
       <H2>{t.related}</H2>
       <P>{t.rel}</P>

@@ -55,6 +55,22 @@ const T = {
       </>
     ),
     open: "Hover ve odakla açılır; asla tıklama gerektirmez.",
+    gecikme: (
+      <>
+        Fare <strong>400ms bekliyor</strong> (<code>delay</code>), klavye odağı{" "}
+        <strong>beklemiyor</strong>: ekranı geçen bir farenin arkasında sıra sıra kabarcık
+        açılmamalı, ama Tab&apos;la buraya gelen kişi onu bilerek istedi. <code>Esc</code>{" "}
+        kapatıyor, çünkü odak tetikleyicide kalıyor ve kabarcığın başka çıkışı yok.
+      </>
+    ),
+    bag: (
+      <>
+        Etiket <code>aria-describedby</code> ile tetikleyiciye <strong>bağlı</strong>, ve bağın
+        hedefi her zaman DOM&apos;da: ekran okuyucu açıklamayı odak anında okuyor, kabarcık ise o
+        an henüz açılmamış olabiliyor. Görünen kopya <code>aria-hidden</code>, yani metin iki kez
+        okunmuyor.
+      </>
+    ),
     rules: "Kurallar",
     plane: (
       <>
@@ -95,6 +111,22 @@ const T = {
       </>
     ),
     open: "It opens on hover and on focus; it never requires a click.",
+    gecikme: (
+      <>
+        The pointer <strong>waits 400ms</strong> (<code>delay</code>), keyboard focus{" "}
+        <strong>does not</strong>: a mouse crossing the screen should not leave a trail of
+        bubbles behind it, but someone who tabbed here asked for it. <code>Esc</code> closes it,
+        because focus stays on the trigger and the bubble has no other way out.
+      </>
+    ),
+    bag: (
+      <>
+        The label is tied to the trigger with <code>aria-describedby</code>, and the target of
+        that tie is <strong>always</strong> in the DOM: a screen reader reads the description the
+        moment focus lands, while the bubble may not be open yet. The visible copy is{" "}
+        <code>aria-hidden</code>, so the text is not read twice.
+      </>
+    ),
     rules: "Rules",
     plane: (
       <>
@@ -149,6 +181,8 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <P>{t.open}</P>
 
       <H2>{t.rules}</H2>
+      <P>{t.gecikme}</P>
+      <P>{t.bag}</P>
       <Note>{t.extra}</Note>
       <Note>{t.plane}</Note>
 

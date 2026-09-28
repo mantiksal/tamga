@@ -1,5 +1,5 @@
 import { IconButton, Icon } from "tamga-ui";
-import { Plus, Refresh, Delete } from "tamga-ui/icons";
+import { Close, Delete, Edit, Plus, Star } from "tamga-ui/icons";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -39,6 +39,27 @@ const T = {
         (32px). Daha küçüğü <Xref to="mini-button">Mini button</Xref>.
       </>
     ),
+    edit: "Düzenle",
+    favourite: "Favori",
+    close: "Kapat",
+    boylar: (
+      <>
+        Üç boy: <code>sm</code> 30 piksel (tablo satırı, çip şeridi),{" "}
+        <code>base</code> 40 (şeridin ölçüsü · girdi, düğme ve ikon düğmesi aynı satırda) ve{" "}
+        <code>lg</code> 50 (tek başına duran bir eylem). <strong>Köşe ölçüyle birlikte
+        büyüyor</strong> (5 · 7 · 8): aynı yarıçapı üç boya vermek küçüğü yuvarlak, büyüğü keskin
+        gösteriyor.
+      </>
+    ),
+    varyantlar: (
+      <>
+        Dolgu varyantları düğmeninkiyle aynı sözcükleri konuşuyor:{" "}
+        <code>secondary</code> (varsayılan), <code>primary</code>, <code>soft</code>,{" "}
+        <code>danger</code> ve <code>ghost</code>. <strong>Ghost duruşta bir nesne değil</strong>{" "}
+        · kenarı ve tabanı yok, üstüne gelince beliriyor: otuz satırın her birinde duran bir üç
+        nokta, otuz nesne demek olurdu.
+      </>
+    ),
     rules: "Kurallar",
     label: (
       <>
@@ -63,6 +84,26 @@ const T = {
       <>
         <code>size</code> takes two values: <code>base</code> (40px, the default) and{" "}
         <code>sm</code> (32px). Anything smaller is <Xref to="mini-button">Mini button</Xref>.
+      </>
+    ),
+    edit: "Edit",
+    favourite: "Favourite",
+    close: "Close",
+    boylar: (
+      <>
+        Three sizes: <code>sm</code> 30px (a table row, a chip strip), <code>base</code> 40 (the
+        strip&apos;s measure · input, button and icon button on one line) and <code>lg</code> 50
+        (an action standing on its own). <strong>The corner grows with the size</strong> (5 · 7 ·
+        8): one radius across three sizes makes the small one look round and the large one sharp.
+      </>
+    ),
+    varyantlar: (
+      <>
+        The fills speak the button&apos;s words: <code>secondary</code> (the default),{" "}
+        <code>primary</code>, <code>soft</code>, <code>danger</code> and <code>ghost</code>.{" "}
+        <strong>Ghost is not an object at rest</strong> · it has no edge and no base and appears
+        under the pointer: a three-dot button on each of thirty rows would otherwise be thirty
+        objects.
       </>
     ),
     rules: "Rules",
@@ -93,21 +134,45 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <Demo
         labels={dict.demo}
-        code={`<IconButton aria-label="${t.add}"><Icon icon={Plus} size="sm" /></IconButton>
-<IconButton aria-label="${t.refresh}"><Icon icon={Refresh} size="sm" /></IconButton>
-<IconButton aria-label="${t.remove}"><Icon icon={Delete} size="sm" /></IconButton>`}
+        code={`<IconButton size="sm" aria-label="…"><Icon icon={Edit} size="xs" /></IconButton>
+<IconButton aria-label="…"><Icon icon={Edit} size="base" /></IconButton>
+<IconButton size="lg" aria-label="…"><Icon icon={Edit} size="lg" /></IconButton>
+
+<IconButton variant="primary" aria-label="…"><Icon icon={Plus} size="base" /></IconButton>
+<IconButton variant="soft" aria-label="…"><Icon icon={Star} size="base" weight="fill" /></IconButton>
+<IconButton variant="danger" aria-label="…"><Icon icon={Delete} size="base" /></IconButton>
+<IconButton variant="ghost" aria-label="…"><Icon icon={Close} size="base" /></IconButton>`}
       >
-        <IconButton aria-label={t.add}>
-          <Icon icon={Plus} size="sm" />
+        {/* Üç boy yan yana: köşenin ölçüyle birlikte büyüdüğü ancak böyle
+            görülüyor. */}
+        <IconButton size="sm" aria-label={t.edit}>
+          <Icon icon={Edit} size="xs" weight="bold" />
         </IconButton>
-        <IconButton aria-label={t.refresh}>
-          <Icon icon={Refresh} size="sm" />
+        <IconButton aria-label={t.edit}>
+          <Icon icon={Edit} size="base" weight="bold" />
         </IconButton>
-        <IconButton aria-label={t.remove}>
-          <Icon icon={Delete} size="sm" />
+        <IconButton size="lg" aria-label={t.edit}>
+          <Icon icon={Edit} size="lg" weight="bold" />
+        </IconButton>
+
+        <span className="h-8 w-px bg-[var(--color-div)]" aria-hidden />
+
+        <IconButton variant="primary" aria-label={t.add}>
+          <Icon icon={Plus} size="base" weight="bold" />
+        </IconButton>
+        <IconButton variant="soft" aria-label={t.favourite}>
+          <Icon icon={Star} size="base" weight="fill" />
+        </IconButton>
+        <IconButton variant="danger" aria-label={t.remove}>
+          <Icon icon={Delete} size="base" weight="bold" />
+        </IconButton>
+        <IconButton variant="ghost" aria-label={t.close}>
+          <Icon icon={Close} size="base" weight="bold" />
         </IconButton>
       </Demo>
 
+      <P>{t.boylar}</P>
+      <P>{t.varyantlar}</P>
       <P>{t.size}</P>
 
       <H2>{t.rules}</H2>

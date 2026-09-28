@@ -1,9 +1,26 @@
-import { Card, Table } from "tamga-ui";
+import Link from "next/link";
+import { Card, Icon, Table } from "tamga-ui";
+import { ArrowUpRight } from "tamga-ui/icons";
 import type { Locale } from "@/i18n/config";
 import { PageHead, H2, H3, P, Note } from "@/components/prose";
 import { Xref } from "@/components/xref";
 import { findPage } from "@/content/nav";
+import { yol } from "@/content/yollar";
 import { CrudOrnegi, type OrnekMetinleri } from "./ornek";
+
+/* Sekiz parça, sayfadaki kullanım sırasıyla: liste, başlık, sayfalayıcı, boş
+   hâl, onay, çekmece, ve ekranın henüz göstermediği iki tanesi. Ad ÇEVRİLMİYOR
+   (bir bileşenin adı bir terim), slug ise adresi üretiyor. */
+const PARCALAR = [
+  { ad: "Table", slug: "table" },
+  { ad: "SortHeader", slug: "sort-header" },
+  { ad: "Pagination", slug: "pagination" },
+  { ad: "EmptyState", slug: "empty-state" },
+  { ad: "ConfirmDialog", slug: "dialog" },
+  { ad: "Sheet", slug: "sheet" },
+  { ad: "MultiSelect", slug: "multi-select" },
+  { ad: "DatePicker", slug: "date-picker" },
+] as const;
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
@@ -78,6 +95,8 @@ const T = {
       sonraki: "Sonraki",
       sayfa: "{n}. sayfa",
       filtreKaldir: "Durum filtresini kaldır",
+      sifirla: "Örneği baştan başlat",
+      tablo: "Kayıt tablosu",
     } satisfies OrnekMetinleri,
     anatomiH: "Anatomi: altı bölge, bu sırayla",
     anatomiP: (
@@ -176,14 +195,6 @@ const T = {
       </>
     ),
     parcalarH: "Kullanılan parçalar",
-    parcalar: (
-      <>
-        <Xref to="table">Table</Xref> · <Xref to="sort-header">SortHeader</Xref> ·{" "}
-        <Xref to="pagination">Pagination</Xref> · <Xref to="empty-state">Empty state</Xref> ·{" "}
-        <Xref to="dialog">ConfirmDialog</Xref> · <Xref to="sheet">Sheet</Xref> ·{" "}
-        <Xref to="multi-select">Multi select</Xref> · <Xref to="date-picker">Date picker</Xref>
-      </>
-    ),
   },
   en: {
     lead: (
@@ -253,6 +264,8 @@ const T = {
       sonraki: "Next",
       sayfa: "Page {n}",
       filtreKaldir: "Remove the state filter",
+      sifirla: "Reset the example",
+      tablo: "Record table",
     } satisfies OrnekMetinleri,
     anatomiH: "Anatomy: six regions, in this order",
     anatomiP: (
@@ -353,14 +366,6 @@ const T = {
       </>
     ),
     parcalarH: "Parts used",
-    parcalar: (
-      <>
-        <Xref to="table">Table</Xref> · <Xref to="sort-header">SortHeader</Xref> ·{" "}
-        <Xref to="pagination">Pagination</Xref> · <Xref to="empty-state">Empty state</Xref> ·{" "}
-        <Xref to="dialog">ConfirmDialog</Xref> · <Xref to="sheet">Sheet</Xref> ·{" "}
-        <Xref to="multi-select">Multi select</Xref> · <Xref to="date-picker">Date picker</Xref>
-      </>
-    ),
   },
 };
 
@@ -401,15 +406,13 @@ function Fiiller({ head, rows }: { head: string[]; rows: string[][] }) {
 
 function Sayilar({ items }: { items: string[][] }) {
   return (
-    <ol className="tamga-prose my-4 flex list-none flex-col gap-3 p-0">
+    <ol className="docs-sayim">
       {items.map(([ad, aciklama], i) => (
-        <li key={ad} className="flex gap-3">
-          <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-(--radius-mark) bg-[var(--color-ink)] font-mono text-micro font-bold text-[var(--color-page)]">
-            {i + 1}
-          </span>
-          <span>
-            <strong className="text-ink">{ad}</strong>
-            <span className="block text-ink-soft">{aciklama}</span>
+        <li key={ad}>
+          <span className="docs-sayim-no">{i + 1}</span>
+          <span className="flex flex-col gap-1">
+            <strong className="docs-sayim-ad">{ad}</strong>
+            <span className="docs-sayim-ac">{aciklama}</span>
           </span>
         </li>
       ))}
@@ -468,7 +471,17 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <Note>{t.yapmaN}</Note>
 
       <H2>{t.parcalarH}</H2>
-      <P>{t.parcalar}</P>
+      {/* ÇİP, cümle içinde nokta ile ayrılmış bağlantı değil: sekiz adın
+          arasından birini bulmak bir LİSTE işi, ve okunacak bir cümle değil
+          gidilecek bir kapı dizisi. */}
+      <div className="docs-parcalar">
+        {PARCALAR.map(({ ad, slug }) => (
+          <Link key={ad} href={yol(lang, slug)} className="docs-parca-cip">
+            {ad}
+            <Icon icon={ArrowUpRight} size="xs" weight="bold" />
+          </Link>
+        ))}
+      </div>
     </>
   );
 }

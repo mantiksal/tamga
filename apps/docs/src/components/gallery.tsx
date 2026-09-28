@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Button, Dialog, Icon, Label } from "tamga-ui";
-import { Check, Copy } from "tamga-ui/icons";
+import { Button, Dialog, Icon } from "tamga-ui";
+import { CaretLeft, CaretRight, Check, Copy } from "tamga-ui/icons";
 import type { Locale as Dil } from "@/i18n/config";
 
 /**
@@ -56,16 +56,23 @@ export type GaleriOgesi = {
   boy?: "blok" | "ekran";
   /**
    * Modalin çerçevesi. Varsayılan olarak bir ekran kendi ince çizgisini alıyor;
-   * `"yok"` içeriğin ÇERÇEVEYİ KENDİ TAŞIDIĞINI söylüyor. "Dört durum" tam bu:
-   * içinde zaten dört çerçeveli ekran var, ve dışına bir çerçeve daha çizmek
-   * kart içinde kart üretiyordu — dört küçük ekran büyük bir kartın kenarına
-   * yapışıyor, alttaki ikisi de kırpılıyordu.
+   * `"yok"` içeriğin ÇERÇEVEYİ KENDİ TAŞIDIĞINI söylüyor · bir kartın içine
+   * ikinci bir kart çizmemek için. Bugün kullanan yok, ve olmaması iyi: bir
+   * ekran görüntüsünün nerede bittiğini söyleyen çizgi her ekranda aynı olmalı.
    */
   tamCerceve?: "ekran" | "yok";
   /** Hem kartta hem modalde çizilen şey. */
   ornek: (lang: Dil) => ReactNode;
   /** Modal içeriği farklıysa (daha uzun bir hâli); yoksa `ornek` kullanılıyor. */
   tam?: (lang: Dil) => ReactNode;
+  /**
+   * Bu öğeyi çizen KİT BİLEŞENİNİN adı (`ListTemplate`).
+   *
+   * Adın kendisi ("Kullanıcılar") ekranın ne olduğunu söylüyor, bu ise hangi
+   * şablondan çıktığını · ve okuyucunun aradığı şey çoğu zaman ikincisi:
+   * "bu ekranı hangi bileşen veriyor".
+   */
+  bilesen?: string;
   /**
    * Kopyalanacak işaretleme. ELLE YAZILIYOR ve bu bilinçli: React ağacından
    * kaynak üretmek mümkün ama çıkan şey okunacak bir örnek değil bir döküm
@@ -113,16 +120,22 @@ export function Galeri({
   labels: {
     hepsi: string;
     kapat: string;
-    sayac: (n: number) => string;
     paket: string;
     tarif: string;
     kopyala: string;
     kopyalandi: string;
+    /** Pencere şeridi: "3 / 12", önceki, sonraki. */
+    sira: (n: number, toplam: number) => string;
+    onceki: string;
+    sonraki: string;
   };
 }) {
   const { kok, olcek } = useSahneOlcegi();
   const [suzgec, setSuzgec] = useState<string | null>(null);
-  const [acik, setAcik] = useState<GaleriOgesi | null>(null);
+  /* AÇIK OLAN BİR İNDEKS, bir nesne değil: ileri/geri gezinmek için sıradaki
+     öğeyi bilmek gerekiyor, ve sıra GÖRÜNEN listenin sırası · bir gruba
+     süzülmüşken "sonraki", o grubun sonrakisi olmalı. */
+  const [acikIndeks, setAcikIndeks] = useState<number | null>(null);
   const [kopyalandi, setKopyalandi] = useState(false);
 
   /* Grup ANAHTARI dilden bağımsız (Türkçe ad), etiketi dile bağlı: dil
@@ -134,6 +147,27 @@ export function Galeri({
   }, [ogeler]);
 
   const gorunen = suzgec ? ogeler.filter((o) => o.grup.tr === suzgec) : ogeler;
+  const acik = acikIndeks === null ? null : (gorunen[acikIndeks] ?? null);
+
+  /* DÖNGÜSEL: sondaki "sonraki" başa dönüyor. Bir katalogda gezinirken
+     sonuncuda takılmak, listeyi kapatıp yeniden açmayı gerektiriyor. */
+  const git = (yon: number) =>
+    setAcikIndeks((i) => (i === null ? null : (i + yon + gorunen.length) % gorunen.length));
+
+  /* ←/→ GEZİNİYOR, Esc kapatıyor · kapatmayı `Dialog` zaten yapıyor. Dinleyici
+     yalnız pencere açıkken bağlı: kapalıyken sayfadaki ok tuşları kaydırma
+     için, ve onları yutmak sayfayı kilitler. */
+  useEffect(() => {
+    if (acikIndeks === null) return;
+    const tus = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") git(1);
+      else if (e.key === "ArrowLeft") git(-1);
+      else return;
+      e.preventDefault();
+    };
+    window.addEventListener("keydown", tus);
+    return () => window.removeEventListener("keydown", tus);
+  }, [acikIndeks, gorunen.length]);
 
   return (
     <div
@@ -141,17 +175,26 @@ export function Galeri({
       className="my-6 flex flex-col gap-10"
       style={olcek ? ({ ["--galeri-olcek" as string]: String(olcek) } as React.CSSProperties) : undefined}
     >
-      {/* ÇİPLER, açılır liste değil: seçenek sayısı az ve hepsi bir bakışta
+      {/* ŞERİT BAŞLIĞIN ALTINA YAPIŞIYOR: on dört kartlık bir katalogda filtre
+          yukarıda kalırsa bir gruba bakmak için her seferinde başa dönmek
+          gerekiyor · token ve ikon sayfalarıyla aynı şerit.
+
+          ÇİPLER, açılır liste değil: seçenek sayısı az ve hepsi bir bakışta
           görünmeli. Bir açılır liste, "ne var ne yok" sorusunu tekrar
-          gizlerdi. */}
-      <div className="flex flex-wrap items-center gap-2">
+          gizlerdi. Her çip KENDİ SAYISINI taşıyor, çünkü "kaç tane" sorusu
+          "hangileri"nden önce geliyor. */}
+      <div className="galeri-serit">
         <button
           type="button"
           className="galeri-cip"
           data-active={suzgec === null}
-          onClick={() => setSuzgec(null)}
+          onClick={() => {
+            setSuzgec(null);
+            setAcikIndeks(null);
+          }}
         >
           {labels.hepsi}
+          <span className="galeri-cip-n">{ogeler.length}</span>
         </button>
         {gruplar.map((g) => (
           <button
@@ -159,12 +202,34 @@ export function Galeri({
             type="button"
             className="galeri-cip"
             data-active={suzgec === g.tr}
-            onClick={() => setSuzgec(g.tr)}
+            /* Süzgeç değişince açık pencere kapanıyor: indeks GÖRÜNEN listeye
+               göre, ve liste değişince aynı indeks başka bir öğeyi gösterirdi. */
+            onClick={() => {
+              setSuzgec(g.tr);
+              setAcikIndeks(null);
+            }}
           >
             {g[lang]}
+            <span className="galeri-cip-n">
+              {ogeler.filter((o) => o.grup.tr === g.tr).length}
+            </span>
           </button>
         ))}
-        <Label className="ml-auto">{labels.sayac(gorunen.length)}</Label>
+        {/* LEJANT: iki kare, iki cümle yerine. Rozetin dolu mu çerçeveli mi
+            olduğu kartlarda görülüyor ama ne DEMEK olduğu görülmüyor.
+
+            YALNIZ LİSTEDE OLAN TÜR YAZILIYOR: şablonların hepsi paket, ve
+            orada bir "tarif" karesi hiç karşılığı olmayan bir sözcük. */}
+        <span className="galeri-lejant">
+          {(["paket", "tarif"] as const)
+            .filter((tur) => ogeler.some((o) => o.tur === tur))
+            .map((tur) => (
+              <span key={tur}>
+                <span className="galeri-lejant-kare" data-tur={tur} />
+                {tur === "paket" ? labels.paket : labels.tarif}
+              </span>
+            ))}
+        </span>
       </div>
 
       {gruplar
@@ -193,9 +258,15 @@ export function Galeri({
                         kart bomboş görünüyordu. Yüksekliği kuyuya bağlayınca
                         ortalama da kuyunun ortası oluyor. */}
                     <span
+                      /* `~=` İLE EŞLEŞİYOR, `*=` İLE DEĞİL · ve bu bir düzeltme:
+                         `[class*='h-dvh']` alt dize arıyor ve `min-h-dvh`i DE
+                         yakalıyordu. Oturum ve kamusal ekranlara `height: 100%`
+                         basılıyor, zemin çerçevenin boyunda kalıyor, içerik
+                         altından taşıyordu · aşağı kaydırınca arka plan bir
+                         yerde kesiliyordu. `~=` boşlukla ayrılmış TOKENI arıyor. */
                       className={`galeri-onizleme docs-kit pointer-events-none block${
                         o.boy === "ekran"
-                          ? " [&_[class*='min-h-dvh']]:min-h-full [&_[class*='h-dvh']]:h-full"
+                          ? " [&_[class~='min-h-dvh']]:min-h-full [&_[class~='h-dvh']]:h-full"
                           : ""
                       }`}
                       data-boy={o.boy ?? "blok"}
@@ -210,7 +281,7 @@ export function Galeri({
                         <button
                           type="button"
                           className="galeri-ac text-left text-subhead font-semibold text-ink"
-                          onClick={() => setAcik(o)}
+                          onClick={() => setAcikIndeks(gorunen.indexOf(o))}
                         >
                           {o.ad[lang]}
                         </button>
@@ -220,6 +291,9 @@ export function Galeri({
                         <span className="galeri-rozet" data-tur={o.tur}>
                           {o.tur === "paket" ? labels.paket : labels.tarif}
                         </span>
+                        {/* Bileşen adı: "Kullanıcılar" ekranın ne olduğunu
+                            söylüyor, `ListTemplate` hangi şablondan çıktığını. */}
+                        {o.bilesen && <code className="galeri-bilesen">{o.bilesen}</code>}
                       </span>
                       <span className="text-small leading-relaxed text-ink-soft">
                         {o.aciklama[lang]}
@@ -235,13 +309,41 @@ export function Galeri({
           oynuyorsun. Bir ekran görüntüsü açan galeri, galeri değil katalog. */}
       <Dialog
         open={acik !== null}
-        onClose={() => setAcik(null)}
+        onClose={() => setAcikIndeks(null)}
         title={acik ? acik.ad[lang] : ""}
         closeLabel={labels.kapat}
         size="wide"
       >
-        {acik && (
+        {acik && acikIndeks !== null && (
           <div className="flex flex-col gap-4">
+            {/* GEZİNME ŞERİDİ: bir katalogda ikinci ekrana bakmak için pencereyi
+                kapatıp yeniden açmak gerekmiyor. Ok tuşları da aynı işi
+                yapıyor, ve sayaç kaçıncısında olduğunu söylüyor. */}
+            <div className="galeri-gezinme">
+              <button
+                type="button"
+                className="tamga-icon-btn tamga-icon-btn-sm"
+                aria-label={labels.onceki}
+                onClick={() => git(-1)}
+              >
+                <Icon icon={CaretLeft} size="xs" />
+              </button>
+              <button
+                type="button"
+                className="tamga-icon-btn tamga-icon-btn-sm"
+                aria-label={labels.sonraki}
+                onClick={() => git(1)}
+              >
+                <Icon icon={CaretRight} size="xs" />
+              </button>
+              <span className="galeri-gezinme-ad">
+                {acik.bilesen && <code>{acik.bilesen}</code>}
+                <span>{acik.grup[lang]}</span>
+                <span className="galeri-gezinme-sira">
+                  {labels.sira(acikIndeks + 1, gorunen.length)}
+                </span>
+              </span>
+            </div>
             <p className="text-ink-soft">{acik.aciklama[lang]}</p>
             {/* EKRAN SINIRLI BİR ÇERÇEVEDE: şablonların bir kısmı `h-dvh`
                 taşıyor ve diyaloğun içinde sayfayı taşırıyordu. Kırpmak
@@ -255,7 +357,7 @@ export function Galeri({
             <div
               className={
                 acik.boy === "ekran" && acik.tamCerceve !== "yok"
-                  ? "docs-kit galeri-ekran [&_[class*='min-h-dvh']]:min-h-full [&_[class*='h-dvh']]:h-full"
+                  ? "docs-kit galeri-ekran [&_[class~='min-h-dvh']]:min-h-full [&_[class~='h-dvh']]:h-full"
                   : "docs-kit"
               }
             >

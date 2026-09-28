@@ -1,8 +1,9 @@
-import { Button, Checkbox, StatusChip, LiveScope } from "tamga-ui";
+import { Button, Checkbox, Icon, StatusChip, LiveScope } from "tamga-ui";
+import { Close, Prohibit } from "tamga-ui/icons";
 import { OffsetLadder } from "@/components/interactive";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
-import { PageHead, H2, P, Note } from "@/components/prose";
+import { PageHead, H2, H3, P, Note, slug } from "@/components/prose";
 import { Demo } from "@/components/demo";
 import { Xref } from "@/components/xref";
 import { findPage } from "@/content/nav";
@@ -34,8 +35,39 @@ const T = {
     critical: "Kritik", warning: "Uyarı", healthy: "Sağlıklı",
 
     ladderWhat: "ne",
-    ladderLegend: `0  basılı hâl · 1  mini buton · 2  buton, kart, input odağı
-3  birincil buton · 4  hover · 6  overlay düzlemi`,
+    ladderLegend: `0  basılı hâl · 2  ikon ve mini düğme, onay kutusu, segment
+3  küçük düğme, anahtar, odak, seçili kart · 4  düğme, editör
+5  kart, Kpi, overlay, düğme hover · 7  canlı Kpi hover`,
+    basamaklar: [
+      "basılı hâl",
+      "merdivende var, bileşende kullanılmıyor",
+      "ikon ve mini düğme, onay kutusu, segment",
+      "küçük düğme, anahtar, odak, seçili kart",
+      "düğme, editör",
+      "kart, Kpi, overlay, düğme hover",
+      "merdivende var, bileşende kullanılmıyor",
+      "canlı Kpi hover",
+    ],
+    yasaAdlari: [
+      "Tek yükseltme formülü",
+      "Dolgu eylem, çerçeve seçim",
+      "Renk sapma ve etkileşim içindir",
+      "Ekranda tek parlaklık nabzı",
+    ],
+    notUsH: "Ne değiliz",
+    notUsList: [
+      "gradyan",
+      "bulanık gölge",
+      "cam efekti",
+      "süpüren shimmer",
+      "yuvarlak hap rozet",
+      "yarım piksel",
+      "overshoot'lu eğri",
+      "büyük harf dönüşümü",
+      "ham renk, ham süre, ham ölçü",
+      "basılamayan bir şeye offset",
+      "ekranda ikinci bir parlaklık nabzı",
+    ],
     whatFor: "Bu sayfa ne işe yarıyor",
     whatForP: (
       <>
@@ -60,15 +92,69 @@ const T = {
     l1: "Yasa 1: tek yükseltme formülü",
     l1p: (
       <>
-        Yükselen her nesne aynı formülden gelir: <strong>1px kenar + N px sert offset, aynı
+        Yükselen her nesne aynı formülden gelir: <strong>bir kenar + N px sert offset, aynı
         renkte.</strong> Bulanıklık yok, opaklık yok. Offset önemi kodlar, renk anlamı kodlar.
+        Kenar iki kalınlıkta: <strong>1.5px basılan şeylerde</strong> (buton, girdi, anahtar),
+        <strong>1px duran yüzeylerde</strong> (kart, panel). Kalın çizgi bir tuşun çizgisi.
       </>
     ),
-    l1ladder: "Merdiven: soldan sağa 0, 1, 2, 3, 4, 6",
+    l1istisnaH: "Tek istisna: katman bir yükseklik değil bir SİNYAL olduğunda",
+    l1istisna: (
+      <>
+        &quot;Aynı renkte&quot; kuralının bir istisnası var ve adı konmuş bir token:{" "}
+        <code>--focus-ring</code>. Odaklanan bir girdi kenarını koyultur ama katmanını{" "}
+        <strong>yumuşak vurgu renginde</strong> atar. Sebep şu: orada offset nesnenin ne kadar
+        yükseldiğini söylemiyor, <em>klavyenin şu an nerede olduğunu</em> söylüyor · yani bir
+        yükseklik değil bir sinyal. Aynı ayrım bildirimde de geçiyor: kutu koyu, katmanı vurgu
+        renginde, çünkü katman &quot;bu kutu yüksek&quot; değil &quot;buraya bak&quot; diyor.
+      </>
+    ),
+    l1istisnaNot: (
+      <>
+        İstisna <strong>adlandırılmış olmakla</strong> sınırlı. Bir bileşen kendi başına farklı
+        renkte bir katman seçemez; yalnız bu iki token kullanılabilir. Adı olmayan bir istisna,
+        istisna değil sızıntıdır: kapı (<code>check-physics</code>) token adına bakıyor, renge
+        değil.
+      </>
+    ),
+    l1ladder: "Merdiven: soldan sağa 0, 1, 2, 3, 4, 5, 6, 7",
     l1press: (
       <>
         Üstüne gel, bas. Birincil buton 3px&apos;ten 4&apos;e çıkar; basınca ikisi de 0&apos;a iner
         ve gerçekten gömülür. Bu bir animasyon değil, aynı formülün başka bir adımı.
+      </>
+    ),
+    l1boy: "Küçülen kontrol katmanını da küçültür",
+    l1boyP: (
+      <>
+        Bir kontrolün <code>sm</code> hâli yalnız kısalmıyor, <strong>merdivende bir basamak
+        da iniyor</strong>: <code>Button</code> 4&apos;te durur, <code>Button size=&quot;sm&quot;</code>{" "}
+        3&apos;te, ve basışı da 3px olur. Sebebi yükseklik bir ÖLÇÜ olması: 32 piksellik bir düğme
+        40 piksellik biriyle aynı kalınlıkta gölge taşırsa küçülen tek şey genişliği olur, ve iki
+        boy yan yana durduğunda göz hangisinin küçük olduğunu gölgeden çıkaramaz. Katmanın RENGİ
+        varyantın, offseti boyun · <code>primary sm</code> 3px&apos;lik accent taşır.
+      </>
+    ),
+    l1kenar: "Kenar iki kalınlıkta, ve hangisi olduğu ölçülüyor",
+    l1kenarP: (
+      <>
+        <strong>1.5px basılan şeylerde</strong> (düğme, ikon düğmesi, girdi, anahtar, segment
+        öğesi, adım işareti), <strong>1px duran yüzeylerde</strong> (kart, Kpi, panel, overlay).
+        Kalın çizgi bir tuşun çizgisidir; yüzey basılmıyor, o yüzden ince kalıyor. Bu cümle uzun
+        süre yalnız yazılıydı ve ikon düğmesi 1px&apos;te kalmıştı · ailesinin tek istisnasıydı ve
+        kimse görmedi, çünkü tek başına bakınca yanlış görünmüyor. Artık{" "}
+        <code>check:physics</code> kuralın G maddesi olarak ölçüyor.
+      </>
+    ),
+    l1hop: "Hover ne kadar yükseltir",
+    l1hopP: (
+      <>
+        Hover merdivende <strong>yukarı çıkar</strong>, ama kaç basamak çıkacağı nesnenin kendi
+        kararı: bir buton bir basamak, bir kart iki basamak yükselebilir. Serbest olan sıçramanın
+        boyu; <strong>değerin kendisi değil</strong>, o hâlâ merdivenden seçiliyor.{" "}
+        <em>Kural bir süre &quot;tam bir basamak&quot; idi, ve merdivende 5 olmadığı için 4&apos;te
+        duran hiçbir şey hover yapamıyordu: iki kural birlikte, yasanın izin verdiği bir yüksekliği
+        kullanılamaz kılıyordu.</em>
       </>
     ),
     l1wrong: (
@@ -82,6 +168,20 @@ const T = {
     ),
 
     l2: "Yasa 2: dolgu eylem demek, çerçeve seçim demek",
+    l2renk: "Seçimin rengi kenar, vurgu değil",
+    l2renkP: (
+      <>
+        Çerçeve seçimi işaretliyor, ama <strong>hangi renkte</strong> sorusu uzun süre
+        cevapsızdı ve kitin içinde iki farklı cevap yaşıyordu. Doğrusu{" "}
+        <code>--color-edge</code>: renk kutusu, tema kartı, ray kartı, segment ve ayar rayı hep
+        bununla işaretleniyor, ve seçili olan bir de <strong>yükseliyor</strong> (3px, düğmenin
+        4&apos;ünden bir basamak altta · çünkü bu bir eylem değil bir DURUM).{" "}
+        <code>--color-accent-line</code> ile çizilen seçim iki şeyi birden kaybediyordu: kitin
+        geri kalanıyla çelişiyordu, ve açık bir markada vurgu ile kenar aynı parlaklığa düşüp
+        seçim tamamen kayboluyordu. Vurgu rengi seçimi değil, <em>seçilenin içindeki işareti</em>{" "}
+        boyar: radyo noktası, çentik, ray çubuğu.
+      </>
+    ),
     l2p: (
       <>
         Sayfada <strong>tek bir dolu buton</strong> olur: birincil eylem. &quot;Buradasın&quot; ya
@@ -167,14 +267,6 @@ const T = {
         yakalamıyor. Kitin fizik kapısı bu yüzden sayıyı değil <em>ilişkiyi</em> ölçüyor.
       </>
     ),
-    notUs: (
-      <>
-        <strong>Ne değiliz:</strong> gradyan yok · bulanık gölge yok · cam efekti yok · süpüren
-        shimmer yok · yuvarlak hap rozet yok · yarım piksel yok · overshoot&apos;lu eğri yok · büyük
-        harf dönüşümü yok · ham renk, ham süre, ham ölçü yok · basılamayan bir şeye offset yok ·
-        ekranda ikinci bir parlaklık nabzı yok.
-      </>
-    ),
   },
   en: {
     save: "Save", cancel: "Cancel", confirm: "Confirm", remove: "Delete",
@@ -182,8 +274,39 @@ const T = {
     critical: "Critical", warning: "Warning", healthy: "Healthy",
 
     ladderWhat: "what",
-    ladderLegend: `0  pressed · 1  mini button · 2  button, card, input focus
-3  primary button · 4  hover · 6  the overlay plane`,
+    ladderLegend: `0  pressed · 2  icon and mini button, checkbox, segment
+3  small button, switch, focus, selected card · 4  button, editor
+5  card, Kpi, overlay, button hover · 7  live Kpi hover`,
+    basamaklar: [
+      "pressed",
+      "on the ladder, unused by any component",
+      "icon and mini button, checkbox, segment",
+      "small button, switch, focus, selected card",
+      "button, editor",
+      "card, Kpi, overlay, button hover",
+      "on the ladder, unused by any component",
+      "live Kpi hover",
+    ],
+    yasaAdlari: [
+      "One lift formula",
+      "Fill is action, outline is selection",
+      "Colour is for deviation and interaction",
+      "One brightness pulse per screen",
+    ],
+    notUsH: "What we are not",
+    notUsList: [
+      "gradients",
+      "blurred shadows",
+      "glass effects",
+      "sweeping shimmer",
+      "pill-shaped badges",
+      "half pixels",
+      "overshooting curve",
+      "uppercase transform",
+      "raw colours, durations or measurements",
+      "offset on anything unpressable",
+      "a second brightness pulse on a screen",
+    ],
     whatFor: "What this page is for",
     whatForP: (
       <>
@@ -208,16 +331,71 @@ const T = {
     l1: "Law 1: one lift formula",
     l1p: (
       <>
-        Every object that lifts comes from the same formula: <strong>a 1px edge plus an N px hard
+        Every object that lifts comes from the same formula: <strong>an edge plus an N px hard
         offset, in the same colour.</strong> No blur, no opacity. The offset encodes importance;
-        the colour encodes meaning.
+        the colour encodes meaning. The edge comes in two weights: <strong>1.5px on things that
+        are pressed</strong> (button, input, switch) and <strong>1px on surfaces that only
+        sit</strong> (card, panel). The heavier line is a key's line.
       </>
     ),
-    l1ladder: "The ladder: 0, 1, 2, 3, 4, 6 from left to right",
+    l1istisnaH: "The one exception: when the offset is a SIGNAL, not a height",
+    l1istisna: (
+      <>
+        There is one exception to &quot;in the same colour&quot;, and it has a name:{" "}
+        <code>--focus-ring</code>. A focused input firms its edge but casts its offset in the{" "}
+        <strong>soft accent</strong>. The reason: there the offset is not saying how high the
+        object sits, it is saying <em>where the keyboard is</em> · a signal, not a height. The
+        same distinction runs through the toast: a dark box with an accent offset, because the
+        offset says &quot;look here&quot;, not &quot;this box is raised&quot;.
+      </>
+    ),
+    l1istisnaNot: (
+      <>
+        The exception is limited to what is <strong>named</strong>. A component cannot pick a
+        differently coloured offset on its own; only those two tokens. An unnamed exception is
+        not an exception but a leak: the gate (<code>check-physics</code>) reads the token name,
+        not the colour.
+      </>
+    ),
+    l1ladder: "The ladder: 0, 1, 2, 3, 4, 5, 6, 7 from left to right",
     l1press: (
       <>
         Hover, then press. The primary button goes from 3px to 4; on press both drop to 0 and are
         genuinely sunk. This is not an animation, it is another step of the same formula.
+      </>
+    ),
+    l1boy: "A smaller control carries a smaller layer",
+    l1boyP: (
+      <>
+        The <code>sm</code> form of a control does not only get shorter, it{" "}
+        <strong>drops a rung</strong>: <code>Button</code> rests at 4,{" "}
+        <code>Button size=&quot;sm&quot;</code> at 3, and its press is 3px. Height is a MEASURE:
+        if a 32px button carries the same layer as a 40px one, the only thing that shrank is its
+        width, and with the two side by side the eye cannot tell which is the small one. The
+        layer&apos;s COLOUR belongs to the variant, its offset to the size, so{" "}
+        <code>primary sm</code> carries 3px of accent.
+      </>
+    ),
+    l1kenar: "The edge has two weights, and which one is measured",
+    l1kenarP: (
+      <>
+        <strong>1.5px on things that press</strong> (button, icon button, input, switch, segment
+        item, step mark), <strong>1px on surfaces that stand</strong> (card, Kpi, panel, overlay).
+        A thick line is the line of a key; a surface does not press, so it stays thin. This
+        sentence sat in the docs for months and was measured nowhere, and the icon button stayed
+        at 1px: the one exception in its own family, and nobody saw it, because on its own it
+        does not look wrong. <code>check:physics</code> now measures it as clause G.
+      </>
+    ),
+    l1hop: "How far a hover lifts",
+    l1hopP: (
+      <>
+        A hover <strong>climbs the ladder</strong>, but how many rungs is the object&apos;s own
+        decision: a button may rise one rung, a card two. What is free is the size of the hop;{" "}
+        <strong>not the value itself</strong>, which is still chosen from the ladder.{" "}
+        <em>The rule read &quot;exactly one rung&quot; for a while, and since the ladder has no 5,
+        nothing resting at 4 could hover at all: the two rules together made a height the law
+        allows unusable.</em>
       </>
     ),
     l1wrong: (
@@ -231,6 +409,21 @@ const T = {
     ),
 
     l2: "Law 2: a fill means an action, an outline means a selection",
+    l2renk: "A selection is marked in the edge, not the accent",
+    l2renkP: (
+      <>
+        An outline marks the selection, but <strong>in which colour</strong> went unanswered for a
+        long time, and the kit carried two different answers. The right one is{" "}
+        <code>--color-edge</code>: the colour swatch, the theme card, the rail card, the segment
+        and the settings rail all mark with it, and a selected thing also{" "}
+        <strong>lifts</strong> (3px, one rung below the button&apos;s 4, because this is a STATE
+        and not an action). Drawing the selection in <code>--color-accent-line</code> lost two
+        things at once: it disagreed with the rest of the kit, and on a light brand the accent and
+        the edge fall to the same lightness and the selection disappears altogether. The accent
+        paints the <em>mark inside</em> the selected thing: the radio dot, the check, the rail
+        bar. Never the selection itself.
+      </>
+    ),
     l2p: (
       <>
         There is <strong>one filled button</strong> on a page: the primary action. Anything that
@@ -318,14 +511,6 @@ const T = {
         number.
       </>
     ),
-    notUs: (
-      <>
-        <strong>What we are not:</strong> no gradients · no blurred shadows · no glass effects · no
-        sweeping shimmer · no pill-shaped badges · no half pixels · no overshooting curve · no
-        uppercase transform · no raw colours, durations or measurements · no offset on anything
-        unpressable · no second brightness pulse on a screen.
-      </>
-    ),
   },
 };
 
@@ -340,7 +525,35 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <H2>{t.whatFor}</H2>
       <P>{t.whatForP}</P>
       <P>{t.character}</P>
-      <Note>{t.notUs}</Note>
+
+      {/* DÖRT YASA BİR HARİTA. Sayfa uzun ve dört yasa onun omurgası: kartlar
+          hem "kaç tane" sorusunu bir bakışta cevaplıyor hem de ilgili başlığa
+          götürüyor. Bağlantı, çünkü gidilen yer sayfanın kendi içinde. */}
+      <div className="my-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {[t.l1, t.l2, t.l3, t.l4].map((baslik, i) => (
+          <a key={baslik} href={`#${slug(baslik)}`} className="docs-yasa-kart">
+            <span className="docs-yasa-no">{i + 1}</span>
+            <strong className="text-small leading-snug">{t.yasaAdlari[i]}</strong>
+          </a>
+        ))}
+      </div>
+
+      {/* SINIRIN LİSTESİ, CÜMLESİ DEĞİL. Aynı on bir madde bir paragraf olarak
+          duruyordu ve okunmuyordu: bir yasak listesi taranır, okunmaz. */}
+      <div className="tamga-card my-5 flex flex-col gap-3 p-4.5">
+        <strong className="flex items-center gap-2 text-small font-extrabold">
+          <Icon icon={Prohibit} size="sm" weight="bold" style={{ color: "var(--color-critical)" }} />
+          {t.notUsH}
+        </strong>
+        <span className="flex flex-wrap gap-2">
+          {t.notUsList.map((n) => (
+            <span key={n} className="docs-degil">
+              <Icon icon={Close} size="xs" weight="bold" style={{ color: "var(--color-critical)" }} />
+              {n}
+            </span>
+          ))}
+        </span>
+      </div>
 
       <H2>{t.l1}</H2>
       <P>{t.l1p}</P>
@@ -349,10 +562,19 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <Demo labels={dict.demo} align="start" grid={false} code={`/* offset  ${t.ladderWhat} */
 ${t.ladderLegend}`}>
         <div className="w-full">
-          <OffsetLadder lang={lang} />
+          <OffsetLadder lang={lang} steps={t.basamaklar} />
         </div>
       </Demo>
       <P>{t.l1ladder}</P>
+
+      <H3>{t.l1kenar}</H3>
+      <P>{t.l1kenarP}</P>
+
+      <H3>{t.l1boy}</H3>
+      <P>{t.l1boyP}</P>
+
+      <H3>{t.l1hop}</H3>
+      <P>{t.l1hopP}</P>
 
       <Demo
         labels={dict.demo}
@@ -363,6 +585,10 @@ ${t.ladderLegend}`}>
         <Button>{t.cancel}</Button>
       </Demo>
       <P>{t.l1press}</P>
+
+      <H2>{t.l1istisnaH}</H2>
+      <P>{t.l1istisna}</P>
+      <Note>{t.l1istisnaNot}</Note>
 
       {/* KARŞI ÖRNEK. Bir kural, çiğnendiğinde ne olduğu görülmeden ikna
           etmez — ve bu üç şeklin neden yasak olduğu yan yana konunca bir
@@ -394,6 +620,9 @@ ${t.ladderLegend}`}>
           </span>
         </span>
       </Demo>
+
+      <H3>{t.l2renk}</H3>
+      <P>{t.l2renkP}</P>
       <P>{t.l2wrong}</P>
       <Note>{t.l2note}</Note>
 

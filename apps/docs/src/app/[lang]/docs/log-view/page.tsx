@@ -43,6 +43,22 @@ const T = {
         yaşanır.
       </>
     ),
+    yeni: (
+      <>
+        Fırlatmamanın bir bedeli var: gelen satır görünmüyor, ve haber verilmezse akış durmuş
+        sanılıyor. <strong>&quot;↓ 12 yeni satır&quot;</strong> düğmesi tam bunun için;
+        sayıyı <code>labels.newLines</code> yazıyor, çünkü çoğul kuralı dile göre değişiyor.
+        Aşağı indiğin an sayaç sıfırlanıyor.
+      </>
+    ),
+    seviye: (
+      <>
+        Seviye rozeti <code>level</code> ile geliyor, rengi <code>tone</code> ile:{" "}
+        <strong>sözcüğü ürün yazar</strong> (&quot;WARN&quot;, &quot;UYARI&quot;), rozeti kit
+        çizer. Rozetin yuvası sabit genişlikte, rozetin kendisi metni kadar · mesaj sütunu her
+        satırda aynı yerden başlasın diye.
+      </>
+    ),
     aria: (
       <>
         <code>role=&quot;log&quot;</code> var ama <code>aria-live</code>{" "}
@@ -87,6 +103,23 @@ const T = {
         bottom&quot; is the default.
       </>
     ),
+    yeni: (
+      <>
+        Not throwing you has a price: the new line is out of sight, and without a word about it
+        the stream looks stopped. That is what the{" "}
+        <strong>&quot;↓ 12 new lines&quot;</strong> button is for; the count is written by{" "}
+        <code>labels.newLines</code>, because plural rules differ by language. The counter
+        resets the moment you reach the bottom.
+      </>
+    ),
+    seviye: (
+      <>
+        The level badge comes from <code>level</code>, its colour from <code>tone</code>:{" "}
+        <strong>the product writes the word</strong> (&quot;WARN&quot;, &quot;UYARI&quot;), the
+        kit draws the badge. The badge&apos;s slot is fixed width while the badge hugs its text,
+        so the message column starts at the same place on every line.
+      </>
+    ),
     aria: (
       <>
         <code>role=&quot;log&quot;</code> is there but <code>aria-live</code> is{" "}
@@ -128,9 +161,10 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
-      <Demo labels={dict.demo} align="start" grid={false} code={`<LogView
+      <Demo yuzey labels={dict.demo} align="start" grid={false} code={`<LogView
   lines={lines}
   label="…"
+  labels={{ newLines: (n) => \`\${n} yeni satır\` }}
   height={320}
   follow
 />`}>
@@ -138,11 +172,13 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
           <LogViewDemo lang={lang} />
         </div>
       </Demo>
+      <P>{t.seviye}</P>
       <P>{t.time}</P>
       <P>{t.wrap}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.scroll}</Note>
+      <Note>{t.yeni}</Note>
       <Note>{t.aria}</Note>
 
       <H2>Props</H2>

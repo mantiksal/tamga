@@ -57,6 +57,23 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    katmanH: "Beş katman",
+    katmanP: (
+      <>
+        Kitin bütün yüzeyleri bu beş basamakta: <strong>çerçeve</strong> en altta (kabuğun
+        kendisi, kesik kenarla çizildi çünkü bir yüzey değil bir <em>alan</em>),{" "}
+        <strong>çukur</strong> sayfanın içine oyulmuş olan, <strong>zemin</strong> sayfanın
+        kendisi, <strong>yüzey</strong> onun üstünde duran kart, ve <strong>yükseltilmiş</strong>{" "}
+        · diyalog ve menü, kenarı koyu ve tabanı bir basamak uzun. Aradaki fark renkten çok{" "}
+        <strong>kenar ve taban</strong>: yükselmeyi kenar taşıyor, dolgu değil.
+      </>
+    ),
+    kCerceve: "Çerçeve",
+    kCukur: "Çukur",
+    kZemin: "Zemin",
+    kYuzey: "Yüzey",
+    kYukseltilmis: "Yükseltilmiş",
+    kYukseltilmisAlt: "diyalog, menü",
     related: "İlgili",
   },
   en: {
@@ -88,6 +105,24 @@ const T = {
       </>
     ),
     rules: "Rules",
+    katmanH: "Five layers",
+    katmanP: (
+      <>
+        Every surface in the kit sits on one of these five steps: the <strong>chrome</strong> at
+        the bottom (the shell itself, drawn with a dashed edge because it is not a surface but an{" "}
+        <em>area</em>), the <strong>sunk</strong> one carved into the page, the{" "}
+        <strong>page</strong> itself, the <strong>surface</strong> standing on it, and the{" "}
+        <strong>raised</strong> one · dialogs and menus, with a dark edge and a base one step
+        longer. What separates them is less colour than <strong>edge and base</strong>: the lift
+        is carried by the edge, not by the fill.
+      </>
+    ),
+    kCerceve: "Chrome",
+    kCukur: "Sunk",
+    kZemin: "Page",
+    kYuzey: "Surface",
+    kYukseltilmis: "Raised",
+    kYukseltilmisAlt: "dialog, menu",
     related: "Related",
   },
 };
@@ -111,6 +146,32 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         </div>
       </Demo>
       <P>{t.when}</P>
+
+      <H2>{t.katmanH}</H2>
+      <Demo labels={dict.demo} align="start" grid={false} code={`<Surface>…</Surface>
+<Surface raised>…</Surface>`}>
+        <div className="grid w-full gap-4.5 rounded-(--radius-card) bg-[var(--color-band)] p-6 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { ad: t.kCerceve, kod: "--color-band", sinif: "border border-dashed border-ink-faint" },
+            { ad: t.kCukur, kod: "--color-sunk", sinif: "border border-line bg-sunk" },
+            { ad: t.kZemin, kod: "--color-page", sinif: "border border-line bg-page" },
+            { ad: t.kYuzey, kod: "--color-shell", sinif: "tamga-card" },
+          ].map((k) => (
+            <span
+              key={k.ad}
+              className={`flex h-28 flex-col justify-end gap-0.5 rounded-(--radius-btn) p-3 ${k.sinif}`}
+            >
+              <strong className="text-small">{k.ad}</strong>
+              <span className="font-mono text-caption text-ink-faint">{k.kod}</span>
+            </span>
+          ))}
+          <Surface raised className="flex h-28 flex-col justify-end gap-0.5 p-3">
+            <strong className="text-small">{t.kYukseltilmis}</strong>
+            <span className="font-mono text-caption text-ink-faint">{t.kYukseltilmisAlt}</span>
+          </Surface>
+        </div>
+      </Demo>
+      <P>{t.katmanP}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.gap}</Note>

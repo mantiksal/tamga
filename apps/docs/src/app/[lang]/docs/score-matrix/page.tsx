@@ -27,12 +27,41 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: Loc
  * Bir İngilizce sayfada "Kaydet" yazan bir buton, çevrilmemiş bir sayfadan
  * daha kötüdür: sayfa çevrilmiş görünür, ama ekrandaki şey değildir.
  */
+/* Bir mağazanın haftası: gündüz yoğun, gece boş, hafta sonu öğlen zirve.
+   Uydurma bir desen değil · tasarımın örneği de tam bunu gösteriyor. */
+const SAATLER = ["08", "10", "12", "14", "16", "18", "20", "22", "00", "02", "04", "06"];
+const YOGUNLUK = [
+  [8, 34, 38, 36, 33, 9, 6, 0, 0, 0, 0, 0],
+  [16, 18, 36, 38, 34, 15, 7, 0, 0, 0, 0, 0],
+  [17, 33, 37, 35, 16, 14, 6, 0, 0, 0, 0, 0],
+  [15, 32, 36, 34, 31, 13, 5, 0, 0, 0, 0, 0],
+  [30, 31, 44, 46, 33, 30, 14, 7, 0, 0, 0, 0],
+  [14, 45, 46, 44, 32, 15, 13, 6, 5, 0, 0, 0],
+  [29, 30, 45, 46, 44, 28, 6, 5, 0, 0, 0, 0],
+];
+
 const T = {
   tr: {
     lead: (
       <>
-        Aynı okumanın kare ızgara hâli. Halka bir <em>oranı</em>, matris bir <em>doluluğu</em>
-        gösterir: kaç hücre yandı, kaçı boş kaldı; sayıyı saymadan görürsün.
+        İki boyutlu <strong>yoğunluk ızgarası</strong>: satır bir bandı (gün, bölge), sütun
+        ötekini (saat, hafta) taşıyor, ve hücrenin rengi kesişimdeki <em>miktarı</em> söylüyor.
+        Skor göstergeleriyle aynı aileden değil · onlar tek bir sayıyı okutuyor, bu bir{" "}
+        <strong>desen</strong> gösteriyor: yoğunluğun nerede toplandığını, saymadan.
+      </>
+    ),
+    az: "Az",
+    cok: "Çok",
+    gunler: ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz"],
+    siparisBaslik: "Gün ve saate göre sipariş sayısı",
+    hucreAd: (gun: string, saat: string, n: number) => `${gun} ${saat}: ${n} sipariş`,
+    miktarP: (
+      <>
+        Renk burada bir <strong>durum</strong> değil bir <strong>miktar</strong>: o yüzden ton
+        ailesinden değil markanın kendi rampasından geliyor, ve beş basamak bir gözün yanında
+        sayı olmadan okuyabileceği en fazlası. Basamak ızgaranın <strong>kendi en
+        büyüğüne</strong> göre hesaplanıyor · mutlak bir eşik, bir ızgarayı başka bir haftanın
+        rakamlarıyla kıyaslanamaz yapardı.
       </>
     ),
     rel: (
@@ -71,8 +100,25 @@ const T = {
   en: {
     lead: (
       <>
-        The same reading as a square grid. A ring shows a <em>ratio</em>; a matrix shows{" "}
-        <em>fill</em>: how many cells lit and how many stayed empty; you see it without counting.
+        A two-dimensional <strong>density grid</strong>: the rows carry one band (a weekday, a
+        region), the columns the other (an hour, a week), and a cell's colour reports the{" "}
+        <em>amount</em> at their crossing. Not a relative of the score gauges · those read out a
+        single number, this one shows a <strong>pattern</strong>: where the density gathers,
+        without counting.
+      </>
+    ),
+    az: "Few",
+    cok: "Many",
+    gunler: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    siparisBaslik: "Orders by day and hour",
+    hucreAd: (gun: string, saat: string, n: number) => `${gun} ${saat}: ${n} orders`,
+    miktarP: (
+      <>
+        Colour here is not a <strong>state</strong> but an <strong>amount</strong>: it comes from
+        the brand's own ramp rather than the tone family, and five steps is about the most an eye
+        reads off a grid with no number beside it. The step is computed against the grid's{" "}
+        <strong>own maximum</strong> · an absolute threshold would make one grid impossible to
+        compare with another week's numbers.
       </>
     ),
     rel: (
@@ -123,19 +169,24 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <Demo
         labels={dict.demo}
         align="start"
-        code={`<ScoreMatrix value={91} delta={1.8} label="${t.score(91)}" bandLabel="${t.good}" />`}
+        code={`<ScoreMatrix
+  label="${t.siparisBaslik}"
+  columns={["08", "10", "12", "14", "16", "18", "20", "22", "00", "02", "04", "06"]}
+  rows={[{ label: "${t.gunler[0]}", values: [8, 34, 38, 36, 33, 9, 6, 0, 0, 0, 0, 0] }, …]}
+  legend={{ low: "${t.az}", high: "${t.cok}" }}
+/>`}
       >
-        <div className="flex w-full flex-wrap items-start gap-10">
-          <ScoreMatrix value={91} delta={1.8} label={t.score(91)} bandLabel={t.good} />
-          <ScoreMatrix value={54} delta={-6.4} label={t.score(54)} bandLabel={t.low} />
+        <div className="w-full">
+          <ScoreMatrix
+            label={t.siparisBaslik}
+            columns={SAATLER}
+            rows={YOGUNLUK.map((values, i) => ({ label: t.gunler[i] ?? "", values }))}
+            legend={{ low: t.az, high: t.cok }}
+            cellTitle={(gun, saat, n) => t.hucreAd(gun, saat, n)}
+          />
         </div>
       </Demo>
-
-      <H2>{t.bands}</H2>
-      <pre className="docs-code my-4">{`>= 90   positive
->= 70   caution
-<  70   danger`}</pre>
-      <P>{t.bandsWhy}</P>
+      <P>{t.miktarP}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.labelRule}</Note>

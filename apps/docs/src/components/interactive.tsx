@@ -1,20 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  IconButton,
+  Badge,
+  Field,
+  Input,
+  BarChart,
   Button,
   Dialog,
   Sheet,
   Popover,
+  ConfirmDialog,
   DropdownMenu,
+  MiniButton,
   Select,
   Toast,
   ToastViewport,
   Icon,
   Checkbox,
   RadioGroup,
+  StackedBarChart,
   Switch,
   Segmented,
+  TabPanel,
   Tabs,
   Pagination,
   SortHeader,
@@ -22,6 +31,7 @@ import {
   SelectRow,
   SelectionBar,
   Card,
+  CellActions,
   Table,
   NumberInput,
   Combobox,
@@ -44,8 +54,9 @@ import {
   type UploadItem,
   RichText,
   TreeSelect,
+  type Tone,
 } from "tamga-ui";
-import { More, Delete, Download, Refresh } from "tamga-ui/icons";
+import { Archive, Bell, Copy, CurrencyDollar, Delete, Download, Edit, Filter, More, Print, Refresh, Settings, Truck } from "tamga-ui/icons";
 import { Demo, type DemoLabels } from "@/components/demo";
 
 /**
@@ -142,8 +153,11 @@ const D = {
     prevMonth: "Önceki ay",
     nextMonth: "Sonraki ay",
     openCalendar: "Takvimi aç",
-    dropImages: "Görselleri buraya sürükle",
-    browse: "Dosya seç",
+    dropImages: "Görselleri buraya bırak ya da",
+    browse: "bilgisayardan seç",
+    uploadHint: "PNG, JPG veya WEBP · en fazla 10 MB",
+    cancelUpload: "Yüklemeyi iptal et",
+    badType: "desteklenmeyen dosya türü",
     remove: "Kaldır",
     moveLeft: "Sola al",
     moveRight: "Sağa al",
@@ -220,8 +234,11 @@ const D = {
     prevMonth: "Previous month",
     nextMonth: "Next month",
     openCalendar: "Open the calendar",
-    dropImages: "Drag images here",
-    browse: "Choose files",
+    dropImages: "Drop images here or",
+    browse: "choose from your computer",
+    uploadHint: "PNG, JPG or WEBP · 10 MB at most",
+    cancelUpload: "Cancel the upload",
+    badType: "unsupported file type",
     remove: "Remove",
     moveLeft: "Move left",
     moveRight: "Move right",
@@ -232,6 +249,25 @@ const D = {
 /** Her örnek dili alır; hiçbiri kendi başına bir dil varsaymaz. */
 type L = { lang: Locale };
 
+
+/**
+ * Çubuk grafik — sayılar YEREL biçimde.
+ *
+ * Bileşen dili bilmiyor ve bilmemeli; biçimleyici çağırandan geliyor. Ama bir
+ * fonksiyon prop'u sunucu bileşeninden istemciye GEÇEMİYOR (React sunucudan
+ * istemciye fonksiyon göndermiyor), o yüzden demo burada: sayfa sunucuda kalıyor,
+ * biçimleyici istemcide kuruluyor. 3380 → "3.380" (tr) · "3,380" (en).
+ */
+export function BarChartDemo({ lang, bars }: L & { bars: readonly { label: string; value: number }[] }) {
+  return (
+    <BarChart
+      bars={bars}
+      className="w-full"
+      labelWidth="7rem"
+      formatValue={(v) => v.toLocaleString(lang === "tr" ? "tr-TR" : "en-US")}
+    />
+  );
+}
 
 export function DialogDemo({ lang }: L) {
   const d = D[lang];
@@ -261,6 +297,38 @@ export function DialogDemo({ lang }: L) {
   );
 }
 
+/**
+ * Onay diyaloğu · ve ÖN KOŞUL. Demoda kutucuk var, çünkü `confirmDisabled`ın
+ * anlattığı şey ancak açılıp kapanınca görülüyor: aynı diyalog, bir kez
+ * onaylanabilir bir kez onaylanamaz, ve ikinci hâlde gövde SEBEBİ yazıyor.
+ */
+export function ConfirmDemo({ lang }: L) {
+  const d = D[lang];
+  const n = N[lang];
+  const [open, setOpen] = useState(false);
+  const [engel, setEngel] = useState(false);
+  return (
+    <div className="flex flex-wrap items-center gap-5">
+      <Button variant="danger" onClick={() => setOpen(true)}>
+        {n.musteriSil}
+      </Button>
+      <Checkbox label={n.acikSiparis} checked={engel} onChange={setEngel} />
+      <ConfirmDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        onConfirm={() => setOpen(false)}
+        title={n.musteriSilBaslik}
+        confirmLabel={n.sil}
+        cancelLabel={d.cancel}
+        closeLabel={d.close}
+        confirmDisabled={engel}
+      >
+        {engel ? n.acikSiparisGovde : n.musteriSilGovde}
+      </ConfirmDialog>
+    </div>
+  );
+}
+
 export function SheetDemo({ lang }: L) {
   const d = D[lang];
   const [open, setOpen] = useState(false);
@@ -286,48 +354,129 @@ export function SheetDemo({ lang }: L) {
 
 export function PopoverDemo({ lang }: L) {
   const d = D[lang];
+  const n = N[lang];
+  /* Tasarımın kendi paneli: bir fiyat aralığı formu. Popover'ın asıl sözü
+     "içinde form barındırabilir" ve bunu ancak gerçek bir form gösteriyor. */
   return (
     <Popover
-      trigger={<Button>{d.filters}</Button>}
-      title={d.filter}
-      closeLabel={d.close}
-      footer={<Button size="sm">{d.clear}</Button>}
+      trigger={
+        <Button>
+          <Icon icon={Filter} size="xs" />
+          {d.filters}
+        </Button>
+      }
+      title={n.fiyatAraligi}
+      footer={
+        <>
+          <Button size="sm" variant="ghost">
+            {d.clear}
+          </Button>
+          <Button size="sm" variant="primary">
+            {n.uygula}
+          </Button>
+        </>
+      }
     >
-      <p>{d.popoverBody}</p>
+      <span className="flex gap-2">
+        <Input defaultValue="₺200" aria-label={n.enAz} className="tamga-sayi" />
+        <Input defaultValue="₺2.000" aria-label={n.enCok} className="tamga-sayi" />
+      </span>
     </Popover>
+  );
+}
+
+/**
+ * Hücre eylemleri · menü hücre sınırında KESİLMEDİĞİ için var.
+ *
+ * Demoda menünün açılabiliyor olması şart: kapalı hâlde bu bileşenin ne
+ * yaptığı görünmüyor, ve gösterdiği şey tam olarak kırpmanın kapalı olması.
+ */
+export function CellActionsDemo({ lang }: L) {
+  const d = D[lang];
+  const n = N[lang];
+  return (
+    <Card className="w-full">
+      <Table>
+        <tbody>
+          {ROWS.slice(0, 3).map((r) => (
+            <tr key={r.id}>
+              <td className="font-semibold">{r.name}</td>
+              <td className="font-mono text-small text-ink-faint">{r.id.toUpperCase()}</td>
+              <CellActions>
+                <MiniButton aria-label={n.duzenle} title={n.duzenle}>
+                  <Icon icon={Edit} size="xs" />
+                </MiniButton>
+                <DropdownMenu
+                  align="end"
+                  width={190}
+                  trigger={
+                    <MiniButton aria-label={d.more} title={d.more}>
+                      <Icon icon={More} size="xs" />
+                    </MiniButton>
+                  }
+                  items={[
+                    { label: n.cogalt, icon: <Icon icon={Copy} size="xs" />, onSelect: () => {} },
+                    { label: n.arsivle, icon: <Icon icon={Archive} size="xs" />, onSelect: () => {} },
+                    { kind: "separator" },
+                    { label: d.delete, icon: <Icon icon={Delete} size="xs" />, state: "danger", onSelect: () => {} },
+                  ]}
+                />
+              </CellActions>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </Card>
   );
 }
 
 export function MenuDemo({ lang }: L) {
   const d = D[lang];
+  const n = N[lang];
   return (
     <DropdownMenu
       align="start"
+      width={240}
       trigger={
         <button className="tamga-icon-btn" aria-label={d.more}>
           <Icon icon={More} size="sm" />
         </button>
       }
+      /* Kısayol METNİ menüde, BAĞI değil: tuşu bağlayan sayfa, menü yalnız
+         söylüyor. Bir menünün global kısayol bağlaması, zaten bağlamış olan
+         sayfayla çakışırdı. */
       items={[
-        { label: d.refresh, icon: <Icon icon={Refresh} size="xs" />, onSelect: () => {} },
-        { label: d.exportAll, icon: <Icon icon={Download} size="xs" />, onSelect: () => {} },
+        { kind: "label", label: n.siparis },
+        { label: n.kargola, icon: <Icon icon={Download} size="xs" />, shortcut: "⌘K", onSelect: () => {} },
+        { label: n.fatura, icon: <Icon icon={Print} size="xs" />, shortcut: "⌘P", onSelect: () => {} },
+        { label: d.refresh, icon: <Icon icon={Refresh} size="xs" />, shortcut: "R", onSelect: () => {} },
         { kind: "separator" },
-        { label: d.delete, icon: <Icon icon={Delete} size="xs" />, state: "danger", onSelect: () => {} },
+        { label: n.iptal, icon: <Icon icon={Delete} size="xs" />, state: "danger", shortcut: "⌫", onSelect: () => {} },
       ]}
     />
   );
 }
 
+/* Referansın kendi listesi: kargo firmaları, ve her seçeneğin sağında sessiz
+   bir teslim süresi · seçimi belirleyen şey firmanın adı kadar o süre. */
 export function SelectDemo({ lang }: L) {
   const d = D[lang];
+  const n = N[lang];
   const [value, setValue] = useState<string>();
   return (
-    <div className="w-64">
+    <div className="w-70">
       <Select
-        options={d.statuses}
+        icon={Truck}
+        options={[
+          { value: n.kargo1, hint: n.sure1 },
+          { value: n.kargo2, hint: n.sure2 },
+          { value: n.kargo3, hint: n.sure3 },
+          { value: n.kargo4, hint: n.sure4 },
+        ]}
         value={value}
         onChange={setValue}
-        placeholder={d.pickStatus}
+        placeholder={n.kargoSec}
+        aria-label={n.kargoFirmasi}
       />
     </div>
   );
@@ -427,9 +576,12 @@ const EDITOR_ETIKET = {
   },
 };
 
+/* Tasarımın kendi içeriği: bir paragraf, içinde bir bağlantı, altında madde
+   listesi · editörün sözü "biçimli metin" ve bunu ancak biçimli bir metin
+   gösteriyor. Düz tek satır, araç çubuğunun ne işe yaradığını söylemiyordu. */
 const EDITOR_BASLANGIC = {
-  tr: "<p>Gün boyu konfor sağlayan <strong>hafif taban</strong> ve nefes alan üst yapı.</p>",
-  en: "<p>An <strong>ultralight sole</strong> and a breathable upper, all day long.</p>",
+  tr: '<p>%100 keten kumaştan, rahat kesim yazlık gömlek. <a href="#rich-text">Beden tablosuna</a> göz at.</p><ul><li>Nefes alan doku</li><li>Sedef düğmeler</li><li>30°C\u2019de yıkama</li></ul>',
+  en: '<p>A relaxed-fit summer shirt in 100% linen. Check the <a href="#rich-text">size chart</a>.</p><ul><li>Breathable weave</li><li>Mother-of-pearl buttons</li><li>Wash at 30°C</li></ul>',
 };
 
 export function RichTextDemo({ lang }: L) {
@@ -439,7 +591,8 @@ export function RichTextDemo({ lang }: L) {
       <RichText
         value={html}
         onChange={setHtml}
-        allow={["bold", "italic", "link", "h3", "ul", "ol"]}
+        allow={["bold", "italic", "link", "ul", "ol"]}
+        hint={lang === "tr" ? "Markdown destekler" : "Markdown supported"}
         labels={EDITOR_ETIKET[lang]}
         ariaLabel={lang === "tr" ? "Açıklama" : "Description"}
         rows={5}
@@ -450,10 +603,13 @@ export function RichTextDemo({ lang }: L) {
 
 export function ToastDemo({ lang }: L) {
   const d = D[lang];
-  const [items, setItems] = useState<{ id: number; tone: "positive" | "danger"; title: string }[]>([]);
+  const n = N[lang];
+  const [items, setItems] = useState<
+    { id: number; tone: "positive" | "danger"; title: string; undo?: boolean }[]
+  >([]);
 
-  function push(tone: "positive" | "danger", title: string) {
-    setItems((s) => [{ id: Date.now(), tone, title }, ...s].slice(0, 3));
+  function push(tone: "positive" | "danger", title: string, undo?: boolean) {
+    setItems((s) => [{ id: Date.now(), tone, title, undo }, ...s].slice(0, 3));
   }
 
   return (
@@ -463,6 +619,9 @@ export function ToastDemo({ lang }: L) {
         <Button variant="danger" onClick={() => push("danger", d.notSaved)}>
           {d.failure}
         </Button>
+        {/* Eylemli bildirim 8 saniye duruyor, ötekiler 5: "Geri al"a uzanan
+            elin önce cümleyi okuması gerekiyor. */}
+        <Button onClick={() => push("positive", n.silindi, true)}>{n.geriAlmali}</Button>
       </div>
       <ToastViewport position="bottom-right">
         {items.map((t) => (
@@ -470,6 +629,13 @@ export function ToastDemo({ lang }: L) {
             key={t.id}
             tone={t.tone}
             title={t.title}
+            action={
+              t.undo ? (
+                <Button size="sm" onClick={() => setItems((s) => s.filter((x) => x.id !== t.id))}>
+                  {n.geriAl}
+                </Button>
+              ) : undefined
+            }
             dismissLabel={d.close}
             onDismiss={() => setItems((s) => s.filter((x) => x.id !== t.id))}
           />
@@ -520,49 +686,88 @@ export function RadioDemo({ lang }: L) {
  */
 export function LookDemo({ lang }: L) {
   const d = D[lang];
-  const [v, setV] = useState("team");
-  const secenekler = [
-    { value: "basic", ad: d.lookBasic, ipucu: d.lookBasicHint },
-    { value: "team", ad: d.lookTeam, ipucu: d.lookTeamHint },
-    { value: "scale", ad: d.lookScale, ipucu: d.lookScaleHint },
+  const n = N[lang];
+  const [v, setV] = useState("magaza");
+  const [kim, setKim] = useState("vip");
+  /* Tasarımın kendi ikilisi: solda fiyatlı kart seçenekleri, sağda düz liste ·
+     kart tipi tam da "seçenekler arasında açıklama ya da fiyat farkı olduğunda"
+     kullanılıyor, ve iki biçim yan yana durunca fark okunuyor. */
+  const kargolar = [
+    { value: "standart", ad: n.kargoStandart, alt: n.kargoStandartAlt, fiyat: "₺49" },
+    { value: "hizli", ad: n.kargoHizli, alt: n.kargoHizliAlt, fiyat: "₺89" },
+    { value: "magaza", ad: n.kargoMagaza, alt: n.kargoMagazaAlt, fiyat: n.ucretsiz },
   ];
   return (
-    <div className="flex w-full flex-col gap-5">
+    <div className="flex w-full flex-wrap items-start gap-8">
       <RadioGroup
         look="card"
-        label={d.lookPlan}
+        label={n.teslimat}
         value={v}
         onChange={setV}
-        options={secenekler.map((o) => ({
+        className="w-85 max-w-full"
+        options={kargolar.map((o) => ({
           value: o.value,
           label: (
-            <>
-              <span className="text-body text-ink block font-medium">{o.ad}</span>
-              <span className="text-caption text-ink-faint mt-1 block">{o.ipucu}</span>
-            </>
+            <span className="flex w-full items-center gap-3">
+              <span className="min-w-0 flex-1">
+                <span className="text-body block font-semibold">{o.ad}</span>
+                <span className="text-caption text-ink-faint block">{o.alt}</span>
+              </span>
+              <span className="shrink-0 font-mono text-small font-bold">{o.fiyat}</span>
+            </span>
           ),
         }))}
+      />
+      <RadioGroup
+        label={n.kimeGorunsun}
+        value={kim}
+        onChange={setKim}
+        options={[
+          { value: "tum", label: n.tumMusteriler },
+          { value: "yeni", label: n.yeniMusteriler },
+          { value: "vip", label: n.vipMusteriler },
+        ]}
       />
       <RadioGroup
         look="chip"
         label={d.lookPlan}
         value={v}
         onChange={setV}
-        options={secenekler.map((o) => ({ value: o.value, label: o.ad }))}
+        options={kargolar.map((o) => ({ value: o.value, label: o.ad }))}
       />
     </div>
   );
 }
 
 export function SwitchDemo({ lang }: L) {
-  const d = D[lang];
-  const [on, setOn] = useState(true);
-  const [off, setOff] = useState(false);
+  const n = N[lang];
+  const [ayarlar, setAyarlar] = useState([true, false, true]);
+  /* ANAHTARIN ASIL YERİ BİR AYAR LİSTESİ: tek başına duran bir anahtar neyi
+     açıp kapattığını söylemiyor · adı ve altındaki cümle onun yarısı. */
+  const satirlar = [
+    { ad: n.swSiparis, alt: n.swSiparisAlt },
+    { ad: n.swBakim, alt: n.swBakimAlt },
+    { ad: n.swStok, alt: n.swStokAlt },
+  ];
   return (
-    <div className="flex items-center gap-6">
-      <Switch on={on} onChange={setOn} label={d.notifications} />
-      <Switch on={off} onChange={setOff} label={d.maintenance} />
-      <Switch on={false} label={d.disabled} disabled />
+    <div className="flex w-full max-w-130 flex-col">
+      {satirlar.map((r, i) => (
+        <span
+          key={r.ad}
+          className="flex items-center gap-4 py-3"
+          style={{ borderBottom: "1px dashed var(--color-line)" }}
+        >
+          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span className="text-body font-bold">{r.ad}</span>
+            <span className="text-small text-ink-faint">{r.alt}</span>
+          </span>
+          <Switch
+            on={ayarlar[i] ?? false}
+            onChange={(v) => setAyarlar((a) => a.map((x, j) => (j === i ? v : x)))}
+            label={r.ad}
+          />
+        </span>
+      ))}
     </div>
   );
 }
@@ -584,25 +789,85 @@ export function SegmentedDemo({ lang }: L) {
   );
 }
 
+/**
+ * İki tür bir arada · tarif ikisini yan yana gösteriyor ve sebebi görünür:
+ * çizgili şerit SAYFANIN görünümlerini, klasör ise bir YÜZEYİN bölümlerini
+ * ayırıyor.
+ */
 export function TabsDemo({ lang }: L) {
   const d = D[lang];
-  const [t, setT] = useState("general");
+  const n = N[lang];
+  const [t, setT] = useState("all");
+  const [k, setK] = useState("general");
+
+  const durum: Record<string, string> = {
+    all: n.tumuMetin,
+    live: n.yayindaMetin,
+    draft: n.taslakMetin,
+    archive: n.arsivMetin,
+  };
+  const klasor: Record<string, string> = {
+    general: n.genelMetin,
+    price: n.fiyatMetin,
+    stock: n.stokMetin,
+  };
+
   return (
-    <div className="w-full">
-      <Tabs
-        label={d.productTabs}
-        value={t}
-        onChange={setT}
-        items={[
-          { value: "general", label: d.general },
-          { value: "stock", label: d.stock },
-          { value: "images", label: d.images },
-        ]}
-      />
-      <p className="pt-5 text-[length:var(--docs-small)] text-ink-faint">
-        {d.activeTab}: {({ general: d.general, stock: d.stock, images: d.images } as Record<string, string>)[t]}
-      </p>
+    <div className="flex w-full flex-col gap-8">
+      <div className="flex flex-col gap-3.5">
+        <Tabs
+          label={d.productTabs}
+          value={t}
+          onChange={setT}
+          items={[
+            { value: "all", label: n.tumu, count: 128 },
+            { value: "live", label: n.yayinda, count: 96 },
+            { value: "draft", label: n.taslak, count: 21 },
+            { value: "archive", label: n.arsiv, count: 11 },
+          ]}
+        />
+        <p className="text-[length:var(--docs-small)] text-ink-faint">{durum[t]}</p>
+      </div>
+
+      <div className="flex flex-col">
+        <Tabs
+          look="folder"
+          label={n.bolumler}
+          value={k}
+          onChange={setK}
+          items={[
+            { value: "general", label: n.genel },
+            { value: "price", label: n.fiyat },
+            { value: "stock", label: n.stok },
+          ]}
+        />
+        <TabPanel className="text-ink-faint">{klasor[k]}</TabPanel>
+      </div>
     </div>
+  );
+}
+
+/* On dört gün, üç kanal · kırılımın işi toplamı BÖLMEK, o yüzden seriler
+   gerçekçi oranlarda: web en büyük, pazaryeri en küçük ve dalgalı. */
+const YIGIN = {
+  web: [41, 37, 50, 46, 61, 57, 70, 44, 48, 54, 67, 72, 79, 76],
+  mobil: [30, 34, 30, 41, 38, 45, 52, 32, 36, 40, 47, 52, 58, 55],
+  pazar: [12, 15, 10, 17, 21, 19, 24, 14, 17, 20, 22, 25, 27, 29],
+};
+
+export function StackedBarDemo({ lang }: L) {
+  const n = N[lang];
+  const etiketler = YIGIN.web.map((_, i) => `${i + 1} ${n.eylul}`);
+  return (
+    <StackedBarChart
+      labels={etiketler}
+      height={260}
+      series={[
+        { name: n.web, values: YIGIN.web },
+        { name: n.mobil, values: YIGIN.mobil },
+        { name: n.pazaryeri, values: YIGIN.pazar },
+      ]}
+    />
   );
 }
 
@@ -635,12 +900,22 @@ const ROWS = [
   { id: "r3", name: "A Love Supreme · LP", stock: 0 },
 ];
 
+/**
+ * İKİ SÜTUN DA SIRALANABİLİR, biri değil: sıralı olmayan sütunun nötr glifi
+ * ancak o zaman görünüyor, ve bu sayfanın anlattığı üç durumdan biri o.
+ */
 export function DataTableDemo({ lang }: L) {
   const d = D[lang];
-  const [dir, setDir] = useState<SortDirection>("desc");
+  const [sira, setSira] = useState<{ key: "name" | "stock"; dir: SortDirection }>({
+    key: "stock",
+    dir: "desc",
+  });
   const [sel, setSel] = useState<string[]>(["r1"]);
 
-  const sorted = [...ROWS].sort((a, b) => (dir === "desc" ? b.stock - a.stock : a.stock - b.stock));
+  const sorted = [...ROWS].sort((a, b) => {
+    const yon = sira.dir === "desc" ? -1 : 1;
+    return sira.key === "stock" ? (a.stock - b.stock) * yon : a.name.localeCompare(b.name) * yon;
+  });
   const all = sel.length === ROWS.length;
 
   return (
@@ -667,8 +942,18 @@ export function DataTableDemo({ lang }: L) {
                 label={d.selectAll}
               />
             </th>
-            <th>{d.product}</th>
-            <SortHeader direction={dir} onSort={setDir} align="right" className="w-24">
+            <SortHeader
+              direction={sira.key === "name" ? sira.dir : undefined}
+              onSort={(dir) => setSira({ key: "name", dir })}
+            >
+              {d.product}
+            </SortHeader>
+            <SortHeader
+              direction={sira.key === "stock" ? sira.dir : undefined}
+              onSort={(dir) => setSira({ key: "stock", dir })}
+              align="right"
+              className="w-24"
+            >
               {d.stock}
             </SortHeader>
           </tr>
@@ -693,30 +978,129 @@ export function DataTableDemo({ lang }: L) {
   );
 }
 
+/**
+ * Rozet · canlı sayaç.
+ *
+ * Tarifte "dene" satırı var, çünkü rozetin üç kuralı ancak DEĞİŞTİRİLİNCE
+ * görülüyor: sıfırda çizilmiyor (ikon yerinden oynamıyor), `max`ı geçince
+ * "99+" oluyor, ve ton yalnız rengi değiştiriyor. Üç sabit örnek bunu
+ * gösteremiyordu.
+ */
+export function BadgeDemo({
+  lang,
+  labels,
+  unread,
+  notifications,
+}: L & { labels: DemoLabels; unread: string; notifications: string }) {
+  const [count, setCount] = useState(3);
+  const [tone, setTone] = useState<Tone>("danger");
+  const kod = `<Badge count={${count}}${tone === "danger" ? "" : ` tone="${tone}"`} label="${unread}">
+  <IconButton aria-label="${notifications}"><Icon icon={Bell} size="sm" /></IconButton>
+</Badge>`;
+
+  return (
+    <Demo
+      labels={labels}
+      code={kod}
+      dene={
+        <>
+          <span className="flex shrink-0 items-center gap-2.5">
+            <span className="font-mono text-caption text-ink-faint">count</span>
+            <NumberInput
+              value={count}
+              onChange={(n) => setCount(Math.max(0, n ?? 0))}
+              min={0}
+              max={999}
+              labels={{ increase: "+1", decrease: "−1" }}
+              className="w-28"
+            />
+          </span>
+          <span className="flex shrink-0 items-center gap-1.5">
+            {[0, 3, 99, 140].map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => setCount(n)}
+                className="tamga-mini-btn font-mono"
+                aria-pressed={count === n}
+              >
+                {n}
+              </button>
+            ))}
+          </span>
+          <span className="flex shrink-0 items-center gap-2.5">
+            <span className="font-mono text-caption text-ink-faint">tone</span>
+            <Segmented
+              label="tone"
+              value={tone}
+              onChange={(v) => setTone(v)}
+              options={[
+                { value: "danger" as Tone, label: "danger" },
+                { value: "caution" as Tone, label: "caution" },
+                { value: "positive" as Tone, label: "positive" },
+                { value: "info" as Tone, label: "info" },
+              ]}
+            />
+          </span>
+        </>
+      }
+    >
+      <Badge count={count} tone={tone} label={unread}>
+        <IconButton aria-label={notifications}>
+          <Icon icon={Bell} size="sm" />
+        </IconButton>
+      </Badge>
+      <Badge count={count} tone={tone} label={unread} />
+    </Demo>
+  );
+}
+
 export function NumberInputDemo({ lang }: L) {
   const d = D[lang];
+  const n = N[lang];
+  const [adet, setAdet] = useState<number | null>(3);
+  const [esik, setEsik] = useState<number | null>(10);
   const [price, setPrice] = useState<number | null>(249.9);
-  const [stock, setStock] = useState<number | null>(12);
   return (
-    <div className="flex w-full max-w-96 flex-col gap-4">
-      <NumberInput
-        value={price}
-        onChange={setPrice}
-        step={0.1}
-        min={0}
-        suffix="₺"
-        full
-        labels={{ increase: d.priceUp, decrease: d.priceDown }}
-      />
-      <NumberInput
-        value={stock}
-        onChange={setStock}
-        min={0}
-        max={999}
-        suffix={d.unit}
-        full
-        labels={{ increase: d.stockUp, decrease: d.stockDown }}
-      />
+    <div className="flex w-full flex-col gap-6">
+      {/* Tasarımın kendi ikilisi: tıklanan adet, yazılan eşik. */}
+      <div className="flex flex-wrap items-end gap-8">
+        <Field label={n.adet}>
+          <NumberInput
+            look="quantity"
+            value={adet}
+            onChange={setAdet}
+            min={0}
+            max={99}
+            labels={{ increase: d.stockUp, decrease: d.stockDown }}
+          />
+        </Field>
+        <Field label={n.kritikEsik}>
+          <NumberInput
+            value={esik}
+            onChange={setEsik}
+            min={0}
+            max={999}
+            locale={lang === "tr" ? "tr-TR" : "en-US"}
+            className="w-40"
+            labels={{ increase: d.stockUp, decrease: d.stockDown }}
+          />
+        </Field>
+      </div>
+      <div className="max-w-96">
+        <Field label={n.fiyatEtiket}>
+          <NumberInput
+            value={price}
+            onChange={setPrice}
+            step={0.1}
+            min={0}
+            suffix="₺"
+            locale={lang === "tr" ? "tr-TR" : "en-US"}
+            full
+            labels={{ increase: d.priceUp, decrease: d.priceDown }}
+          />
+        </Field>
+      </div>
     </div>
   );
 }
@@ -777,24 +1161,35 @@ export function FileUploadDemo({ lang }: L) {
         ])
       }
       onRemove={(id) => setItems((s) => s.filter((x) => x.id !== id))}
-      onReorder={(id, dir) =>
+      onReorder={(id, hedef) =>
         setItems((s) => {
           const i = s.findIndex((x) => x.id === id);
-          const j = i + dir;
-          if (i < 0 || j < 0 || j >= s.length) return s;
+          if (i < 0 || hedef < 0 || hedef >= s.length) return s;
+          /* Takas değil kaydırma: 4. görseli kapak yapmak istiyorsan
+             aradakiler bir sağa kaysın, kapak 4. sıraya fırlamasın. */
           const copy = [...s];
-          [copy[i], copy[j]] = [copy[j]!, copy[i]!];
+          const [tasinan] = copy.splice(i, 1);
+          copy.splice(hedef, 0, tasinan!);
           return copy;
         })
       }
       labels={{
         drop: d.dropImages,
         browse: d.browse,
+        hint: d.uploadHint,
+        cancel: d.cancelUpload,
         remove: d.remove,
         moveLeft: d.moveLeft,
         moveRight: d.moveRight,
         primary: d.cover,
       }}
+      /* Üç satır, üç durum · tasarımın kendi örneği de bu üçünü gösteriyor:
+         giden, gelen, reddedilen. Gerçek bir yükleme olmadan görülmüyorlar. */
+      files={[
+        { id: "f1", name: "keten-gomlek-on.jpg", progress: 64 },
+        { id: "f2", name: "keten-gomlek-arka.jpg", size: "1,8 MB" },
+        { id: "f3", name: "katalog.pdf", error: d.badType },
+      ]}
       className="w-full"
     />
   );
@@ -895,7 +1290,69 @@ const N = {
     every: (n: number) => (n < 60 ? `${n} dakikada bir` : `${n / 60} saatte bir`),
     interval: "Kontrol aralığı",
     logLabel: "Çalışma günlüğü",
+    logTumu: "Tümü", logHata: "Hata", logUyari: "Uyarı", logBilgi: "Bilgi",
+    adet: "Adet", kritikEsik: "Kritik stok eşiği", fiyatEtiket: "Fiyat",
+    teslimat: "Teslimat yöntemi",
+    swSiparis: "Sipariş bildirimleri", swSiparisAlt: "Her yeni siparişte e-posta gönder.",
+    swBakim: "Bakım modu", swBakimAlt: "Mağaza ziyaretçilere kapanır.",
+    swStok: "Stok uyarısı", swStokAlt: "Eşiğin altına inen ürünleri bildir.",
+    fiyatAraligi: "Fiyat aralığı", uygula: "Uygula", enAz: "En az fiyat", enCok: "En çok fiyat",
+    yeniParola: "Yeni parola",
+    pwZayif: "Zayıf", pwOrta: "Orta", pwIyi: "İyi", pwGuclu: "Güçlü",
+    pwKural: "en az 8 karakter, bir büyük harf, bir rakam ve bir sembol",
+    odemeAnahtari: "Ödeme API anahtarı",
+    anahtarMeta: "Son kullanım: 2 saat önce · Oluşturan: Elif Yıldız",
+    kargoStandart: "Standart kargo", kargoStandartAlt: "2-4 iş günü",
+    kargoHizli: "Hızlı kargo", kargoHizliAlt: "Ertesi gün",
+    kargoMagaza: "Mağazadan teslim", kargoMagazaAlt: "Kadıköy şubesi",
+    ucretsiz: "Ücretsiz",
+    kimeGorunsun: "Kimlere görünsün",
+    tumMusteriler: "Tüm müşteriler", yeniMusteriler: "Yeni müşteriler", vipMusteriler: "VIP müşteriler",
+    duzenle: "Düzenle",
+    musteriSil: "Müşteriyi sil",
+    musteriSilBaslik: "Müşteriyi sil?",
+    musteriSilGovde: "Mert Aksoy ve sipariş geçmişi kalıcı olarak silinecek. Bu işlem geri alınamaz.",
+    acikSiparis: "Müşterinin açık siparişi var",
+    acikSiparisGovde: "Mert Aksoy'un 2 açık siparişi var. Açık siparişi olan bir müşteri silinemez; önce siparişleri kapatın.",
+    sil: "Sil",
+    geriAl: "Geri al",
+    silindi: "Ürün arşive taşındı",
+    geriAlmali: "Geri al düğmeli bildirim",
+    siparis: "SİPARİŞ",
+    kargoFirmasi: "Kargo firması", kargoSec: "Kargo firması seç",
+    kargo1: "Yurtiçi Kargo", sure1: "2-3 gün",
+    kargo2: "Aras Kargo", sure2: "1-2 gün",
+    kargo3: "MNG Kargo", sure3: "2-4 gün",
+    kargo4: "Sürat Kargo", sure4: "3-5 gün",
+    eylul: "Eyl", web: "Web", mobil: "Mobil", pazaryeri: "Pazaryeri",
+    tumu: "Tümü", yayinda: "Yayında", taslak: "Taslak", arsiv: "Arşiv",
+    tumuMetin: "Mağazadaki bütün ürünler.",
+    yayindaMetin: "Vitrinde görünen ürünler.",
+    taslakMetin: "Henüz yayınlanmamış ürünler.",
+    arsivMetin: "Satıştan kaldırılmış ürünler.",
+    bolumler: "Ürün bölümleri",
+    genel: "Genel", fiyat: "Fiyat", stok: "Stok",
+    genelMetin: "Ürün adı, açıklama ve kategori.",
+    fiyatMetin: "Liste fiyatı, indirim ve vergi oranı.",
+    stokMetin: "Depo adedi, kritik eşik ve tedarik süresi.",
+    islemler: "İşlemler",
+    kargola: "Kargola",
+    fatura: "Fatura yazdır",
+    iptal: "Siparişi iptal et",
+    cogalt: "Çoğalt",
+    arsivle: "Arşivle",
+    yeniSatir: (n: number) => (n === 1 ? "1 yeni satır" : `${n} yeni satır`),
     chartLabels: ["00:00", "06:00", "12:00", "18:00", "23:00"],
+    thisPeriod: "Bu dönem",
+    lastPeriod: "Geçen dönem",
+    days: "Günler",
+    dayNames: ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"],
+    hours: "Saat",
+    between: "ile",
+    zone: "arası · İstanbul (GMT+3)",
+    everyDay: "Her gün",
+    weekdays: "Her hafta içi",
+    noDay: "Gün seçilmedi",
   },
   en: {
     general: "General", generalBody: "The panel's name, time zone and default language.",
@@ -914,24 +1371,93 @@ const N = {
     every: (n: number) => (n < 60 ? `Every ${n} minutes` : `Every ${n / 60} hours`),
     interval: "Check interval",
     logLabel: "Run log",
+    logTumu: "All", logHata: "Error", logUyari: "Warning", logBilgi: "Info",
+    adet: "Quantity", kritikEsik: "Low stock threshold", fiyatEtiket: "Price",
+    teslimat: "Delivery method",
+    swSiparis: "Order notifications", swSiparisAlt: "Send an e-mail on every new order.",
+    swBakim: "Maintenance mode", swBakimAlt: "The store closes to visitors.",
+    swStok: "Low stock alert", swStokAlt: "Report products that fall under the threshold.",
+    fiyatAraligi: "Price range", uygula: "Apply", enAz: "Lowest price", enCok: "Highest price",
+    yeniParola: "New password",
+    pwZayif: "Weak", pwOrta: "Fair", pwIyi: "Good", pwGuclu: "Strong",
+    pwKural: "at least 8 characters, one capital, one digit and one symbol",
+    odemeAnahtari: "Payment API key",
+    anahtarMeta: "Last used: 2 hours ago · Created by: Elif Yıldız",
+    kargoStandart: "Standard shipping", kargoStandartAlt: "2-4 business days",
+    kargoHizli: "Express shipping", kargoHizliAlt: "Next day",
+    kargoMagaza: "Pick up in store", kargoMagazaAlt: "Kadıköy branch",
+    ucretsiz: "Free",
+    kimeGorunsun: "Who sees it",
+    tumMusteriler: "All customers", yeniMusteriler: "New customers", vipMusteriler: "VIP customers",
+    duzenle: "Edit",
+    musteriSil: "Delete customer",
+    musteriSilBaslik: "Delete customer?",
+    musteriSilGovde: "Mert Aksoy and their order history will be permanently deleted. This cannot be undone.",
+    acikSiparis: "The customer has open orders",
+    acikSiparisGovde: "Mert Aksoy has 2 open orders. A customer with open orders cannot be deleted; close the orders first.",
+    sil: "Delete",
+    geriAl: "Undo",
+    silindi: "Product moved to the archive",
+    geriAlmali: "Notification with undo",
+    siparis: "ORDER",
+    kargoFirmasi: "Carrier", kargoSec: "Pick a carrier",
+    kargo1: "Royal Mail", sure1: "2-3 days",
+    kargo2: "DPD", sure2: "1-2 days",
+    kargo3: "Evri", sure3: "2-4 days",
+    kargo4: "Yodel", sure4: "3-5 days",
+    eylul: "Sep", web: "Web", mobil: "Mobile", pazaryeri: "Marketplace",
+    tumu: "All", yayinda: "Live", taslak: "Draft", arsiv: "Archive",
+    tumuMetin: "Every product in the store.",
+    yayindaMetin: "Products visible in the storefront.",
+    taslakMetin: "Products not published yet.",
+    arsivMetin: "Products taken off sale.",
+    bolumler: "Product sections",
+    genel: "General", fiyat: "Price", stok: "Stock",
+    genelMetin: "Product name, description and category.",
+    fiyatMetin: "List price, discount and tax rate.",
+    stokMetin: "Warehouse count, critical threshold and lead time.",
+    islemler: "Actions",
+    kargola: "Ship",
+    fatura: "Print invoice",
+    iptal: "Cancel order",
+    cogalt: "Duplicate",
+    arsivle: "Archive",
+    yeniSatir: (n: number) => (n === 1 ? "1 new line" : `${n} new lines`),
     chartLabels: ["00:00", "06:00", "12:00", "18:00", "23:00"],
+    thisPeriod: "This period",
+    lastPeriod: "Last period",
+    days: "Days",
+    dayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    hours: "Hours",
+    between: "to",
+    zone: "· Istanbul (GMT+3)",
+    everyDay: "Every day",
+    weekdays: "Every weekday",
+    noDay: "No day selected",
   },
 };
 
+/** İki kılık yan yana: kartlar ve tek yüzeyin içindeki sessiz yığın. */
 export function AccordionDemo({ lang }: L) {
   const n = N[lang];
-  return (
-    <Accordion>
-      <Collapsible title={n.general} meta={n.threeItems} defaultOpen>
+  const bolumler = (
+    <>
+      <Collapsible title={n.general} icon={Settings} meta={n.threeItems} defaultOpen>
         <p className="text-body text-ink-soft">{n.generalBody}</p>
       </Collapsible>
-      <Collapsible title={n.alerts} meta={n.twoItems}>
+      <Collapsible title={n.alerts} icon={Bell} meta={n.twoItems}>
         <p className="text-body text-ink-soft">{n.alertsBody}</p>
       </Collapsible>
-      <Collapsible title={n.billing} meta={n.oneItem}>
+      <Collapsible title={n.billing} icon={CurrencyDollar} meta={n.oneItem}>
         <p className="text-body text-ink-soft">{n.billingBody}</p>
       </Collapsible>
-    </Accordion>
+    </>
+  );
+  return (
+    <div className="flex w-full flex-col gap-8">
+      <Accordion>{bolumler}</Accordion>
+      <Accordion look="list">{bolumler}</Accordion>
+    </div>
   );
 }
 
@@ -939,9 +1465,17 @@ export function CodeDemo({ lang }: L) {
   const n = N[lang];
   const labels = { copy: n.copy, copied: n.copied, failed: n.failed };
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex w-full flex-col gap-4">
+      {/* Tek satırlık kurulum komutu da aynı blok: dosya adı yok, şerit yalnız
+          kopyala düğmesini taşıyor. */}
       <Code labels={labels}>npm install tamga-ui</Code>
-      <Code labels={labels}>{`import { Button } from "tamga-ui";\nimport "tamga-ui/styles.css";`}</Code>
+      <Code labels={labels} filename="webhook.js">{`import { createHmac } from "node:crypto";
+
+export function verify(req, secret) {
+  const signature = req.headers["x-tamga-signature"];
+  const digest = createHmac("sha256", secret).update(req.rawBody).digest("hex");
+  return signature === digest;
+}`}</Code>
     </div>
   );
 }
@@ -975,14 +1509,24 @@ export function StepsDemo({ lang }: L) {
 
 export function PasswordDemo({ lang }: L) {
   const n = N[lang];
+  const [pw, setPw] = useState("dogru-at-pil");
+  /* GÜCÜ ÜRÜN ÖLÇÜYOR, kit değil: dört kural, kaçı sağlanıyorsa o kadar çubuk.
+     Kitin işi çubukları yakmak; neyin güçlü sayıldığı bir politika. */
+  const kurallar = [pw.length >= 8, /[A-ZĞÜŞİÖÇ]/.test(pw), /[0-9]/.test(pw), /[^A-Za-z0-9]/.test(pw)];
+  const gecen = kurallar.filter(Boolean).length;
+  const seviye = [n.pwZayif, n.pwZayif, n.pwOrta, n.pwIyi, n.pwGuclu][gecen] ?? n.pwZayif;
   return (
     <div className="w-full max-w-96">
-      <PasswordInput
-        autoComplete="current-password"
-        placeholder={n.pwPlaceholder}
-        defaultValue="dogru-at-pil-zimba"
-        labels={{ show: n.show, hide: n.hide }}
-      />
+      <Field label={n.yeniParola}>
+        <PasswordInput
+          autoComplete="new-password"
+          placeholder={n.pwPlaceholder}
+          value={pw}
+          onChange={(e) => setPw(e.target.value)}
+          labels={{ show: n.show, hide: n.hide }}
+          strength={{ value: gecen, note: `${seviye} · ${n.pwKural}` }}
+        />
+      </Field>
     </div>
   );
 }
@@ -990,11 +1534,13 @@ export function PasswordDemo({ lang }: L) {
 export function SecretDemo({ lang }: L) {
   const n = N[lang];
   return (
-    <div className="w-full max-w-md">
-      <SecretField
-        value="tk_live_9f2ac41ebd7740c8a1e5"
-        labels={{ reveal: n.reveal, hide: n.hideKey, copy: n.copy, copied: n.copied, failed: n.failed }}
-      />
+    <div className="w-full">
+      <Field label={n.odemeAnahtari} description={n.anahtarMeta}>
+        <SecretField
+          value="sk_live_9f2ac41ebd7740c8a1e5Q7"
+          labels={{ reveal: n.reveal, hide: n.hideKey, copy: n.copy, copied: n.copied, failed: n.failed }}
+        />
+      </Field>
     </div>
   );
 }
@@ -1004,7 +1550,15 @@ export function SliderDemo({ lang }: L) {
   const [v, setV] = useState(72);
   return (
     <div className="w-full max-w-96">
-      <Slider value={v} onChange={setV} min={0} max={100} suffix="%" label={n.threshold} />
+      <Slider
+        value={v}
+        onChange={setV}
+        min={0}
+        max={100}
+        suffix="%"
+        label={n.threshold}
+        scale={["0%", "50%", "100%"]}
+      />
     </div>
   );
 }
@@ -1050,14 +1604,40 @@ export function MultiSelectDemo({ lang }: L) {
 
 export function ScheduleDemo({ lang }: L) {
   const n = N[lang];
-  const [v, setV] = useState(5);
+  /* Tarifteki demo: hafta içi, 09:00 ile 18:00 arası. */
+  const [gunler, setGunler] = useState<number[]>([1, 2, 3, 4, 5]);
+  const [bas, setBas] = useState("09:00");
+  const [bit, setBit] = useState("18:00");
+
+  /* ÖZET CÜMLEYİ ÇAĞIRAN KURUYOR: kit çeviri yapmıyor, ve "hafta içi" ile
+     "her gün" arasındaki fark bir dilbilgisi kararı. */
+  const hepsi = gunler.length === 7;
+  const haftaIci = gunler.length === 5 && [1, 2, 3, 4, 5].every((g) => gunler.includes(g));
+  const gunMetni = hepsi
+    ? n.everyDay
+    : haftaIci
+      ? n.weekdays
+      : gunler.length === 0
+        ? n.noDay
+        : gunler.map((g) => n.dayNames[g]).join(", ");
+
   return (
-    <div className="w-full max-w-72">
+    <div className="w-full max-w-md">
       <ScheduleInput
-        value={v}
-        onChange={setV}
-        options={[1, 5, 15, 30, 60, 360].map((m) => ({ minutes: m, label: n.every(m) }))}
-        label={n.interval}
+        days={gunler}
+        onDaysChange={setGunler}
+        from={bas}
+        to={bit}
+        onFromChange={setBas}
+        onToChange={setBit}
+        labels={{
+          days: n.days,
+          dayNames: n.dayNames,
+          hours: n.hours,
+          between: n.between,
+          zone: n.zone,
+        }}
+        summary={`${gunMetni} · ${bas} - ${bit}`}
       />
     </div>
   );
@@ -1068,8 +1648,8 @@ export function LineChartDemo({ lang }: L) {
   return (
     <LineChart
       series={[
-        { name: "p50", values: [18, 21, 19, 24, 22, 20, 23, 21, 19, 22], tone: "neutral" },
-        { name: "p95", values: [42, 51, 47, 88, 64, 52, 71, 58, 49, 55], tone: "caution" },
+        { name: n.thisPeriod, values: [42, 51, 47, 88, 64, 52, 71, 58, 49, 55] },
+        { name: n.lastPeriod, values: [38, 44, 46, 61, 58, 49, 62, 54, 47, 50], dashed: true },
       ]}
       labels={n.chartLabels}
       formatValue={(v) => `${v}ms`}
@@ -1077,56 +1657,128 @@ export function LineChartDemo({ lang }: L) {
   );
 }
 
-const LOG_TONES = ["neutral", "neutral", "caution", "neutral", "danger", "positive"] as const;
+/* Seviye sözcüğü hem TR hem EN sayfada aynı: bir log seviyesi çevrilen bir
+   arayüz metni değil, satırın kendisinde duran makine etiketi. */
+/* Tasarımın kendi satırları: bir mağazanın günlüğü, jenerik "check complete"
+   değil · bir günlüğün okunup okunmadığı ancak gerçek cümlelerle görülüyor. */
+const LOG_SEVIYE = [
+  { level: "INFO", tone: "info", tr: "Sipariş #TG-10482 oluşturuldu", en: "Order #TG-10482 created" },
+  { level: "INFO", tone: "info", tr: "Ödeme sağlayıcısından onay alındı", en: "Payment provider approved" },
+  { level: "WARN", tone: "caution", tr: "Stok eşiği aşıldı: TG-KTN-01 (8 adet)", en: "Stock threshold crossed: TG-KTN-01 (8 left)" },
+  { level: "ERROR", tone: "danger", tr: "Kargo API yanıt vermedi (timeout 5000ms)", en: "Shipping API did not answer (timeout 5000ms)" },
+  { level: "INFO", tone: "info", tr: "Kargo API yeniden denendi, başarılı", en: "Shipping API retried, succeeded" },
+  { level: "WARN", tone: "caution", tr: "Kupon EFSANE25 kullanım limitinin %90'ına ulaştı", en: "Coupon EFSANE25 reached 90% of its limit" },
+  { level: "DEBUG", tone: "neutral", tr: "Önbellek temizlendi: /urunler/giyim", en: "Cache cleared: /products/apparel" },
+] as const;
 
+function logSatiri(i: number, lang: "tr" | "en") {
+  const s = LOG_SEVIYE[i % LOG_SEVIYE.length]!;
+  const dk = String((i * 2) % 60).padStart(2, "0");
+  return {
+    id: `l${i}`,
+    time: `14:${dk}:${String((i * 7) % 60).padStart(2, "0")}`,
+    level: s.level,
+    tone: s.tone,
+    text: lang === "tr" ? s.tr : s.en,
+  };
+}
+
+/**
+ * AKAN demo, durağan liste değil: bu bileşenin asıl sözü ("yukarıdaysan seni
+ * fırlatmam, sayıyı söylerim") ancak satır GELİRKEN görülüyor. Durağan bir
+ * listede ne takip ne de düğme görünüyordu.
+ */
 export function LogViewDemo({ lang }: L) {
   const n = N[lang];
-  const lines = Array.from({ length: 24 }, (_, i) => ({
-    id: `l${i}`,
-    time: `10:${String(i * 2).padStart(2, "0")}:14`,
-    text:
-      lang === "tr"
-        ? `kontrol tamamlandı · 200 · ${18 + (i % 9) * 3}ms · fra`
-        : `check complete · 200 · ${18 + (i % 9) * 3}ms · fra`,
-    tone: LOG_TONES[i % LOG_TONES.length],
-  }));
-  return <LogView lines={lines} label={n.logLabel} height={280} />;
+  const [sayi, setSayi] = useState(14);
+  const [seviye, setSeviye] = useState("*");
+
+  useEffect(() => {
+    const t = setInterval(() => setSayi((s) => (s < 60 ? s + 1 : s)), 1600);
+    return () => clearInterval(t);
+  }, []);
+
+  const lines = useMemo(
+    () => Array.from({ length: sayi }, (_, i) => logSatiri(i, lang)),
+    [sayi, lang],
+  );
+
+  /* SÜZME ÇAĞIRANIN TARAFINDA: kit çubuğu çiziyor, hangi seviyenin hangi
+     düğmeye düştüğünü ürün biliyor. */
+  const gorunen = seviye === "*" ? lines : lines.filter((l) => l.level === seviye);
+
+  return (
+    <LogView
+      lines={gorunen}
+      label={n.logLabel}
+      labels={{ newLines: n.yeniSatir }}
+      filters={{
+        value: seviye,
+        onChange: setSeviye,
+        options: [
+          { value: "*", label: n.logTumu },
+          { value: "ERROR", label: n.logHata },
+          { value: "WARN", label: n.logUyari },
+          { value: "INFO", label: n.logBilgi },
+        ],
+      }}
+      height={320}
+    />
+  );
 }
 
 /**
  * Offset merdiveni — Yasa 1'i sayı tablosu yerine ŞEKİL olarak gösterir.
  *
- * Bir tablo "3 = birincil buton" der ve okuyucu 3'ün ne kadar olduğunu
- * bilmez. Altı kutu yan yana konunca merdiven görünür hâle geliyor: ilki
- * gömülü, sonuncusu overlay düzleminde.
+ * Bir tablo "4 = düğme" der ve okuyucu 4'ün ne kadar olduğunu bilmez. Kutular
+ * yan yana konunca merdiven görünür hâle geliyor: ilki gömülü, sonuncusu
+ * overlay düzleminde.
  */
-export function OffsetLadder({ lang }: L) {
-  const steps = [
-    [0, lang === "tr" ? "basılı" : "pressed"],
-    [1, lang === "tr" ? "mini buton" : "mini button"],
-    [2, lang === "tr" ? "buton · kart" : "button · card"],
-    [3, lang === "tr" ? "birincil" : "primary"],
-    [4, lang === "tr" ? "birincil hover" : "primary hover"],
-    [6, lang === "tr" ? "overlay" : "overlay"],
-  ] as const;
+export function OffsetLadder({ lang, steps }: L & { steps: readonly string[] }) {
+  /* BASAMAKLAR KİTTEN ÖLÇÜLDÜ, hatırlanmadı. Liste bir süre yanlıştı: tasarım
+     dili yenilenirken bütün merdiven bir basamak yukarı kaydı ve eski liste
+     kaldı. Metin artık sayfanın kendi lejantından geliyor · iki yerde iki
+     gerçek olmasın. */
+  const [secili, setSecili] = useState(4);
+  const [basili, setBasili] = useState<number | null>(null);
+
   return (
-    <div className="flex flex-wrap items-start gap-6 py-4">
-      {steps.map(([n, label]) => (
-        <span key={n} className="flex flex-col items-center gap-3">
-          <span
-            className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-ctl)] font-mono text-body text-ink"
-            style={{
-              background: "var(--color-shell)",
-              border: "1px solid var(--color-edge)",
-              /* Sert offset, bulanıklık YOK — anlatılan şeyin kendisi. */
-              boxShadow: n ? `${n}px ${n}px 0 var(--color-edge)` : "none",
-            }}
-          >
-            {n}
-          </span>
-          <span className="max-w-20 text-center text-caption text-ink-faint">{label}</span>
-        </span>
-      ))}
+    <div className="flex w-full flex-col gap-4">
+      <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
+        {steps.map((_, n) => {
+          const on = n === secili;
+          const bas = n === basili;
+          return (
+            <button
+              key={n}
+              type="button"
+              aria-pressed={on}
+              onClick={() => setSecili(n)}
+              onPointerDown={() => setBasili(n)}
+              onPointerUp={() => setBasili(null)}
+              onPointerLeave={() => setBasili(null)}
+              className="flex aspect-square flex-col items-center justify-center gap-0.5 rounded-(--radius-ctl)"
+              style={{
+                background: on ? "var(--color-accent-bg)" : "var(--color-shell)",
+                /* 2-4 BASILAN kontrollerin basamağı: kenarları da onların kenarı. */
+                border: `${n >= 2 && n <= 4 ? 1.5 : 1}px solid var(--color-edge${n >= 2 && n <= 4 ? "-strong" : ""})`,
+                /* Sert offset, bulanıklık YOK — anlatılan şeyin kendisi. */
+                boxShadow: bas || !n ? "none" : `${n}px ${n}px 0 var(--color-edge)`,
+                transform: bas && n ? `translate(${n}px, ${n}px)` : undefined,
+              }}
+            >
+              <span className="font-display text-subhead font-black">{n}</span>
+              <span className="font-mono text-micro text-ink-faint">px</span>
+            </button>
+          );
+        })}
+      </div>
+      {/* SEÇİLİ BASAMAĞIN KARŞILIĞI: merdiven tek başına "sekiz kare" · hangi
+          bileşenin nerede durduğunu söyleyen satır onu bir ÖLÇEK yapıyor. */}
+      <span className="tamga-surface flex flex-wrap items-center gap-3 px-4 py-3">
+        <code className="tamga-tag tamga-tag-outline font-mono">{secili}px</code>
+        <span className="text-small text-ink-soft">{steps[secili]}</span>
+      </span>
     </div>
   );
 }

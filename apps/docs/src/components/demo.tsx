@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Button, Icon, ScrollX, Segmented, Switch } from "tamga-ui";
-import { Check, Copy } from "tamga-ui/icons";
+import { Icon, ScrollX, Segmented, Switch } from "tamga-ui";
+import { Check, Code, Copy, Eye, HandPointing } from "tamga-ui/icons";
 
 /**
  * Bir örnek: canlı hâli, kodu, ve kodu alma yolu.
@@ -33,6 +33,8 @@ export type DemoLabels = {
   copyAria: string;
   /** Kaydırılabilir kontrol şeridinin erişilebilir adı. */
   controls: string;
+  /** Kontrol şeridinin başlığı: "Dene". */
+  try: string;
 };
 
 export type ControlSpec = Record<string, readonly string[] | boolean>;
@@ -49,11 +51,21 @@ export function Demo({
   code,
   labels,
   controls,
+  dene,
   render,
-  /** kareli zemin: bir bileşenin boşlukta yüzmediğini göstermek için */
+  /** noktalı zemin: bir bileşenin boşlukta yüzmediğini göstermek için */
   grid = true,
+  /**
+   * Önizlemede bileşenin altına bir KART koyar.
+   *
+   * Normalde bir kartın içinde yaşayan şeyler için (grafik, kırıntı yolu,
+   * tablo): noktalı zeminin üstünde tek başına duran bir grafik, gerçek
+   * panelde hiç görünmeyeceği bir hâlde gösterilmiş olur.
+   */
+  yuzey = false,
   /** yüksek örnekler için — varsayılan orta hizalı tek satır */
   align = "center",
+  ipucu,
 }: {
   /** Sabit örnek. `controls` verildiğinde `render` kullanılır, bu değil. */
   children?: ReactNode;
@@ -62,6 +74,16 @@ export function Demo({
   /** Sekme ve düğme metinleri. Kit gibi burası da çeviri çekmez, hazır metni alır. */
   labels: DemoLabels;
   grid?: boolean;
+  yuzey?: boolean;
+  /**
+   * Kutunun altındaki tek satır: örnekte NE YAPILACAĞI ya da neye bakılacağı.
+   *
+   * Bir demo çoğu zaman kendi kendini anlatmıyor: "Oynat" düğmesi duruyor ama
+   * basınca ne olacağını ve neye dikkat edileceğini söyleyen bir şey yok.
+   * Paragrafa yazmak işe yaramıyor · satır kutunun İÇİNDE, içeriğe en yakın
+   * yerde duruyor.
+   */
+  ipucu?: ReactNode;
   align?: "center" | "start";
   /**
    * Canlı kontroller. Storybook'un tek gerçek üstünlüğü buydu — `variant`'ı
@@ -69,6 +91,14 @@ export function Demo({
    * bedeli kaymadır, doküman bir şey der Storybook başkasını gösterir.
    */
   controls?: ControlSpec;
+  /**
+   * "Dene" şeridine giren ÖZEL kontroller.
+   *
+   * `controls` sonlu seçenek kümeleri ve açık/kapalı için; bir sayaç ya da bir
+   * kısayol düğmesi o kalıba girmiyor. Bu prop verildiğinde demo kendi
+   * durumunu kendi tutuyor ve şerit onun düğmelerini taşıyor.
+   */
+  dene?: ReactNode;
   /** Kontroller varken örnek bir FONKSİYONDUR: değerler değişince yeniden çizilir. */
   render?: (v: ControlValues) => ReactNode;
 }) {
@@ -92,61 +122,77 @@ export function Demo({
        görünmüyordu. Z-index sorunu değildi — hiçbir z-index bir `overflow`
        kırpmasını aşamaz. Sekme şeridinin zaten kendi alt kuralı var, yani
        kırpmaya ihtiyacı yoktu. */
-    <div className="tamga-card tamga-card-open my-7">
-      {/* Sekme şeridi: alt çizgi, kutu değil. Yasa 2'nin bilinçli istisnası —
-          bir sekmeyi kutuya almak onu panelden koparır. */}
-      <div className="flex items-center gap-1 border-b border-[var(--color-line)] px-2">
-        {(
-          [
-            ["preview", labels.preview],
-            ["code", labels.code],
-          ] as const
-        ).map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setTab(id)}
-            aria-current={tab === id ? "true" : undefined}
-            className="relative px-3 py-2.5 text-small font-medium"
-            style={{
-              color: tab === id ? "var(--color-ink)" : "var(--color-ink-faint)",
-              boxShadow: tab === id ? "inset 0 -2px 0 var(--color-accent-line)" : undefined,
-            }}
-          >
-            {label}
-          </button>
-        ))}
-
-        <span className="ml-auto">
-          <Button size="sm" variant="ghost" onClick={copy} aria-label={labels.copyAria}>
-            <Icon icon={copied ? Check : Copy} size="xs" />
-            {copied ? labels.copied : labels.copy}
-          </Button>
-        </span>
+    <div className="docs-demo tamga-card-open">
+      {/* ŞERİT BİR SEGMENT TAŞIYOR, alt çizgili sekme değil: bu ikisi bir
+          panelin bölümleri değil, aynı şeyin İKİ GÖRÜNÜMÜ. Küçük boy, çünkü
+          burası bir ARAÇ ÇUBUĞU: taban boy şeridi içeriğinden uzun yapıyor. */}
+      <div className="docs-demo-bar">
+        <Segmented
+          size="sm"
+          label={labels.controls}
+          value={tab}
+          onChange={(v) => setTab(v)}
+          options={[
+            {
+              value: "preview" as const,
+              label: (
+                <>
+                  <Icon icon={Eye} size="xs" weight="duotone" />
+                  {labels.preview}
+                </>
+              ),
+            },
+            {
+              value: "code" as const,
+              label: (
+                <>
+                  <Icon icon={Code} size="xs" weight="duotone" />
+                  {labels.code}
+                </>
+              ),
+            },
+          ]}
+        />
+        {/* Kopyala şeridin kendi ölçüsünde (28px): kitin küçük düğmesi 32 ve
+            yanındaki segmentten uzun kalıyor. */}
+        <button type="button" className="docs-demo-kopya ml-auto" onClick={copy} aria-label={labels.copyAria}>
+          <Icon icon={copied ? Check : Copy} size="xs" weight="bold" />
+          {copied ? labels.copied : labels.copy}
+        </button>
       </div>
 
       {tab === "preview" ? (
         <div
           className={[
-            grid ? "docs-grid" : "",
+            grid ? "docs-demo-grid" : "",
             /* `docs-kit`: örnek kutusunun içi siteye değil KİTE ait. Site
-               gövdeye 17px veriyor ve kendi yazı boyutunu yazmayan her kit
-               bileşeni onu miras alıyordu; kitin gövde ölçeği 13px. */
+               gövdeye kendi okuma ölçeğini veriyor ve kendi yazı boyutunu
+               yazmayan her kit bileşeni onu miras alıyordu; kitin gövde ölçeği
+               13px. */
             "docs-kit",
-            "flex min-h-28 flex-wrap gap-5 px-8 py-9",
+            "flex min-h-32 flex-wrap gap-x-10 gap-y-6 px-(--docs-govde-pad) py-9",
             align === "center" ? "items-center justify-center" : "items-start",
           ].join(" ")}
         >
-          {shown}
+          {yuzey ? <div className="tamga-card w-full px-6 py-5">{shown}</div> : shown}
         </div>
       ) : (
-        <pre className="docs-code rounded-t-none border-0">{source}</pre>
+        <pre className="docs-cb-pre" style={{ background: "var(--color-inverse)" }}>
+          {source}
+        </pre>
       )}
+
+      {ipucu ? (
+        <p className="docs-demo-ipucu">
+          <Icon icon={HandPointing} size="sm" weight="duotone" />
+          {ipucu}
+        </p>
+      ) : null}
 
       {/* Kontrol şeridi her iki sekmede de duruyor. Kod sekmesindeyken de
           görünmesi bilinçli: değeri değiştirince kopyalanacak kodun da
           değiştiğini görmek, kontrollerin sahte olmadığının kanıtı. */}
-      {controls ? (
+      {controls || dene ? (
         /* KONTROL ŞERİDİ KAYIYOR, TAŞMIYOR.
 
            390 pikselde bu şerit sayfayı 186 piksel taşırıyordu: `flex-wrap`
@@ -158,11 +204,10 @@ export function Demo({
            `ScrollX` taşmayı kendi içinde tutuyor: kaydırma şeride ait,
            belgeye değil. Kitin kendi bileşeni, ve bu tam olarak var olduğu
            durum. */
-        <ScrollX
-          label={labels.controls}
-          className="flex items-center gap-x-6 gap-y-3 border-t border-[var(--color-line)] px-5 py-3"
-        >
-          {Object.entries(controls).map(([key, opt]) => (
+        <ScrollX label={labels.try} className="docs-demo-dene">
+          <span className="docs-nav-baslik shrink-0 !px-0">{labels.try}</span>
+          {dene}
+          {Object.entries(controls ?? {}).map(([key, opt]) => (
             <span key={key} className="flex shrink-0 items-center gap-2.5">
               <span className="font-mono text-caption text-ink-faint">{key}</span>
               {Array.isArray(opt) ? (

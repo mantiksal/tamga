@@ -1,4 +1,5 @@
-import { Input } from "tamga-ui";
+import { Input, InputGroup, Icon, Kbd } from "tamga-ui";
+import { Search } from "tamga-ui/icons";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -36,6 +37,17 @@ const T = {
       <>
         Odaklandığında kenar aksana döner ve 2px&apos;lik sert offset gelir, aynı yükseltme
         formülü, Yasa 1.
+      </>
+    ),
+    ara: "Sipariş ara",
+    kdv: "KDV dahil",
+    ekler: (
+      <>
+        <code>InputGroup</code> girdinin kabına <strong>bir parça yapıştırıyor</strong>: para
+        birimi, alan adı, birim, arama ikonu, kısayol tuşu. Önek bir metin değil bir{" "}
+        <strong>parça</strong> · bazen &ldquo;₺&rdquo;, bazen{" "}
+        <code>&lt;Icon /&gt;</code>. Girdiye string olarak verilseydi ikincisi mümkün olmazdı.
+        Odak halkası da kutunun tamamını çevreliyor: iki kutu değil, tek nesne.
       </>
     ),
     rules: "Kurallar",
@@ -78,6 +90,17 @@ const T = {
       <>
         On focus the edge turns accent and a 2px hard offset appears, the same lift formula,
         Law 1.
+      </>
+    ),
+    ara: "Search orders",
+    kdv: "VAT included",
+    ekler: (
+      <>
+        <code>InputGroup</code> sticks <strong>a piece</strong> onto the field&apos;s box: a
+        currency, a domain, a unit, a search glyph, a shortcut key. A prefix is not a string but a{" "}
+        <strong>piece</strong> · sometimes &ldquo;₺&rdquo;, sometimes an{" "}
+        <code>&lt;Icon /&gt;</code>. As a string prop on the input, the second would be
+        impossible. The focus ring wraps the whole box too: one object, not two.
       </>
     ),
     rules: "Rules",
@@ -127,16 +150,44 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <Demo
         labels={dict.demo}
         align="start"
-        code={`<Input placeholder="${t.ph}" />
-<Input placeholder="${t.bad}" invalid />
-<Input placeholder="${t.off}" disabled />`}
+        grid={false}
+        code={`<Input placeholder="${t.ph}" full />
+
+<InputGroup prefix={<Icon icon={Search} size="sm" />} suffix={<Kbd inline>/</Kbd>}>
+  <Input placeholder="${t.ara}" full />
+</InputGroup>
+
+<InputGroup prefix="₺" suffix="${t.kdv}">
+  <Input defaultValue="1.249,90" className="font-mono" full />
+</InputGroup>
+
+<Input placeholder="${t.bad}" invalid full />`}
       >
-        <div className="flex w-full max-w-96 flex-col gap-3">
-          <Input placeholder={t.ph} />
-          <Input placeholder={t.bad} invalid />
-          <Input placeholder={t.off} disabled />
+        <div className="grid w-full gap-4 sm:grid-cols-2">
+          <Input placeholder={t.ph} full />
+
+          {/* İkon ve kısayol: ikisi de girdinin İÇİNDE, yanında değil · bir
+              arama kutusu tek nesne. */}
+          <InputGroup
+            prefix={<Icon icon={Search} size="sm" className="text-ink-faint" />}
+            suffix={<Kbd inline>/</Kbd>}
+          >
+            <Input placeholder={t.ara} full />
+          </InputGroup>
+
+          <InputGroup prefix="₺" suffix={t.kdv}>
+            <Input defaultValue="1.249,90" className="font-mono" full />
+          </InputGroup>
+
+          <InputGroup prefix="tamga.shop/">
+            <Input defaultValue="keten-gomlek" className="font-mono" full />
+          </InputGroup>
+
+          <Input placeholder={t.bad} invalid full />
+          <Input placeholder={t.off} disabled full />
         </div>
       </Demo>
+      <P>{t.ekler}</P>
       <P>{t.focus}</P>
 
       <H2>{t.sizeH}</H2>

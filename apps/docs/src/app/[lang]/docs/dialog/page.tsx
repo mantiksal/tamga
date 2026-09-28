@@ -1,4 +1,4 @@
-import { DialogDemo } from "@/components/interactive";
+import { ConfirmDemo, DialogDemo } from "@/components/interactive";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -195,13 +195,25 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <Note>{t.boyN}</Note>
 
       <H2>Props</H2>
-      <Props of="Dialog" lang={lang} />
+      <Props of="Dialog" lang={lang} etiketli />
 
       <H2>{t.confirmH}</H2>
       <P>{t.confirmP}</P>
+      <Demo labels={dict.demo} align="start" grid={false} code={`<ConfirmDialog
+  open={open}
+  onClose={close}
+  onConfirm={remove}
+  title="…"
+  confirmLabel="Sil"
+  cancelLabel="Vazgeç"
+  closeLabel="Kapat"
+  confirmDisabled={acikSiparisVar}
+>…</ConfirmDialog>`}>
+        <ConfirmDemo lang={lang} />
+      </Demo>
       <P>{t.confirmTone}</P>
       <Note>{t.confirmNote}</Note>
-      <Props of="ConfirmDialog" lang={lang} />
+      <Props of="ConfirmDialog" lang={lang} etiketli />
     </>
   );
 }

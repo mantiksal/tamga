@@ -1,4 +1,5 @@
 import { Swap, Button, Spinner } from "tamga-ui";
+import { SwapToggles } from "./ornek";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -59,6 +60,21 @@ const T = {
         vardı ve işaretlemesini her çağıran kendi yazıyordu; bedeli görünmezdi ama gerçekti.
       </>
     ),
+    favourite: "Favoriye ekle",
+    favourited: "Favori",
+    pin: "Sabitle",
+    pinned: "Sabitle",
+    visible: "Görünür",
+    hidden: "Gizli",
+    asc: "Artan",
+    desc: "Azalan",
+    toggleP: (
+      <>
+        En sık kullanımı bir <strong>aç/kapa düğmesi</strong>: favori, sabitle, görünürlük,
+        sıralama yönü. Düğme yerinde kalıyor, içindeki iki durum yer değiştiriyor · kutu her
+        zaman UZUN olanın genişliğinde olduğu için yanındaki hiçbir şey kaymıyor.
+      </>
+    ),
     rules: "Kurallar",
     related: "İlgili",
   },
@@ -91,6 +107,21 @@ const T = {
         <strong>This component invents nothing.</strong> The class was already in the kit; what
         was missing was one place holding the correct markup. <code>.tamga-swap</code> was in the kit for
         years and every caller wrote its markup by hand: the cost was invisible but real.
+      </>
+    ),
+    favourite: "Add to favourites",
+    favourited: "Favourite",
+    pin: "Pin",
+    pinned: "Pin",
+    visible: "Visible",
+    hidden: "Hidden",
+    asc: "Ascending",
+    desc: "Descending",
+    toggleP: (
+      <>
+        Its commonest use is a <strong>toggle button</strong>: favourite, pin, visibility, sort
+        direction. The button stays put while the two states change places · the box is always as
+        wide as the LONGER one, so nothing beside it shifts.
       </>
     ),
     rules: "Rules",
@@ -128,6 +159,24 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
             }
           />
         </Button>
+      </Demo>
+
+      <P>{t.toggleP}</P>
+      <Demo labels={dict.demo} align="start" code={`<Button onClick={() => setFav((f) => !f)}>
+  <Swap showing={fav ? "b" : "a"} a={<>…</>} b={<>…</>} />
+</Button>`}>
+        <SwapToggles
+          labels={{
+            favourite: t.favourite,
+            favourited: t.favourited,
+            pin: t.pin,
+            pinned: t.pinned,
+            visible: t.visible,
+            hidden: t.hidden,
+            asc: t.asc,
+            desc: t.desc,
+          }}
+        />
       </Demo>
 
       <H2>{t.rules}</H2>

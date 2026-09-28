@@ -34,6 +34,7 @@ const G = {
 const OGELER: GaleriOgesi[] = [
   {
     key: "app-shell",
+    bilesen: "AppShell",
     grup: G.uygulama,
     tur: "paket",
     boy: "ekran",
@@ -55,6 +56,7 @@ const OGELER: GaleriOgesi[] = [
   },
   {
     key: "overview",
+    bilesen: "OverviewTemplate",
     grup: G.uygulama,
     tur: "paket",
     boy: "ekran",
@@ -77,6 +79,7 @@ const OGELER: GaleriOgesi[] = [
   },
   {
     key: "list-users",
+    bilesen: "ListTemplate",
     grup: G.liste,
     tur: "paket",
     boy: "ekran",
@@ -104,6 +107,7 @@ const OGELER: GaleriOgesi[] = [
   },
   {
     key: "list-orders",
+    bilesen: "ListTemplate",
     grup: G.liste,
     tur: "paket",
     boy: "ekran",
@@ -130,6 +134,7 @@ const OGELER: GaleriOgesi[] = [
   },
   {
     key: "list-states",
+    bilesen: "ListTemplate",
     grup: G.liste,
     tur: "paket",
     boy: "ekran",
@@ -139,17 +144,27 @@ const OGELER: GaleriOgesi[] = [
       en: "A skeleton while loading, `code · request_id` on error, a slot when empty, the caller's table when ready. Empty is a slot on purpose: an empty user list is an invitation, an empty returns list is good news.",
     },
     ornek: (lang) => <KullaniciListesi lang={lang} durum="loading" />,
-    /* Modal içeriği dört çerçeveli ekran taşıyor; dışına bir çerçeve daha
-       çizmek kart içinde kart üretiyordu. */
+    /* ÇERÇEVE GERİ GELDİ. Modal içeriği bir zamanlar DÖRT çerçeveli ekran
+       taşıyordu ve dışına bir çerçeve daha çizmek kart içinde kart üretiyordu;
+       şimdi tek ekran var, ve tek ekran ötekiler gibi kendi görüntü alanında
+       duruyor. */
     tam: (lang) => <Durumlar lang={lang} />,
-    tamCerceve: "yok",
-    kod: `<ListTemplate state="loading" loadingRows={25} … />
-<ListTemplate state="empty" empty={<BosCumle />} … />
-<ListTemplate state="error" error={{ code, requestId }} … />
-<ListTemplate state="ready" …><Table>…</Table></ListTemplate>`,
+    kod: `const [durum, setDurum] = useState<"loading" | "error" | "empty" | "ready">("loading");
+
+<Segmented label="Ekran durumu" value={durum} onChange={setDurum} options={[…]} />
+<ListTemplate
+  title="Kullanıcılar"
+  state={durum}
+  loadingRows={25}
+  error={{ code: "upstream_timeout", requestId: "req_8f2a11" }}
+  empty={<EmptyState title="Bu filtreyle kullanıcı kalmadı." />}
+>
+  <Table>…</Table>
+</ListTemplate>`
   },
   {
     key: "detail",
+    bilesen: "DetailTemplate",
     grup: G.kayit,
     tur: "paket",
     boy: "ekran",
@@ -173,6 +188,7 @@ const OGELER: GaleriOgesi[] = [
   },
   {
     key: "detail-form",
+    bilesen: "DetailTemplate",
     grup: G.kayit,
     tur: "paket",
     boy: "ekran",
@@ -193,6 +209,7 @@ const OGELER: GaleriOgesi[] = [
   },
   {
     key: "settings",
+    bilesen: "SettingsTemplate",
     grup: G.ayar,
     tur: "paket",
     boy: "ekran",
@@ -216,6 +233,7 @@ const OGELER: GaleriOgesi[] = [
   },
   {
     key: "wizard",
+    bilesen: "WizardTemplate",
     grup: G.ayar,
     tur: "paket",
     boy: "ekran",
@@ -238,6 +256,7 @@ const OGELER: GaleriOgesi[] = [
   },
   {
     key: "sign-in",
+    bilesen: "AuthTemplate",
     grup: G.oturumsuz,
     tur: "paket",
     boy: "ekran",
@@ -251,11 +270,20 @@ const OGELER: GaleriOgesi[] = [
   <AuthProviders dividerLabel="ya da">
     <Button><Icon icon={GoogleLogo} size="xs" />Google ile devam et</Button>
   </AuthProviders>
-  <form>…</form>
+  <form className="flex flex-col gap-4">
+    <Field label="E-posta" htmlFor="eposta"><Input id="eposta" full type="email" /></Field>
+    <span className="flex flex-col gap-1.5">
+      <Field label="Parola" htmlFor="parola"><PasswordInput labels={parolaEtiketleri} /></Field>
+      <a className="tamga-link self-end text-small" href="/sifre">Şifremi unuttum</a>
+    </span>
+    <Checkbox label="Beni hatırla" checked={hatirla} onChange={setHatirla} />
+    <Button variant="primary" full type="submit">Giriş yap</Button>
+  </form>
 </AuthTemplate>`,
   },
   {
     key: "register",
+    bilesen: "AuthTemplate",
     grup: G.oturumsuz,
     tur: "paket",
     boy: "ekran",
@@ -277,6 +305,7 @@ const OGELER: GaleriOgesi[] = [
   },
   {
     key: "public",
+    bilesen: "PublicTemplate",
     grup: G.oturumsuz,
     tur: "paket",
     boy: "ekran",
@@ -294,8 +323,20 @@ const OGELER: GaleriOgesi[] = [
   footer="Bu sayfa herkese açıktır."
   labels={{ loading: "Yükleniyor", ...hata }}
 >
-  {icerik}
-</PublicTemplate>`,
+  <Alert state="positive" title="Bütün servisler çalışıyor">Son 90 gün</Alert>
+  <Card>
+    {servisler.map((v) => (
+      <div key={v.ad} className="tamga-list-row flex-col items-stretch gap-2 py-3">
+        <span className="flex items-center gap-3">
+          <span className="flex-1 truncate font-medium text-ink">{v.ad}</span>
+          <span className="font-mono text-small tabular-nums text-ink-faint">{v.oran}%</span>
+          <StatusChip label={v.durum} state={v.ton} />
+        </span>
+        <TimelineStrip data={v.gunler} height={22} labels={["90 gün önce", "Bugün"]} />
+      </div>
+    ))}
+  </Card>
+</PublicTemplate>`
   },
 ];
 
@@ -303,20 +344,24 @@ const ETIKET = {
   tr: {
     hepsi: "Tümü",
     kapat: "Kapat",
-    sayac: (n: number) => `${n} ekran`,
     paket: "paket",
     tarif: "tarif",
     kopyala: "Kodu kopyala",
     kopyalandi: "Kopyalandı",
+    sira: (n: number, toplam: number) => `${n} / ${toplam}`,
+    onceki: "Önceki",
+    sonraki: "Sonraki",
   },
   en: {
     hepsi: "All",
     kapat: "Close",
-    sayac: (n: number) => `${n} screens`,
     paket: "package",
     tarif: "recipe",
     kopyala: "Copy code",
     kopyalandi: "Copied",
+    sira: (n: number, toplam: number) => `${n} / ${toplam}`,
+    onceki: "Previous",
+    sonraki: "Next",
   },
 };
 

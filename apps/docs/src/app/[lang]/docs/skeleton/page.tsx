@@ -1,6 +1,6 @@
 import {
   Skeleton, SkeletonText, SkeletonRows, SkeletonKpi, SkeletonCard,
-  SkeletonTable, SkeletonOptions, SkeletonPanel, SkeletonPageBand,
+  SkeletonTable, SkeletonOptions, SkeletonPanel, SkeletonPageBand, KpiGrid,
 } from "tamga-ui";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
@@ -115,10 +115,13 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
           </div>
           <div>
             <p className="docs-eyebrow mb-3">Kpi</p>
-            <div className="flex gap-3">
+            {/* Gerçek ızgarada: karo 210 pikselin altına inmiyor, yani iskelet
+                de yerini tuttuğu karonun genişliğinde duruyor. Elle kurulan bir
+                `flex` iki karoyu 147 piksele sıkıştırıyordu. */}
+            <KpiGrid>
               <SkeletonKpi index={0} />
               <SkeletonKpi index={1} />
-            </div>
+            </KpiGrid>
           </div>
           <div className="sm:col-span-2">
             <p className="docs-eyebrow mb-3">Table</p>

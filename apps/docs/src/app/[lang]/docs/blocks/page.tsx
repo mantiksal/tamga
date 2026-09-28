@@ -165,15 +165,15 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <H2>{t.filtreH}</H2>
       <P>{t.filtreP}</P>
       <Note>{t.filtreN}</Note>
-      <Props of="FilterBar" lang={lang} />
+      <Props of="FilterBar" lang={lang} etiketli />
 
       <H2>{t.seritH}</H2>
       <P>{t.seritP}</P>
-      <Props of="CountRow" lang={lang} />
+      <Props of="CountRow" lang={lang} etiketli />
 
       <H2>{t.kaydetH}</H2>
       <P>{t.kaydetP}</P>
-      <Props of="SaveBar" lang={lang} />
+      <Props of="SaveBar" lang={lang} etiketli />
 
       <Note>{t.kararN}</Note>
     </>

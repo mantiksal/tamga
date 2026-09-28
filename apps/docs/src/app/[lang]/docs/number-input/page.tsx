@@ -1,7 +1,7 @@
 import { NumberInputDemo } from "@/components/interactive";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
-import { PageHead, H2, P, Note } from "@/components/prose";
+import { PageHead, H2, P, Note, Nedenler } from "@/components/prose";
 import { Demo } from "@/components/demo";
 import { Xref } from "@/components/xref";
 import { Props } from "@/components/props";
@@ -61,6 +61,16 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    ikiBicim: (
+      <>
+        İki biçim, iki soru. <code>field</code> sağ kenarında sayaç olan metin alanı · bir eşik,
+        bir oran, bir fiyat gibi <strong>yazılan</strong> ve yalnız dürtülen sayılar için.{" "}
+        <code>quantity</code> düğmeleri değerin iki yanında duran birleşik kontrol ·{" "}
+        <strong>tıklanarak</strong> ayarlanan adet için, sayı küçükken ve etkileşimin tamamı o
+        iki düğmeyken. İkincisinde değer yazılabilir bir alan değil: orada klavyeyle girilen
+        geçersiz bir değerin kapısını açmanın karşılığı yok.
+      </>
+    ),
     labels: (
       <>
         İki okun <code>labels</code>&apos;ı zorunlu: metinsiz iki düğme ekran okuyucuda
@@ -108,6 +118,16 @@ const T = {
       </>
     ),
     rules: "Rules",
+    ikiBicim: (
+      <>
+        Two looks, two questions. <code>field</code> is the text field with the stepper on its
+        right edge · for numbers that are <strong>typed</strong> and only nudged: a threshold, a
+        rate, a price. <code>quantity</code> is the joined control with the buttons flanking the
+        value · for a count that is <strong>clicked</strong> into place, where the number is
+        small and those two buttons are the whole interaction. In that one the value is not an
+        editable field: there is nothing to gain from opening the door to an invalid typed value.
+      </>
+    ),
     labels: (
       <>
         <code>labels</code> for the two arrows is required: two buttons with no text are
@@ -133,12 +153,8 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
-      <ul className="my-4 ml-5 list-disc space-y-2 text-control">
-        <li>{t.r1}</li>
-        <li>{t.r2}</li>
-        <li>{t.r3}</li>
-      </ul>
-      <Demo labels={dict.demo} align="start" code={`<NumberInput
+      <Nedenler>{[t.r1, t.r2, t.r3]}</Nedenler>
+      <Demo yuzey labels={dict.demo} align="start" code={`<NumberInput
   value={price}
   onChange={setPrice}
   step={0.1}
@@ -149,6 +165,8 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         <NumberInputDemo lang={lang} />
       </Demo>
       <P>{t.how}</P>
+
+      <P>{t.ikiBicim}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.labels}</Note>

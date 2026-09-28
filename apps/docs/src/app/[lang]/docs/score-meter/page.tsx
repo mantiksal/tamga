@@ -73,6 +73,9 @@ const T = {
     mid: "Orta",
     low: "Düşük",
     score: (n: number) => `Skor ${n} / 100`,
+    satisfaction: "Müşteri memnuniyeti",
+    risk: "Risk skoru",
+    bandNames: ["Kötü", "Zayıf", "Orta", "İyi", "Mükemmel"] as [string, string, string, string, string],
   },
   en: {
     lead: (
@@ -121,6 +124,9 @@ const T = {
     mid: "Fair",
     low: "Low",
     score: (n: number) => `Score ${n} / 100`,
+    satisfaction: "Customer satisfaction",
+    risk: "Risk score",
+    bandNames: ["Poor", "Weak", "Fair", "Good", "Excellent"] as [string, string, string, string, string],
   },
 };
 
@@ -136,11 +142,11 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <Demo
         labels={dict.demo}
         align="start"
-        code={`<ScoreMeter value={72} delta={-4.2} label="${t.score(72)}" bandLabel="${t.mid}" />`}
+        code={`<ScoreMeter value={72} label="${t.satisfaction}" bands={[${t.bandNames.map((b) => `"${b}"`).join(", ")}]} />`}
       >
-        <div className="flex w-full flex-wrap items-start gap-10">
-          <ScoreMeter value={72} delta={-4.2} label={t.score(72)} bandLabel={t.mid} />
-          <ScoreMeter value={91} delta={1.8} label={t.score(91)} bandLabel={t.good} />
+        <div className="flex w-full flex-col gap-10">
+          <ScoreMeter value={72} label={t.satisfaction} bands={t.bandNames} />
+          <ScoreMeter value={91} label={t.risk} bands={t.bandNames} />
         </div>
       </Demo>
       <P>{t.delta}</P>

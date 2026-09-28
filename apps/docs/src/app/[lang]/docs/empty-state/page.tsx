@@ -1,4 +1,5 @@
-import { EmptyState, Button } from "tamga-ui";
+import { EmptyState, Button, Icon } from "tamga-ui";
+import { Package, Plus, Upload } from "tamga-ui/icons";
 /* Vitrin için basit bir yer tutucu çizim: kit "ne çizildiğini" sormaz. */
 const box = ({ size }: { size: number; float: boolean }) => (
   <span
@@ -44,6 +45,17 @@ const T = {
     title: "Kataloğun boş",
     note: "İlk ürünü ekleyince burada görünür.",
     action: "Ürün ekle",
+    csv: "CSV yükle",
+    duzTitle: "Henüz ürün yok",
+    duzNote: "İlk ürününü ekle ya da CSV dosyasıyla toplu içe aktar.",
+    duzP: (
+      <>
+        <code>plain</code> çoğu ekranın ihtiyacı olan biçim: <strong>kesik kenarlı</strong> bir
+        kart, bir ikon karosu, bir satır ve ilk adım. Kesik çizgi bu kitin her yerinde
+        &quot;henüz gerçek içerik değil&quot; demek, ve boş bir bölüm tam olarak o · dolduğunda
+        aynı yerde kesiksiz bir kart duruyor.
+      </>
+    ),
     body: "Bir ürün eklediğinde stok, fiyat ve görselleri buradan yönetirsin.",
     layouts: (
       <>
@@ -68,6 +80,27 @@ const T = {
         fotoğrafını ya da hiçbir şeyini koyar; kit hangisi olduğunu sormaz.
       </>
     ),
+    balon: (
+      <>
+        Çizimin başının üstündeki balonu <code>ArtSays</code> çiziyor ve{" "}
+        <code>EmptyState</code> onu kendi kullanıyor · ayrıca çağrılması gereken bir şey değil.
+        Adı bir ara <code>SaysBubble</code>&apos;dı, ve o ad tasarımda{" "}
+        <Xref to="says-bubble">konuşma balonunun</Xref>: ikisi aynı adı taşıyınca boş durum
+        arayan da sohbet arayan da yanlış bileşeni buluyordu.
+      </>
+    ),
+    plainTitle: "Henüz ürün yok",
+    plainBody: "İlk ürününü ekle ya da CSV dosyasıyla toplu içe aktar.",
+    plainAction: "Ürün ekle",
+    plainSecond: "CSV içe aktar",
+    plainP: (
+      <>
+        <code>layout=&quot;plain&quot;</code> çizim taşımayan biçim: bir <strong>ikon
+        karosu</strong>, bir satır ve ilk adım · çoğu ekranın ihtiyacı olan şey bu. Kartın kenarı{" "}
+        <strong>kesik</strong>, çünkü kitin her yerinde kesik çizgi &ldquo;henüz gerçek içerik
+        değil&rdquo; demek: dolu hâlinde aynı yerde kesiksiz bir kart duruyor, ikisi aynı kutu.
+      </>
+    ),
     rules: "Kurallar",
     related: "İlgili",
   },
@@ -77,6 +110,17 @@ const T = {
     title: "Your catalogue is empty",
     note: "Add your first product and it appears here.",
     action: "Add a product",
+    csv: "Upload CSV",
+    duzTitle: "No products yet",
+    duzNote: "Add your first product, or import them in bulk from a CSV file.",
+    duzP: (
+      <>
+        <code>plain</code> is the shape most screens need: a <strong>dashed</strong> card, an
+        icon tile, one line and the first step. In this kit a dashed edge means &quot;not real
+        content yet&quot;, which is exactly what an empty section is · once it fills, an unbroken
+        card stands in the same place.
+      </>
+    ),
     body: "Once you add a product you manage its stock, price and images from here.",
     layouts: (
       <>
@@ -100,6 +144,28 @@ const T = {
         own character, a photograph, or nothing at all; the kit never asks which.
       </>
     ),
+    balon: (
+      <>
+        The bubble over the drawing&apos;s head is drawn by <code>ArtSays</code>, and{" "}
+        <code>EmptyState</code> uses it itself · it is not something you have to call. It used to
+        be called <code>SaysBubble</code>, which in the design is the{" "}
+        <Xref to="says-bubble">conversation bubble</Xref>: with both under one name, whoever
+        looked for an empty state and whoever looked for a chat found the wrong component.
+      </>
+    ),
+    plainTitle: "No products yet",
+    plainBody: "Add your first product, or import them in bulk from a CSV file.",
+    plainAction: "Add product",
+    plainSecond: "Import CSV",
+    plainP: (
+      <>
+        <code>layout=&quot;plain&quot;</code> is the one without a drawing: an{" "}
+        <strong>icon tile</strong>, a line and the first step · what most screens need. The
+        card&apos;s edge is <strong>dashed</strong>, because everywhere in the kit a dashed edge
+        means &ldquo;not real content yet&rdquo;: filled, the same place holds a solid card, and
+        the two are one box.
+      </>
+    ),
     rules: "Rules",
     related: "Related",
   },
@@ -114,6 +180,45 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
+      <Demo
+        labels={dict.demo}
+        align="start"
+        code={`<EmptyState
+  layout="plain"
+  icon={Package}
+  title="${t.duzTitle}"
+  note="${t.duzNote}"
+  action={
+    <>
+      <Button variant="primary"><Icon icon={Plus} size="xs" />${t.action}</Button>
+      <Button><Icon icon={Upload} size="xs" />${t.csv}</Button>
+    </>
+  }
+/>`}
+      >
+        <div className="w-full">
+          <EmptyState
+            layout="plain"
+            icon={Package}
+            title={t.duzTitle}
+            note={t.duzNote}
+            action={
+              <>
+                <Button variant="primary">
+                  <Icon icon={Plus} size="xs" />
+                  {t.action}
+                </Button>
+                <Button>
+                  <Icon icon={Upload} size="xs" />
+                  {t.csv}
+                </Button>
+              </>
+            }
+          />
+        </div>
+      </Demo>
+      <P>{t.duzP}</P>
+
       <Note>{t.art}</Note>
       <Demo
         labels={dict.demo}
@@ -143,9 +248,35 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         </div>
       </Demo>
       <P>{t.layouts}</P>
+      <Demo labels={dict.demo} align="start" grid={false} code={`<EmptyState
+  layout="plain"
+  icon={Package}
+  title="${t.plainTitle}"
+  action={<><Button variant="primary">${t.plainAction}</Button><Button>${t.plainSecond}</Button></>}
+>
+  ${t.plainBody}
+</EmptyState>`}>
+        <div className="w-full">
+          <EmptyState
+            layout="plain"
+            icon={Package}
+            title={t.plainTitle}
+            action={
+              <>
+                <Button variant="primary">{t.plainAction}</Button>
+                <Button>{t.plainSecond}</Button>
+              </>
+            }
+          >
+            {t.plainBody}
+          </EmptyState>
+        </div>
+      </Demo>
+      <P>{t.plainP}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.which}</Note>
+      <P>{t.balon}</P>
 
       <H2>Props</H2>
       <Props of="EmptyState" lang={lang} />

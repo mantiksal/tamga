@@ -1,4 +1,5 @@
 import { AvatarStack } from "tamga-ui";
+import { YiginOrnek } from "./ornek";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -58,6 +59,17 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    ekip: ["Elif Yıldız", "Mert Aksoy", "Zeynep Kaya", "Can Öztürk"],
+    ekle: "+ Kişi",
+    cikar: "− Kişi",
+    kacKisi: "3 kişi",
+    inceliyor: "bu siparişi inceliyor",
+    artan: (
+      <>
+        Son karo bir kişi değil bir <strong>özet</strong>: sayıyı taşıyor ve bu yüzden kendi
+        tabanını da taşıyor · yüzlerin dizisinden böyle ayrılıyor.
+      </>
+    ),
     related: "İlgili",
     rel: (
       <>
@@ -97,6 +109,17 @@ const T = {
       </>
     ),
     rules: "Rules",
+    ekip: ["Elif Yıldız", "Mert Aksoy", "Zeynep Kaya", "Can Öztürk"],
+    ekle: "+ Person",
+    cikar: "− Person",
+    kacKisi: "3 people",
+    inceliyor: "are looking at this order",
+    artan: (
+      <>
+        The last tile is not a person but a <strong>summary</strong>: it carries a number, and
+        that is why it also carries its own base · it is how it steps out of the row of faces.
+      </>
+    ),
     related: "Related",
     rel: (
       <>
@@ -114,14 +137,28 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
   return (
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
-      <Demo labels={dict.demo} code={`<AvatarStack names={["Berika Sultan", "Deniz Kara", "Selin Aydın"]} />
-<AvatarStack names={["Berika Sultan", "Deniz Kara"]} extra={7} />`}>
-        <div className="flex flex-col gap-5">
-          <AvatarStack names={["Berika Sultan", "Deniz Kara", "Selin Aydın"]} />
-          <AvatarStack names={["Berika Sultan", "Deniz Kara"]} extra={7} size={32} />
+      <Demo
+        labels={dict.demo}
+        code={`<AvatarStack names={${JSON.stringify(t.ekip)}} extra={8} size={38} />
+
+<span className="flex items-center gap-2.5">
+  <AvatarStack names={${JSON.stringify(t.ekip.slice(0, 3))}} size={26} />
+  <strong>${t.kacKisi}</strong> ${t.inceliyor}
+</span>`}
+      >
+        <div className="flex flex-col gap-6">
+          <AvatarStack names={t.ekip} extra={8} size={38} />
+          <span className="text-body text-ink-faint flex items-center gap-2.5">
+            <AvatarStack names={t.ekip.slice(0, 3)} size={26} />
+            <span>
+              <strong className="text-ink">{t.kacKisi}</strong> {t.inceliyor}
+            </span>
+          </span>
+          <YiginOrnek kisiler={t.ekip} ekle={t.ekle} cikar={t.cikar} />
         </div>
       </Demo>
       <P>{t.edge}</P>
+      <P>{t.artan}</P>
       <P>{t.oneLetter}</P>
 
       <H2>{t.rules}</H2>

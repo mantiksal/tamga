@@ -63,6 +63,27 @@ const T = {
         vardı ve işaretlemesini her çağıran kendi yazıyordu; bedeli görünmezdi ama gerçekti.
       </>
     ),
+    onerilen: "Önerilen ürünler",
+    gorsel: "ürün görseli",
+    urunler: [
+      ["Deri kartlık", "₺349"],
+      ["Pamuk havlu 2'li", "₺279"],
+      ["Bambu çorap", "₺159"],
+      ["Keten pantolon", "₺1.099"],
+      ["Seramik kupa", "₺189"],
+      ["Yün atkı", "₺429"],
+    ],
+    sola: "Sola kaydır",
+    saga: "Sağa kaydır",
+    oklar: (
+      <>
+        <code>controls</code> şeridin başına <strong>iki ok düğmesi</strong> koyuyor. Her tıklama
+        şeridi <strong>bir görünür genişlik</strong> kaydırıyor, bir kart değil: kart boyu bir
+        adım, şeridin kartın ne olduğunu bilmesini gerektirirdi. Tam genişlik yerine %90, çünkü
+        kenardaki kart hiç görünmeden geçince okuyan kişi yerini kaybediyor. Oklar klavyeyi
+        <strong> ikame etmiyor</strong>: şerit zaten odaklanabilir ve ok tuşlarıyla kayıyor.
+      </>
+    ),
     rules: "Kurallar",
     related: "İlgili",
   },
@@ -101,6 +122,28 @@ const T = {
         years and every caller wrote its markup by hand: the cost was invisible but real.
       </>
     ),
+    onerilen: "Recommended products",
+    gorsel: "product image",
+    urunler: [
+      ["Leather card holder", "₺349"],
+      ["Cotton towels, 2", "₺279"],
+      ["Bamboo socks", "₺159"],
+      ["Linen trousers", "₺1.099"],
+      ["Ceramic mug", "₺189"],
+      ["Wool scarf", "₺429"],
+    ],
+    sola: "Scroll left",
+    saga: "Scroll right",
+    oklar: (
+      <>
+        <code>controls</code> puts <strong>two arrow buttons</strong> at the head of the strip.
+        Each click moves it by <strong>one visible width</strong>, not by one card: a card-sized
+        step would need the strip to know what a card is. 90% of the width rather than all of it,
+        because a card that passes without ever being seen loses the reader&apos;s place. The
+        arrows <strong>do not replace the keyboard</strong>: the strip is focusable and scrolls
+        with the arrow keys already.
+      </>
+    ),
     rules: "Rules",
     related: "Related",
   },
@@ -120,14 +163,22 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 </ScrollX>`}>
         <div className="w-full">
           <Card>
-            <ScrollX label={t.col}>
-              <div className="flex w-[var(--docs-overflow-demo)] gap-4 p-4">
-                {Array.from({ length: 9 }, (_, i) => (
-                  <span
-                    key={i}
-                    className="tamga-surface flex h-16 w-24 shrink-0 items-center justify-center font-mono text-caption text-ink-faint"
-                  >
-                    {t.col} {i + 1}
+            <ScrollX
+              label={t.col}
+              title={t.onerilen}
+              controls={{ left: t.sola, right: t.saga }}
+              className="p-4"
+            >
+              <div className="flex gap-4">
+                {t.urunler.map(([ad, fiyat]) => (
+                  <span key={ad} className="tamga-card flex w-45 shrink-0 flex-col overflow-hidden">
+                    <span className="docs-gorsel flex h-27 items-center justify-center border-b border-line font-mono text-caption text-ink-faint">
+                      {t.gorsel}
+                    </span>
+                    <span className="flex flex-col gap-1 px-3 py-2.5">
+                      <strong className="text-small">{ad}</strong>
+                      <span className="font-mono text-small font-bold">{fiyat}</span>
+                    </span>
                   </span>
                 ))}
               </div>
@@ -135,6 +186,8 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
           </Card>
         </div>
       </Demo>
+
+      <P>{t.oklar}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.keyboard}</Note>

@@ -1,4 +1,4 @@
-import { Textarea } from "tamga-ui";
+import { TextareaSayac } from "./ornek";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -36,6 +36,16 @@ const T = {
         davranışı; tek fark yükseklik.
       </>
     ),
+    kisa: "Kısa açıklama",
+    ornek: "Gün boyu konfor sağlayan hafif taban ve nefes alan üst yapı.",
+    sayacP: (
+      <>
+        Sayaç <strong>alanda duruyor, kontrolde değil</strong>: bir metin alanı kaç karakter
+        taşıdığını bilir, kaçına izin verildiğini bilmez. Sınır aşılınca sayaç kritik renge
+        dönüyor ve alan da hatalı işaretleniyor · iki kanal, çünkü rengi görmeyen biri için sayı
+        tek başına bir uyarı değil.
+      </>
+    ),
     rules: "Kurallar",
     rows: (
       <>
@@ -57,6 +67,16 @@ const T = {
       <>
         The same edge, the same focus physics and the same <code>invalid</code> behaviour as{" "}
         <Xref to="input">Input</Xref>; the only difference is height.
+      </>
+    ),
+    kisa: "Short description",
+    ornek: "A light sole and a breathable upper for all-day comfort.",
+    sayacP: (
+      <>
+        The counter <strong>belongs to the field, not the control</strong>: a textarea knows how
+        many characters it holds, not how many it is allowed. Past the limit the counter turns
+        critical and the field is marked invalid · two channels, because to someone who does not
+        see the colour a number alone is not a warning.
       </>
     ),
     rules: "Rules",
@@ -87,12 +107,14 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <Demo
         labels={dict.demo}
         align="start"
-        code={`<Textarea rows={4} placeholder="${t.ph}" full />`}
+        grid={false}
+        code={`<Field label="${t.kisa}" count={{ value: text.length, max: 120 }} htmlFor="aciklama">
+  <Textarea id="aciklama" rows={4} value={text} onChange={…} full />
+</Field>`}
       >
-        <div className="w-full max-w-96">
-          <Textarea rows={4} placeholder={t.ph} full />
-        </div>
+        <TextareaSayac label={t.kisa} placeholder={t.ph} initial={t.ornek} />
       </Demo>
+      <P>{t.sayacP}</P>
       <P>{t.same}</P>
 
       <H2>{t.rules}</H2>

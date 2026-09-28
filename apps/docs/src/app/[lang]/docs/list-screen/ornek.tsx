@@ -15,6 +15,7 @@ import {
   MiniButton,
   NumberInput,
   Pagination,
+  ScrollX,
   Select,
   Sheet,
   SortHeader,
@@ -22,7 +23,7 @@ import {
   Table,
   type SortDirection,
 } from "tamga-ui";
-import { Close, Delete, Plus, Search } from "tamga-ui/icons";
+import { Close, Delete, Plus, Refresh, Search } from "tamga-ui/icons";
 
 /**
  * KALIBIN ÇALIŞAN HÂLİ.
@@ -71,6 +72,8 @@ export type OrnekMetinleri = {
   /** `{n}` yerine sayfa numarası geçer. */
   sayfa: string;
   filtreKaldir: string;
+  sifirla: string;
+  tablo: string;
 };
 
 /**
@@ -180,6 +183,22 @@ export function CrudOrnegi({ t }: { t: OrnekMetinleri }) {
     }
   }
 
+  /* ÖRNEĞİ BAŞTAN BAŞLATMAK: on bir kaydın beşini silip sayfayı yenilemek
+     zorunda kalan okuyucu, örneği bir daha denemiyor. Tek düğme bütün durumu
+     geri veriyor · açık pencereler dahil. */
+  function sifirla() {
+    setKayitlar(BASLANGIC);
+    setAra("");
+    setFiltre(t.durumlar[0]);
+    setSira({ alan: "ad", yon: "asc" });
+    setSayfa(1);
+    setSecili(new Set());
+    setEkleAcik(false);
+    setDuzenlenen(null);
+    setSilinecek(null);
+    setTopluSil(false);
+  }
+
   const alanlar = (
     <div className="flex flex-col gap-4">
       <Field label={t.ad} htmlFor="ornek-ad">
@@ -190,14 +209,20 @@ export function CrudOrnegi({ t }: { t: OrnekMetinleri }) {
           onChange={(e) => setTaslak({ ...taslak, ad: e.target.value })}
         />
       </Field>
-      <Field label={t.stok}>
-        <NumberInput
-          value={taslak.stok}
-          onChange={(v) => setTaslak({ ...taslak, stok: v })}
-          min={0}
-          labels={{ increase: t.artir, decrease: t.azalt }}
-        />
-      </Field>
+      {/* DURUM ÇİPİ FORMDA DA VAR, ve canlı: stok bir sayı, durum o sayının
+          okunuşu · kullanıcı 3'ü 4 yaptığında listede ne göreceğini kaydetmeden
+          önce görüyor. Eşik listedekiyle aynı fonksiyondan geliyor. */}
+      <div className="flex flex-col items-start gap-2">
+        <Field label={t.stok}>
+          <NumberInput
+            value={taslak.stok}
+            onChange={(v) => setTaslak({ ...taslak, stok: v })}
+            min={0}
+            labels={{ increase: t.artir, decrease: t.azalt }}
+          />
+        </Field>
+        <StatusChip {...okuma(taslak.stok ?? 0, t.durumlar)} />
+      </div>
     </div>
   );
 
@@ -297,88 +322,96 @@ export function CrudOrnegi({ t }: { t: OrnekMetinleri }) {
           /* Boş durumun İKİNCİ cümlesi: kayıt var, filtre eledi. */
           <p className="p-6 text-center text-ink-soft">{t.bos}</p>
         ) : (
-          <Table>
-            <thead>
-              <tr>
-                <th scope="col" className="w-8">
-                  <Checkbox
-                    label={<span className="sr-only">{t.sayfadakileriSec}</span>}
-                    checked={sayfadakiSecili === satirlar.length}
-                    onChange={(acik) => {
-                      const next = new Set(secili);
-                      for (const k of satirlar) {
-                        if (acik) next.add(k.id);
-                        else next.delete(k.id);
-                      }
-                      setSecili(next);
-                    }}
-                  />
-                </th>
-                {/* ④ Sırala: yön SortHeader'da, karar bizde. */}
-                <SortHeader
-                  direction={sira.alan === "ad" ? sira.yon : undefined}
-                  onSort={() => siralaya("ad")}
-                >
-                  {t.ad}
-                </SortHeader>
-                <SortHeader
-                  align="right"
-                  direction={sira.alan === "stok" ? sira.yon : undefined}
-                  onSort={() => siralaya("stok")}
-                >
-                  {t.stok}
-                </SortHeader>
-                <th scope="col" className="w-40 text-right">
-                  <span className="sr-only">{t.duzenle}</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {satirlar.map((k) => (
-                <tr key={k.id}>
-                  <td>
+          // TABLO KENDİ KABINDA KAYIYOR: dört sütun 390 px'e sığmıyor ve
+          // kapsız bırakıldığında SAYFAYI kaydırıyordu (ölçüldü: 137 px).
+          <ScrollX label={t.tablo}>
+            <Table>
+              <thead>
+                <tr>
+                  <th scope="col" className="w-8">
                     <Checkbox
-                      label={<span className="sr-only">{doldur(t.satirSec, { ad: k.ad })}</span>}
-                      checked={secili.has(k.id)}
-                      onChange={(a) => satirSec(k.id, a)}
+                      label={<span className="sr-only">{t.sayfadakileriSec}</span>}
+                      checked={sayfadakiSecili === satirlar.length}
+                      onChange={(acik) => {
+                        const next = new Set(secili);
+                        for (const k of satirlar) {
+                          if (acik) next.add(k.id);
+                          else next.delete(k.id);
+                        }
+                        setSecili(next);
+                      }}
                     />
-                  </td>
-                  <td>
-                    <span className="flex items-center gap-2">
-                      <span className="text-ink">{k.ad}</span>
-                      <StatusChip {...okuma(k.stok, t.durumlar)} />
-                    </span>
-                  </td>
-                  <td className="text-right tabular-nums text-ink">{k.stok}</td>
-                  <td className="text-right">
-                    <span className="flex items-center justify-end gap-2">
-                      {/* ⑤ Düzenle: çekmecede, çünkü liste bağlamın kendisi.
-                          Düğme `MiniButton` DEĞİL: o 32x32'lik kare yalnız
-                          simge taşır, içine metin konunca kırpıyor. */}
-                      <Button
-                        size="sm"
-                        aria-label={`${k.ad} ${t.duzenle}`}
-                        onClick={() => {
-                          setTaslak({ ad: k.ad, stok: k.stok });
-                          setDuzenlenen(k);
-                        }}
-                      >
-                        {t.duzenle}
-                      </Button>
-                      {/* ⑥ Sil: onay kapısının arkasında. */}
-                      <IconButton
-                        size="sm"
-                        aria-label={`${k.ad} ${t.sil}`}
-                        onClick={() => setSilinecek(k)}
-                      >
-                        <Icon icon={Delete} size="xs" />
-                      </IconButton>
-                    </span>
-                  </td>
+                  </th>
+                  {/* ④ Sırala: yön SortHeader'da, karar bizde. */}
+                  <SortHeader
+                    direction={sira.alan === "ad" ? sira.yon : undefined}
+                    onSort={() => siralaya("ad")}
+                  >
+                    {t.ad}
+                  </SortHeader>
+                  <SortHeader
+                    align="right"
+                    direction={sira.alan === "stok" ? sira.yon : undefined}
+                    onSort={() => siralaya("stok")}
+                  >
+                    {t.stok}
+                  </SortHeader>
+                  {/* `relative` ŞART: `sr-only` mutlak konumlu, ve konumlanmış
+                      bir ata yoksa kapsayıcı bloğu SAYFA oluyor · kayan
+                      tablonun içindeki 1 piksellik gizli metin, sayfanın
+                      yatay kaymasını 61'den 137 piksele çıkarıyordu. */}
+                  <th scope="col" className="relative w-40 text-right">
+                    <span className="sr-only">{t.duzenle}</span>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {satirlar.map((k) => (
+                  <tr key={k.id}>
+                    <td>
+                      <Checkbox
+                        label={<span className="sr-only">{doldur(t.satirSec, { ad: k.ad })}</span>}
+                        checked={secili.has(k.id)}
+                        onChange={(a) => satirSec(k.id, a)}
+                      />
+                    </td>
+                    <td>
+                      <span className="flex items-center gap-2">
+                        <span className="text-ink">{k.ad}</span>
+                        <StatusChip {...okuma(k.stok, t.durumlar)} />
+                      </span>
+                    </td>
+                    <td className="text-right tabular-nums text-ink">{k.stok}</td>
+                    <td className="text-right">
+                      <span className="flex items-center justify-end gap-2">
+                        {/* ⑤ Düzenle: çekmecede, çünkü liste bağlamın kendisi.
+                            Düğme `MiniButton` DEĞİL: o 32x32'lik kare yalnız
+                            simge taşır, içine metin konunca kırpıyor. */}
+                        <Button
+                          size="sm"
+                          aria-label={`${k.ad} ${t.duzenle}`}
+                          onClick={() => {
+                            setTaslak({ ad: k.ad, stok: k.stok });
+                            setDuzenlenen(k);
+                          }}
+                        >
+                          {t.duzenle}
+                        </Button>
+                        {/* ⑥ Sil: onay kapısının arkasında. */}
+                        <IconButton
+                          size="sm"
+                          aria-label={`${k.ad} ${t.sil}`}
+                          onClick={() => setSilinecek(k)}
+                        >
+                          <Icon icon={Delete} size="xs" />
+                        </IconButton>
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </ScrollX>
         )}
 
         {/* ⑦ Sayfala: yalnız toplam bir sayfayı aşınca. */}
@@ -395,6 +428,15 @@ export function CrudOrnegi({ t }: { t: OrnekMetinleri }) {
           </div>
         )}
       </Card>
+
+      {/* Düğme kartın DIŞINDA: bir kaydı değil ÖRNEĞİ geri alıyor, yani
+          ekranın parçası değil doküman sayfasının aracı. */}
+      <div className="flex justify-end">
+        <Button size="sm" onClick={sifirla}>
+          <Icon icon={Refresh} size="xs" />
+          {t.sifirla}
+        </Button>
+      </div>
 
       {/* Ekleme AYRI BİR YÜZEYDE: liste bağlam değil, yeni kayıt kendi işi. */}
       <Dialog

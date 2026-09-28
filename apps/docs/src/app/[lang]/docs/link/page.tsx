@@ -1,4 +1,5 @@
-import { Link } from "tamga-ui";
+import { Link, Icon } from "tamga-ui";
+import { ArrowRight, ExternalLink } from "tamga-ui/icons";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -65,6 +66,21 @@ const T = {
         vardı ve işaretlemesini her çağıran kendi yazıyordu; bedeli görünmezdi ama gerçekti.
       </>
     ),
+    hepsi: "Tüm siparişler",
+    sessiz: "Sessiz bağlantı",
+    vurgulu: "Vurgulu",
+    cumleBas: "Kargo ayarlarını",
+    cumleBag: "teslimat bölümünden",
+    cumleSon: "değiştirebilirsin. Değişiklikler yeni siparişlerde geçerli olur.",
+    bicimler: (
+      <>
+        Dört biçim: <code>inline</code> bir cümlenin içinde (altı çizili),{" "}
+        <code>standalone</code> kendi satırında ve <strong>oku işaretçi altında bir adım ileri
+        gidiyor</strong>, <code>quiet</code> bakılana kadar bekliyor (bir ayak satırında yirmi
+        bağlantının yirmisi birden vurgu renginde olamaz), <code>marked</code> ise yıkama
+        taşıyor · bir paragrafta bulunması gereken tek adres için.
+      </>
+    ),
     rules: "Kurallar",
     related: "İlgili",
   },
@@ -105,6 +121,21 @@ const T = {
         years and every caller wrote its markup by hand: the cost was invisible but real.
       </>
     ),
+    hepsi: "All orders",
+    sessiz: "Quiet link",
+    vurgulu: "Marked",
+    cumleBas: "You can change the shipping settings from the",
+    cumleBag: "delivery section",
+    cumleSon: ". Changes apply to new orders.",
+    bicimler: (
+      <>
+        Four looks: <code>inline</code> inside a sentence (underlined),{" "}
+        <code>standalone</code> on its own line with an arrow that{" "}
+        <strong>steps forward under the pointer</strong>, <code>quiet</code> waiting until it is
+        looked at (twenty links in a footer cannot all be in the accent), and <code>marked</code>{" "}
+        carrying a wash · for the one address in a paragraph that has to be found.
+      </>
+    ),
     rules: "Rules",
     related: "Related",
   },
@@ -119,13 +150,35 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
-      <Demo labels={dict.demo} code={`<Link href="/docs">${t.docs}</Link>
-<Link href="https://example.com" external>${t.ext}</Link>`}>
-        <Link href="#">{t.docs}</Link>
-        <Link href="https://example.com" external>
-          {t.ext}
-        </Link>
+      <Demo labels={dict.demo} align="start" grid={false} code={`<Link href="/shipping">${t.docs}</Link>
+<Link href="/orders" look="standalone">${t.hepsi} <Icon icon={ArrowRight} size="xs" weight="bold" /></Link>
+<Link href="https://example.com" external>${t.ext}</Link>
+<Link href="/help" look="quiet">${t.sessiz}</Link>
+<Link href="/campaign" look="marked">${t.vurgulu}</Link>`}>
+        <div className="flex w-full flex-col gap-4">
+          {/* Cümlenin içinde: bağlantı metnin ritmini bozmuyor, altı çiziliyor. */}
+          <p className="max-w-140 text-control leading-relaxed text-ink">
+            {t.cumleBas} <Link href="#link">{t.cumleBag}</Link> {t.cumleSon}
+          </p>
+          <div className="flex flex-wrap items-center gap-7">
+            <Link href="#link" look="standalone">
+              {t.hepsi}
+              <Icon icon={ArrowRight} size="xs" weight="bold" />
+            </Link>
+            <Link href="https://example.com" external>
+              {t.ext}
+              <Icon icon={ExternalLink} size="xs" weight="bold" className="ml-1.5 inline align-[-2px]" />
+            </Link>
+            <Link href="#link" look="quiet">
+              {t.sessiz}
+            </Link>
+            <Link href="#link" look="marked">
+              {t.vurgulu}
+            </Link>
+          </div>
+        </div>
       </Demo>
+      <P>{t.bicimler}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.notButton}</Note>

@@ -30,6 +30,8 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: Loc
 const T = {
   tr: {
     loading: "Yükleniyor",
+    step: "Adım",
+    done: "Tamamlandı",
     aria: "Dosya yükleme ilerlemesi",
     neutral: (
       <>
@@ -38,6 +40,24 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    hedef: "Aylık hedef",
+    depo: "Depo doluluğu",
+    dagilim: "Sipariş durumu dağılımı",
+    teslim: "Teslim %48",
+    kargoda: "Kargoda %24",
+    hazirlaniyor: "Hazırlanıyor %20",
+    iade: "İade %8",
+    ucBicim: (
+      <>
+        Üç biçim, üç soru. <code>bar</code> çizgili yol · <strong>sürekli</strong> bir nicelik.{" "}
+        <code>blocks</code> hücre dizisi · <strong>sayılabilir</strong> bir kapasite, asıl
+        cümlenin &quot;10&apos;da 7&quot; olduğu yerde: orada düz bir çubuk, olmayan bir
+        hassasiyeti iddia ediyor. Son dolu hücre açık tonda, &quot;burada duruyoruz&quot; diyen
+        tek işaret o. <code>split</code> paylara bölünmüş tek yol · bütünü tamamlayan bir{" "}
+        <strong>dağılım</strong>, altında kendi lejantıyla. Lejant satırını çağıran yazıyor: kit
+        yüzde biçimlemiyor, çünkü işaret de yeri de bir yerel.
+      </>
+    ),
     fake: (
       <>
         <strong>Yüzdeyi gerçekten bilmiyorsan bu bileşen değil.</strong>{" "}
@@ -56,6 +76,8 @@ const T = {
   },
   en: {
     loading: "Loading",
+    step: "Step",
+    done: "Completed",
     aria: "File upload progress",
     neutral: (
       <>
@@ -64,6 +86,25 @@ const T = {
       </>
     ),
     rules: "Rules",
+    hedef: "Monthly target",
+    depo: "Warehouse capacity",
+    dagilim: "Order status split",
+    teslim: "Delivered 48%",
+    kargoda: "Shipping 24%",
+    hazirlaniyor: "Preparing 20%",
+    iade: "Returned 8%",
+    ucBicim: (
+      <>
+        Three looks, three questions. <code>bar</code> is the striped track · a{" "}
+        <strong>continuous</strong> quantity. <code>blocks</code> is a row of cells · a{" "}
+        <strong>countable</strong> capacity, for where the real sentence is &quot;7 of 10&quot;:
+        a smooth bar there claims a precision that does not exist. The last filled cell takes the
+        light tone, the one mark that says &quot;this is where we are&quot;. <code>split</code>{" "}
+        is one track cut into shares · a <strong>distribution</strong> that adds up to a whole,
+        with its legend underneath. The caller writes the legend line: the kit formats no
+        percentages, because the sign and its place are a locale.
+      </>
+    ),
     fake: (
       <>
         <strong>If you do not actually know the percentage, this is not the component.</strong> Use{" "}
@@ -90,13 +131,52 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
   return (
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
-      <Demo labels={dict.demo} align="start" code={`<Progress value={62} label="${t.loading}" ariaLabel="${t.aria}" />
-<Progress value={62} showScale ariaLabel="${t.aria}" />`}>
-        <div className="flex w-full max-w-96 flex-col gap-7">
-          <Progress value={62} label={t.loading} ariaLabel={t.aria} />
-          <Progress value={62} showScale ariaLabel={t.aria} />
+      <Demo yuzey labels={dict.demo} align="start" code={`<Progress value={64} label="${t.loading}" ariaLabel="${t.aria}" />
+<Progress value={60} label="${t.step}" valueText="3 / 5" ariaLabel="${t.aria}" />
+<Progress value={100} label="${t.done}" ariaLabel="${t.aria}" />`}>
+        <div className="flex w-full max-w-md flex-col gap-6">
+          <Progress value={64} label={t.loading} ariaLabel={t.aria} />
+          <Progress value={60} label={t.step} valueText="3 / 5" ariaLabel={t.aria} />
+          <Progress value={100} label={t.done} ariaLabel={t.aria} />
         </div>
       </Demo>
+      <Demo yuzey labels={dict.demo} align="start" code={`<Progress look="blocks" blocks={10} value={70} label="${t.depo}" valueText="7 / 10" />
+
+<Progress
+  look="split"
+  label="${t.dagilim}"
+  segments={[
+    { value: 48, label: "${t.teslim}" },
+    { value: 24, label: "${t.kargoda}" },
+    { value: 20, label: "${t.hazirlaniyor}" },
+    { value: 8, tone: "danger", label: "${t.iade}" },
+  ]}
+/>`}>
+        <div className="flex w-full max-w-160 flex-col gap-6">
+          <Progress value={84} label={t.hedef} ariaLabel={t.aria} />
+          <Progress
+            look="blocks"
+            blocks={10}
+            value={70}
+            label={t.depo}
+            valueText="7 / 10"
+            ariaLabel={t.aria}
+          />
+          <Progress
+            look="split"
+            label={t.dagilim}
+            ariaLabel={t.aria}
+            segments={[
+              { value: 48, label: t.teslim },
+              { value: 24, label: t.kargoda },
+              { value: 20, label: t.hazirlaniyor },
+              { value: 8, tone: "danger", label: t.iade },
+            ]}
+          />
+        </div>
+      </Demo>
+      <P>{t.ucBicim}</P>
+
       <P>{t.neutral}</P>
 
       <H2>{t.rules}</H2>

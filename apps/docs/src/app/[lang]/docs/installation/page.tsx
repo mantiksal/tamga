@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
-import { PageHead, H2, P, Note } from "@/components/prose";
+import { Atom, Hexagon, Wind } from "tamga-ui/icons";
+import { CodeBlock } from "@/components/kod";
+import { Note, P, PageHead, RefTable, Section, Step } from "@/components/prose";
 import { findPage } from "@/content/nav";
 import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
@@ -16,19 +19,19 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: Loc
  * metinleri içindir ("Kopyala", "Önizleme"); sayfa içeriği sayfayla yaşar.
  *
  * İkisi aynı dosyada, çünkü asıl risk çeviri değil AYRIŞMA: Türkçesi
- * güncellenip İngilizcesi unutulursa, iki farklı gerçek doğar. Yan yana
+ * güncellenip İngilizcesi unutulursa iki farklı gerçek doğar. Yan yana
  * durduklarında bu unutuş görünür olur.
  */
 const T = {
   tr: {
-    s1: "1 · Paketi kur",
+    s1: "Paketi kur",
     p1: (
       <>
         React 19 bir <em>peer dependency</em>, yani kit kendi React&apos;ini getirmez, projenin
         React&apos;ini kullanır. İki kopya React aynı ağaçta çalışamaz.
       </>
     ),
-    s2: "2 · CSS girişini kur",
+    s2: "CSS girişini kur",
     p2: <>Sıra önemli: kitin token&apos;ları Tailwind kurulduktan sonra gelmek zorunda.</>,
     note: (
       <>
@@ -37,7 +40,7 @@ const T = {
         kendi kullandıkları sessizce eksik kalır ve bileşenler yarı çıplak render olur.
       </>
     ),
-    s3: "3 · Kullan",
+    s3: "Kullan",
     s4: "Ayrı parçalar",
     p4: <>Her şeye ihtiyacın yoksa kit parça parça da alınabilir:</>,
     p5: (
@@ -46,16 +49,24 @@ const T = {
         kullanmayan bir projede de çalışır.
       </>
     ),
+    tablo: ["Giriş", "İçinde"] as [string, string],
+    parcalar: [
+      { key: "tamga-ui", val: "bileşenler" },
+      { key: "tamga-ui/styles.css", val: "token + fizik, tek satırda", tag: "önerilen" },
+      { key: "tamga-ui/theme.css", val: "yalnız token'lar", tag: "Tailwind v4" },
+      { key: "tamga-ui/kit.css", val: "yalnız sınıflar, saf CSS" },
+      { key: "tamga-ui/icons", val: "kürasyonlu ikon seti" },
+    ],
   },
   en: {
-    s1: "1 · Install the package",
+    s1: "Install the package",
     p1: (
       <>
         React 19 is a <em>peer dependency</em>: the kit does not bring its own React, it uses
         yours. Two copies of React cannot live in one tree.
       </>
     ),
-    s2: "2 · Set up the CSS entry",
+    s2: "Set up the CSS entry",
     p2: <>Order matters: the kit&apos;s tokens must come after Tailwind is installed.</>,
     note: (
       <>
@@ -65,7 +76,7 @@ const T = {
         half-dressed.
       </>
     ),
-    s3: "3 · Use it",
+    s3: "Use it",
     s4: "Separate pieces",
     p4: <>If you do not need everything, the kit can be taken piece by piece:</>,
     p5: (
@@ -74,33 +85,29 @@ const T = {
         in a project without Tailwind too.
       </>
     ),
+    tablo: ["Entry", "What is in it"] as [string, string],
+    parcalar: [
+      { key: "tamga-ui", val: "components" },
+      { key: "tamga-ui/styles.css", val: "tokens + physics, in one line", tag: "recommended" },
+      { key: "tamga-ui/theme.css", val: "tokens only", tag: "Tailwind v4" },
+      { key: "tamga-ui/kit.css", val: "classes only, plain CSS" },
+      { key: "tamga-ui/icons", val: "the curated icon set" },
+    ],
   },
-} satisfies Record<Locale, Record<string, ReactNode>>;
+} satisfies Record<Locale, Record<string, ReactNode | unknown>>;
 
-export default async function Page({ params }: { params: Promise<{ lang: Locale }> }) {
-  const { lang } = await params;
-  const t = T[lang];
-  const p = findPage("installation")!;
+const KURULUM = {
+  pnpm: "pnpm add tamga-ui",
+  npm: "npm install tamga-ui",
+  yarn: "yarn add tamga-ui",
+};
 
-  return (
-    <>
-      <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
-
-      <H2>{t.s1}</H2>
-      <pre className="docs-code my-4">{`pnpm add tamga-ui`}</pre>
-      <P>{t.p1}</P>
-
-      <H2>{t.s2}</H2>
-      <P>{t.p2}</P>
-      <pre className="docs-code my-4">{`/* src/app/globals.css */
-@import "tailwindcss";
+const CSS_GIRISI = `@import "tailwindcss";
 @import "tamga-ui/styles.css";
 
-@source "../../node_modules/tamga-ui/dist";`}</pre>
-      <Note>{t.note}</Note>
+@source "../../node_modules/tamga-ui/dist";`;
 
-      <H2>{t.s3}</H2>
-      <pre className="docs-code my-4">{`import { Button, StatusChip } from "tamga-ui";
+const ORNEK = `import { Button, StatusChip } from "tamga-ui";
 
 export function Toolbar() {
   return (
@@ -109,16 +116,46 @@ export function Toolbar() {
       <StatusChip label="Yayında" state="positive" dot />
     </div>
   );
-}`}</pre>
+}`;
 
-      <H2>{t.s4}</H2>
-      <P>{t.p4}</P>
-      <pre className="docs-code my-4">{`tamga-ui             ${lang === "tr" ? "bileşenler" : "components"}
-tamga-ui/styles.css  ${lang === "tr" ? "token + fizik, tek satırda" : "tokens + physics, in one line"}
-tamga-ui/theme.css   ${lang === "tr" ? "yalnız token'lar (Tailwind v4 gerektirir)" : "tokens only (requires Tailwind v4)"}
-tamga-ui/kit.css     ${lang === "tr" ? "yalnız sınıflar, saf CSS" : "classes only, plain CSS"}
-tamga-ui/icons       ${lang === "tr" ? "kürasyonlu ikon seti" : "the curated icon set"}`}</pre>
-      <P>{t.p5}</P>
+export default async function Page({ params }: { params: Promise<{ lang: Locale }> }) {
+  const { lang } = await params;
+  const t = T[lang];
+  const dict = await getDictionary(lang);
+  const p = findPage("installation")!;
+
+  return (
+    <>
+      <PageHead
+        title={p.title[lang]}
+        blurb={p.blurb[lang]}
+        gereksinimler={[
+          { icon: Atom, label: "React 19" },
+          { icon: Wind, label: "Tailwind v4" },
+          { icon: Hexagon, label: "Node 20+" },
+        ]}
+      />
+
+      <Step n={1} id="paketi-kur" title={t.s1}>
+        <CodeBlock pm={KURULUM} dict={dict} />
+        <P>{t.p1}</P>
+      </Step>
+
+      <Step n={2} id="css-girisi" title={t.s2}>
+        <P>{t.p2}</P>
+        <CodeBlock code={CSS_GIRISI} file="src/app/globals.css" dict={dict} />
+        <Note>{t.note}</Note>
+      </Step>
+
+      <Step n={3} id="kullan" title={t.s3} sonMu>
+        <CodeBlock code={ORNEK} file="app/toolbar.tsx" dict={dict} />
+      </Step>
+
+      <Section id="ayri-parcalar" title={t.s4}>
+        <P>{t.p4}</P>
+        <RefTable head={t.tablo} rows={t.parcalar} />
+        <P>{t.p5}</P>
+      </Section>
     </>
   );
 }

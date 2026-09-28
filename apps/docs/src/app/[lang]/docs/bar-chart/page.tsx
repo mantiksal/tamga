@@ -1,4 +1,4 @@
-import { BarChart } from "tamga-ui";
+import { BarChartDemo, StackedBarDemo } from "@/components/interactive";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -116,6 +116,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <Demo
+        yuzey
         labels={dict.demo}
         align="start"
         code={`<BarChart
@@ -124,7 +125,7 @@ ${bars.map((b) => `    { label: "${b.label}", value: ${b.value} },`).join("\n")}
   ]}
 />`}
       >
-        <BarChart bars={bars} className="w-full" labelWidth="7rem" />
+        <BarChartDemo lang={lang} bars={bars} />
       </Demo>
       <P>{t.lead}</P>
 
@@ -136,10 +137,22 @@ ${bars.map((b) => `    { label: "${b.label}", value: ${b.value} },`).join("\n")}
 
       <H2>{t.stackH}</H2>
       <P>{t.stackP}</P>
-      <Props of="StackedBarChart" lang={lang} />
+      <Demo yuzey labels={dict.demo} align="start" grid={false} code={`<StackedBarChart
+  labels={days}
+  series={[
+    { name: "Web", values: web },
+    { name: "Mobil", values: mobile },
+    { name: "Pazaryeri", values: marketplace },
+  ]}
+/>`}>
+        <div className="w-full">
+          <StackedBarDemo lang={lang} />
+        </div>
+      </Demo>
+      <Props of="StackedBarChart" lang={lang} etiketli />
 
       <H2>Props</H2>
-      <Props of="BarChart" lang={lang} />
+      <Props of="BarChart" lang={lang} etiketli />
 
       <H2>{t.related}</H2>
       <P>{t.rel}</P>

@@ -1,5 +1,4 @@
-import { RailLink, Icon } from "tamga-ui";
-import { BoardView, ListView, Settings } from "tamga-ui/icons";
+import { RayOrnegi } from "./ornek";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -28,17 +27,25 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: Loc
  * Bir İngilizce sayfada "Kaydet" yazan bir buton, çevrilmemiş bir sayfadan
  * daha kötüdür: sayfa çevrilmiş görünür, ama ekrandaki şey değildir.
  */
+/* Referansın kendi rayı: dört satır, ikisi rozetli, seçili olan üçüncü ·
+   seçilinin ötekilerden nasıl ayrıldığı ancak liste uzayınca görülüyor. */
 const T = {
   tr: {
     overview: "Genel bakış",
+    orders: "Siparişler",
+    rozetAd: (n: number) => `${n} bekleyen`,
+    products: "Ürünler",
+    stock: "Stok",
     robots: "Kayıtlar",
     settings: "Ayarlar",
-    lead: "Bir kenar çubuğunun tek satırı. Dar hâlinde 40×40 ve yalnız bir ikon; geniş hâlinde ikonun yanında etiket.",
+    lead: "Bir kenar çubuğunun tek satırı. Dar hâlinde 52×40 ve yalnız bir ikon; geniş hâlinde ikonun yanında etiket, sağında rozet.",
     label: (
       <>
         <code>label</code> <strong>zorunlu</strong> ve iki iş birden yapıyor:{" "}
-        <code>aria-label</code> olarak ekran okuyucuya adı veriyor, <code>title</code> olarak
-        fareyle bekleyene aynı adı veriyor. İkon-yalnız bir gezinmede bu ad tek tanımlayıcıdır;
+        <code>aria-label</code> olarak ekran okuyucuya adı veriyor, kitin kendi{" "}
+        <Xref to="tooltip">Tooltip</Xref>&apos;i olarak fareyle bekleyene aynı adı veriyor
+        (tarayıcının gri <code>title</code> balonu değil · o, kitin her yerdeki ipucundan başka
+        türlü görünüyordu). İkon-yalnız bir gezinmede bu ad tek tanımlayıcıdır;
         olmadığında kullanıcı her simgeyi ezberlemek zorunda kalır.
       </>
     ),
@@ -47,7 +54,7 @@ const T = {
         <code>showLabel</code> aynı kontrolün <strong>ikinci genişliği</strong>, ayrı bir bileşen
         değil. Varsayılan <code>false</code>: dar ray, etiket yalnız erişilebilir ad olarak yaşar.
         <code>true</code> verildiğinde satır kabına yayılır ve etiket ikonun yanında görünür,
-        <code>title</code> ise kalkar: görünen bir metnin üstünde beliren ipucu aynı şeyi ikinci
+        ipucu ise kalkar: görünen bir metnin üstünde beliren ipucu aynı şeyi ikinci
         kez söyler. İkiye bölünseydi hover, seçili ve odak fizikleri iki yerde yaşar ve zamanla
         ayrışırdı.
       </>
@@ -73,14 +80,27 @@ const T = {
         etmişse, o mekanizma ikisinin de altındadır.
       </>
     ),
+    rozet: (
+      <>
+        <code>badge</code> girişin arkasında bekleyen sayıyı taşıyor: geniş rayda{" "}
+        <strong>sayı</strong>, dar rayda yalnız bir <strong>kare</strong>. 40 piksellik bir kutuda
+        iki haneli bir sayı ikonun üstüne biniyor, ve okunmayan bir sayı &quot;bir şey
+        var&quot;dan fazlasını söylemiyor · o zaman kareyi göster, sayıyı{" "}
+        <code>badgeLabel</code> ile ekran okuyucuya söyle.
+      </>
+    ),
     rules: "Kurallar",
     related: "İlgili",
   },
   en: {
     overview: "Overview",
+    orders: "Orders",
+    rozetAd: (n: number) => `${n} waiting`,
+    products: "Products",
+    stock: "Stock",
     robots: "Records",
     settings: "Settings",
-    lead: "One row of a sidebar. Narrow it is 40×40 and an icon; wide it puts the label beside the icon.",
+    lead: "One row of a sidebar. Narrow it is 52×40 and an icon; wide it puts the label beside the icon with its badge on the right.",
     label: (
       <>
         <code>label</code> is <strong>required</strong> and does two jobs at once: as{" "}
@@ -120,6 +140,15 @@ const T = {
         sits underneath both.
       </>
     ),
+    rozet: (
+      <>
+        <code>badge</code> carries the number waiting behind the entry: a <strong>number</strong>
+        {" "}on a wide rail, only a <strong>square</strong> on a narrow one. In a 40px box a
+        two-digit number sits on top of the icon, and an unreadable number says no more than
+        &quot;there is something&quot; · so show the square and hand the number to the screen
+        reader with <code>badgeLabel</code>.
+      </>
+    ),
     rules: "Rules",
     related: "Related",
   },
@@ -134,19 +163,26 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
-      <Demo labels={dict.demo} code={`<RailLink label="${t.overview}" href="/overview" active>
+      <Demo labels={dict.demo} grid={false} align="start" code={`<RailLink label="${t.overview}" href="/overview" active>
   <Icon icon={BoardView} size="sm" />
+</RailLink>
+
+<RailLink label="${t.orders}" href="/orders" showLabel badge={12} badgeLabel="${t.rozetAd(12)}">
+  <Icon icon={ListView} size="sm" />
 </RailLink>`}>
-        <RailLink label={t.overview} href="#" active>
-          <Icon icon={BoardView} size="sm" />
-        </RailLink>
-        <RailLink label={t.robots} href="#">
-          <Icon icon={ListView} size="sm" />
-        </RailLink>
-        <RailLink label={t.settings} href="#">
-          <Icon icon={Settings} size="sm" />
-        </RailLink>
+        {/* İki genişlik yan yana: aynı kontrol, aynı fizik, iki kap. Referans
+            da böyle gösteriyor · ray 72px ya da 230px, arası yok. */}
+        <RayOrnegi
+          ogeler={[
+            { key: "overview", label: t.overview },
+            { key: "orders", label: t.orders, badge: 12, badgeLabel: t.rozetAd(12) },
+            { key: "products", label: t.products },
+            { key: "stock", label: t.stock, badge: 7, badgeLabel: t.rozetAd(7) },
+          ]}
+        />
       </Demo>
+
+      <P>{t.rozet}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.label}</Note>

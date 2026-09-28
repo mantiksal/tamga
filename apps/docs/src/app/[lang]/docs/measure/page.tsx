@@ -1,4 +1,11 @@
-import { Button, Card, CardBody, Input, StatusChip } from "tamga-ui";
+import {
+  KapiOrnegi,
+  KenarOrnegi,
+  RitimOrnegi,
+  YaricapOrnegi,
+  YarimOrnegi,
+  YuvarlakOrnegi,
+} from "./ornek";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -23,6 +30,59 @@ const T = {
     live: "Yayında",
     tokensLink: "Token'lar",
     physicsLink: "Fizik",
+
+    demo: {
+      search: "Ara",
+      save: "Kaydet",
+      live: "Yayında",
+      knob: "--radius",
+      roles: ["çip, segment içi", "girdi, küçük düğme", "düğme, uyarı", "kart", "içerik kutusu, çekmece"],
+      right: "böyle",
+      wrong: "böyle değil",
+      draft: "Taslak",
+      name: "Ayşe Demir",
+      roundOk: "Avatar, canlı nokta ve çip: üçü de kendi rol yarıçapında.",
+      roundNo: "Hap rozet ve hap çip: ikinci bir yarıçap ailesi.",
+      rows: [
+        ["#10482", "Ayşe Demir", "₺1.249"],
+        ["#10481", "Mert Aksoy", "₺489"],
+        ["#10480", "Zeynep Kaya", "₺2.310"],
+        ["#10479", "Can Öztürk", "₺349"],
+      ] as const,
+      showGrid: "8px ızgarayı göster",
+      view: "Görünüm",
+      segA: "Liste",
+      segB: "Kart",
+      ritimRows: [
+        ["Liste satırı", "--row"],
+        ["Liste satırı", "--row"],
+        ["Sık satır", "--row-sm"],
+        ["Sık satır", "--row-sm"],
+      ] as const,
+      ritimTags: [
+        ["--gutter", "oluk, her şeyin başladığı çizgi"],
+        ["--row", "liste satırı"],
+        ["--row-sm", "sık satır"],
+        ["--control", "her kontrol"],
+      ] as const,
+      halfOk: "1px · 8px",
+      halfNo: "0.5px · 7.5px · 13px",
+      gateTitle: "check:scale · check:css (örnek çıktı)",
+      gate: [
+        ["✗", "src/order-card.tsx:14", "padding: 13px → ölçü skalada yok, bir token kullan"],
+        ["✗", "src/badge.tsx:8", "border-radius: 999px → tam yuvarlak yalnız radio, skor halkası ve halka spinner'da"],
+        ["✗", "kit.css:212", "border-width: 0.5px → yarım piksel yok"],
+        ["✓", "293 sınıf", "temiz"],
+      ] as const,
+    },
+    ipucu: {
+      radius: "Düğmeyi kaydır: beş rol yarıçapı tek değerden türüyor.",
+      round: "Avatar, canlı nokta, çip: üçü de köşeli.",
+      border: "Aynı tablo, iki kenar kalınlığı.",
+      rhythm: "Izgarayı aç: kontroller aynı yükseklikte, satırlar 8px çizgisinde.",
+      half: "Yarım piksel ekranda bulanık basar.",
+      enforce: "Kapı ham ölçüyü bulunca build durur.",
+    },
 
     whatFor: "Bu sayfa ne işe yarıyor",
     whatForP: (
@@ -52,8 +112,10 @@ const T = {
     ),
     radiusFull: (
       <>
-        <strong>Tam yuvarlak iki şeye ayrıldı: avatar ve canlı nokta.</strong> Hap şeklinde rozet
-        yok, hap şeklinde çip yok. Bir rozeti hap yapmak onu ikinci bir yarıçap ailesi hâline
+        <strong>
+          Tam yuvarlak üç şeye ayrıldı: tekli seçim, skor halkası ve halka spinner.
+        </strong>{" "}
+        Avatar da canlı nokta da köşeli; hap şeklinde rozet yok, hap şeklinde çip yok. Bir rozeti hap yapmak onu ikinci bir yarıçap ailesi hâline
         getiriyor, ve iki aile bir gün üç olur.
       </>
     ),
@@ -108,6 +170,59 @@ const T = {
     tokensLink: "Tokens",
     physicsLink: "Physics",
 
+    demo: {
+      search: "Search",
+      save: "Save",
+      live: "Live",
+      knob: "--radius",
+      roles: ["chip, segment item", "input, small button", "button, alert", "card", "content box, drawer"],
+      right: "this",
+      wrong: "not this",
+      draft: "Draft",
+      name: "Ayşe Demir",
+      roundOk: "Avatar, live dot and chip: each on its own role radius.",
+      roundNo: "A pill badge and a pill chip: a second radius family.",
+      rows: [
+        ["#10482", "Ayşe Demir", "₺1,249"],
+        ["#10481", "Mert Aksoy", "₺489"],
+        ["#10480", "Zeynep Kaya", "₺2,310"],
+        ["#10479", "Can Öztürk", "₺349"],
+      ] as const,
+      showGrid: "Show the 8px grid",
+      view: "View",
+      segA: "List",
+      segB: "Card",
+      ritimRows: [
+        ["List row", "--row"],
+        ["List row", "--row"],
+        ["Dense row", "--row-sm"],
+        ["Dense row", "--row-sm"],
+      ] as const,
+      ritimTags: [
+        ["--gutter", "the gutter, the line everything starts on"],
+        ["--row", "list row"],
+        ["--row-sm", "dense row"],
+        ["--control", "every control"],
+      ] as const,
+      halfOk: "1px · 8px",
+      halfNo: "0.5px · 7.5px · 13px",
+      gateTitle: "check:scale · check:css (example output)",
+      gate: [
+        ["✗", "src/order-card.tsx:14", "padding: 13px → not on the scale, use a token"],
+        ["✗", "src/badge.tsx:8", "border-radius: 999px → fully round is only for the radio, the score ring and the ring spinner"],
+        ["✗", "kit.css:212", "border-width: 0.5px → no half pixels"],
+        ["✓", "293 classes", "clean"],
+      ] as const,
+    },
+    ipucu: {
+      radius: "Move the knob: five role radii derive from one value.",
+      round: "Avatar, live dot, chip: all three keep their corners.",
+      border: "The same table, two border weights.",
+      rhythm: "Turn the grid on: controls share one height, rows sit on the 8px line.",
+      half: "A half pixel prints blurry on screen.",
+      enforce: "When the gate finds a raw measurement, the build stops.",
+    },
+
     whatFor: "What this page is for",
     whatForP: (
       <>
@@ -135,8 +250,11 @@ const T = {
     ),
     radiusFull: (
       <>
-        <strong>Fully round is reserved for two things: the avatar and the live dot.</strong> No
-        pill-shaped badges, no pill-shaped chips. Making a badge a pill turns it into a second
+        <strong>
+          Fully round is reserved for three things: the radio, the score ring and the ring spinner.
+        </strong>{" "}
+        The avatar and the live dot keep their corners too; no pill-shaped badges, no pill-shaped
+        chips. Making a badge a pill turns it into a second
         radius family, and two families eventually become three.
       </>
     ),
@@ -200,37 +318,86 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.radius}</H2>
       <P>{t.radiusP}</P>
-      {/* AYNI EKRANDA İKİ YARIÇAP: kural yan yana konunca bir cümleden hızlı
-          okunuyor — kontrol keskin, yüzey bir kademe yumuşak. */}
+      {/* AYNI EKRANDA BEŞ YARIÇAP, VE HEPSİ TEK DEĞERDEN: kural yan yana
+          konunca bir cümleden hızlı okunuyor · kontrol keskin, yüzey bir
+          kademe yumuşak, ve ikisi birlikte kayıyor. */}
       <Demo
+        ipucu={t.ipucu.radius}
         labels={dict.demo}
+        align="start"
         code={`<Card>
   <CardBody>
     <Input placeholder="${t.search}" />
     <Button variant="primary">${t.save}</Button>
   </CardBody>
-</Card>`}
+</Card>
+
+:root { --radius: 6px; }
+--radius-chip:  calc(var(--radius) - 2px);
+--radius-ctl:   var(--radius);
+--radius-btn:   calc(var(--radius) + 1px);
+--radius-card:  calc(var(--radius) + 2px);
+--radius-panel: calc(var(--radius) + 4px);`}
       >
-        <Card className="w-full max-w-100">
-          <CardBody className="flex flex-wrap items-center gap-3">
-            <Input placeholder={t.search} />
-            <Button variant="primary">{t.save}</Button>
-            <StatusChip label={t.live} state="positive" dot />
-          </CardBody>
-        </Card>
+        <YaricapOrnegi labels={t.demo} />
       </Demo>
       <P>{t.radiusKnob}</P>
+      <Demo
+        ipucu={t.ipucu.round}
+        labels={dict.demo}
+        align="start"
+        code={`--radius-full   /* ${lang === "tr" ? "yalnız radio, skor halkası ve halka spinner" : "the radio, the score ring and the ring spinner only"} */`}
+      >
+        <YuvarlakOrnegi labels={t.demo} />
+      </Demo>
       <Note>{t.radiusFull}</Note>
 
       <H2>{t.border}</H2>
       <P>{t.borderP}</P>
+      <Demo
+        ipucu={t.ipucu.border}
+        labels={dict.demo}
+        align="start"
+        code={`--color-edge   /* ${lang === "tr" ? "tek çizgi rengi" : "the single rule colour"} */`}
+      >
+        <KenarOrnegi labels={t.demo} />
+      </Demo>
 
       <H2>{t.rhythm}</H2>
       <P>{t.rhythmP}</P>
+      <Demo
+        ipucu={t.ipucu.rhythm}
+        labels={dict.demo}
+        align="start"
+        code={`--gutter
+--row
+--row-sm
+--control`}
+      >
+        <RitimOrnegi labels={t.demo} />
+      </Demo>
       <P>{t.rhythmHalf}</P>
+      <Demo
+        ipucu={t.ipucu.half}
+        labels={dict.demo}
+        align="start"
+        code={`/* ${t.demo.wrong} */
+border-width: 0.5px;
+margin-top: 7.5px;`}
+      >
+        <YarimOrnegi labels={t.demo} />
+      </Demo>
 
       <H2>{t.enforce}</H2>
       <P>{t.enforceP}</P>
+      <Demo
+        ipucu={t.ipucu.enforce}
+        labels={dict.demo}
+        align="start"
+        code={t.demo.gate.map((g) => `${g[0]} ${g[1]}  ${g[2]}`).join("\n")}
+      >
+        <KapiOrnegi labels={t.demo} />
+      </Demo>
 
       <Note>
         {t.tokensNote} <Xref to="tokens">{t.tokensLink}</Xref> ·{" "}

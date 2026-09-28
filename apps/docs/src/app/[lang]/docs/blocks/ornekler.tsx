@@ -3,6 +3,7 @@
 import { useState } from "react";
 import {
   Alert,
+  Avatar,
   Button,
   Card,
   CardBody,
@@ -24,7 +25,7 @@ import {
   Table,
 } from "tamga-ui";
 import { CountRow, FilterBar, SaveBar, type FilterValues } from "tamga-ui/blocks";
-import { Delete, GithubLogo, GoogleLogo, Plus } from "tamga-ui/icons";
+import { Delete, Edit, File, GithubLogo, GoogleLogo, Plus } from "tamga-ui/icons";
 import { Galeri, type GaleriOgesi } from "@/components/gallery";
 import type { Locale as Dil } from "@/i18n/config";
 
@@ -148,9 +149,9 @@ const S = {
 
     sonHareketler: "Son hareketler",
     hareketler: [
-      ["Ada", "kaydı güncelledi", "2 dk"],
-      ["Baran", "yeni kayıt açtı", "18 dk"],
-      ["Ceyda", "bir dosya ekledi", "1 sa"],
+      ["Ada Yılmaz", "kaydı güncelledi", "2 dk", "edit"],
+      ["Baran Koç", "yeni kayıt açtı", "18 dk", "plus"],
+      ["Ceyda Arslan", "bir dosya ekledi", "1 sa", "file"],
     ],
 
     googleIle: "Google ile devam et",
@@ -268,9 +269,9 @@ const S = {
 
     sonHareketler: "Recent activity",
     hareketler: [
-      ["Ada", "updated a record", "2 min"],
-      ["Baran", "opened a new record", "18 min"],
-      ["Ceyda", "attached a file", "1 hr"],
+      ["Ada Yılmaz", "updated a record", "2 min", "edit"],
+      ["Baran Koç", "opened a new record", "18 min", "plus"],
+      ["Ceyda Arslan", "attached a file", "1 hr", "file"],
     ],
 
     googleIle: "Continue with Google",
@@ -643,6 +644,9 @@ function GrafikKartiOrnegi({ lang }: { lang: Dil }) {
   );
 }
 
+/* Eylemin glifi: rol adıyla, Phosphor adıyla değil. */
+const HAREKET_GLIFI = { edit: Edit, plus: Plus, file: File } as const;
+
 function AktiviteOrnegi({ lang }: { lang: Dil }) {
   const s = S[lang];
   return (
@@ -650,11 +654,22 @@ function AktiviteOrnegi({ lang }: { lang: Dil }) {
       <CardHead>
         <h3 className="text-subhead font-semibold text-ink">{s.sonHareketler}</h3>
       </CardHead>
-      {s.hareketler.map(([kisi, ne, neZaman]) => (
+      {/* KİM SÜTUNU BİR AVATAR: bir akışta ilk taranan şey kişi, ve baş
+          harfler bir adın en hızlı okunan hâli. Eylem glifi de ROLÜYLE
+          geliyor · aynı fiil her üründe aynı simgeyi taşıyor.
+          BU BİR LOG DEĞİL, o yüzden `LogView` değil: log makinenin yazdığı
+          şey (mono, akan, süzülen); bu insanın yaptığı şey. */}
+      {s.hareketler.map(([kisi, ne, neZaman, glif]) => (
         <ListRow key={kisi}>
-          <span className="min-w-0 flex-1 truncate text-ink">
+          <Avatar name={kisi} size={28} look="soft" />
+          <span className="flex min-w-0 flex-1 items-center gap-2 truncate text-ink">
             <strong className="font-medium">{kisi}</strong> {ne}
           </span>
+          <Icon
+            icon={HAREKET_GLIFI[glif as keyof typeof HAREKET_GLIFI]}
+            size="xs"
+            className="shrink-0 text-ink-faint"
+          />
           <Label>{neZaman}</Label>
         </ListRow>
       ))}
@@ -966,17 +981,19 @@ const OGELER: GaleriOgesi[] = [
     tur: "tarif",
     ad: { tr: "Son hareketler", en: "Recent activity" },
     aciklama: {
-      tr: "Kim, ne yaptı, ne zaman. Üç sütun değil tek satır: bir akış taranır, okunmaz.",
-      en: "Who did what, and when. One line rather than three columns: a feed is scanned, not read.",
+      tr: "Kim, ne yaptı, ne zaman. Üç sütun değil tek satır: bir akış taranır, okunmaz. Bir LOG değil, o yüzden LogView değil: log makinenin yazdığı şey, bu insanın yaptığı şey.",
+      en: "Who did what, and when. One line rather than three columns: a feed is scanned, not read. It is not a LOG, so not LogView: a log is what the machine writes, this is what a person did.",
     },
     ornek: (lang) => <AktiviteOrnegi lang={lang} />,
     kod: `<Card>
   <CardHead><h3 className="text-subhead font-semibold text-ink">Son hareketler</h3></CardHead>
   {hareketler.map((h) => (
     <ListRow key={h.id}>
-      <span className="min-w-0 flex-1 truncate text-ink">
+      <Avatar name={h.kisi} size={28} look="soft" />
+      <span className="flex min-w-0 flex-1 items-center gap-2 truncate text-ink">
         <strong className="font-medium">{h.kisi}</strong> {h.ne}
       </span>
+      <Icon icon={h.glif} size="xs" className="shrink-0 text-ink-faint" />
       <Label>{h.neZaman}</Label>
     </ListRow>
   ))}
@@ -1029,20 +1046,24 @@ const ETIKET = {
   tr: {
     hepsi: "Tümü",
     kapat: "Kapat",
-    sayac: (n: number) => `${n} blok`,
     paket: "paket",
     tarif: "tarif",
     kopyala: "Kodu kopyala",
     kopyalandi: "Kopyalandı",
+    sira: (n: number, toplam: number) => `${n} / ${toplam}`,
+    onceki: "Önceki",
+    sonraki: "Sonraki",
   },
   en: {
     hepsi: "All",
     kapat: "Close",
-    sayac: (n: number) => `${n} blocks`,
     paket: "package",
     tarif: "recipe",
     kopyala: "Copy code",
     kopyalandi: "Copied",
+    sira: (n: number, toplam: number) => `${n} / ${toplam}`,
+    onceki: "Previous",
+    sonraki: "Next",
   },
 };
 

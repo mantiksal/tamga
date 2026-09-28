@@ -1,5 +1,5 @@
 import { MiniButton, Icon } from "tamga-ui";
-import { Delete, CaretLeft, CaretRight } from "tamga-ui/icons";
+import { CaretLeft, Delete, Edit, More, Truck } from "tamga-ui/icons";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -38,6 +38,18 @@ const T = {
         Kitin en küçük kontrolü: bir girdinin içine, bir kartın köşesine, bir görselin üstüne sığar.
       </>
     ),
+    edit: "Düzenle",
+    confirm: "Onayla",
+    ship: "Kargola",
+    more: "Diğer",
+    varyantlar: (
+      <>
+        Dört dolgu: <code>secondary</code> (varsayılan), <code>primary</code>,{" "}
+        <code>soft</code> ve <code>quiet</code>. <strong>Sessiz olanın tabanı yok</strong> ve
+        kenarı ayraç çizgisinde: bir satırda üç eylem varsa üçü birden nesne olamaz · biri
+        önde durur, ötekiler yerini bilir.
+      </>
+    ),
     rules: "Kurallar",
     noLift: (
       <>
@@ -69,6 +81,18 @@ const T = {
       <>
         The kit&apos;s smallest control: it fits inside a field, in the corner of a card, on top of
         an image.
+      </>
+    ),
+    edit: "Edit",
+    confirm: "Approve",
+    ship: "Ship",
+    more: "More",
+    varyantlar: (
+      <>
+        Four fills: <code>secondary</code> (the default), <code>primary</code>,{" "}
+        <code>soft</code> and <code>quiet</code>. <strong>The quiet one has no base</strong> and
+        its edge is the divider line: with three actions in one row, all three cannot be objects ·
+        one stands forward, the others know their place.
       </>
     ),
     rules: "Rules",
@@ -107,18 +131,40 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <P>{t.lead}</P>
       <Demo
         labels={dict.demo}
-        code={`<MiniButton aria-label="${t.remove}"><Icon icon={Delete} size="xs" /></MiniButton>`}
+        code={`<MiniButton aria-label="${t.edit}"><Icon icon={Edit} size="xs" />${t.edit}</MiniButton>
+<MiniButton variant="primary" aria-label="${t.confirm}">${t.confirm}</MiniButton>
+<MiniButton variant="soft" aria-label="${t.ship}"><Icon icon={Truck} size="xs" />${t.ship}</MiniButton>
+<MiniButton variant="quiet" aria-label="${t.more}"><Icon icon={More} size="xs" />${t.more}</MiniButton>`}
       >
+        {/* Metin de alabiliyor: referansın satırı "Düzenle · Kopyala · Onayla ·
+            Kargola · Diğer", yani yalnız ikon taşıyan bir kutu değil. */}
+        <MiniButton aria-label={t.edit}>
+          <Icon icon={Edit} size="xs" weight="bold" />
+          {t.edit}
+        </MiniButton>
+        <MiniButton variant="primary" aria-label={t.confirm}>
+          {t.confirm}
+        </MiniButton>
+        <MiniButton variant="soft" aria-label={t.ship}>
+          <Icon icon={Truck} size="xs" weight="bold" />
+          {t.ship}
+        </MiniButton>
+        <MiniButton variant="quiet" aria-label={t.more}>
+          <Icon icon={More} size="xs" weight="bold" />
+          {t.more}
+        </MiniButton>
+
+        <span className="h-7 w-px bg-[var(--color-div)]" aria-hidden />
+
         <MiniButton aria-label={t.left}>
           <Icon icon={CaretLeft} size="xs" />
-        </MiniButton>
-        <MiniButton aria-label={t.right}>
-          <Icon icon={CaretRight} size="xs" />
         </MiniButton>
         <MiniButton aria-label={t.remove}>
           <Icon icon={Delete} size="xs" />
         </MiniButton>
       </Demo>
+
+      <P>{t.varyantlar}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.noLift}</Note>

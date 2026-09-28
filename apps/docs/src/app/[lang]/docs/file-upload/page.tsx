@@ -106,7 +106,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
   items={items}
   onAdd={(files) => …}
   onRemove={(id) => …}
-  onReorder={(id, dir) => …}
+  onReorder={(id, hedef) => …}
   labels={{ drop: "…", browse: "…", remove: "…", moveLeft: "…", moveRight: "…", primary: "…" }}
 />`}>
         <FileUploadDemo lang={lang} />

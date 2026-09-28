@@ -36,6 +36,32 @@ const T = {
         kuralı olarak bırakılırsa, unutulduğu her yerde sekmeler boşlukta durur.
       </>
     ),
+    tur: (
+      <>
+        <strong>İki tür var.</strong> <code>look=&quot;line&quot;</code> (varsayılan) aktif
+        sekmenin altına çizgi koyuyor ve <strong>sayfanın görünümlerini</strong> ayırıyor;{" "}
+        <code>look=&quot;folder&quot;</code> sekmeleri <strong>panelin üstüne</strong> oturtuyor
+        ve bir <strong>yüzeyin bölümlerini</strong> ayırıyor · bir kartın içindeki form
+        bölümleri gibi. Klasör türünde şeridin hemen altına <code>&lt;TabPanel&gt;</code>{" "}
+        koyuluyor: aktif sekmenin alt kenarı saydam, yani ikisi tek gövde okunuyor.
+      </>
+    ),
+    sayac: (
+      <>
+        <code>count</code> etiketin yanına mono bir çip koyuyor: o sekmede kaç satır olduğu.
+        Mono, çünkü <strong>öteki sekmelerin sayılarıyla karşılaştırılan</strong> bir sayı ·
+        okunacak bir sözcük değil.
+      </>
+    ),
+    oklar: (
+      <>
+        Şeritte <strong>tek durak</strong> var: seçili sekme. Ötekilere <kbd>←</kbd>{" "}
+        <kbd>→</kbd> ile gidiliyor, <kbd>Home</kbd> ve <kbd>End</kbd> uçlara atlıyor, ve odak da
+        seçimle birlikte taşınıyor. <code>role=&quot;tablist&quot;</code> verilen bir şerit ekran
+        okuyucuya &quot;buradan oklarla geçilir&quot; diye duyuruluyor; oklar çalışmayınca
+        kullanıcı şeritte sıkışıyordu.
+      </>
+    ),
     rules: "Kurallar",
     panel: (
       <>
@@ -57,6 +83,32 @@ const T = {
         An underline, not a box. Putting a tab in a box cuts it off from the panel beneath it.
         The rule line at the bottom lives <strong>inside the component</strong>: left as a layout
         rule the caller has to remember, the tabs float in space everywhere it is forgotten.
+      </>
+    ),
+    tur: (
+      <>
+        <strong>There are two kinds.</strong> <code>look=&quot;line&quot;</code> (the default)
+        underlines the active tab and separates <strong>views of the page</strong>;{" "}
+        <code>look=&quot;folder&quot;</code> seats the tabs <strong>on the panel</strong> and
+        separates <strong>sections of one surface</strong>, the sections of a form inside a
+        card. With the folder kind, put a <code>&lt;TabPanel&gt;</code> right under the strip:
+        the active tab&apos;s bottom edge is transparent, so the two read as one body.
+      </>
+    ),
+    sayac: (
+      <>
+        <code>count</code> puts a mono chip beside the label: how many rows are in that tab. Mono,
+        because it is a number <strong>compared with the other tabs&apos; numbers</strong>, not a
+        word to be read.
+      </>
+    ),
+    oklar: (
+      <>
+        The strip has a <strong>single stop</strong>: the selected tab. The others are reached
+        with <kbd>←</kbd> <kbd>→</kbd>, <kbd>Home</kbd> and <kbd>End</kbd> jump to the ends, and
+        focus travels with the selection. A strip given{" "}
+        <code>role=&quot;tablist&quot;</code> is announced to a screen reader as &quot;move with
+        the arrows&quot;; while the arrows did nothing, the user was stuck in it.
       </>
     ),
     rules: "Rules",
@@ -94,6 +146,10 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         <TabsDemo lang={lang} />
       </Demo>
       <P>{t.underline}</P>
+
+      <P>{t.tur}</P>
+      <P>{t.sayac}</P>
+      <P>{t.oklar}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.panel}</Note>

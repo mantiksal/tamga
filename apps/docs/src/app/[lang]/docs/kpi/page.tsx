@@ -1,5 +1,4 @@
-import { Kpi, Sparkline } from "tamga-ui";
-import { CanliKarolar } from "./ornek";
+import { AyrintiliKarolar, CanliKarolar, KaroIzgara } from "./ornek";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -42,6 +41,17 @@ const T = {
     orders: "Sipariş",
     revenue: "Ciro",
     latency: "Yanıt süresi",
+    customers: "Yeni müşteri",
+    returns: "İade oranı",
+    bicim: (
+      <>
+        <strong>İki biçim.</strong> <code>look=&quot;tile&quot;</code> (varsayılan) bir KPI
+        ızgarasının kurulduğu karo: solda 40 piksellik ikon kutusu, sayının üstünde etiket · bir
+        panelin tepesinde dört tanesi yan yana durur. <code>look=&quot;detail&quot;</code> ise
+        yanında bir <strong>eğri</strong> ve altında bir <strong>değişim</strong> taşıyan uzun
+        kart: ikon ve etiket üstte, sayı ile grafik yan yana. Aynı sayı, iki yoğunluk.
+      </>
+    ),
     lead: "Tek bir sayı, büyük, ve yanında nereden geldiği.",
     skeletonFirst: (
       <>
@@ -77,12 +87,14 @@ const T = {
         karo hover&apos;da oynarsa tıklanabilir olduğu yalanını söyler.
       </>
     ),
-    gridH: "Izgara: sütun sayısı sayılır, verilmez",
+    gridH: "Izgara: sütunu KAP veriyor",
     gridP: (
       <>
-        <code>KpiGrid</code> sütun sayısını çocuk sayısından alıyor (en çok altı). Elle yazılan
-        bir sütun sayısı yeni bir karo eklendiğinde yalnız o ekranda güncelleniyor, ve tek başına
-        kalan bir karo bütün satırı kaplayıp panoyu dengesiz gösteriyor.
+        <code>KpiGrid</code> sütun sayısını ekrandan da çocuk sayısından da almıyor:{" "}
+        <strong>karo 210 pikselin altına inmiyor</strong>, sığmayan alt satıra geçiyor. Kural bir
+        süre karoları sayıp ekran genişliğine bakıyordu ve ölçülen hata şuydu: 1494 piksellik bir
+        ekranda, 790 piksellik bir sütunun içinde dört karo açılıyor, karo 190 piksele düşüyor ve
+        sayı kırpılıyordu. Bir karo, içinde durduğu kabı bilir; ekranı değil.
       </>
     ),
     attentionH: "Karo her ekranda aynı görünür",
@@ -129,6 +141,18 @@ const T = {
     orders: "Orders",
     revenue: "Revenue",
     latency: "Response time",
+    customers: "New customers",
+    returns: "Return rate",
+    bicim: (
+      <>
+        <strong>Two shapes.</strong> <code>look=&quot;tile&quot;</code> (the default) is the tile
+        a KPI grid is built from: a 40px icon box on the left, the label over the number · four
+        of them stand side by side at the top of a panel. <code>look=&quot;detail&quot;</code> is
+        the taller card carrying a <strong>curve</strong> beside the number and a{" "}
+        <strong>change</strong> under it: icon and label on top, number and chart side by side.
+        The same number, two densities.
+      </>
+    ),
     lead: "One number, large, and beside it, where it came from.",
     skeletonFirst: (
       <>
@@ -164,12 +188,15 @@ const T = {
         apply only to the first two: a tile that moves on hover while doing nothing tells a lie.
       </>
     ),
-    gridH: "The grid counts its columns, it is not told them",
+    gridH: "The container decides the columns",
     gridP: (
       <>
-        <code>KpiGrid</code> takes the column count from how many children it has (six at most).
-        A hand-written column count is updated only on the screen where a tile was added, and a
-        tile left alone on its own row makes the dashboard look off balance.
+        <code>KpiGrid</code> takes its column count neither from the screen nor from how many
+        children it has: <strong>a tile never goes below 210px</strong>, and what does not fit
+        moves to the next row. The rule used to count the tiles and measure the screen, and the
+        measured failure was this: on a 1494px screen, inside a 790px column, it opened four
+        columns, each tile fell to 190px and the number was clipped. A tile knows the box it
+        stands in, not the screen.
       </>
     ),
     attentionH: "The tile looks the same on every screen",
@@ -215,22 +242,30 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
+      <Demo labels={dict.demo} align="start" grid={false} code={`<KpiGrid>
+  <Kpi icon={CurrencyDollar} iconTone="info" label="${t.revenue}" value="842.350" unit="₺" />
+  <Kpi icon={Receipt} iconTone="info" label="${t.orders}" value="1.284" />
+  <Kpi icon={Users} iconTone="info" label="${t.customers}" value="312" />
+  <Kpi icon={Undo} label="${t.returns}" value="%2,4" />
+</KpiGrid>`}>
+        <KaroIzgara
+          revenue={t.revenue}
+          orders={t.orders}
+          customers={t.customers}
+          returns={t.returns}
+        />
+      </Demo>
+      <P>{t.bicim}</P>
       <Demo labels={dict.demo} align="start" grid={false} code={`<Kpi
+  look="detail"
+  icon={Receipt}
+  iconTone="info"
   label="${t.orders}"
   value={248}
   delta={12}
   chart={<Sparkline values={series} tone="positive" />}
 />`}>
-        <div className="grid w-full gap-4 sm:grid-cols-3">
-          <Kpi
-            label={t.orders}
-            value={248}
-            delta={12}
-            chart={<Sparkline values={[42, 38, 45, 51, 47, 60, 58, 66, 61, 72, 68, 80]} tone="positive" />}
-          />
-          <Kpi label={t.revenue} value="18.420" unit="₺" delta={-4} />
-          <Kpi label={t.latency} value={24} unit="ms" delta={8} better="down" />
-        </div>
+        <AyrintiliKarolar orders={t.orders} revenue={t.revenue} latency={t.latency} />
       </Demo>
       <P>{t.tabular}</P>
 
@@ -246,7 +281,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.gridH}</H2>
       <P>{t.gridP}</P>
-      <Props of="KpiGrid" lang={lang} />
+      <Props of="KpiGrid" lang={lang} etiketli />
 
       <H2>{t.attentionH}</H2>
       <P>{t.attentionP}</P>
@@ -258,10 +293,10 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.deltaH}</H2>
       <P>{t.deltaP}</P>
-      <Props of="Delta" lang={lang} />
+      <Props of="Delta" lang={lang} etiketli />
 
       <H2>Props</H2>
-      <Props of="Kpi" lang={lang} />
+      <Props of="Kpi" lang={lang} etiketli />
 
       <H2>{t.related}</H2>
       <P>{t.rel}</P>

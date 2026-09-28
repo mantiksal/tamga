@@ -145,7 +145,6 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
             title={t.title}
             description={t.desc}
             detail="quota_exceeded · req_8f2ac41e"
-            retryLabel={t.retry}
           />
         </div>
       </Demo>

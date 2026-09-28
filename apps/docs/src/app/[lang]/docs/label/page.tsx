@@ -1,4 +1,5 @@
 import { Label } from "tamga-ui";
+import { EtiketTurleri } from "./ornek";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -37,6 +38,23 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    alanH: "Alan etiketi",
+    alanP: (
+      <>
+        Beş tür, ve beşi de <code>Field</code>&apos;ın işi: standart, zorunlu (kırmızı yıldız ·
+        sözcük değil <strong>glif</strong>, çünkü sözcük bir çeviri ve kit çeviri yapmıyor),
+        isteğe bağlı (etiketin ardında sessiz bir çip), bilgi ipuçlu (<code>title</code> taşıyan
+        glif, <code>&lt;label&gt;</code>&apos;ın DIŞINDA · tıklayınca kontrol odaklanmasın diye)
+        ve bölüm etiketi. Sonuncusu bu bileşenin <code>look=&quot;section&quot;</code>&apos;ı:
+        bir sayıyı işaretlemiyor, bir <strong>bölgeyi</strong> adlandırıyor.
+      </>
+    ),
+    fiyat: "Fiyat",
+    indirim: "İndirim",
+    istegeBagli: "isteğe bağlı",
+    kdv: "KDV oranı",
+    kdvIpucu: "Ürün kategorisine göre otomatik gelir",
+    teslimat: "TESLİMAT BİLGİLERİ",
     notField: (
       <>
         <strong>Form etiketi değildir.</strong> Bir kontrolü adlandırmaz, bir şeyi niteler. Form
@@ -60,6 +78,24 @@ const T = {
       </>
     ),
     rules: "Rules",
+    alanH: "The field label",
+    alanP: (
+      <>
+        Five kinds, and all five belong to <code>Field</code>: plain, required (a red asterisk ·
+        a <strong>glyph</strong> rather than a word, because the word would be a translation and
+        the kit makes none), optional (a quiet chip after the label), with a hint (a glyph
+        carrying a <code>title</code>, OUTSIDE the <code>&lt;label&gt;</code> so clicking it does
+        not focus the control) and the section label. The last one is this component&apos;s{" "}
+        <code>look=&quot;section&quot;</code>: it does not annotate a number, it names a{" "}
+        <strong>region</strong>.
+      </>
+    ),
+    fiyat: "Price",
+    indirim: "Discount",
+    istegeBagli: "optional",
+    kdv: "VAT rate",
+    kdvIpucu: "Filled automatically from the product category",
+    teslimat: "DELIVERY DETAILS",
     notField: (
       <>
         <strong>It is not a form label.</strong> It does not name a control; it qualifies a thing.
@@ -91,6 +127,21 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         <Label>{t.checks}</Label>
       </Demo>
       <P>{t.mono}</P>
+
+      <H2>{t.alanH}</H2>
+      <Demo labels={dict.demo} align="start" code={`<Field label="${t.fiyat}" required>…</Field>
+<Field label="${t.indirim}" info={<Tag look="outline">${t.istegeBagli}</Tag>}>…</Field>
+<Label look="section">${t.teslimat}</Label>`}>
+        <EtiketTurleri
+          fiyat={t.fiyat}
+          indirim={t.indirim}
+          istegeBagli={t.istegeBagli}
+          kdv={t.kdv}
+          kdvIpucu={t.kdvIpucu}
+          teslimat={t.teslimat}
+        />
+      </Demo>
+      <P>{t.alanP}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.notField}</Note>

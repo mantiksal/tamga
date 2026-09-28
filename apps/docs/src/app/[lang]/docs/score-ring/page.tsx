@@ -31,9 +31,9 @@ const T = {
   tr: {
     lead: (
       <>
-        0-100 arası bir sayıyı okunur kılan halka. <strong>Sert kare segmentler</strong>:
-        pürüzsüz yay ve ibre yok; süpürülen bir yay skeuomorfik bir göstergedir ve bu kit
-        skeuomorf çizmez.
+        0-100 arası bir sayıyı okunur kılan halka. <strong>Dolu yay, ibre yok</strong>: yay ne
+        kadarının dolduğunu bir bakışta söylüyor, sayı ortada yazılı duruyor. İbreli bir kadran
+        bir nesnenin taklidi olurdu ve bu kit taklit çizmiyor.
       </>
     ),
     size: "Boyut",
@@ -79,9 +79,10 @@ const T = {
   en: {
     lead: (
       <>
-        The ring that makes a number between 0 and 100 readable. <strong>Hard square
-        segments</strong>: no smooth arc, no needle; a swept arc is a skeuomorphic gauge, and this
-        kit does not draw skeuomorphs.
+        The ring that makes a number between 0 and 100 readable. <strong>A filled arc, no
+        needle</strong>: the arc says how much is full at a glance and the number sits in the
+        middle. A needle would be an imitation of an object, and this kit does not draw
+        imitations.
       </>
     ),
     size: "Size",

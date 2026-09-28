@@ -4,7 +4,14 @@
     "docs": "Doküman menüsü",
     "toc": "İçindekiler",
     "menuAc": "Menüyü aç",
-    "menuKapat": "Menüyü kapat"
+    "menuKapat": "Menüyü kapat",
+    "search": "Dokümanda ara",
+    "searchAria": "Doküman sayfalarında ara",
+    "searchEmpty": "Sonuç yok",
+    "prev": "Önceki",
+    "next": "Sonraki",
+    "crumbRoot": "Doküman",
+    "example": "Örnek"
   },
   "chrome": {
     "theme": {
@@ -24,6 +31,7 @@
     "copy": "Kopyala",
     "copied": "Kopyalandı",
     "copyAria": "Kodu kopyala",
-    "controls": "Örnek ayarları"
+    "controls": "Örnek ayarları",
+    "try": "Dene"
   }
 }

@@ -39,6 +39,16 @@ const T = {
         yaşıyor.
       </>
     ),
+    palette: "Komut paleti",
+    newProduct: "Yeni ürün",
+    ikiBoy: (
+      <>
+        <strong>Tuş da katmanlı</strong>: 1.5px kenar, 2px taban · bu kitte basılabilir olanın
+        işareti derinlik, ve bir kısayol gösterimi basılacak bir şeyi tarif ediyor.{" "}
+        <code>inline</code> ise daha sessiz olanı: bir kısayol listesinde her satırda bir tuş
+        var, ve yirmi katmanlı kutu listeyi bir tuş takımına çeviriyor.
+      </>
+    ),
     rules: "Kurallar",
     related: "İlgili",
     rel: (
@@ -57,6 +67,16 @@ const T = {
         <code>&lt;kbd&gt;</code> is used, not <code>&lt;span&gt;</code>: for a screen reader, the
         difference between &quot;Ctrl&quot; and &quot;a key to be pressed&quot; lives in this
         element.
+      </>
+    ),
+    palette: "Command palette",
+    newProduct: "New product",
+    ikiBoy: (
+      <>
+        <strong>A key is layered too</strong>: a 1.5px edge and a 2px base · in this kit depth is
+        the mark of what can be pressed, and a shortcut describes something to press.{" "}
+        <code>inline</code> is the quieter one: a shortcut list has a key on every row, and twenty
+        layered boxes turn the list into a keypad.
       </>
     ),
     rules: "Rules",
@@ -79,17 +99,45 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
-      <Demo labels={dict.demo} code={`<Kbd>⌘</Kbd> <Kbd>S</Kbd>`}>
-        <span className="flex items-center gap-2 text-[length:var(--docs-small)] text-ink-soft">
-          <Kbd>⌘</Kbd>
-          <Kbd>S</Kbd>
-          <span className="ml-1">{t.save}</span>
-        </span>
-        <span className="ml-6 flex items-center gap-2 text-[length:var(--docs-small)] text-ink-soft">
-          <Kbd>/</Kbd>
-          <span className="ml-1">{t.search}</span>
-        </span>
+      <Demo labels={dict.demo} align="start" grid={false} code={`<Kbd>⌘</Kbd> <Kbd>⇧</Kbd> <Kbd>K</Kbd>
+
+<Kbd inline>N</Kbd>`}>
+        <div className="flex w-full flex-col gap-4">
+          <span className="flex items-center gap-2 text-[length:var(--docs-small)] text-ink-soft">
+            <Kbd>⌘</Kbd>
+            <Kbd>⇧</Kbd>
+            <Kbd>K</Kbd>
+            <span className="ml-1.5">{t.palette}</span>
+          </span>
+
+          {/* Kısayol listesi: satır başına bir tuş, ve tuşlar sessiz · yirmi
+              katmanlı kutu listeyi bir tuş takımına çeviriyor. */}
+          <div className="flex max-w-90 flex-col gap-2">
+            {(
+              [
+                [t.newProduct, ["N"]],
+                [t.search, ["/"]],
+                [t.save, ["⌘", "S"]],
+              ] as const
+            ).map(([ad, tuslar]) => (
+              <span
+                key={ad}
+                className="flex items-center justify-between border-b border-dashed border-[var(--color-line)] pb-2 text-[length:var(--docs-small)] text-ink"
+              >
+                {ad}
+                <span className="flex gap-1">
+                  {tuslar.map((k) => (
+                    <Kbd key={k} inline>
+                      {k}
+                    </Kbd>
+                  ))}
+                </span>
+              </span>
+            ))}
+          </div>
+        </div>
       </Demo>
+      <P>{t.ikiBoy}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.semantic}</Note>

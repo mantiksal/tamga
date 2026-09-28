@@ -100,7 +100,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
   return (
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
-      <Demo labels={dict.demo} align="start" code={`<Slider value={v} onChange={setV} min={0} max={100} suffix="%" label="…" />`}>
+      <Demo yuzey labels={dict.demo} align="start" code={`<Slider value={v} onChange={setV} min={0} max={100} suffix="%" label="…" />`}>
         <SliderDemo lang={lang} />
       </Demo>
       <P>{t.value}</P>

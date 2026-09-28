@@ -1,4 +1,5 @@
-import { Input, Field } from "tamga-ui";
+import { Input, Field, Icon, Tooltip } from "tamga-ui";
+import { Info } from "tamga-ui/icons";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -35,6 +36,18 @@ const T = {
     mailPh: "ornek@sirket.com",
     vkn: "Vergi no",
     vknErr: "On bir hane olmalı.",
+    zorunlu: "Zorunlu",
+    vknInfo: "Vergi dairesinden alınan on bir haneli numara.",
+    zorunlulukP: (
+      <>
+        Zorunluluk iki kanaldan söyleniyor: <code>required</code> etiketin yanına{" "}
+        <strong>kırmızı yıldızı</strong> koyuyor (sözcük değil glif · sözcük bir çeviri, kit
+        çeviri yapmıyor), <code>note</code> ise satırın öteki ucuna çağıranın yazdığı sessiz
+        sözcüğü. <strong>Hata satırı da bir glif taşıyor</strong>: renk tek başına bir işaret
+        değil, kırmızıyı görmeyen biri için satır sıradan bir yardım metni kalırdı. Hatalı alanın
+        zemini de yıkanıyor · dört alanlı bir formda göz hatalıyı kenar tarayarak arıyordu.
+      </>
+    ),
     rules: "Kurallar",
     htmlFor: (
       <>
@@ -65,6 +78,19 @@ const T = {
     mailPh: "name@company.com",
     vkn: "Tax number",
     vknErr: "Must be eleven digits.",
+    zorunlu: "Required",
+    vknInfo: "The eleven-digit number issued by the tax office.",
+    zorunlulukP: (
+      <>
+        A required field says so twice: <code>required</code> puts the{" "}
+        <strong>red asterisk</strong> beside the label (a glyph, not a word · a word is a
+        translation and the kit makes none), and <code>note</code> puts the caller&apos;s quiet
+        word at the other end of the row. <strong>The error line carries a glyph too</strong>:
+        colour alone is not a mark, and to someone who does not see the red the line would read
+        as ordinary help text. The failing field is washed as well · in a form of four, the eye
+        was hunting for it along the edges.
+      </>
+    ),
     rules: "Rules",
     htmlFor: (
       <>
@@ -102,7 +128,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <Demo
         labels={dict.demo}
         align="start"
-        code={`<Field label="${t.mail}" description="${t.mailDesc}" htmlFor="mail">
+        code={`<Field label="${t.mail}" description="${t.mailDesc}" required note="${t.zorunlu}" htmlFor="mail">
   <Input id="mail" placeholder="${t.mailPh}" full />
 </Field>
 
@@ -110,15 +136,35 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
   <Input id="vkn" defaultValue="1234" invalid full />
 </Field>`}
       >
-        <div className="flex w-full max-w-96 flex-col gap-7">
-          <Field label={t.mail} description={t.mailDesc} htmlFor="mail">
+        <div className="grid w-full gap-7 sm:grid-cols-2">
+          <Field
+            label={t.mail}
+            description={t.mailDesc}
+            required
+            note={t.zorunlu}
+            htmlFor="mail"
+          >
             <Input id="mail" placeholder={t.mailPh} full />
           </Field>
-          <Field label={t.vkn} error={t.vknErr} htmlFor="vkn">
+          <Field
+            label={t.vkn}
+            error={t.vknErr}
+            /* İpucu kitin kendi balonuyla: tarayıcının gri `title` balonu
+               şeritteki her ipucundan başka türlü görünüyor. */
+            info={
+              <Tooltip label={t.vknInfo} placement="top">
+                <span className="inline-flex">
+                  <Icon icon={Info} size="xs" />
+                </span>
+              </Tooltip>
+            }
+            htmlFor="vkn"
+          >
             <Input id="vkn" defaultValue="1234" invalid full />
           </Field>
         </div>
       </Demo>
+      <P>{t.zorunlulukP}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.htmlFor}</Note>

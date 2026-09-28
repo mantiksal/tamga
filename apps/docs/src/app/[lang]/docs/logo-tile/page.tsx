@@ -113,14 +113,17 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
-      <Demo labels={dict.demo} code={`<LogoTile name="Slack" />
+      <Demo labels={dict.demo} code={`<LogoTile name="Tamga" src="/tamga-mark-light.svg" />
+<LogoTile name="Slack" />
 <LogoTile name="Webhook" size="sm" />`}>
+        <LogoTile name="Tamga" src="/tamga-mark-light.svg" />
         <LogoTile name="Slack" />
         <LogoTile name="PagerDuty" />
         <LogoTile name="Webhook" size="sm" />
       </Demo>
 
       <P>{t.size}</P>
+
 
       <H2>{t.rules}</H2>
       <Note>{t.alt}</Note>

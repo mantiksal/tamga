@@ -1,8 +1,10 @@
 import { Card, Table, StatusChip, Dot } from "tamga-ui";
+import { TabloOrnegi } from "./ornek";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
 import { Demo } from "@/components/demo";
+import { CellActionsDemo } from "@/components/interactive";
 import { Xref } from "@/components/xref";
 import { Props } from "@/components/props";
 import { findPage } from "@/content/nav";
@@ -67,6 +69,31 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    tamH: "Seçim, sıralama ve satır eylemi",
+    tamP: (
+      <>
+        Üçü bir arada: baştaki kutu <strong>seçiyor</strong>, başlıklar{" "}
+        <strong>sıralıyor</strong>, sondaki düğme satırın kendi eylemi. Seç-hepsini kutusunun
+        üçüncü bir hâli var (bazıları seçili) ve tire ile çiziliyor · yarım bir onay işareti,
+        yarım bir onay demek. Seçili satır yıkamasını alıyor, ve kaç tanesinin seçili olduğu
+        tablonun <strong>altında</strong> yazıyor: seçim satırlarda yapılıyor, sayı onlara yakın
+        durmalı.
+      </>
+    ),
+    tSiparis: "SİPARİŞ",
+    tMusteri: "MÜŞTERİ",
+    tTutar: "TUTAR",
+    tDurum: "DURUM",
+    tDetay: "Detay",
+    tSecTumu: "Tümünü seç",
+    tSecilen: ["Sipariş seçilmedi", "1 sipariş seçili", "2 sipariş seçili", "3 sipariş seçili", "4 sipariş seçili", "5 sipariş seçili"],
+    tSatirlar: [
+      { id: "#TG-10479", ad: "Ayşe Şahin", tutar: 3450, durum: "positive", etiket: "Teslim" },
+      { id: "#TG-10482", ad: "Mert Aksoy", tutar: 1840, durum: "neutral", etiket: "Yeni" },
+      { id: "#TG-10480", ad: "Burak Demir", tutar: 1290, durum: "info", etiket: "Kargoda" },
+      { id: "#TG-10481", ad: "Zeynep Kaya", tutar: 420, durum: "caution", etiket: "Hazırlanıyor" },
+      { id: "#TG-10478", ad: "Can Öztürk", tutar: 310, durum: "danger", etiket: "İade" },
+    ] as const,
     noEngine: (
       <>
         <strong>Kit bir tablo MOTORU göndermiyor.</strong> Bu bileşen işaretlemeyi ve fiziği
@@ -124,6 +151,31 @@ const T = {
       </>
     ),
     rules: "Rules",
+    tamH: "Selection, sorting and the row's action",
+    tamP: (
+      <>
+        All three at once: the box at the start <strong>selects</strong>, the headers{" "}
+        <strong>sort</strong>, the button at the end is the row's own action. The select-all box
+        has a third state (some selected) drawn as a dash · half a checkmark would mean half a
+        yes. A selected row takes its wash, and how many are selected is written{" "}
+        <strong>below</strong> the table: the selecting happens in the rows, so the count belongs
+        near them.
+      </>
+    ),
+    tSiparis: "ORDER",
+    tMusteri: "CUSTOMER",
+    tTutar: "TOTAL",
+    tDurum: "STATUS",
+    tDetay: "Details",
+    tSecTumu: "Select all",
+    tSecilen: ["No orders selected", "1 order selected", "2 orders selected", "3 orders selected", "4 orders selected", "5 orders selected"],
+    tSatirlar: [
+      { id: "#TG-10479", ad: "Ayşe Şahin", tutar: 3450, durum: "positive", etiket: "Delivered" },
+      { id: "#TG-10482", ad: "Mert Aksoy", tutar: 1840, durum: "neutral", etiket: "New" },
+      { id: "#TG-10480", ad: "Burak Demir", tutar: 1290, durum: "info", etiket: "Shipping" },
+      { id: "#TG-10481", ad: "Zeynep Kaya", tutar: 420, durum: "caution", etiket: "Preparing" },
+      { id: "#TG-10478", ad: "Can Öztürk", tutar: 310, durum: "danger", etiket: "Returned" },
+    ] as const,
     noEngine: (
       <>
         <strong>The kit does not ship a table ENGINE.</strong> This component carries the markup
@@ -198,11 +250,38 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.cellH}</H2>
       <P>{t.cellP}</P>
-      <Props of="CellActions" lang={lang} />
+      <H2>{t.tamH}</H2>
+      <Demo labels={dict.demo} align="start" grid={false} code={`<SelectAll checked={…} indeterminate={…} label="${t.tSecTumu}" onChange={…} />
+<SortHeader direction={dir} onSort={setDir}>${t.tTutar}</SortHeader>
+<tr data-selected>…<Button size="sm">${t.tDetay}</Button></tr>`}>
+        <TabloOrnegi
+          satirlar={t.tSatirlar.map((r) => ({ ...r }))}
+          basliklar={{
+            id: t.tSiparis,
+            musteri: t.tMusteri,
+            tutar: t.tTutar,
+            durum: t.tDurum,
+          }}
+          detay={t.tDetay}
+          secTumu={t.tSecTumu}
+          secilen={t.tSecilen}
+        />
+      </Demo>
+      <P>{t.tamP}</P>
+
+      <Demo labels={dict.demo} align="start" grid={false} code={`<CellActions>
+  <MiniButton aria-label="…"><Icon icon={Edit} size="xs" /></MiniButton>
+  <DropdownMenu trigger={…} items={…} align="end" />
+</CellActions>`}>
+        <div className="w-full">
+          <CellActionsDemo lang={lang} />
+        </div>
+      </Demo>
+      <Props of="CellActions" lang={lang} etiketli />
       <Note>{t.cellN}</Note>
 
       <H2>Props</H2>
-      <Props of="Table" lang={lang} />
+      <Props of="Table" lang={lang} etiketli />
 
       <H2>{t.related}</H2>
       <P>{t.rel}</P>

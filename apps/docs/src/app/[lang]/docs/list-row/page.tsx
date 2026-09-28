@@ -1,5 +1,5 @@
-import { ListRow, Dot, Label, IconButton, Icon, Surface } from "tamga-ui";
-import { More } from "tamga-ui/icons";
+import { ListRow, Label, Icon, Surface, toneOf } from "tamga-ui";
+import { Bell, CaretRight, Link, Mail, Phone } from "tamga-ui/icons";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -39,10 +39,16 @@ const T = {
     ),
     slack: "Slack",
     slackMeta: "#uyarilar",
+    slackAlt: "Kritik uyarılar bu kanala düşüyor",
     mail: "E-posta",
     mailMeta: "3 alıcı",
+    mailAlt: "Günlük özet · her sabah 09:00",
     hook: "Webhook",
     hookMeta: "bağlı değil",
+    hookAlt: "https://api.magaza.com/tamga/olay",
+    sms: "SMS",
+    smsMeta: "2 numara",
+    smsAlt: "Yalnız kesinti bildirimlerinde",
     more: "Daha fazla",
     element: (
       <>
@@ -82,10 +88,16 @@ const T = {
     ),
     slack: "Slack",
     slackMeta: "#alerts",
+    slackAlt: "Critical alerts land in this channel",
     mail: "Email",
     mailMeta: "3 recipients",
+    mailAlt: "Daily digest · every morning at 09:00",
     hook: "Webhook",
     hookMeta: "not connected",
+    hookAlt: "https://api.store.com/tamga/event",
+    sms: "SMS",
+    smsMeta: "2 numbers",
+    smsAlt: "Only for outage notices",
     more: "More",
     element: (
       <>
@@ -135,18 +147,28 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
           <Surface className="overflow-hidden">
             {(
               [
-                [t.slack, t.slackMeta, "positive"],
-                [t.mail, t.mailMeta, "positive"],
-                [t.hook, t.hookMeta, "neutral"],
+                [t.slack, t.slackAlt, t.slackMeta, "positive", Bell],
+                [t.mail, t.mailAlt, t.mailMeta, "positive", Mail],
+                [t.sms, t.smsAlt, t.smsMeta, "neutral", Phone],
+                [t.hook, t.hookAlt, t.hookMeta, "caution", Link],
               ] as const
-            ).map(([name, meta, tone]) => (
-              <ListRow key={name}>
-                <Dot state={tone} />
-                <span className="min-w-0 flex-1 text-body text-ink">{name}</span>
+            ).map(([name, alt, meta, tone, icon]) => (
+              <ListRow key={name} href="#list-row">
+                {/* Karo 40px: satırın kendi yüksekliği (56) içinde duran en büyük
+                    kare · daha büyüğü satırı şişiriyor, daha küçüğü iki satırlık
+                    metnin yanında kayboluyor. */}
+                <span
+                  className="tamga-logo-tile tamga-logo-tile-sm"
+                  style={{ background: toneOf(tone).bg, color: toneOf(tone).fg }}
+                >
+                  <Icon icon={icon} size="sm" />
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <strong className="truncate text-body text-ink">{name}</strong>
+                  <span className="truncate text-small text-ink-faint">{alt}</span>
+                </span>
                 <Label mono>{meta}</Label>
-                <IconButton aria-label={t.more}>
-                  <Icon icon={More} size="sm" />
-                </IconButton>
+                <Icon icon={CaretRight} size="xs" className="text-ink-faint" />
               </ListRow>
             ))}
           </Surface>

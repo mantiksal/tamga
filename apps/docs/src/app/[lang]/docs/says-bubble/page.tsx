@@ -1,14 +1,5 @@
-import { SaysBubble } from "tamga-ui";
-/* Vitrin için basit bir yer tutucu çizim: kit "ne çizildiğini" sormaz. */
-const box = ({ size }: { size: number; float: boolean }) => (
-  <span
-    aria-hidden
-    className="tamga-card flex items-center justify-center font-mono text-caption text-ink-faint"
-    style={{ width: size * 0.7, height: size * 0.7 }}
-  >
-    art
-  </span>
-);
+import { SaysBubble, Icon } from "tamga-ui";
+import { Sparkle } from "tamga-ui/icons";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -23,80 +14,107 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: Loc
 }
 
 /**
- * Sayfa metni, iki dilli.
- *
- * Neden burada ve sözlükte değil: bir doküman paragrafını JSON anahtarına
- * çevirmek onu okunamaz hâle getirir ve yapıyı metinden koparır. Sözlük ARAYÜZ
- * metinleri içindir ("Kopyala", "Önizleme"); sayfa içeriği sayfayla yaşar.
- *
- * İkisi aynı dosyada, çünkü asıl risk çeviri değil AYRIŞMA: Türkçesi
- * güncellenip İngilizcesi unutulursa iki farklı gerçek doğar. Yan yana
- * durduklarında bu unutuş görünür olur.
- *
- * ÖRNEKLERİN İÇİ DE ÇEVRİLİYOR — buton yazıları, yer tutucular, örnek veri.
- * Bir İngilizce sayfada "Kaydet" yazan bir buton, çevrilmemiş bir sayfadan
- * daha kötüdür: sayfa çevrilmiş görünür, ama ekrandaki şey değildir.
+ * Sayfa metni, iki dilli. Sözlük ARAYÜZ metinleri içindir; sayfa içeriği
+ * sayfayla yaşar, ve iki dil yan yana durduğu için biri unutulunca görünüyor.
  */
 const T = {
   tr: {
     lead: (
       <>
-        Çizimin bir cümle söylemesi gerektiğinde. Balon kitin sisteminin içindedir: 1px kenar +
-        2px sert offset, tıpkı yükselen her nesne gibi; piksel sanatın katı bir arayüzün içinde
-        kaybolmadan durmasını sağlayan şey bu eşleşme.
+        Konuşma balonu: müşteri mesajları, sipariş notları ve asistan önerileri. Üç taraf var ve{" "}
+        <strong>taraf konuşandır</strong> · okuyan kişi sol kenarda karşı tarafı, sağ kenarda
+        kendi sözlerini arıyor, ad okumadan.
       </>
     ),
-    line: "Burada henüz bir şey yok.",
-    one: "Tek kısa cümle: balon bir ses, paragraf değil.",
+    soru: "Merhaba, siparişime hediye paketi eklenebilir mi?",
+    soruSaat: "14:05",
+    yanit: "Tabii, ücretsiz ekledik. Kargoya verildiğinde bilgilendireceğiz.",
+    yanitSaat: "14:07 · Görüldü",
+    oneriBaslik: "Öneri:",
+    oneri: "Bu müşteri son 3 siparişinde hediye paketi istedi. Varsayılan olarak eklemek ister misin?",
+    kose: (
+      <>
+        Balonun <strong>konuşana bakan köşesi küçük</strong> (8 · 8 · 8 · 2), ötekiler kart
+        köşesi. Kuyruk yok: bir kuyruk döndürülmüş kare demek, ve kitin hiçbir yerinde
+        döndürülmüş kare yok.
+      </>
+    ),
+    taban: (
+      <>
+        Bu tarafın balonu <strong>taban taşıyor</strong> (3px), gelen mesaj taşımıyor: gönderilen
+        mesaj sayfanın üstünde duran bir nesne, gelen mesaj sayfanın kendisi.
+      </>
+    ),
+    kesik: (
+      <>
+        Asistanın önerisi <strong>kesik kenarlı</strong>: kitin her yerinde kesik çizgi
+        &ldquo;henüz gerçek içerik değil&rdquo; demek, ve bir öneri de henüz verilmemiş bir
+        karar. Kabul edilince yerine gerçek mesaj geçiyor.
+      </>
+    ),
+    meta: (
+      <>
+        Saat ve iletim durumu <strong>balonun içinde</strong>, altında değil: balonun altındaki
+        bir satır uzun bir sohbetin ritmini bozuyor, ve her mesajın arasına bir boşluk daha
+        koyuyor.
+      </>
+    ),
     rules: "Kurallar",
-    own: (
-      <>
-        <strong>Kendi çizimini takmak</strong>: <code>art</code> bir render fonksiyonu, yani
-        maskot da fotoğraf da olabilir:
-      </>
-    ),
-    slot: (
-      <>
-        Yeni bir çizim bir prop&apos;a mal olur. Yeni bir <strong>slot</strong> ise bir tasarım
-        kararıdır ve gerekçe ister; sistemin klip-art&apos;a dönüşmesini engelleyen çizgi bu.
-      </>
-    ),
     related: "İlgili",
     rel: (
       <>
-        Boş bir yüzey için <Xref to="empty-state">Empty state</Xref>; boş bir satır için{" "}
-        <Xref to="empty-note">Empty note</Xref>.
+        Çizimin konuştuğu balon için <Xref to="empty-state">Empty state</Xref>; tek satırlık bir
+        bildirim için <Xref to="toast">Toast</Xref>.
       </>
     ),
   },
   en: {
     lead: (
       <>
-        For when the drawing has to say a line. The bubble sits inside the kit&apos;s system: a 1px
-        edge plus a 2px hard offset, like every object that lifts; that match is what lets pixel
-        art sit inside a strict interface without dissolving.
+        The conversation bubble: customer messages, order notes and assistant suggestions. There
+        are three sides, and <strong>the side is the speaker</strong> · a reader scans the left
+        edge for the other party and the right edge for their own words, without reading a name.
       </>
     ),
-    line: "There is nothing here yet.",
-    one: "One short line: a bubble is a voice, not a paragraph.",
+    soru: "Hello, can a gift wrap be added to my order?",
+    soruSaat: "14:05",
+    yanit: "Of course, we added it free of charge. We will let you know when it ships.",
+    yanitSaat: "14:07 · Seen",
+    oneriBaslik: "Suggestion:",
+    oneri: "This customer asked for gift wrap on their last 3 orders. Add it by default?",
+    kose: (
+      <>
+        The corner <strong>facing the speaker is the small one</strong> (8 · 8 · 8 · 2), the rest
+        are card corners. There is no tail: a tail means a rotated square, and there is no
+        rotated square anywhere in the kit.
+      </>
+    ),
+    taban: (
+      <>
+        This side&apos;s bubble <strong>carries a base</strong> (3px), the incoming one does not:
+        a sent message is an object standing on the page, an incoming message is the page itself.
+      </>
+    ),
+    kesik: (
+      <>
+        The assistant&apos;s suggestion is <strong>dashed</strong>: everywhere in the kit a dashed
+        edge means &ldquo;not real content yet&rdquo;, and a suggestion is a decision not taken
+        yet. Accepted, a real message takes its place.
+      </>
+    ),
+    meta: (
+      <>
+        The time and the delivery state live <strong>inside</strong> the bubble, not under it: a
+        line under the bubble breaks the rhythm of a long thread and adds another gap between
+        every message.
+      </>
+    ),
     rules: "Rules",
-    own: (
-      <>
-        <strong>Using your own drawing</strong>: <code>art</code> is a render function, so it can
-        be a mascot or a photograph:
-      </>
-    ),
-    slot: (
-      <>
-        A new drawing costs one prop. A new <strong>slot</strong> is a design decision and needs a
-        reason; that line is what stops the system turning into clip art.
-      </>
-    ),
     related: "Related",
     rel: (
       <>
-        For an empty surface, <Xref to="empty-state">Empty state</Xref>; for an empty row,{" "}
-        <Xref to="empty-note">Empty note</Xref>.
+        For the bubble a drawing speaks from, <Xref to="empty-state">Empty state</Xref>; for a
+        one-line notice, <Xref to="toast">Toast</Xref>.
       </>
     ),
   },
@@ -111,27 +129,34 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
-      <Demo labels={dict.demo} code={`<SaysBubble art={myArt} size={132}>${t.line}</SaysBubble>`}>
-        <SaysBubble art={box} size={120}>
-          {t.line}
-        </SaysBubble>
+      <Demo yuzey labels={dict.demo} align="start" grid={false} code={`<SaysBubble avatar="MA" meta="${t.soruSaat}">${t.soru}</SaysBubble>
+
+<SaysBubble from="me" avatar="E" meta="${t.yanitSaat}">${t.yanit}</SaysBubble>
+
+<SaysBubble from="assistant" avatar={<Icon icon={Sparkle} size="sm" weight="fill" />}>
+  <strong>${t.oneriBaslik}</strong> …
+</SaysBubble>`}>
+        <div className="flex w-full max-w-155 flex-col gap-4">
+          <SaysBubble avatar="MA" meta={t.soruSaat}>
+            {t.soru}
+          </SaysBubble>
+          <SaysBubble from="me" avatar="E" meta={t.yanitSaat}>
+            {t.yanit}
+          </SaysBubble>
+          <SaysBubble from="assistant" avatar={<Icon icon={Sparkle} size="sm" weight="fill" />}>
+            <strong>{t.oneriBaslik}</strong> {t.oneri}
+          </SaysBubble>
+        </div>
       </Demo>
-      <P>{t.one}</P>
+      <P>{t.kose}</P>
+      <P>{t.taban}</P>
 
       <H2>{t.rules}</H2>
-      <Note>{t.own}</Note>
-      <pre className="docs-code my-4">{`import type { Art } from "tamga-ui";
-
-const mascot = (name: string): Art =>
-  function Mascot({ size }) {
-    return <img src={\`/mascot/\${name}.png\`} height={size} alt="" aria-hidden />;
-  };
-
-<SaysBubble art={mascot("fish")}>…</SaysBubble>`}</pre>
-      <P>{t.slot}</P>
+      <Note>{t.kesik}</Note>
+      <Note>{t.meta}</Note>
 
       <H2>Props</H2>
-      <Props of="SaysBubble" lang={lang} />
+      <Props of="SaysBubble" lang={lang} etiketli />
 
       <H2>{t.related}</H2>
       <P>{t.rel}</P>

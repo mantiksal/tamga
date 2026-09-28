@@ -114,8 +114,8 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <Note>{t.noEngine}</Note>
 
       <H2>Props</H2>
-      <Props of="SelectionBar" lang={lang} />
-      <Props of="SelectAll" lang={lang} />
+      <Props of="SelectionBar" lang={lang} etiketli />
+      <Props of="SelectAll" lang={lang} etiketli />
     </>
   );
 }

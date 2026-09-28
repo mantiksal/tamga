@@ -40,8 +40,9 @@ const T = {
     ),
     minutes: (
       <>
-        Aralıklar <strong>dakika</strong> olarak veriliyor, çevirisi çağıranın: &quot;5
-        dakika&quot; ile &quot;5 minutes&quot; arasındaki farkı kit bilemez.
+        Özet cümleyi <strong>çağıran kuruyor</strong>: &quot;Her hafta içi&quot; ile &quot;Her
+        gün&quot; arasındaki fark bir dilbilgisi kararı, ve kit çeviri yapmaz. Kontroller
+        kombinasyonu üretiyor, cümleyi ürün yazıyor.
       </>
     ),
     rules: "Kurallar",
@@ -65,10 +66,12 @@ const T = {
     ),
     minutes: (
       <>
-        Intervals are given in <strong>minutes</strong>, and their wording belongs to the caller:
-        the kit cannot know the difference between &quot;5 dakika&quot; and &quot;5 minutes&quot;.
+        The caller writes the <strong>summary sentence</strong>: the difference between "Every
+        weekday" and "Every day" is a decision about grammar, and the kit does not translate. The
+        controls produce the combination; the product writes the sentence.
       </>
     ),
+
     rules: "Rules",
     related: "Related",
     rel: (
@@ -89,11 +92,15 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
-      <Demo labels={dict.demo} align="start" code={`<ScheduleInput
-  value={minutes}
-  onChange={setMinutes}
-  options={[{ minutes: 1, label: "…" }, { minutes: 5, label: "…" }]}
-  label="…"
+      <Demo yuzey labels={dict.demo} align="start" code={`<ScheduleInput
+  days={days}
+  onDaysChange={setDays}
+  from="09:00"
+  to="18:00"
+  onFromChange={setFrom}
+  onToChange={setTo}
+  labels={{ days: "…", dayNames: ["…"], hours: "…", between: "…" }}
+  summary="…"
 />`}>
         <ScheduleDemo lang={lang} />
       </Demo>

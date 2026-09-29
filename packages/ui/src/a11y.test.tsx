@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { AppShell, ListTemplate, DetailTemplate, WizardTemplate, OverviewTemplate } from "./patterns/index.js";
 import {
   Button, IconButton, MiniButton, Input, Textarea, Checkbox, Switch, RadioGroup, Segmented,
   Select, Pagination, StatusChip, Progress, Spinner, Steps, Tabs, Field, LogoTile, AccountButton,
-  PageBand, ThemeToggle,
+  PageBand, ThemeToggle, DropdownMenu,
 } from "./index.js";
 import { Search } from "./components/icons.js";
 
@@ -221,5 +221,27 @@ describe("ThemeToggle · segmented temayı sahiplenmiyor", () => {
       />,
     );
     expect(document.documentElement.classList.contains("dark")).toBe(false);
+  });
+});
+
+describe("DropdownMenu · odak, menüyü AÇAN kişinin hakkı", () => {
+  /* Ana sayfa, `defaultOpen` menünün ilk seçeneği odağı aldığı için sayfanın
+     3365. pikselinde açılıyordu: tarayıcı odaklanan ögeyi görünür kılmak
+     zorunda. Kapı bu yüzden var · "açık" ile "az önce açıldı" aynı şey değil. */
+  const items = [
+    { kind: "item" as const, label: "Düzenle", onSelect: () => {} },
+    { kind: "item" as const, label: "Sil", onSelect: () => {} },
+  ];
+
+  it("`defaultOpen` ile açık doğan menü odağı ÇALMIYOR", () => {
+    const { container } = render(<DropdownMenu trigger={<button>Eylemler</button>} items={items} defaultOpen />);
+    expect(container.querySelectorAll("[data-tamga-option]").length).toBe(2);
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it("kullanıcı açtığında ilk seçenek odağı ALIYOR", () => {
+    const { container } = render(<DropdownMenu trigger={<button>Eylemler</button>} items={items} />);
+    fireEvent.click(container.querySelector("button")!);
+    expect(document.activeElement).toBe(container.querySelector("[data-tamga-option]"));
   });
 });

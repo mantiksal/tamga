@@ -5,6 +5,17 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## Unreleased
+
+### Fixed
+
+- **A menu that starts open no longer steals the focus.** `DropdownMenu` with `defaultOpen`
+  focused its first option on mount, and the browser scrolls whatever it focuses into view: a page
+  carrying such a menu opened thousands of pixels down, past its own heading. The rule is no
+  longer "is it open" but "was it just opened" — the focus belongs to whoever performed the
+  opening. A menu the visitor opens still focuses its first option, so the arrow keys have
+  somewhere to start. Covered by a test.
+
 ## 0.5.0
 
 > The Soft Neo Brutalism port: every component, every token and the physics behind them. The

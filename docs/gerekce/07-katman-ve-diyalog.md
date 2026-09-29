@@ -193,3 +193,22 @@ etiketi dışarıdan geliyor.
 
 Escape ve Kapat düğmesi klavyeyi zaten karşılıyor. Perde erişilebilirlik
 ağacında kalınca panelin ikisi de "Kapat" diye bildirilen iki kontrolü oluyordu.
+
+### Odak, menüyü AÇAN kişinin hakkı.
+
+`useListKeys` menü açıldığında ilk seçeneğe odaklanıyor: ok tuşlarının başlayacak
+bir yeri olsun diye, ve bu doğru. Ama ölçüt "açık mı" yazılmıştı, "az önce açıldı
+mı" değil, ve ikisi `defaultOpen` ile ayrışıyor: açık doğan bir menüde efekt
+mount anında koşuyor, ilk seçenek odağı alıyor, tarayıcı da odaklanan ögeyi
+görünür kılmak için sayfayı ona kaydırıyor.
+
+Bir kez yaşandı: doküman sitesinin ana sayfası, ikinci bölümündeki açık menü
+yüzünden sayfanın 3365. pikselinde açılıyordu. Ziyaretçi kendi başlığını hiç
+görmüyordu, ve sebep sayfada değil kitteydi: sayfa yalnızca menüyü açık
+istemişti.
+
+Bayrak mount'taki `open` değeriyle doğuyor ve menü kapandığında düşüyor:
+kullanıcının sonradan açtığı menü odağı yine alıyor. React'in StrictMode'da
+efekti iki kez koşturması da bunu bozmuyor, ikinci koşuda bayrak hâlâ duruyor.
+`a11y.test.tsx` iki yönü de tutuyor: açık doğan menü odağı çalmıyor, kullanıcının
+açtığı menü alıyor.

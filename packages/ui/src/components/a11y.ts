@@ -115,8 +115,16 @@ export function useListKeys({
   containerRef: React.RefObject<HTMLElement | null>;
   onClose: () => void;
 }) {
+  /* Ölçüt "açık mı" değil, "AÇILDI MI": `defaultOpen` ile açık doğan bir menüde
+     ilk seçenek odağı alırsa tarayıcı sayfayı ona kaydırıyor.
+     Gerekçe: docs/gerekce/07-katman-ve-diyalog.md */
+  const acikDogdu = useRef(open);
+
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      acikDogdu.current = false;
+      return;
+    }
     const root = containerRef.current;
     if (!root) return;
 
@@ -124,8 +132,7 @@ export function useListKeys({
       Array.from(root.querySelectorAll<HTMLElement>("[data-tamga-option]:not([disabled])"));
 
     /* focus the first option on open, so the arrows have somewhere to start */
-    const initial = items();
-    initial[0]?.focus();
+    if (!acikDogdu.current) items()[0]?.focus();
 
     const onKey = (e: KeyboardEvent) => {
       const list = items();

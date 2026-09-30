@@ -66,7 +66,7 @@ export function Checkbox({
       aria-disabled={disabled || undefined}
       disabled={disabled}
       onClick={() => !disabled && onChange?.(!checked)}
-      className={cn("flex items-center gap-2 text-body", disabled && "text-ink-faint", className)}
+      className={cn("flex items-center gap-2 text-left text-body", disabled && "text-ink-faint", className)}
     >
       <span
         className={cn("tamga-check", compact && "tamga-check-sm")}

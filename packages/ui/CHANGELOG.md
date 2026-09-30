@@ -5,6 +5,15 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## Unreleased
+
+### Fixed
+
+- **`Checkbox` no longer centres a two-line label.** It renders a `<button>`, and a browser centres
+  button text; every other choice surface in the kit already neutralises that (`RadioGroup`'s list
+  look, `.tamga-choice-card`), this one did not. A one-word label never showed it; a label with a
+  description under it did.
+
 ## 0.5.1
 
 > Three corrections the 0.5.0 port left behind: a menu that stole the page's scroll, and the

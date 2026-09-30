@@ -5,7 +5,10 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
-## Unreleased
+## 0.5.1
+
+> Three corrections the 0.5.0 port left behind: a menu that stole the page's scroll, and the
+> rail's hover, lift and press.
 
 ### Changed
 

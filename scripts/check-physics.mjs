@@ -202,14 +202,18 @@ for (const [aile, d] of aileler) {
   const duruş = d.rest.find((k) => k.golge && !k.golge.inset && !k.golge.cozulemedi);
   if (!duruş || duruş.golge.x === 0) continue;
   const yukseklik = duruş.golge.x;
+  /* Ölçülen YOL, varış konumu değil: duruşta da bir kayma olabiliyor.
+     Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md */
+  const duruşKayma = duruş.kayma ?? { x: 0, y: 0 };
 
   for (const k of d.active) {
     if (!k.golge || k.golge.inset || k.golge.cozulemedi) continue;
     if (k.golge.x !== 0) ekle(k, `E · basılı hâl ${k.golge.x}px; yasa "basınca 0'a iner ve gerçekten gömülür" diyor`);
     const kayma = k.kayma ?? mirasKayma(aile, "active");
+    const bekleneni = { x: duruşKayma.x + yukseklik, y: duruşKayma.y + yukseklik };
     if (!kayma) ekle(k, `E · basılı hâlde kayma yok; nesne gömülmüyor, yalnız gölgesini kaybediyor`);
-    else if (kayma.x !== yukseklik || kayma.y !== yukseklik)
-      ekle(k, `E · kayma (${kayma.x}, ${kayma.y}) duruş yüksekliği ${yukseklik}px ile eşit değil; 1:1 dibe oturma bozuluyor`);
+    else if (kayma.x !== bekleneni.x || kayma.y !== bekleneni.y)
+      ekle(k, `E · kayma (${kayma.x}, ${kayma.y}) yolu ${yukseklik}px yapmıyor; duruş (${duruşKayma.x}, ${duruşKayma.y}) iken (${bekleneni.x}, ${bekleneni.y}) olmalı · 1:1 dibe oturma bozuluyor`);
   }
 
   for (const k of d.hover) {

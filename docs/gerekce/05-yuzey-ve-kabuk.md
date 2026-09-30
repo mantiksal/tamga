@@ -329,12 +329,42 @@ değişiyor · geniş rayda sayı, dar rayda yalnız bir kare: 40 piksellik bir 
 iki haneli sayı ikonun üstüne biniyor, ve okunmayan bir sayı "bir şey var"dan
 fazlasını söylemiyor. Sayı o zaman `badgeLabel` ile ekran okuyucuya gidiyor.
 
-### Aktif ray satırı yıkama alıyor.
+### Rayda hover yıkama, seçili satır kalkış.
 
-Hover da aktif de yüzey rengindeyken ikisini ayıran tek şey gölgenin derinliği
-(3 ve 4 piksel) kalıyordu, ve göz o farkı okumuyor. Aktif satır artık vurgu
-yıkaması taşıyor · yıkama bir DOLGU değil, yani Yasa 2 duruyor: "buradasın"
-hâlâ bir eylem gibi boyanmıyor.
+Hover da seçili de yüzey rengindeyken ikisini ayıran tek şey gölgenin derinliği
+(3 ve 4 piksel) kalıyordu, ve göz o farkı okumuyor. Bir ara boştaki satır
+hover'da kenarını ve tabanını kazanıp kalkıyordu; o da ayrımı çözmedi, başka bir
+şey bozdu: ray sekiz satırlık bir LİSTE, ve her satırın imleç altında ayrı bir
+düğmeye dönüşmesi gezinmeyi sekiz ayrı kontrol gibi gösteriyor.
+
+Şimdiki ayrım cinsten: hover bir YIKAMA (kitin bu iş için ayırdığı
+`--color-nav-hover-bg`, ki token'ın kendi yorumu da "seçili olan bunu değil
+çerçeveyi alır" diyor), seçili satır ise yıkamayı hiç almıyor ve bir piksel
+KALKIYOR. Yasa 2 bozulmuyor: yasa DOLGUYU eyleme bağlıyor, yüksekliği değil ·
+satır hâlâ çerçeveyle konuşuyor.
+
+Seçili satırın ayrı bir hover'ı yok, çünkü "buradasın" imleç geldi diye değişen
+bir şey değil.
+
+### Ray basarken yola çıktığını gösteriyor.
+
+Kitte bir "anında basanlar" listesi var (`transition-duration: 0s`): dokunmatik
+bir DOKUNUŞ 10-40 ms sürüyor ve basma 100 ms'ye yayılınca kontrol yolun üçte
+birinden dönüyordu, yani basıldığı hiç görünmüyordu. Ray o listeden çıkarıldı:
+bir gezinme rayı işaretçi yüzeyi, ve satırın yola çıktığının görülmesi orada
+"şak" diye inmesinden daha çok şey söylüyor. Liste düğmeler için duruyor.
+
+### Basma yolu duruştan ölçülüyor, varıştan değil.
+
+`check-physics`in E maddesi "kayma duruş offsetinin TAM KENDİSİ" diyor, ama kapı
+bunu uzun süre VARIŞ konumu olarak ölçtü: o güne dek gölgeli duran her aile
+kaymasız duruyordu, dolayısıyla ikisi aynı sayıydı. Seçili ray satırı -1'de
+duruyor; 3 piksellik yol onu +2'ye indiriyor, +3 ise kendi zemininin bir piksel
+altına gömerdi.
+
+Ölçüm yola çevrilince kapı, yıllardır göremediği bir ihlali aynı anda yakaladı:
+seçili segment de -1'de duruyor (gölgesine yer açmak için) ve +2'ye basıyordu,
+yani zemininin altına. Yasa değişmedi, ölçülen şey düzeldi.
 
 ### İpucu iki kez okunmasın.
 

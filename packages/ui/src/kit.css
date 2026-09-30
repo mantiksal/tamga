@@ -637,22 +637,14 @@
     gap: 11px;
     padding-inline: 10px;
   }
-  /* BOŞTAKİ SATIR HOVER'DA DÜĞMEYE DÖNÜŞÜYOR, ve bu 2026-09-24'te geldi.
-     Önce yalnız rengi ve zemini değişiyordu: ray üstünde gezinen imleç, o
-     satırın TIKLANABİLİR olduğunu söylemiyordu · vurgulanmış bir metin gibi
-     duruyordu. Artık kenarını ve tabanını kazanıyor, yani ne olduğunu
-     dokunulduğu an gösteriyor. Zemin `shell`, çünkü ray artık kendi zemininde
-     (`--color-rail`) ve satırın ondan YUKARI çıkması gerekiyor. */
-  .tamga-rail-link:hover {
+  /* Hover bir YIKAMA, düğmeleşme değil · ve seçili satır onu hiç almıyor.
+     Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md */
+  .tamga-rail-link:hover:not([data-active="true"]) {
     color: var(--color-nav-hover);
-    background: var(--color-shell);
-    border-color: var(--color-edge-strong);
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0 var(--color-edge-strong);
+    background: var(--color-nav-hover-bg);
   }
-  /* SEÇİLİ SATIR YÜKSELMİYOR, OTURUYOR (Yasa 2): dolgu değil çerçeve, ve
-     hover'daki 4'ten alçak bir taban. "Buradasın" bir eylem değil bir konum;
-     yükselen bir şey basılmayı vaat eder. */
+  /* Seçili satır kalkıyor · Yasa 2 DOLGUYU eyleme bağlıyor, yüksekliği değil.
+     Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md */
   /* SEÇİLİ SATIRIN ÇERÇEVESİ KOYU KENAR, VURGU RENGİ DEĞİL · ve bir süre tersiydi.
      Bütün kutuyu vurguya boyamak, rayda sürekli duran bir UYARI gibi okunuyordu:
      vurgu rengi bir EYLEMİN rengi, oysa "buradasın" bir konum. Tasarım dili
@@ -665,6 +657,7 @@
   .tamga-rail-link[data-active="true"] {
     background: var(--color-shell);
     border-color: var(--color-edge-strong);
+    transform: translate(-1px, -1px);
     box-shadow: 3px 3px 0 var(--color-edge-strong);
   }
   /* VURGU TEK BİR YERDE: İKONDA. Kutu ötekilerle aynı dilde duruyor; hangi
@@ -673,14 +666,9 @@
   .tamga-rail-link[data-active="true"] svg {
     color: var(--color-accent);
   }
-  .tamga-rail-link[data-active="true"]:hover {
-    background: var(--color-shell);
-    border-color: var(--color-edge-strong);
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0 var(--color-edge-strong);
-  }
+  /* Seçili satırın ayrı bir hover'ı yok: "buradasın" imleçle değişmiyor. */
   .tamga-rail-link[data-active="true"]:active {
-    transform: translate(3px, 3px);
+    transform: translate(2px, 2px);
     box-shadow: 0 0 0 var(--color-edge-strong);
   }
 
@@ -691,7 +679,8 @@
   .tamga-btn:not(:disabled):active,
   .tamga-icon-btn:not(:disabled):active,
   .tamga-mini-btn:not(:disabled):active,
-  .tamga-rail-link[data-active="true"]:active,
+  /* Ray bu listede DEĞİL: satır basılırken yola çıktığı görülsün · bir gezinme
+     rayı işaretçi yüzeyi, listenin dokunuş gerekçesi ona uymuyor. */
   .tamga-art-tile:active,
   .tamga-art-route:active {
     transition-duration: 0s;
@@ -2815,8 +2804,9 @@
     transform: translate(-1px, -1px);
     box-shadow: 3px 3px 0 var(--color-edge);
   }
+  /* Yol 2px ama varış +1: segment -1'de duruyor, yani zemini +1'de. */
   .tamga-segment > button[data-active="true"]:active {
-    transform: translate(2px, 2px);
+    transform: translate(1px, 1px);
     box-shadow: 0 0 0 var(--color-edge);
   }
 

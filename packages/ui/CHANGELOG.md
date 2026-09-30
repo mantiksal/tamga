@@ -7,6 +7,22 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ## Unreleased
 
+### Changed
+
+- **The rail's hover is a wash again, and the current row lifts.** Hovering a row had it grow a
+  border and a base, turning every row into its own button: a rail is a list of eight, and eight
+  controls under the pointer is not navigation. Hover is now only the wash the kit already had a
+  token for (`--color-nav-hover-bg`), and the current row — which never takes that wash — lifts by
+  a pixel over its 3px base, so "you are here" is the one thing standing up. Law 2 is untouched:
+  it binds the FILL to an action, not the height, and the current row still speaks with an
+  outline. The pressed row travels 2px, which is the 3px of its base measured from where it
+  actually rests.
+
+- **A pressed segment no longer sinks below its own ground.** The selected tab rests a pixel up so
+  its shadow has room, which puts its ground at 1px; it was travelling 2px. The physics gate could
+  not see this because it measured the ARRIVAL, not the travel, and every family with a shadow
+  used to rest flat — that is fixed too, and the gate found this the moment it could.
+
 ### Fixed
 
 - **A menu that starts open no longer steals the focus.** `DropdownMenu` with `defaultOpen`

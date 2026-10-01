@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
-import { isLocale, locales, type Locale } from "@/i18n/config";
+import { defaultLocale, isLocale, locales, type Locale } from "@/i18n/config";
+import { SITE } from "@/content/site";
 import SAYILAR from "@/content/counts.json";
 import "../globals.css";
 
@@ -45,12 +46,38 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang } = await params;
   const tr = lang === "tr";
+  /* BAŞLIK SAYFANIN KENDİ CÜMLESİ, marka adı değil: arama sonucunda "Tamga
+     Design System" yazıyordu ve ne olduğunu söyleyen tek satır açıklamaya
+     kalıyordu. Bu cümle sayfanın H1'iyle aynı şeyi söylüyor. */
+  const baslik = tr
+    ? "Tamga · yönetim panelleri için açık kaynak tasarım sistemi"
+    : "Tamga · an open source design system for admin panels";
+  const aciklama = tr
+    ? `Mantıksal'ın tasarım sistemi. Token'lar ve ${SAYILAR.bilesen} bileşen; on panel tek karakterde.`
+    : `A design system by Mantıksal. Tokens and ${SAYILAR.bilesen} components, so ten panels keep one character.`;
+  /* Adresler MUTLAK. Göreli `hreflang` ve kanonik yoktu: Google'a /tr ile /en'in
+     aynı sayfanın iki dili olduğunu söyleyen bir şey kalmıyordu. */
+  const diller = {
+    ...Object.fromEntries(locales.map((l) => [l, `${SITE}/${l}`])),
+    "x-default": `${SITE}/${defaultLocale}`,
+  };
   return {
-    title: { default: "Tamga Design System", template: "%s · Tamga Design System" },
-    description: tr
-      ? `Mantıksal'ın tasarım sistemi. Token'lar ve ${SAYILAR.bilesen} bileşen; on panel tek karakterde.`
-      : `A design system by Mantıksal. Tokens and ${SAYILAR.bilesen} components, so ten panels keep one character.`,
-    alternates: { languages: Object.fromEntries(locales.map((l) => [l, `/${l}`])) },
+    metadataBase: new URL(SITE),
+    title: { default: baslik, template: "%s · Tamga Design System" },
+    description: aciklama,
+    alternates: { canonical: `/${lang}`, languages: diller },
+    /* Link önizlemesi: Slack'e, WhatsApp'a yapıştırılan adres bugün çıplak
+       görünüyordu, tek bir `og:` etiketi yoktu. Görsel henüz yok, o yüzden kart
+       `summary`: görselsiz `summary_large_image` boş bir kutu çiziyor. */
+    openGraph: {
+      type: "website",
+      siteName: "Tamga Design System",
+      locale: tr ? "tr_TR" : "en_US",
+      url: `${SITE}/${lang}`,
+      title: baslik,
+      description: aciklama,
+    },
+    twitter: { card: "summary", title: baslik, description: aciklama },
   };
 }
 

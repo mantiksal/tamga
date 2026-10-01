@@ -5,7 +5,10 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
-## Unreleased
+## 0.5.2
+
+> A light palette takes the brand's hue, and two things a pointer could feel: a checkbox
+> that flickered under hover and a two-line label that centred itself.
 
 ### Fixed
 

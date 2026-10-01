@@ -46,8 +46,8 @@ export type NavEntry = {
    * ve boş bir grup kurmak mümkün hâle gelirdi. Düz listede o iki sorun da yok: grup başlığı
    * verinin bir alanı, ve başlık ancak bir girişi varsa görünüyor.
    *
-   * YALNIZ GENİŞ RAYDA ÇİZİLİYOR. Dar rayda 40 piksellik bir kutuda başlık okunmuyor; orada
-   * gruplama boşlukla anlatılıyor.
+   * BAŞLIK YALNIZ GENİŞ RAYDA ÇİZİLİYOR. Dar rayda 40 piksellik bir kutuda bir başlık okunmuyor;
+   * orada grup değişimi bir ÇİZGİYLE anlatılıyor, rayın tepesindeki marka ayracının aynısı.
    */
   section?: string;
 };
@@ -159,10 +159,19 @@ export function AppShell({
                   ad değişince yeni bir başlık çıkıyor. Tıklanmaz ve tıklanır GÖRÜNMEZ: bir
                   gezinme listesinde tıklanamayan bir şeyin bağlantıya benzemesi, kullanıcıya
                   çalışmayan bir hedef gösterir. */}
-              {wide && entry.section && entry.section !== nav[i - 1]?.section ? (
-                <p className={`px-2.5 text-caption font-bold uppercase tracking-label text-ink-faint ${i > 0 ? "mt-5 pb-1.5" : "pb-1.5"}`}>
-                  {entry.section}
-                </p>
+              {entry.section && entry.section !== nav[i - 1]?.section ? (
+                wide ? (
+                  <p className={`px-2.5 text-caption font-bold uppercase tracking-label text-ink-faint ${i > 0 ? "mt-5 pb-1.5" : "pb-1.5"}`}>
+                    {entry.section}
+                  </p>
+                ) : i > 0 ? (
+                  /* DAR RAYDA GRUP BİR ÇİZGİ, ve bir süre HİÇBİR ŞEYDİ: başlık `wide`
+                     koşuluna bağlıydı, dolayısıyla daralan ray altı simgeyi tek bir
+                     ayrımsız sütuna çeviriyordu · "başlangıç" ile "araçlar" aynı şey
+                     gibi okunuyordu. İlk grubun önüne çizgi girmiyor: marka ayracı
+                     orada zaten var, ikisi üst üste biner. */
+                  <span className="my-1.5 h-0 w-6 shrink-0 border-t border-line" aria-hidden />
+                ) : null
               ) : null}
             {/* RAY BAĞLANTISI KİTİN `RailLink`İ, ELLE ÇİZİLMİYOR: elle yazılan kopya geniş
                 rayda `tamga-rail-link-wide`ı atlıyordu ve etiket kırpılıyordu. `RailLink`

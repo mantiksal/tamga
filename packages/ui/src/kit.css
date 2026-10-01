@@ -575,6 +575,10 @@
   .tamga-rail-link {
     position: relative;
     display: flex;
+    /* İmleç BURADA, tarayıcıya bırakılmıyor: satır `href` taşıdığında `<a>` olup işaret
+       parmağını kendiliğinden alıyor, ama ekranları adres değil durum olan bir kabukta
+       aynı satır `<button>` ve imleç oka düşüyordu · aynı kontrol, iki farklı imleç. */
+    cursor: pointer;
     height: 40px;
     /* 52 piksel, 40 değil: dar ray 56 piksellik bir sütun ve satır onu
        dolduruyor · kare bir kutu, rayın içinde yüzen bir düğme gibi

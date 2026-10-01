@@ -5,6 +5,22 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.5.6
+
+> The rail answers the mouse, and a group stays a group when the rail narrows.
+
+### Fixed
+
+- **A rail row without an address now shows a pointer.** `.tamga-rail-link` left the cursor to the
+  browser: a row carrying `href` is an `<a>` and gets the pointing hand for free, while the same row
+  in a shell whose screens are state is a `<button>` and kept the arrow. One control, two cursors,
+  and every such product patched it from the outside.
+
+- **A narrow rail shows where one group ends and the next begins.** `NavEntry.section` drew its
+  heading only on a wide rail, which is right — a heading is unreadable in a 40px box — but nothing
+  took its place, so a rail that narrowed turned "start" and the three tools into one undivided
+  column. The group change is now a line, the same divider the brand mark already sits above.
+
 ## 0.5.5
 
 > A page title finds its size, a shell can be driven by state instead of addresses, and the

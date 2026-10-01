@@ -14,6 +14,26 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   look, `.tamga-choice-card`), this one did not. A one-word label never showed it; a label with a
   description under it did.
 
+## Unreleased
+
+### Changed
+
+- **A light palette now carries the brand's hue.** `makePalette` fixed every light surface at hue
+  90 — `page`, `shell`, `rail`, `hover`, `sunk`, `line`, `div` were the same warm paper whatever the
+  brand, while the dark half breathed in the brand's hue. Only the HUE moves: the lightness steps
+  and the chroma ceiling are untouched, so the contrast that makes a panel comfortable to read is
+  the same number it was (measured: ink over page stays above 15). The warm-brand guard still holds
+  a red or orange brand at the paper hue, because a surface pulled toward those reads as dirty
+  rather than tinted.
+
+### Fixed
+
+- **A hovered checkbox no longer flickers.** The box lifts a pixel on hover, and the hover target
+  was the box itself: a pointer resting on its lower or right edge lost the box as it moved, the
+  hover ended, the box came back, the hover started again — a loop that does not stop, because the
+  pointer never moved. Hover now belongs to the wrapping control, which does not move. The label
+  lights the box too, which is where a checkbox's hit area always was.
+
 ## 0.5.1
 
 > Three corrections the 0.5.0 port left behind: a menu that stole the page's scroll, and the

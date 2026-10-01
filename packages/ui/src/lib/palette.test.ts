@@ -91,12 +91,26 @@ describe("makePalette", () => {
     }
   });
 
-  it("SABİT kademe: açık temanın kâğıtları her markada aynı", () => {
-    const kirmizi = makePalette("#e02938").light;
+  it("açık yüzeyler markadan ton alıyor, parlaklığı değişmiyor", () => {
+    const mavi = makePalette("#1e4fd8").light;
     const yesil = makePalette("#0a7a5f").light;
     for (const rol of ["page", "shell", "rail", "band", "sunk", "hover", "line", "div"] as const) {
-      expect(kirmizi[rol], rol).toBe(yesil[rol]);
-      /* Sıcak krem: ton 78-90 bandında. */
+      /* Kâğıtlar bir zamanlar her markada AYNIYDI; koyu tema markanın tonunda nefes alırken
+         açık tema almıyordu. */
+      expect(mavi[rol], rol).not.toBe(yesil[rol]);
+      /* Değişen yalnız ton: aynı basamak iki markada da aynı parlaklıkta kalıyor, göz
+         konforunu veren o. */
+      expect(hexToOklch(mavi[rol]).l, rol).toBeCloseTo(hexToOklch(yesil[rol]).l, 2);
+      /* Yüzey hâlâ bir gri: tonlanmış ama renk değil. */
+      expect(hexToOklch(mavi[rol]).c, rol).toBeLessThanOrEqual(0.023);
+    }
+  });
+
+  it("sıcak marka kâğıdı kirletmiyor: kırmızı krem bandında kalıyor", () => {
+    /* Muhafız açık nötrlerde duruyor (`b.l > 0.7`): kırmızı ya da turuncu bir markada yüzey
+       markanın tonuna gitseydi kâğıt kirli görünürdü, 78'e kaçıyor. */
+    const kirmizi = makePalette("#e02938").light;
+    for (const rol of ["page", "shell", "rail", "sunk", "line", "div"] as const) {
       expect(hexToOklch(kirmizi[rol]).h, rol).toBeGreaterThan(60);
       expect(hexToOklch(kirmizi[rol]).h, rol).toBeLessThan(110);
     }

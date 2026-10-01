@@ -61,7 +61,7 @@ export type PalettePair = { light: Palette; dark: Palette };
 const REFERANS_MARKA = { l: 0.49, c: 0.2158, h: 264.4 };
 
 /** `l` açıklık, `c` doyum, `k` marka kademesi. */
-type Basamak = { l: number; c: number; k: "tam" | "kisitli" | "sabit" };
+type Basamak = { l: number; c: number; k: "tam" | "kisitli" };
 
 type NotrRol =
   | "page" | "shell" | "rail" | "hover" | "sunk" | "line" | "div" | "edge" | "edgeHover"
@@ -69,13 +69,13 @@ type NotrRol =
 
 const BASAMAK: Record<"light" | "dark", Record<NotrRol, Basamak>> = {
   light: {
-    page: { l: 0.961, c: 0.0083, k: "sabit" },
-    shell: { l: 0.997, c: 0.0041, k: "sabit" },
-    rail: { l: 0.925, c: 0.0112, k: "sabit" },
-    hover: { l: 0.970, c: 0.0082, k: "sabit" },
-    sunk: { l: 0.898, c: 0.0142, k: "sabit" },
-    line: { l: 0.861, c: 0.0156, k: "sabit" },
-    div: { l: 0.904, c: 0.0129, k: "sabit" },
+    page: { l: 0.961, c: 0.0083, k: "kisitli" },
+    shell: { l: 0.997, c: 0.0041, k: "kisitli" },
+    rail: { l: 0.925, c: 0.0112, k: "kisitli" },
+    hover: { l: 0.970, c: 0.0082, k: "kisitli" },
+    sunk: { l: 0.898, c: 0.0142, k: "kisitli" },
+    line: { l: 0.861, c: 0.0156, k: "kisitli" },
+    div: { l: 0.904, c: 0.0129, k: "kisitli" },
     edge: { l: 0.834, c: 0.0154, k: "kisitli" },
     edgeHover: { l: 0.677, c: 0.0340, k: "kisitli" },
     edgeStrong: { l: 0.241, c: 0.0635, k: "tam" },
@@ -85,7 +85,7 @@ const BASAMAK: Record<"light" | "dark", Record<NotrRol, Basamak>> = {
     inkFaint: { l: 0.460, c: 0.0476, k: "kisitli" },
     navIdle: { l: 0.241, c: 0.0635, k: "tam" },
     navHover: { l: 0.241, c: 0.0635, k: "tam" },
-    navHoverBg: { l: 0.997, c: 0.0041, k: "sabit" },
+    navHoverBg: { l: 0.997, c: 0.0041, k: "kisitli" },
   },
   dark: {
     page: { l: 0.218, c: 0.0385, k: "kisitli" },
@@ -116,11 +116,14 @@ const BASAMAK: Record<"light" | "dark", Record<NotrRol, Basamak>> = {
   },
 };
 
-/** Açık temanın sabit kâğıtları: tonu 78, markadan bağımsız. */
+/** Sıcak markada kâğıdın kaçtığı ton. */
 const KAGIT_TONU = 78;
 
+/* AÇIK YÜZEYLER DE MARKADAN TON ALIYOR. Kâğıtlar `h: 90`da sabitti: seçilen renk ne olursa
+   olsun ray, zemin ve kartlar aynı sıcak griydi, oysa koyu tema markanın tonunda nefes
+   alıyordu. Değişen yalnız TON · parlaklık ve doyum tavanı aynı kaldığı için kontrast ve
+   göz konforu yerinde duruyor (ölçüldü: mürekkep/zemin 15.5+). */
 function notrUret(b: Basamak, marka: Oklch, koyu: boolean): string {
-  if (b.k === "sabit") return oklchToHex({ l: b.l, c: b.c, h: 90 });
   const oran = Math.max(0.12, Math.min(1.4, marka.c / REFERANS_MARKA.c));
   const tavan = koyu ? 0.02 : 0.022;
   let c = b.k === "tam" ? b.c * oran : Math.min(b.c * oran, tavan);

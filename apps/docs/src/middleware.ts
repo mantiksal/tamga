@@ -87,8 +87,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   /* Statik dosyalar ve API yolları dışarıda: bir SVG'nin dili yok.
-     `robots.txt` ile `sitemap.xml` de dilsiz, ve bir süre değillerdi: ikisi de
-     `/tr/...`e yönlendiriliyordu, yani arama motoru ikisini de hiç
-     okuyamıyordu. */
-  matcher: ["/((?!_next|api|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)).*)"],
+     `robots.txt`, `sitemap.xml` ve `llms.txt` de dilsiz: üçü de buradan muaf
+     olmasa `/tr/...`e yönlendirilir, ve arama motoru hiçbirini okuyamaz. */
+  matcher: ["/((?!_next|api|favicon.ico|robots.txt|sitemap.xml|llms.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)).*)"],
 };

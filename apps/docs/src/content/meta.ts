@@ -38,7 +38,8 @@ export function sayfaMeta(slug: string, lang: Locale): Metadata {
       url: `${SITE}${yol(lang, slug)}`,
       title: `${title} · Tamga Design System`,
       description,
+      images: [{ url: `/og-${lang}.png`, width: 1200, height: 630, alt: title }],
     },
-    twitter: { card: "summary", title, description },
+    twitter: { card: "summary_large_image", title, description, images: [`/og-${lang}.png`] },
   };
 }

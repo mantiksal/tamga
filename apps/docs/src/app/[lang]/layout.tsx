@@ -66,9 +66,9 @@ export async function generateMetadata({
     title: { default: baslik, template: "%s · Tamga Design System" },
     description: aciklama,
     alternates: { canonical: `/${lang}`, languages: diller },
-    /* Link önizlemesi: Slack'e, WhatsApp'a yapıştırılan adres bugün çıplak
-       görünüyordu, tek bir `og:` etiketi yoktu. Görsel henüz yok, o yüzden kart
-       `summary`: görselsiz `summary_large_image` boş bir kutu çiziyor. */
+    /* Link önizlemesi: Slack'e, WhatsApp'a yapıştırılan adres çıplak
+       görünüyordu, tek bir `og:` etiketi yoktu. Görsel dilin kendi kartı
+       (`scripts/og-kart.mjs`), çünkü sayılar ve cümle çevrili. */
     openGraph: {
       type: "website",
       siteName: "Tamga Design System",
@@ -76,8 +76,9 @@ export async function generateMetadata({
       url: `${SITE}/${lang}`,
       title: baslik,
       description: aciklama,
+      images: [{ url: `/og-${lang}.png`, width: 1200, height: 630, alt: baslik }],
     },
-    twitter: { card: "summary", title: baslik, description: aciklama },
+    twitter: { card: "summary_large_image", title: baslik, description: aciklama, images: [`/og-${lang}.png`] },
   };
 }
 
@@ -101,6 +102,41 @@ export default async function RootLayout({
      birine hiçbir şey anlatmayan bir menü.
 
      Kök layout yalnız `<html lang>` için var; kabuğu her dal kendi seçiyor. */
+  /* ARAMA MOTORUNA YAPILANDIRILMIŞ TANIM. Sayfadaki metinden çıkarılamayan üç
+     şeyi söylüyor: bunu kim yayınlıyor, kaynak nerede, lisans ne.
+     Gerekçe: docs/07-dokuman-sitesi.md */
+  const veri = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${SITE}/#site`,
+        url: `${SITE}/${lang}`,
+        name: "Tamga Design System",
+        inLanguage: lang,
+        publisher: { "@id": `${SITE}/#yayinci` },
+      },
+      {
+        "@type": "Organization",
+        "@id": `${SITE}/#yayinci`,
+        name: "Mantıksal",
+        url: SITE,
+        logo: `${SITE}/tamga-light.svg`,
+      },
+      {
+        "@type": "SoftwareSourceCode",
+        name: "tamga-ui",
+        description: lang === "tr"
+          ? "Yönetim panelleri için açık kaynak React bileşen kütüphanesi."
+          : "An open source React component library for admin panels.",
+        codeRepository: "https://github.com/mantiksal/tamga",
+        programmingLanguage: "TypeScript",
+        license: "https://opensource.org/licenses/MIT",
+        url: `${SITE}/${lang}`,
+      },
+    ],
+  };
+
   return (
     <html lang={lang} suppressHydrationWarning>
       <head>
@@ -121,7 +157,12 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {/* `afterInteractive` değil satır içi: arama motoru HTML'i okurken burada olmalı. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(veri) }}
+        />{children}</body>
     </html>
   );
 }

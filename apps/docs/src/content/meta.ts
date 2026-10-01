@@ -19,8 +19,8 @@ export function sayfaMeta(slug: string, lang: Locale): Metadata {
      geliyor. İkisi birlikte ~90 karakter, ve her sayfada farklı. */
   const description =
     lang === "tr"
-      ? `${sayfa.blurb.tr} · Tamga, yönetim panelleri için açık kaynak tasarım sistemi.`
-      : `${sayfa.blurb.en} · Tamga is an open source design system for admin panels.`;
+      ? `${sayfa.blurb.tr} · Tamga, yönetim panelleri için geliştirilmiş açık kaynak bir tasarım sistemidir.`
+      : `${sayfa.blurb.en} · Tamga is an open source design system built for admin panels.`;
   /* Kanonik ve hreflang SAYFA BAŞINA: Türkçe yol `/tr/docs/ikonlar`, İngilizce
      `/en/docs/icons`. Kök layout'un dil haritası yalnız ana sayfayı gösteriyor. */
   const diller = {

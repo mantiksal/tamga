@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { defaultLocale, isLocale, locales, type Locale } from "@/i18n/config";
 import { SITE } from "@/content/site";
-import SAYILAR from "@/content/counts.json";
 import "../globals.css";
 
 /**
@@ -26,18 +25,16 @@ export async function generateStaticParams() {
 }
 
 /**
- * AÇIKLAMADAKİ SAYI ELLE YAZILMIYOR.
+ * ARAMA SONUCUNDAKİ TEK CÜMLE · ve iki kuralı var.
  *
- * Bu cümle "doksan altı bileşen" diyordu; gerçek sayı 122, ve 96 bileşenin
- * değil SAYFANIN sayısı. Ana sayfa aynı hatayı bir kez yapıp `counts.json`a
- * geçmişti, bu satır geride kalmıştı. Arama sonucunda ve link önizlemesinde
- * görünen tek cümlenin yanlış olması, kapılarla tutarlılık satan bir sistemin
- * verebileceği en kötü ilk izlenim.
+ * BİRİNCİSİ, ÜRÜNLE BAŞLAR, SAHİBİYLE DEĞİL. Cümle "Mantıksal'ın tasarım
+ * sistemi" diye başlıyordu: arayan kişi Mantıksal'ı aramıyor, panelini
+ * kuracak bir şey arıyor.
  *
- * "DÖRT YASA" BURADAN ÇIKARILDI, ve sebebi üslup değil: yasalar tanıtım
- * sayfasında geçmiyor. Arama sonucunda verilen söz, tıklayanın indiği sayfada
- * karşılanmıyordu. Kural: bu cümle yalnız `/` üzerinde görünen şeyi vaat eder.
- * Yasalar tanıtım sayfasına çıkarsa bu satır geri gelebilir; yeri `docs/physics`.
+ * İKİNCİSİ, YALNIZ `/` ÜZERİNDE GÖRÜNEN ŞEYİ VAAT EDER. Bir ara "dört yasa"
+ * diyordu ve yasalar tanıtım sayfasında geçmiyordu; tıklayan vaat edileni
+ * bulamıyordu. Markaya göre özelleştirme burada duruyor, çünkü sayfadaki
+ * panelin marka rengi kontrolü tam olarak onu yapıyor.
  */
 export async function generateMetadata({
   params,
@@ -53,8 +50,8 @@ export async function generateMetadata({
     ? "Tamga · yönetim panelleri için açık kaynak tasarım sistemi"
     : "Tamga · an open source design system for admin panels";
   const aciklama = tr
-    ? `Mantıksal'ın tasarım sistemi. Token'lar ve ${SAYILAR.bilesen} bileşen; on panel tek karakterde.`
-    : `A design system by Mantıksal. Tokens and ${SAYILAR.bilesen} components, so ten panels keep one character.`;
+    ? "Tamga, yönetim panelleri için geliştirilmiş açık kaynak bir tasarım sistemidir. Hazır bileşenleri, ekranları ve temayı markanıza göre özelleştirebilirsiniz."
+    : "Tamga is an open source design system built for admin panels. Its components, ready made screens and theme can be tailored to your brand.";
   /* Adresler MUTLAK. Göreli `hreflang` ve kanonik yoktu: Google'a /tr ile /en'in
      aynı sayfanın iki dili olduğunu söyleyen bir şey kalmıyordu. */
   const diller = {

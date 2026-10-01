@@ -5,7 +5,9 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
-## Unreleased
+## 0.5.3
+
+> A page title can carry its own marks.
 
 ### Changed
 

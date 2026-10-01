@@ -2,13 +2,14 @@ import type { ReactNode } from "react";
 import { Atom, Hexagon, Wind } from "tamga-ui/icons";
 import { CodeBlock } from "@/components/kod";
 import { Note, P, PageHead, RefTable, Section, Step } from "@/components/prose";
+import { sayfaMeta } from "@/content/meta";
 import { findPage } from "@/content/nav";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
-  return { title: findPage("installation")!.title[lang] };
+  return sayfaMeta("installation", lang);
 }
 
 /**

@@ -3,12 +3,13 @@ import { getDictionary } from "@/i18n/get-dictionary";
 import { CodeBlock } from "@/components/kod";
 import { PageHead, H2, P, Note } from "@/components/prose";
 import { AdTablosu, AgirlikKartlari, BoyMerdiveni, IkonIzgarasi } from "@/components/icons-grid";
+import { sayfaMeta } from "@/content/meta";
 import { findPage } from "@/content/nav";
 import counts from "@/content/counts.json";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
-  return { title: findPage("icons")!.title[lang] };
+  return sayfaMeta("icons", lang);
 }
 
 const T = {

@@ -7,6 +7,7 @@ import type { Locale } from "@/i18n/config";
 import { PageHead, H2, P, Note } from "@/components/prose";
 import { Xref } from "@/components/xref";
 import { Props } from "@/components/props";
+import { sayfaMeta } from "@/content/meta";
 import { findPage } from "@/content/nav";
 
 /* ÖRNEK KOD ŞABLONUN KENDİSİNİ GÖSTERİYOR, beş parçayı değil: önizlemede
@@ -387,7 +388,7 @@ const T = {
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
-  return { title: findPage("appearance")!.title[lang] };
+  return sayfaMeta("appearance", lang);
 }
 
 export default async function Page({ params }: { params: Promise<{ lang: Locale }> }) {

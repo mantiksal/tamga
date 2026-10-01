@@ -15,6 +15,23 @@ const config: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
   outputFileTracingRoot: new URL("../../", import.meta.url).pathname,
+  /* GÜVENLİK BAŞLIKLARI · site hiçbirini göndermiyordu.
+     CSP burada YOK ve bilerek: temayı ilk boyamadan önce kuran satır içi script
+     ya bir nonce ya da bir hash ister, ikisi de ayrı bir karar. */
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
+      },
+    ];
+  },
 };
 
 export default config;

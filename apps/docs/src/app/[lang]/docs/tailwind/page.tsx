@@ -4,11 +4,12 @@ import { CodeBlock } from "@/components/kod";
 import { PageHead, H2, P, Note } from "@/components/prose";
 import { Xref } from "@/components/xref";
 import { Utilityler } from "@/components/utilities";
+import { sayfaMeta } from "@/content/meta";
 import { findPage } from "@/content/nav";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
-  return { title: findPage("tailwind")!.title[lang] };
+  return sayfaMeta("tailwind", lang);
 }
 
 const KURULUM = `/* src/app/globals.css */

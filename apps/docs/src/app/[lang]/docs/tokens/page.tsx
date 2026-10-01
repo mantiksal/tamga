@@ -2,11 +2,12 @@ import type { Locale } from "@/i18n/config";
 import { PageHead, H2, P, Note } from "@/components/prose";
 import { Xref } from "@/components/xref";
 import { Tokenlar } from "@/components/tokens";
+import { sayfaMeta } from "@/content/meta";
 import { findPage } from "@/content/nav";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
-  return { title: findPage("tokens")!.title[lang] };
+  return sayfaMeta("tokens", lang);
 }
 
 const T = {

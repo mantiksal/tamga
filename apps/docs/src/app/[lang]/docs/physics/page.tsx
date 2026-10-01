@@ -6,11 +6,12 @@ import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, H3, P, Note, slug } from "@/components/prose";
 import { Demo } from "@/components/demo";
 import { Xref } from "@/components/xref";
+import { sayfaMeta } from "@/content/meta";
 import { findPage } from "@/content/nav";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
-  return { title: findPage("physics")!.title[lang] };
+  return sayfaMeta("physics", lang);
 }
 
 /**

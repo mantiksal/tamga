@@ -4,12 +4,13 @@ import { PageHead, H2, P, Note } from "@/components/prose";
 import { Demo } from "@/components/demo";
 import { Xref } from "@/components/xref";
 import { Props } from "@/components/props";
+import { sayfaMeta } from "@/content/meta";
 import { findPage } from "@/content/nav";
 import { RichTextDemo } from "@/components/interactive";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
-  return { title: findPage("rich-text")!.title[lang] };
+  return sayfaMeta("rich-text", lang);
 }
 
 const T = {

@@ -4,6 +4,7 @@ import { ArrowUpRight } from "tamga-ui/icons";
 import type { Locale } from "@/i18n/config";
 import { PageHead, H2, H3, P, Note } from "@/components/prose";
 import { Xref } from "@/components/xref";
+import { sayfaMeta } from "@/content/meta";
 import { findPage } from "@/content/nav";
 import { yol } from "@/content/yollar";
 import { CrudOrnegi, type OrnekMetinleri } from "./ornek";
@@ -24,7 +25,7 @@ const PARCALAR = [
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
-  return { title: findPage("list-screen")!.title[lang] };
+  return sayfaMeta("list-screen", lang);
 }
 
 const T = {

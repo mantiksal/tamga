@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { PageHead, H2, P, Note } from "@/components/prose";
+import { sayfaMeta } from "@/content/meta";
 import { findPage } from "@/content/nav";
 import { KatmanListesi, KontrastTablosu, MarkaKutusu, ParityKartlari, TemaAlani } from "./ornek";
 import counts from "@/content/counts.json";
@@ -7,7 +8,7 @@ import type { Locale } from "@/i18n/config";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
-  return { title: findPage("theme")!.title[lang] };
+  return sayfaMeta("theme", lang);
 }
 
 const T = {

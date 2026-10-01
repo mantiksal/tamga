@@ -7,11 +7,12 @@ import { Demo } from "@/components/demo";
 import { ButtonPlayground } from "@/components/interactive";
 import { Xref } from "@/components/xref";
 import { Props } from "@/components/props";
+import { sayfaMeta } from "@/content/meta";
 import { findPage } from "@/content/nav";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }) {
   const { lang } = await params;
-  return { title: findPage("button")!.title[lang] };
+  return sayfaMeta("button", lang);
 }
 
 /**

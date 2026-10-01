@@ -633,10 +633,10 @@
   --text-body: 14.5px; /* THE default: rows, cells, body copy TR: VARSAYILAN: satırlar, hücreler, gövde metni */
   --text-control: 15px; /* inputs, textareas, larger body TR: girdiler, metin alanları, daha büyük gövde */
   --text-subhead: 16px; /* card and section titles TR: kart ve bölüm başlıkları */
-  --text-title: 18px; /* page titles TR: sayfa başlıkları */
+  --text-title: 18px; /* a dialog's or a panel's own heading TR: diyaloğun ya da panelin kendi başlığı */
   /* The small display step: a card's hero number, a score.
      TR: Küçük gösterim adımı: bir kartın öne çıkan sayısı, bir puan. */
-  --text-display-sm: 24px;
+  --text-display-sm: 24px; /* page titles TR: sayfa başlıkları */
   --text-display: 30px; /* KPI numbers TR: KPI sayıları */
   /* The largest step, and the rarest. One per screen at most.
      TR: En büyük adım, ve en nadiri. Ekran başına en fazla bir tane. */

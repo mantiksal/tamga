@@ -208,7 +208,7 @@ export function PageBand({
         {eyebrow ? (
           <p className="mb-1.5 text-small font-semibold text-ink-faint">{eyebrow}</p>
         ) : null}
-        <h1 className="flex flex-wrap items-center gap-x-3 gap-y-1.5 font-display text-display-lg leading-tight font-extrabold text-ink">{title}</h1>
+        <h1 className="flex flex-wrap items-center gap-x-3 gap-y-1.5 font-display text-display-sm leading-tight font-extrabold text-ink">{title}</h1>
         {subtitle ? <p className="mt-1.5 text-body text-ink-soft">{subtitle}</p> : null}
       </div>
       {actions ? <div className="ml-auto flex flex-wrap items-center gap-2">{actions}</div> : null}

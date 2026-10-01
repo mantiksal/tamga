@@ -5,6 +5,16 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## Unreleased
+
+### Changed
+
+- **A page title is 24px, not 40px.** `PageBand` drew its heading at `--text-display-lg`, which is
+  the reference design's own size for a marketing-width page. In a dense panel — a table under the
+  title, a filter bar above it — it took the room the data needed and read as a banner rather than a
+  heading. The scale now reads 16 section · 18 dialog · 24 page · 30 KPI, and the two token comments
+  that still called 18px "page titles" and 30px "KPI numbers only" were corrected with it.
+
 ## 0.5.4
 
 > An empty filter drawer no longer advertises itself, and a tile's icon reads as a glyph.

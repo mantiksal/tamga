@@ -4,6 +4,7 @@ import { Fragment } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import { Icon } from "../components/icon.js";
 import { RailLink } from "../components/rail-link.js";
+import { cn } from "../lib/cn.js";
 import { PlainLink, type LinkComponent } from "./shared.js";
 
 /**
@@ -14,8 +15,23 @@ import { PlainLink, type LinkComponent } from "./shared.js";
  */
 
 export type NavEntry = {
+  /**
+   * The entry's identity. With `onSelect` it is also what `activePath` is compared against.
+   * TR: Girişin kimliği. `onSelect` ile birlikte `activePath`in karşılaştırıldığı değer de bu.
+   */
   key: string;
-  href: string;
+  /**
+   * Where the entry goes. A desktop app has no addresses: it gives `onSelect` instead, and one of
+   * the two is required.
+   * TR: Girişin gittiği yer. Masaüstü uygulamasının adresi yok; onun yerine `onSelect` veriyor ve
+   * ikisinden biri zorunlu.
+   */
+  href?: string;
+  /**
+   * Runs instead of navigating. For a shell whose screens are state, not addresses.
+   * TR: Gezinmenin yerine koşuyor · ekranları adres değil durum olan bir kabuk için.
+   */
+  onSelect?: () => void;
   /** The translated label. In the tooltip on a narrow rail, on the row itself on a wide one. TR: Çevrilmiş etiket. Dar rayda ipucunda, geniş rayda satırın kendisinde. */
   label: string;
   icon: ComponentProps<typeof Icon>["icon"];
@@ -63,6 +79,13 @@ export type AppShellProps = {
   topbar?: ReactNode;
   /** A control at the foot of the rail: an expand/collapse button, say. TR: Rayın dibine giren kontrol: genişlet/daralt düğmesi gibi. */
   railFooter?: ReactNode;
+  /**
+   * A state class on the content surface, for something the shell cannot know: a window-wide drop
+   * target marking its edge, say. Layout stays the kit's.
+   * TR: İçerik yüzeyine binen durum sınıfı · kabuğun bilemeyeceği bir şey için: pencere genelinde
+   * bir bırakma hedefinin kenarını işaretlemesi gibi. Düzen kitte kalıyor.
+   */
+  mainClassName?: string;
   linkComponent?: LinkComponent;
   labels: { home: string; primaryNav: string };
   children: ReactNode;
@@ -75,6 +98,7 @@ export function AppShell({
   rail = "narrow",
   topbar,
   railFooter,
+  mainClassName,
   linkComponent: Link = PlainLink,
   labels,
   children,
@@ -85,12 +109,14 @@ export function AppShell({
   const kapsiyor = (href: string) => activePath === href || activePath.startsWith(`${href}/`);
   const enOzel = nav.reduce<string | null>(
     (kazanan, entry) =>
-      kapsiyor(entry.href) && (kazanan === null || entry.href.length > kazanan.length)
+      entry.href && kapsiyor(entry.href) && (kazanan === null || entry.href.length > kazanan.length)
         ? entry.href
         : kazanan,
     null,
   );
-  const isCurrent = (href: string) => href === enOzel;
+  /* ADRESİ OLMAYAN GİRİŞ ANAHTARIYLA EŞLEŞİYOR: masaüstü kabuğunda ekran bir durum, yol değil. */
+  const isCurrent = (entry: NavEntry) =>
+    entry.href ? entry.href === enOzel : entry.key === activePath;
 
   const wide = rail === "wide";
 
@@ -144,8 +170,9 @@ export function AppShell({
                 Gerekçe: docs/gerekce/08-blok-ve-sablon.md */}
             <RailLink
               href={entry.href}
+              onClick={entry.onSelect}
               label={entry.label}
-              active={isCurrent(entry.href)}
+              active={isCurrent(entry)}
               showLabel={wide}
               linkComponent={Link}
               data-nav={entry.key}
@@ -159,7 +186,7 @@ export function AppShell({
               <Icon
                 icon={entry.icon}
                 size="md"
-                weight={isCurrent(entry.href) ? "fill" : "regular"}
+                weight={isCurrent(entry) ? "fill" : "regular"}
               />
             </RailLink>
             </Fragment>
@@ -186,7 +213,7 @@ export function AppShell({
               `tamga-surface`tan geliyordu; eksik olan köşeydi. Kontrol
               yarıçapıyla (6px) çizilen bir ekran kutusu, içindeki girdilerle
               aynı köşeyi taşıyor ve bir kap gibi okunmuyor. */}
-          <main className="tamga-surface tamga-app-main relative h-full min-h-0 overflow-y-auto">
+          <main className={cn("tamga-surface tamga-app-main relative h-full min-h-0 overflow-y-auto", mainClassName)}>
             {children}
           </main>
         </div>

@@ -7,6 +7,18 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ## Unreleased
 
+### Added
+
+- **`AppShell` entries can carry an action instead of an address.** `NavEntry.href` was required and
+  the active row was found by comparing paths, which is right for a web panel and wrong for a
+  desktop app, where a screen is state and there is no URL. An entry may now give `onSelect`, and
+  `activePath` is then matched against its `key`. One of the two is required; nothing changes for an
+  entry that has a path.
+
+- **`AppShell.mainClassName`** — a state class on the content surface, for something the shell
+  cannot know: a window-wide drop target marking its edge, say. Layout stays the kit's; without it
+  a product had to draw the whole shell by hand to reach that one edge.
+
 ### Changed
 
 - **A page title is 24px, not 40px.** `PageBand` drew its heading at `--text-display-lg`, which is

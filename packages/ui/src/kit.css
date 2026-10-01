@@ -656,9 +656,9 @@
      vurgu renginde. Bir ara yıkamaya çevrilmişti, tasarım öyle demiyor. */
   .tamga-rail-link[data-active="true"] {
     background: var(--color-shell);
-    border-color: var(--color-edge-strong);
+    border-color: var(--color-accent-shadow);
     transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0 var(--color-edge-strong);
+    box-shadow: 3px 3px 0 var(--color-accent-shadow);
   }
   /* VURGU TEK BİR YERDE: İKONDA. Kutu ötekilerle aynı dilde duruyor; hangi
      satırda olduğunu söyleyen renk yalnız glifte. Çocuğa uzanıyor çünkü ikon
@@ -669,7 +669,7 @@
   /* Seçili satırın ayrı bir hover'ı yok: "buradasın" imleçle değişmiyor. */
   .tamga-rail-link[data-active="true"]:active {
     transform: translate(2px, 2px);
-    box-shadow: 0 0 0 var(--color-edge-strong);
+    box-shadow: 0 0 0 var(--color-accent-shadow);
   }
 
   /* Basma ANINDA, dönüş yumuşak: iki yön de 100ms olduğunda dokunmatik bir

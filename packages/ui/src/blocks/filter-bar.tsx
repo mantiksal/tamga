@@ -353,6 +353,9 @@ export function FilterBar({
             yanında dururken onlarla aynı şeymiş gibi okunuyordu; oysa öbürleri
             bir DEĞER seçiyor, bu bir PANEL açıyor. Sağ uç, bir araç çubuğunda
             "bu listenin geri kalanı" demenin yeri. */}
+        {/* ÇEKMECE BOŞSA DÜĞME DE YOK: bir alanı kalmayan "Tüm filtreler" boş bir panel
+            açıyor, ve açan kişi aradığı filtrenin kaybolduğunu sanıyor. */}
+        {drawer.length > 0 && (
         <Button className="ml-auto" onClick={() => setDrawerOpen(true)}>
           <Icon icon={Customize} size="xs" />
           {labels.allFilters}
@@ -365,6 +368,7 @@ export function FilterBar({
             </span>
           )}
         </Button>
+        )}
 
         {extra}
       </div>

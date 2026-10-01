@@ -5,6 +5,17 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.5.4
+
+> An empty filter drawer no longer advertises itself.
+
+### Fixed
+
+- **`FilterBar` drew the "all filters" button with nothing behind it.** The drawer button rendered
+  whether or not `drawer` carried a field, so a screen whose filters all fit on the top row still
+  offered a button that opened an empty sheet — and the person who opened it assumed the filter they
+  wanted had been removed. No groups, no button.
+
 ## 0.5.3
 
 > A page title can carry its own marks.

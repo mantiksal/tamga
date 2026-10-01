@@ -183,7 +183,15 @@ export function PageBand({
    * yoksa yalnız o kişiyi mi ilgilendirdiği gibi.
    */
   eyebrow?: string;
-  title: string;
+  /**
+   * The page's name. A node rather than a string, because a detail page's title often carries a
+   * mark that belongs INSIDE it: a record number, a status chip, a blocked flag. Those are part of
+   * the title, not an action; `actions` is the other edge of the band.
+   * TR: Sayfanın adı. Metin değil düğüm, çünkü bir detay sayfasının başlığı çoğu zaman İÇİNDE bir
+   * işaret taşıyor: kayıt numarası, durum çipi, bloke bayrağı. Onlar başlığın parçası, bir eylem
+   * değil; `actions` şeridin öteki ucu.
+   */
+  title: ReactNode;
   subtitle?: string;
   actions?: ReactNode;
   className?: string;
@@ -200,7 +208,7 @@ export function PageBand({
         {eyebrow ? (
           <p className="mb-1.5 text-small font-semibold text-ink-faint">{eyebrow}</p>
         ) : null}
-        <h1 className="font-display text-display-lg leading-tight font-extrabold text-ink">{title}</h1>
+        <h1 className="flex flex-wrap items-center gap-x-3 gap-y-1.5 font-display text-display-lg leading-tight font-extrabold text-ink">{title}</h1>
         {subtitle ? <p className="mt-1.5 text-body text-ink-soft">{subtitle}</p> : null}
       </div>
       {actions ? <div className="ml-auto flex flex-wrap items-center gap-2">{actions}</div> : null}

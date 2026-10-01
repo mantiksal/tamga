@@ -5,6 +5,16 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## Unreleased
+
+### Changed
+
+- **`PageBand.title` takes a node, not a string.** A detail page's title usually carries a mark that
+  belongs inside it: the record number, a status chip, a blocked flag. They are part of the title,
+  not an action, so `actions` (the band's other edge) was the wrong home and products were drawing
+  the whole band by hand to get them. The title line now wraps its children with a gap, so a name
+  and two chips sit on one baseline and wrap together.
+
 ## 0.5.2
 
 > A light palette takes the brand's hue, and two things a pointer could feel: a checkbox

@@ -404,3 +404,18 @@ hover'da `translate(-1px,-1px)` ile kalkıyor: o bir piksel kaydırma kabının 
 çıkıyor ve `overflow-y: auto` onu kırpıyor (bir eksen `visible` değilse öteki de
 olamaz). Düğmenin gölgesi de sağa aşağı 2 piksel, o da kırpılıyordu. Dört piksellik iç
 boşluk, kontrolün kendi fiziğine yer açıyor.
+
+### Kutunun hover'ı kendisinde değil, kontrolde.
+
+Onay kutusu ve radyo hover'da bir piksel kalkıyor (Yasa 1 · F: gölge büyüyorsa nesne de kalkar).
+Hover hedefi bir süre kutunun KENDİSİYDİ ve bu sonsuz bir titreme üretiyordu: imleç alt ya da sağ
+kenarda dururken kutu bir piksel kaçıyor, imleç kutunun dışında kalıyor, hover bitiyor, kutu geri
+geliyor, hover yeniden başlıyor. Göz bunu "titreyen kutu" olarak görüyor ve imleç kılını bile
+kıpırdatmadığı için durmuyor.
+
+Hover artık sarmalayan kontrolde (`:where(button, label):hover`). Ebeveyn kıpırdamadığı için döngü
+kapanıyor. İkinci bir kazanç bedava geldi: etiketin üstündeyken de kutu yanıyor, oysa bir onay
+kutusunun tıklanabilir alanı zaten bütün satır.
+
+Tablonun küçük kutusu (`.tamga-check-sm`) kuralın dışında: o zaten hiç kalkmıyor, çünkü bir sütunda
+yirmi beş yükselmiş kutu listeyi düğme ızgarasına çeviriyor.

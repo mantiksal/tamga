@@ -3111,7 +3111,6 @@
     border-radius: var(--radius-chip);
     box-shadow: none;
   }
-  .tamga-check-sm:hover,
   .tamga-check-sm[data-checked="true"] {
     transform: none;
     box-shadow: none;
@@ -3142,13 +3141,10 @@
     cursor: default;
   }
 
-  .tamga-check[data-off]:hover, .tamga-radio[data-off]:hover {
-    border-color: var(--color-edge);
-    transform: none;
-    box-shadow: none;
-  }
-
-  .tamga-check:hover, .tamga-radio:hover {
+  /* Hover KONTROLÜN, işaretin değil: kıpırdayan bir ögeye hover vermek titreme üretiyor.
+     Gerekçe: docs/gerekce/01-form-ve-girdi.md */
+  :where(button, label):hover
+    :is(.tamga-check, .tamga-radio):not([data-off]):not(.tamga-check-sm) {
     border-color: var(--color-accent-line);
     transform: translate(-1px, -1px);
     box-shadow: 3px 3px 0 var(--color-accent-line);

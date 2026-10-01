@@ -169,7 +169,10 @@ export function Kpi({
       style={iconTone ? { background: toneOf(iconTone).bg, color: toneOf(iconTone).fg } : undefined}
       aria-hidden
     >
-      <Icon icon={icon} size={look === "detail" ? "sm" : "base"} />
+      {/* KARO İKONU DUOTONE DEĞİL, KALIN. Varsayılan duotone'un ikinci yarı saydam katmanı
+          40 piksellik kenarlıklı bir karonun içinde zeminle karışıyor ve glif çamurlanıyor;
+          karo zaten kendi kutusu, ikinci bir katmana ihtiyacı yok. */}
+      <Icon icon={icon} size={look === "detail" ? "sm" : "base"} weight="bold" />
     </span>
   ) : null;
 

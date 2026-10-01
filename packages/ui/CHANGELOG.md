@@ -7,7 +7,14 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ## 0.5.4
 
-> An empty filter drawer no longer advertises itself.
+> An empty filter drawer no longer advertises itself, and a tile's icon reads as a glyph.
+
+### Changed
+
+- **`Kpi` draws its tile icon bold, not duotone.** The kit's default weight paints a second
+  translucent layer, which is the cheapest brand lever on a large surface and a muddy glyph inside a
+  40px bordered tile: the tile is already its own box, so the icon has nothing to gain from a second
+  layer. Six tiles in a row now read as six glyphs rather than six smudges.
 
 ### Fixed
 

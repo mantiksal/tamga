@@ -5,7 +5,10 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
-## Unreleased
+## 0.5.5
+
+> A page title finds its size, a shell can be driven by state instead of addresses, and the
+> current rail row stands on the brand.
 
 ### Added
 

@@ -42,7 +42,9 @@ const T = {
       <>
         Seçilenler girdinin <strong>içinde</strong> çip olarak duruyor, altında ayrı bir listede
         değil: seçim ile seçilenler arasındaki mesafe arttıkça, kullanıcı neyi seçtiğini görmek
-        için gözünü iki yere birden koymak zorunda kalır.
+        için gözünü iki yere birden koymak zorunda kalır. Dördünden sonrası tek bir
+        <strong> +N </strong> çipi, ve kutunun tavanı <strong>üç satır</strong>: uzun etiketlerde
+        dört çip bile kutuyu büyütüp altındaki alanı aşağı itiyordu, orada artık kayıyor.
       </>
     ),
     blur: (
@@ -74,7 +76,9 @@ const T = {
       <>
         The chosen ones sit as chips <strong>inside</strong> the input, not in a separate list
         below it: the further apart the picking and the picked are, the more the user has to look
-        in two places at once to see what they chose.
+        in two places at once to see what they chose. Past four they collapse into one
+        <strong> +N </strong> chip, and the box stops growing at <strong>three rows</strong>: with
+        long labels even four chips pushed everything below them down, and there it scrolls.
       </>
     ),
     blur: (

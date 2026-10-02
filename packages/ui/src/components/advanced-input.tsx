@@ -271,8 +271,9 @@ export function TagsInput({
  *
  * Gerekçe: docs/gerekce/01-form-ve-girdi.md
  */
-/* Kutuda yazıyla duran çip sayısı. Dördüncüden sonrası "+N": bir filtre
-   kutusunun iki satırı geçmemesi gerekiyor. */
+/* Kutuda yazıyla duran çip sayısı. Dördüncüden sonrası "+N". Tek başına
+   YETMİYOR: uzun etiketlerde dört çip de üç satırı aşıyor, o yüzden kutunun
+   ayrıca bir tavanı var (aşağıda) ve orada kayıyor. */
 const GORUNEN_CIP = 4;
 
 export function MultiSelect({
@@ -359,17 +360,22 @@ export function MultiSelect({
           (`.tamga-input[data-leading]` 40px sol dolgu açıyor). Bir simge bir yer
           işaretidir; yeri her seçimde değişiyorsa işaret olmaktan çıkıyor.
           Gerekçe: docs/gerekce/01-form-ve-girdi.md */}
+      {/* İKON KUTUNUN DIŞINDA, kökün içinde: kutu artık kayabiliyor ve içine
+          konan mutlak bir öge içerikle birlikte kayıp gözden kaybolurdu. */}
+      <Icon
+        icon={Search}
+        size="xs"
+        aria-hidden
+        className="pointer-events-none absolute left-3 top-3 z-10 text-ink-faint"
+      />
+      {/* TAVAN ÜÇ SATIR, sonrası kaydırma: uzun etiketli dört çip kutuyu üç
+          satıra çıkarıyor ve altındaki alanı aşağı itiyordu. 26 x 4px = 104px =
+          üç çip satırı (26) artı aralıkları (6) artı dolgu (6). */}
       <span
-        className="tamga-input relative h-auto min-h-10 w-full flex-wrap items-center gap-1.5 py-1.5"
+        className="tamga-input relative h-auto max-h-26 min-h-10 w-full flex-wrap items-center gap-1.5 overflow-y-auto py-1.5"
         data-leading="true"
         style={{ display: "flex" }}
       >
-        <Icon
-          icon={Search}
-          size="xs"
-          aria-hidden
-          className="pointer-events-none absolute left-3 top-3 text-ink-faint"
-        />
         {/* ÇİPLER SAYILI: ilk dördü yazılı, gerisi "+N" olarak tek çipte.
             Sınırsız çip kutuyu üç satıra çıkarıyor ve altındaki alanı aşağı
             itiyordu; seçilenlerin TAMAMI zaten listede işaretli duruyor. */}

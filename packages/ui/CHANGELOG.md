@@ -9,6 +9,14 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > A multi select can be used in Safari.
 
+### Changed
+
+- **`MultiSelect` stops growing at three rows.** The box held four chips before collapsing the rest
+  into `+N`, which was written to keep it under two rows, and with long labels four chips were
+  already three rows: the box grew and pushed the fields under it down the page. It now caps at
+  three rows and scrolls, and the magnifier moved out of the scrolling area so it stays put while
+  the chips move.
+
 ### Fixed
 
 - **`MultiSelect` dropped every click in Safari.** The list closes when focus leaves the box, which

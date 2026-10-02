@@ -10,7 +10,7 @@ import { Close } from "./icons.js";
 import { SkeletonOptions, SkeletonPanel } from "./skeleton.js";
 import { Kbd } from "./display.js";
 import { Button } from "./button.js";
-import { useFocusTrap, useListKeys } from "./a11y.js";
+import { useDismiss, useFocusTrap, useListKeys } from "./a11y.js";
 import { MiniButton } from "./button.js";
 import { useScrollLock } from "../lib/scroll-lock.js";
 
@@ -20,24 +20,6 @@ import { useScrollLock } from "../lib/scroll-lock.js";
  *
  * Gerekçe: docs/gerekce/07-katman-ve-diyalog.md
  */
-
-function useDismiss(open: boolean, close: () => void) {
-  const box = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const away = (e: MouseEvent) => {
-      if (box.current && !box.current.contains(e.target as Node)) close();
-    };
-    const esc = (e: KeyboardEvent) => e.key === "Escape" && close();
-    document.addEventListener("mousedown", away);
-    document.addEventListener("keydown", esc);
-    return () => {
-      document.removeEventListener("mousedown", away);
-      document.removeEventListener("keydown", esc);
-    };
-  }, [open, close]);
-  return box;
-}
 
 /* ---------------------------- menu ---------------------------- */
 

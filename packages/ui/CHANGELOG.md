@@ -7,9 +7,21 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ## 0.5.6
 
-> The rail answers the mouse, and a group stays a group when the rail narrows.
+> A calendar can be closed, the rail answers the mouse, and a group stays a group when the rail
+> narrows.
 
 ### Fixed
+
+- **`DatePicker` closes on an outside click and on Escape.** The only way out of an open calendar
+  was to pick a date: someone who opened it by accident either chose a date they did not want or
+  discovered that clicking the field again closed it. The kit already had the dismissal the other
+  overlays use, and this one component never called it.
+
+- **A click inside the calendar no longer escapes to the page.** Wrap the field in a `<label>`, the
+  way a form usually is, and every click on the calendar's own padding was forwarded by the browser
+  to the labelled input, which toggled the calendar underneath the pointer. The kit's own `Field`
+  points at its control rather than wrapping it, so this only ever bit hand written markup, and it
+  bit it silently.
 
 - **A rail row without an address now shows a pointer.** `.tamga-rail-link` left the cursor to the
   browser: a row carrying `href` is an `<a>` and gets the pointing hand for free, while the same row

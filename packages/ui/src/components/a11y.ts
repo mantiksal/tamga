@@ -173,3 +173,28 @@ export function useListKeys({
     return () => root.removeEventListener("keydown", onKey);
   }, [open, containerRef, onClose]);
 }
+
+/**
+ * Closes a popup when the pointer goes down outside it, or on Escape.
+ *
+ * Shared, because an overlay nobody can dismiss is a trap rather than a style:
+ * `DatePicker` kept its own open state and had none of this. The returned ref
+ * marks what counts as "inside", and that includes the trigger.
+ */
+export function useDismiss<T extends HTMLElement = HTMLDivElement>(open: boolean, close: () => void) {
+  const box = useRef<T>(null);
+  useEffect(() => {
+    if (!open) return;
+    const away = (e: MouseEvent) => {
+      if (box.current && !box.current.contains(e.target as Node)) close();
+    };
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && close();
+    document.addEventListener("mousedown", away);
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("mousedown", away);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [open, close]);
+  return box;
+}

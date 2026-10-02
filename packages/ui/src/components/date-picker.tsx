@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useDismiss } from "./a11y.js";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
@@ -185,12 +186,19 @@ export function DatePicker({
   [k: `data-${string}`]: unknown;
 }) {
   const [open, setOpen] = useState(false);
+  /* TAKVİM DIŞARI TIKLAYINCA VE ESCAPE İLE KAPANIYOR, ve bir süre HİÇ
+     kapanmıyordu: tek çıkış yolu bir tarih seçmekti, yani yanlışlıkla açan
+     kişi ya bir tarih seçiyor ya da alanı yeniden tıklamayı buluyordu. Kutu
+     tetiği de kapsıyor: tetiğe tıklama kendi anahtarına ulaşmalı, dışarı
+     sayılmamalı. */
+  const kapat = useCallback(() => setOpen(false), []);
+  const kutu = useDismiss(open, kapat);
   const shown = value
     ? new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(`${value}T00:00:00Z`))
     : "";
 
   return (
-    <div {...dataProps(rest)} className={cn("relative", className)}>
+    <div ref={kutu} {...dataProps(rest)} className={cn("relative", className)}>
       <span className="relative flex items-center">
         <Icon icon={CalendarPlus} size="xs" className="pointer-events-none absolute left-3 text-ink-faint" />
         <input
@@ -227,7 +235,14 @@ export function DatePicker({
       </span>
 
       {open ? (
-        <div className="tamga-overlay absolute z-30 mt-2 p-3">
+        <div
+          className="tamga-overlay absolute z-30 mt-2 p-3"
+          /* TAKVİMİN TIKLAMASI SAYFAYA SIZMIYOR. Tüketen taraf alanı bir
+             `<label>` ile sarınca (kitin `Field`i sarmıyor, elle yazılan sarıyor)
+             takvimin boşluğuna her tıklama tarayıcı tarafından INPUT'A
+             yönlendiriliyor, yani takvim kendi kendine açılıp kapanıyordu. */
+          onClick={(e) => e.stopPropagation()}
+        >
           <Calendar
             locale={locale}
             value={value}

@@ -33,6 +33,10 @@ nötr rol bilir (`neutral · positive · caution · elevated · danger · info`)
 - Ham komut şartsa çıktıyı log'a yönlendir, yalnız kararı grep'le:
   `pnpm build > /tmp/b.log 2>&1; grep -E "error|✓" /tmp/b.log | head`.
 
+**Yayın kapısı.** `npm publish` kendi başına `verify`ı koşturuyor
+(`packages/ui`'nin `prepublishOnly`i): bir kapı düşerse yayın hiç başlamıyor. Kapılar CI'da da
+koşuyor ama CI yayını durduramıyordu, yani zincirin son halkası tavsiyeydi.
+
 **Gate'i değil kodu düzelt.** Her guard'ın başında neden var olduğu yazılı ve çoğu gerçek bir
 hatadan doğdu. Guard seni yakaladıysa önce o yorumu oku.
 

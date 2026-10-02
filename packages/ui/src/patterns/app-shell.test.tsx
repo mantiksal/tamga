@@ -155,3 +155,43 @@ describe("AppShell · en özel giriş", () => {
     expect(acik.map((a) => a.dataset.nav)).toEqual(["pano"]);
   });
 });
+
+/**
+ * GRUPLAR, VE DAR RAYDA DA GÖRÜNÜR OLMALARI.
+ *
+ * Başlık yalnız geniş rayda çiziliyor (40 pikselde başlık okunmuyor) ama bir
+ * süre dar rayda yerine HİÇBİR ŞEY konmuyordu: ray daralınca "başlangıç" ile
+ * üç araç tek ayrımsız sütuna dönüyordu.
+ */
+const grupluNav = [
+  { key: "home", label: "Başlangıç", icon: Search, onSelect: () => {} },
+  { key: "browse", label: "Düzenle", icon: Search, section: "Araçlar", onSelect: () => {} },
+  { key: "convert", label: "Dönüştür", icon: Search, section: "Araçlar", onSelect: () => {} },
+];
+
+const grupluKabuk = (rail: "narrow" | "wide") => (
+  <AppShell nav={grupluNav} activePath="home" rail={rail} labels={LABELS}>
+    <p>gövde</p>
+  </AppShell>
+);
+
+describe("AppShell · grup ayrımı", () => {
+  it("geniş rayda grup bir BAŞLIK", () => {
+    render(grupluKabuk("wide"));
+    expect(screen.getByText("Araçlar")).toBeTruthy();
+    expect(document.querySelectorAll("nav span[aria-hidden]")).toHaveLength(0);
+  });
+
+  it("dar rayda grup bir ÇİZGİ · başlık okunmaz, ayrım yine de görünür", () => {
+    render(grupluKabuk("narrow"));
+    expect(screen.queryByText("Araçlar")).toBeNull();
+    /* Tek çizgi: ilk grubun önüne girmiyor, çünkü marka ayracı orada zaten var. */
+    expect(document.querySelectorAll("nav span[aria-hidden]")).toHaveLength(1);
+  });
+
+  it("adres yerine eylem taşıyan giriş anahtarıyla işaretleniyor", () => {
+    render(grupluKabuk("wide"));
+    expect(document.querySelector('[data-nav="home"]')).toHaveAttribute("aria-current", "page");
+    expect(document.querySelector('[data-nav="browse"]')).not.toHaveAttribute("aria-current");
+  });
+});

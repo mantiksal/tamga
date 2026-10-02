@@ -5,6 +5,19 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.5.7
+
+> A multi select can be used in Safari.
+
+### Fixed
+
+- **`MultiSelect` dropped every click in Safari.** The list closes when focus leaves the box, which
+  is right: a list that only watches for outside clicks never sees the person who left with the
+  keyboard. Safari, however, does not focus a button when you press it, so the input lost focus,
+  the list closed, and the option was removed from the page before its click could finish. Nothing
+  was selectable, and only in that browser. Pressing an option, or a chip's remove button, now
+  keeps the focus where it was.
+
 ## 0.5.6
 
 > A calendar can be closed, a chosen file reaches the screen that asked for it, and the rail

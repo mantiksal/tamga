@@ -379,6 +379,8 @@ export function MultiSelect({
             <button
               type="button"
               aria-label={labels.remove(o.label)}
+              /* Aynı sebep: çipi kaldırmak odağı girdiden almamalı. */
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => toggle(o.value)}
               className="tamga-token-x"
             >
@@ -429,6 +431,11 @@ export function MultiSelect({
                   data-active={i === active || undefined}
                   className="tamga-option w-full"
                   onMouseEnter={() => setActive(i)}
+                  /* ODAK GİRDİDE KALIYOR, ve Safari'de bu bir SÜS DEĞİL: Safari
+                     tıklanan düğmeye odak vermiyor, yani girdi odağı kaybediyor,
+                     aşağıdaki `onBlur` listeyi kapatıyor ve seçenek tıklama
+                     gerçekleşmeden DOM'dan siliniyor · seçim hiç olmuyordu. */
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={() => toggle(v)}
                 >
                   <span className="flex-1 text-left">{etiket}</span>

@@ -322,6 +322,8 @@ function FiltreOrnegi({ lang }: { lang: Dil }) {
         },
       ]}
       fileSearchKey="dosya"
+      /* Biçimi çağıran söylüyor: kit bir dosya türü tanımıyor. */
+      fileAccept=".xlsx,.csv"
       labels={s.filtre}
     />
   );

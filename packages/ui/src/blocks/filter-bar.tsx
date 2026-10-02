@@ -238,6 +238,28 @@ export type FilterBarProps = {
   searchKey?: string;
   /** The key for search-by-file if this screen has it; without it the section is not drawn. TR: Dosyayla arama bu ekranda varsa anahtarı; yoksa bölüm hiç çizilmiyor. */
   fileSearchKey?: string;
+  /**
+   * The chosen FILE, and `null` when it is removed. TR: Seçilen DOSYANIN kendisi, kaldırılınca
+   * `null`.
+   *
+   * `values` holds strings, so the file section could only ever write the file's NAME there, and
+   * the thing the screen has to read, parse or upload existed nowhere. Given this, the name still
+   * lands in `values[fileSearchKey]` for the chip; the `File` comes here. TR: `values` dizgi
+   * tutuyor, yani dosya bölümü oraya ancak dosyanın ADINI yazabiliyordu ve ekranın okuyacağı,
+   * ayrıştıracağı ya da göndereceği şey hiçbir yerde yoktu. Verildiğinde ad yine çipe gidiyor,
+   * `File` buraya geliyor.
+   */
+  onFile?: (file: File | null) => void;
+  /**
+   * What the picker accepts: `".xlsx,.csv"`, `"image/*"`. TR: Seçicinin kabul ettiği tür:
+   * `".xlsx,.csv"`, `"image/*"`.
+   *
+   * The kit named the formats itself for a while (`.xlsx,.xls,.csv`), which is a product's
+   * vocabulary living in a library: the same drawer may want a photo or a PDF. TR: Kit bir süre
+   * türleri kendi sayıyordu; o bir ürünün sözlüğünün kütüphanede yaşamasıdır · aynı çekmece bir
+   * fotoğraf ya da PDF de isteyebilir.
+   */
+  fileAccept?: string;
   /** A screen-specific button on the filter row, beside "All filters". TR: Filtre satırına, "Tüm filtreler"in yanına giren ekrana özel düğme. */
   extra?: ReactNode;
   /** For `DatePicker`'s calendar: "tr-TR", "en-GB". TR: `DatePicker`ın takvimi için: "tr-TR", "en-GB". */
@@ -253,6 +275,8 @@ export function FilterBar({
   optionSource = {},
   searchKey = "q",
   fileSearchKey,
+  onFile,
+  fileAccept,
   extra,
   locale = "en-GB",
   labels,
@@ -477,7 +501,14 @@ export function FilterBar({
               {values[fileSearchKey] ? (
                 <span className="flex items-center gap-2">
                   <span className="truncate text-small text-ink">{values[fileSearchKey]}</span>
-                  <Button type="button" size="sm" onClick={() => write(fileSearchKey, "")}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => {
+                      write(fileSearchKey, "");
+                      onFile?.(null);
+                    }}
+                  >
                     {labels.fileSearch.remove}
                   </Button>
                 </span>
@@ -490,9 +521,15 @@ export function FilterBar({
                   {labels.fileSearch.choose}
                   <input
                     type="file"
-                    accept=".xlsx,.xls,.csv"
+                    accept={fileAccept}
                     className="sr-only"
-                    onChange={(e) => write(fileSearchKey, e.target.files?.[0]?.name ?? "")}
+                    onChange={(e) => {
+                      /* AD ÇİPE, DOSYA ÇAĞIRANA: ikisi ayrı şey ve blok bir
+                         süre yalnız birincisini veriyordu. */
+                      const dosya = e.target.files?.[0] ?? null;
+                      write(fileSearchKey, dosya?.name ?? "");
+                      onFile?.(dosya);
+                    }}
                   />
                 </label>
               )}

@@ -7,8 +7,22 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ## 0.5.6
 
-> A calendar can be closed, the rail answers the mouse, and a group stays a group when the rail
-> narrows.
+> A calendar can be closed, a chosen file reaches the screen that asked for it, and the rail
+> answers the mouse.
+
+### Added
+
+- **`FilterBar.onFile`** · the file itself, and `null` when it is removed. The drawer's file
+  section let someone pick a file and then dropped it: `values` holds strings, so only the NAME
+  was ever written, and the thing the screen has to parse or upload existed nowhere. One product
+  had already moved its import button out of the drawer because of this. The name still lands in
+  `values[fileSearchKey]`, so the chip is unchanged.
+
+### Changed
+
+- **`FilterBar` no longer names file formats; `fileAccept` does.** The picker hardcoded
+  `.xlsx,.xls,.csv`, which is one product's vocabulary living in a library: the same drawer may
+  want a photo or a PDF. Pass `fileAccept` to get the old behaviour back.
 
 ### Fixed
 

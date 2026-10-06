@@ -36,6 +36,15 @@ export type ListTemplateProps = {
 
   labels: { loading: string } & ErrorLabels;
 
+  /**
+   * The strip at the foot of the list surface: the pagination, a total, a bulk action. It sits
+   * INSIDE the card, divided by a line and given its own padding, because the rows are flush with
+   * the card's edge and anything following them lands on that edge.
+   * TR: Liste yüzeyinin dibindeki şerit: sayfalama, bir toplam, toplu bir eylem. Kartın İÇİNDE,
+   * bir çizgiyle ayrılmış ve kendi dolgusuyla duruyor · satırlar kartın kenarına dayalı olduğu
+   * için ardından gelen her şey o kenara yapışıyor.
+   */
+  footer?: ReactNode;
   children?: ReactNode;
 };
 
@@ -50,6 +59,7 @@ export function ListTemplate({
   empty,
   error,
   labels,
+  footer,
   children,
 }: ListTemplateProps) {
   return (
@@ -86,6 +96,12 @@ export function ListTemplate({
           {state === "error" ? <ErrorSlot error={error} labels={labels} /> : null}
           {state === "empty" ? empty : null}
           {state === "ready" ? children : null}
+
+          {/* Dip şerit yalnız liste gerçekten dururken: boş bir listenin altında
+              sayfalayıcı, olmayan bir yolu gösterir. */}
+          {footer && state === "ready" ? (
+            <div className="border-t border-line px-4 py-3">{footer}</div>
+          ) : null}
         </div>
       </div>
     </div>

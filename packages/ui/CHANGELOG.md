@@ -9,6 +9,13 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > A ticked checkbox stays down.
 
+### Added
+
+- **`ListTemplate.footer`** · the strip at the foot of the list surface, for the pagination or a
+  total. The rows are flush with the card's edge, so anything passed after them as a child landed
+  on that edge with no room; the footer sits inside the card, divided by a line and given its own
+  padding, and it is not drawn while the list is empty.
+
 ### Changed
 
 - **`ListTemplate` puts the filters and the list on surfaces of their own.** They sat on the page

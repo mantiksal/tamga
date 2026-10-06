@@ -8,6 +8,7 @@ import {
   CardBody,
   CardHead,
   Checkbox,
+  DatePicker,
   ColorSwatches,
   ConfirmDialog,
   DropdownMenu,
@@ -25,6 +26,7 @@ import {
   ScrollX,
   Segmented,
   Sheet,
+  Pagination,
   SortHeader,
   StatusChip,
   Switch,
@@ -97,6 +99,19 @@ export type CanliMetin = {
   arsivle: string;
   vazgec: string;
   bosSuzgec: string;
+  /* SAYFALAMANIN SÖZCÜKLERİ, ve ikisi YER TUTUCULU DİZGİ: bu sözlük sunucu
+     bileşeninden geliyor, oraya fonksiyon konamıyor (Next sınırı). Sayıyı
+     yerleştiren taraf aşağıdaki istemci. */
+  oncekiSayfa: string;
+  sonrakiSayfa: string;
+  /** "Sayfa {n}" */
+  sayfaNo: string;
+  /** "{ilk}–{son} / {toplam}" */
+  sayfaOzet: string;
+  /** Takvimin ay adlarını ve hafta başlangıcını belirleyen yerel: "tr-TR". */
+  yerel: string;
+  kayitSonra: string;
+  takvim: { previousMonth: string; nextMonth: string; open: string; clear: string };
   kapat: string;
   detay: string;
   gorunum: string;
@@ -137,15 +152,21 @@ export type CanliMetin = {
   hesapPosta: string;
 };
 
-type Hesap = { ad: string; plan: string; durum: 0 | 1 | 2; son: string };
+type Hesap = { ad: string; plan: string; durum: 0 | 1 | 2; son: string; kayit: string };
 
 const HESAPLAR: readonly Hesap[] = [
-  { ad: "Ayşe Demir", plan: "Kurumsal", durum: 0, son: "2 dk" },
-  { ad: "Mert Aksoy", plan: "Pro", durum: 1, son: "dün" },
-  { ad: "Zeynep Kaya", plan: "Pro", durum: 2, son: "3 gün" },
-  { ad: "Can Öztürk", plan: "Ücretsiz", durum: 0, son: "1 sa" },
-  { ad: "Elif Şahin", plan: "Kurumsal", durum: 0, son: "12 dk" },
-  { ad: "Deniz Yılmaz", plan: "Pro", durum: 1, son: "2 gün" },
+  { ad: "Ayşe Demir", plan: "Kurumsal", durum: 0, son: "2 dk", kayit: "2026-09-28" },
+  { ad: "Mert Aksoy", plan: "Pro", durum: 1, son: "dün", kayit: "2026-08-14" },
+  { ad: "Zeynep Kaya", plan: "Pro", durum: 2, son: "3 gün", kayit: "2026-07-02" },
+  { ad: "Can Öztürk", plan: "Ücretsiz", durum: 0, son: "1 sa", kayit: "2026-09-19" },
+  { ad: "Elif Şahin", plan: "Kurumsal", durum: 0, son: "12 dk", kayit: "2026-06-11" },
+  { ad: "Deniz Yılmaz", plan: "Pro", durum: 1, son: "2 gün", kayit: "2026-08-30" },
+  { ad: "Burak Çelik", plan: "Kurumsal", durum: 0, son: "5 dk", kayit: "2026-09-30" },
+  { ad: "Selin Arslan", plan: "Ücretsiz", durum: 2, son: "1 hafta", kayit: "2026-05-21" },
+  { ad: "Emre Doğan", plan: "Pro", durum: 0, son: "40 dk", kayit: "2026-09-06" },
+  { ad: "Gizem Koç", plan: "Kurumsal", durum: 1, son: "3 sa", kayit: "2026-07-25" },
+  { ad: "Onur Taş", plan: "Ücretsiz", durum: 0, son: "9 dk", kayit: "2026-10-01" },
+  { ad: "Pelin Aydın", plan: "Pro", durum: 2, son: "4 gün", kayit: "2026-06-03" },
 ];
 
 const TONLAR: readonly Tone[] = ["positive", "caution", "danger"];
@@ -207,15 +228,33 @@ export function CanliOnizleme({ labels: t }: { labels: CanliMetin }) {
     [urun],
   );
 
+  /* SAYFA BOYU BEŞ: tablo panelin yarısını kaplamadan duruyor, ve on iki
+     hesap üç sayfa ediyor · sayfalama bir süs değil, gerçekten gereken bir
+     kontrol olarak görünüyor. */
+  const SAYFA_BOYU = 5;
+  const [sayfa, setSayfa] = useState(1);
+  /* Tarih süzgeci GERÇEKTEN süzüyor: panelde duran bir kontrolün "demo olsun"
+     diye hiçbir şey yapmaması, demonun kendi iddiasını çürütür. */
+  const [tarih, setTarih] = useState<string>();
+
   const gorunenler = useMemo(() => {
     const q = ara.trim().toLocaleLowerCase("tr");
     const yonK = yon === "asc" ? 1 : -1;
     return HESAPLAR.filter(
       (h) =>
         (!q || h.ad.toLocaleLowerCase("tr").includes(q)) &&
-        (suzgec === 0 || h.durum === suzgec - 1),
+        (suzgec === 0 || h.durum === suzgec - 1) &&
+        /* ISO tarihler dizgi olarak da doğru sıralanıyor; `Date` kurmak gereksiz. */
+        (!tarih || h.kayit >= tarih),
     ).sort((a, b) => a.ad.localeCompare(b.ad, "tr") * yonK);
-  }, [ara, suzgec, yon]);
+  }, [ara, suzgec, yon, tarih]);
+
+  /* SAYFA SÜZGEÇLE BİRLİKTE DARALIYOR: üçüncü sayfadayken süzgeç tek sonuca
+     inerse kullanıcı boş bir tabloya bakar. Sayfa numarası durumda tutuluyor
+     ama ÇİZİLEN değer her zaman kırpılmış olanı. */
+  const sayfalar = Math.max(1, Math.ceil(gorunenler.length / SAYFA_BOYU));
+  const aktifSayfa = Math.min(sayfa, sayfalar);
+  const sayfadakiler = gorunenler.slice((aktifSayfa - 1) * SAYFA_BOYU, aktifSayfa * SAYFA_BOYU);
 
   const nav: readonly NavEntry[] = [
     { key: "genel", href: "/genel", label: t.genelBakis, icon: GridView },
@@ -318,14 +357,32 @@ export function CanliOnizleme({ labels: t }: { labels: CanliMetin }) {
             leading
             value={ara}
             placeholder={t.hesapAra}
-            onChange={(e) => setAra(e.target.value)}
+            onChange={(e) => {
+              setAra(e.target.value);
+              setSayfa(1);
+            }}
+          />
+        </span>
+        <span className="w-44">
+          <DatePicker
+            locale={t.yerel}
+            value={tarih}
+            onChange={(v) => {
+              setTarih(v);
+              setSayfa(1);
+            }}
+            placeholder={t.kayitSonra}
+            labels={t.takvim}
           />
         </span>
         <Segmented
           size="sm"
           label={t.durum}
           value={String(suzgec)}
-          onChange={(v) => setSuzgec(Number(v))}
+          onChange={(v) => {
+            setSuzgec(Number(v));
+            setSayfa(1);
+          }}
           options={t.durumlar.map((l, i) => ({ value: String(i), label: l }))}
         />
       </div>
@@ -375,7 +432,7 @@ export function CanliOnizleme({ labels: t }: { labels: CanliMetin }) {
                 </tr>
               </thead>
               <tbody>
-                {gorunenler.map((h) => (
+                {sayfadakiler.map((h) => (
                   <tr key={h.ad} onClick={() => setAcilan(h)} className="cursor-pointer">
                     <td onClick={(e) => e.stopPropagation()}>
                       <Checkbox
@@ -415,6 +472,27 @@ export function CanliOnizleme({ labels: t }: { labels: CanliMetin }) {
           </ScrollX>
         )}
       </Card>
+
+      {/* SAYFALAMA YALNIZ GEREKİYORSA: tek sayfalık bir listenin altındaki
+          sayfalayıcı, kullanıcıya olmayan bir yolu gösteriyor. */}
+      {gorunenler.length > SAYFA_BOYU ? (
+        <Pagination
+          page={aktifSayfa}
+          pageSize={SAYFA_BOYU}
+          total={gorunenler.length}
+          onChange={setSayfa}
+          labels={{
+            previous: t.oncekiSayfa,
+            next: t.sonrakiSayfa,
+            page: (n) => t.sayfaNo.replaceAll("{n}", String(n)),
+            summary: (ilk, son, toplam) =>
+              t.sayfaOzet
+                .replaceAll("{ilk}", String(ilk))
+                .replaceAll("{son}", String(son))
+                .replaceAll("{toplam}", String(toplam)),
+          }}
+        />
+      ) : null}
     </div>
   );
 

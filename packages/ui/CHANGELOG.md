@@ -5,6 +5,19 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.5.8
+
+> A ticked checkbox stays down.
+
+### Fixed
+
+- **Hover undid the checked state of a `Checkbox` and a `Radio`.** The ticked box is drawn as a key
+  that has been pressed home: it sits 2px down and loses its shadow. The hover rule, written to
+  invite a click, was more specific than that, so a box ticked under the pointer sprang back up and
+  only settled once the pointer left. Someone ticking a row saw nothing happen. The rail already
+  carried the same decision in writing, that a current row has no hover of its own; the checkbox
+  did not.
+
 ## 0.5.7
 
 > A multi select can be used in Safari.

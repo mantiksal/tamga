@@ -3147,8 +3147,13 @@
 
   /* Hover KONTROLÜN, işaretin değil: kıpırdayan bir ögeye hover vermek titreme üretiyor.
      Gerekçe: docs/gerekce/01-form-ve-girdi.md */
+  /* İŞARETLİ KUTU HOVER'DA KALKMIYOR, ve kalkıyordu. İşaretli hâlin tamamı
+     "yerine oturmuş bir tuş" anlatısı; imleç üstüne gelince kuralın özgüllüğü
+     o oturmayı eziyor ve kutu geri kalkıyordu. Sonuç: tıklayan kişi imleci
+     çekene kadar hiçbir şey olmamış gibi görüyordu · rayda aynı karar
+     yazılıydı ("seçili satırın ayrı bir hover'ı yok"), burada yazılı değildi. */
   :where(button, label):hover
-    :is(.tamga-check, .tamga-radio):not([data-off]):not(.tamga-check-sm) {
+    :is(.tamga-check, .tamga-radio):not([data-off]):not(.tamga-check-sm):not([data-checked="true"]) {
     border-color: var(--color-accent-line);
     transform: translate(-1px, -1px);
     box-shadow: 3px 3px 0 var(--color-accent-line);

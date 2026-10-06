@@ -363,7 +363,8 @@ export function CanliOnizleme({ labels: t }: { labels: CanliMetin }) {
             }}
           />
         </span>
-        <span className="w-44">
+        {/* 13rem: tarih + kitin iki ucundaki düğmeler. Dar kutuda değer kırpılıyor. */}
+        <span className="w-52">
           <DatePicker
             locale={t.yerel}
             value={tarih}

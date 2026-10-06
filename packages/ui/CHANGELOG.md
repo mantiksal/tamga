@@ -9,6 +9,15 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > A ticked checkbox stays down.
 
+### Changed
+
+- **`ListTemplate` puts the filters and the list on surfaces of their own.** They sat on the page
+  ground, one bare row above another, and the two read as a single strip: where the list began, and
+  which control filtered which, had to be worked out rather than seen. The kit's own list-screen
+  example and every panel built from it already used cards, so the template was arguing with its own
+  documentation. Both surfaces keep their overflow open, so the filters' dropdowns and the rows'
+  menus are not cut at the card's edge.
+
 ### Fixed
 
 - **Hover undid the selected state of a `Segmented` option too.** The chosen option rests 1px up

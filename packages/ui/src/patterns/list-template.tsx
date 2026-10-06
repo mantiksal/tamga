@@ -60,25 +60,33 @@ export function ListTemplate({
         <PageBand title={title} subtitle={subtitle} actions={actions} />
       </div>
 
+      {/* FİLTRELER VE LİSTE BİRER YÜZEYDE: çıplak iki satır tek bir şerit gibi
+          okunuyordu. `tamga-card-open` şart, yoksa kart açılır listeleri ve
+          satır menülerini kenarında kesiyor.
+          Gerekçe: docs/gerekce/08-blok-ve-sablon.md */}
       {filters ? (
-        <div
-          className="tamga-section tamga-gutter flex flex-wrap items-center gap-2 py-3"
-          data-filters
-        >
-          {filters}
+        <div className="tamga-gutter pb-4">
+          <div
+            className="tamga-card tamga-card-open flex flex-wrap items-center gap-2 p-4"
+            data-filters
+          >
+            {filters}
+          </div>
         </div>
       ) : null}
 
-      <div className="tamga-gutter min-h-0 flex-1 py-6">
-        {state === "loading" ? (
-          <Busy label={labels.loading}>
-            <SkeletonTable rows={loadingRows} {...(loadingColumns ? { cols: loadingColumns } : {})} />
-          </Busy>
-        ) : null}
+      <div className="tamga-gutter min-h-0 flex-1 pb-6">
+        <div className="tamga-card tamga-card-open">
+          {state === "loading" ? (
+            <Busy label={labels.loading}>
+              <SkeletonTable rows={loadingRows} {...(loadingColumns ? { cols: loadingColumns } : {})} />
+            </Busy>
+          ) : null}
 
-        {state === "error" ? <ErrorSlot error={error} labels={labels} /> : null}
-        {state === "empty" ? empty : null}
-        {state === "ready" ? children : null}
+          {state === "error" ? <ErrorSlot error={error} labels={labels} /> : null}
+          {state === "empty" ? empty : null}
+          {state === "ready" ? children : null}
+        </div>
       </div>
     </div>
   );

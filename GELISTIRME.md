@@ -58,6 +58,7 @@ docs/                   kararlar ve kılavuzlar
 | `check:yorum` | Kodda bir yorum bloğu altı düzyazı satırını geçmiyor |
 | `check:css` | CSS yapısal olarak sağlam |
 | `check:physics` | Yükselen her yüzeyde kenar ve gölge aynı renk |
+| `check:durum-hover` | Hover seçili hâlin fiziğini ezmiyor |
 | `check:yuvarlak` | Tam yuvarlak yalnız radyo, skor halkası ve spinner'da |
 | `check:olcu-hizasi` | Sekiz taban kontrolün hepsi `--control` yüksekliğini okuyor |
 | `check:data-props` | Her bileşen `data-*` kabul ediyor |

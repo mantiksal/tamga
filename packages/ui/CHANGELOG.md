@@ -11,6 +11,13 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ### Fixed
 
+- **Hover undid the selected state of a `Segmented` option too.** The chosen option rests 1px up
+  with a 2px shadow; hovering it grew the shadow to 3px and left the object where it was, which is
+  the one thing Law 1 forbids: a shadow that grows while nothing rises makes the height a lie. The
+  option now ignores the pointer, the way the rail, the pagination and the checkbox already did.
+  A new gate (`check:durum-hover`) compares every hover rule against the selected-state rule it
+  could outrank, because this same mistake has now been found by eye three times.
+
 - **Hover undid the checked state of a `Checkbox` and a `Radio`.** The ticked box is drawn as a key
   that has been pressed home: it sits 2px down and loses its shadow. The hover rule, written to
   invite a click, was more specific than that, so a box ticked under the pointer sprang back up and

@@ -2780,7 +2780,12 @@
     justify-content: center;
   }
 
-  .tamga-segment > button:not(:disabled):hover {
+  /* SEÇİLİ SEÇENEK HOVER ALMIYOR · rayın, sayfalayıcının ve onay kutusunun
+     taşıdığı kararın aynısı: "buradasın" imleçle değişmiyor. Seçili düğmenin
+     ayrı bir hover kuralı vardı ve gölgeyi 2'den 3'e çıkarıp nesneyi yerinde
+     bırakıyordu · Yasa 1 · F'nin tam olarak yasakladığı şey, ve kapı bunu
+     göremiyordu çünkü seçili duruşun kendi ofseti var. */
+  .tamga-segment > button:not(:disabled):not([data-active="true"]):hover {
     background: var(--color-nav-hover-bg);
     color: var(--color-nav-hover);
   }
@@ -2800,13 +2805,6 @@
     border-color: var(--color-edge);
     box-shadow: 2px 2px 0 var(--color-edge);
     transform: translate(-1px, -1px);
-  }
-  .tamga-segment > button[data-active="true"]:hover {
-    background: var(--color-shell);
-    color: var(--color-ink);
-    border-color: var(--color-edge);
-    transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0 var(--color-edge);
   }
   /* Yol 2px ama varış +1: segment -1'de duruyor, yani zemini +1'de. */
   .tamga-segment > button[data-active="true"]:active {

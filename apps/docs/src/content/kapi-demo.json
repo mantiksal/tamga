@@ -64,6 +64,10 @@
       "tr": "Gölge ile kenar uyumlu",
       "en": "Shadow matches the border"
     },
+    "check:durum-hover": {
+      "tr": "Seçili hâl hover'da bozulmuyor",
+      "en": "Hover leaves the selected state alone"
+    },
     "check:yuvarlak": {
       "tr": "Daire yalnız 3 yerde",
       "en": "Circles in three places only"

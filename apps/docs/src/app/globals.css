@@ -1727,9 +1727,15 @@ li code {
 
    `safe center` bunun için var: sığdığında ortalıyor, sığmadığında başa
    yaslıyor. Kitin kendi sınıfına dokunulmuyor · kural yalnız bu çerçevenin
-   içinde, ve zaten `min-h-dvh` kancası burada kullanılıyor. */
-.galeri-ekran [class~="min-h-dvh"],
-.galeri-ekran [class~="h-dvh"] {
+   içinde, ve zaten `min-h-dvh` kancası burada kullanılıyor.
+
+   ZATEN ORTALAYANA, ve yalnız ona: kural bir süre `h-dvh` taşıyan HER şeyi
+   yakalıyordu, ve `AppShell`in kökü de onlardan biri. O kök yatay bir flex
+   (ray + içerik) ve ortalanınca iki çocuğu da içeriğine çekiliyor: ray
+   dikeyde ortada duruyordu, `main` ise kabından uzun kaldığı için hiç
+   kaymıyordu · modalda kabuk şablonu bozuk görünüyordu. */
+.galeri-ekran [class~="min-h-dvh"][class~="items-center"],
+.galeri-ekran [class~="h-dvh"][class~="items-center"] {
   align-items: safe center;
 }
 

@@ -13,6 +13,10 @@ const config: NextConfig = {
      `.next`te rahat bırakılıyor. Tüketen ürünün deposunda da aynı çözüm var. */
   distDir: process.env.BUILD_DIR || ".next",
   reactStrictMode: true,
+  /* NEXT'İN DEV ROZETİ KAPALI · sol alttaki siyah "N" dairesi. Yalnız
+     geliştirmede çıkıyor, ama bu sitenin ekran kaydı alınıyor ve kayıtta
+     çerçevenin köşesinde duran bir framework logosu kitin işareti sanılıyor. */
+  devIndicators: false,
   output: "standalone",
   outputFileTracingRoot: new URL("../../", import.meta.url).pathname,
   /* GÜVENLİK BAŞLIKLARI · site hiçbirini göndermiyordu.

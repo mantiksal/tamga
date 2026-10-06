@@ -580,10 +580,11 @@
        aynı satır `<button>` ve imleç oka düşüyordu · aynı kontrol, iki farklı imleç. */
     cursor: pointer;
     height: 40px;
-    /* 52 piksel, 40 değil: dar ray 56 piksellik bir sütun ve satır onu
-       dolduruyor · kare bir kutu, rayın içinde yüzen bir düğme gibi
-       duruyordu. */
-    width: 52px;
+    /* DAR RAYDA KARE. Bir süre 52 pikseldi ("satır sütunu doldursun") ve
+       dikdörtgen bir kutu, içindeki tek ikonun etrafında yamuk duruyordu:
+       seçili satırın çerçevesi ikonu değil boşluğu çerçeveliyordu. Geniş ray
+       zaten kendi genişliğini veriyor (`tamga-rail-link-wide`). */
+    width: 40px;
     flex-shrink: 0;
     align-items: center;
     justify-content: center;

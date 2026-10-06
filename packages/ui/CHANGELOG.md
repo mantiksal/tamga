@@ -18,6 +18,11 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ### Changed
 
+- **A rail row is square on a narrow rail.** It was 52 by 40, written so the row would fill the
+  column, and a rectangle around a single icon framed the space rather than the icon: the selected
+  row read as a wide box with a glyph adrift in it. It is now 40 by 40, centred in the column; a
+  wide rail still takes its own width.
+
 - **`ListTemplate` puts the filters and the list on surfaces of their own.** They sat on the page
   ground, one bare row above another, and the two read as a single strip: where the list began, and
   which control filtered which, had to be worked out rather than seen. The kit's own list-screen

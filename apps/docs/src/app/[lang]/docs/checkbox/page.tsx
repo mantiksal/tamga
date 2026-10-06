@@ -95,7 +95,8 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <P>{t.lead}</P>
       <Demo labels={dict.demo} align="start" code={`<Checkbox label="…" checked={a} onChange={setA} />
-<Checkbox label="…" checked={false} disabled />`}>
+<Checkbox label="…" checked={false} disabled />
+<Checkbox compact label="…" checked={c} onChange={setC} />`}>
         <CheckboxDemo lang={lang} />
       </Demo>
 

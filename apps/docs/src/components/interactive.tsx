@@ -109,6 +109,7 @@ const D = {
     success: "Başarı",
     failure: "Hata",
     inStock: "Stokta olanları göster",
+    satirKutusu: "Tablo satırındaki kutu (compact)",
     onSale: "İndirimdekiler",
     disabled: "Devre dışı",
     orderState: "Sipariş durumu",
@@ -190,6 +191,7 @@ const D = {
     success: "Success",
     failure: "Error",
     inStock: "Show items in stock",
+    satirKutusu: "The checkbox in a table row (compact)",
     onSale: "On sale",
     disabled: "Disabled",
     orderState: "Order status",
@@ -651,11 +653,15 @@ export function CheckboxDemo({ lang }: L) {
   const d = D[lang];
   const [a, setA] = useState(true);
   const [b, setB] = useState(false);
+  const [c, setC] = useState(true);
   return (
     <div className="flex flex-col gap-3">
       <Checkbox label={d.inStock} checked={a} onChange={setA} />
       <Checkbox label={d.onSale} checked={b} onChange={setB} />
       <Checkbox label={d.disabled} checked={false} disabled />
+      {/* İKİNCİ YÜZ DE BURADA, ve bir süre değildi: sayfa yalnız form kutusunu
+          gösteriyordu, tablo kutusunu ilk kez gören "bu kitin değil" diyordu. */}
+      <Checkbox compact label={d.satirKutusu} checked={c} onChange={setC} />
     </div>
   );
 }

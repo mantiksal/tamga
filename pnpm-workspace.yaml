@@ -8,3 +8,10 @@ packages:
 # kırılıyordu. İzin veriliyor: testleri çalıştıran şeyin kurulması gerekiyor.
 allowBuilds:
   esbuild: true
+
+# Geçişli iki yama: next 16.3.x sharp ^0.35.4 ve postcss üzerinden
+# source-map-js 1.2.1 getiriyor, ikisinde de bilinen açık var.
+# next bunları kendi güncellediğinde bu blok silinir.
+overrides:
+  sharp: ">=0.35.5"
+  source-map-js: ">=1.2.2"

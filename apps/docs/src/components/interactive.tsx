@@ -1543,7 +1543,7 @@ export function SecretDemo({ lang }: L) {
     <div className="w-full">
       <Field label={n.odemeAnahtari} description={n.anahtarMeta}>
         <SecretField
-          value="sk_live_9f2ac41ebd7740c8a1e5Q7"
+          value="example_key_0000_0000_0000_0000"
           labels={{ reveal: n.reveal, hide: n.hideKey, copy: n.copy, copied: n.copied, failed: n.failed }}
         />
       </Field>

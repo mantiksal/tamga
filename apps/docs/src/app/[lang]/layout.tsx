@@ -158,7 +158,7 @@ export default async function RootLayout({
         {/* `afterInteractive` değil satır içi: arama motoru HTML'i okurken burada olmalı. */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(veri) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(veri).replace(/</g, "\\u003c") }}
         />{children}</body>
     </html>
   );

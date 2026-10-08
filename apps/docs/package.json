@@ -12,10 +12,10 @@
     "prebuild": "pnpm --filter tamga-ui build && node ../../scripts/extract-props.mjs && node ../../scripts/extract-tokens.mjs && node ../../scripts/extract-icons.mjs && node ../../scripts/extract-counts.mjs"
   },
   "dependencies": {
-    "tamga-ui": "workspace:*",
-    "next": "^16.3.4",
+    "next": "~16.3.8",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "tamga-ui": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",

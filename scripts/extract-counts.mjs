@@ -46,12 +46,14 @@ const zincir = adimlar.map((a) =>
 );
 const kapilar = zincir.length;
 
-/* KONTROL, KAPI DEĞİL · ve fark ziyaretçi için önemli: zincirin 22 adımının
-   dördü derleme işi (typecheck, kitin build'i, testler, dokümanın build'i),
-   on sekizi ise bir KURALI denetleyen betik. Ana sayfa on sekiziyle konuşuyor,
-   çünkü anlatılan şey "derleniyor mu" değil "kurala uyuyor mu". İkisi de
-   buradan sayılıyor; hiçbiri elle yazılmıyor. */
-const kontroller = zincir.filter((a) => a === "props" || a.startsWith("check:"));
+/* KONTROL, KAPI DEĞİL · ve fark ziyaretçi için önemli: zincirin adımlarının
+   beşi üretim ve derleme işi (prop çıkarımı, typecheck, kitin build'i,
+   testler, dokümanın build'i), geri kalanı bir KURALI denetleyen betik. Ana
+   sayfa kural denetleyenlerle konuşuyor, çünkü anlatılan şey "derleniyor mu"
+   değil "kurala uyuyor mu". `props` bir kapı ama kontrol değil: bir şeyi
+   yasaklamıyor, bir şey üretiyor. İkisi de buradan sayılıyor; hiçbiri elle
+   yazılmıyor. */
+const kontroller = zincir.filter((a) => a.startsWith("check:"));
 
 /* SÜRÜM DE BİR SAYI, ve elle yazılınca yanlış olan ilk şey o oldu: npm'de
    0.2.0 dururken doküman sitesinin şeridi "v0.0.0" diyordu. Kaynağı kitin

@@ -77,10 +77,12 @@ const T = {
     heroKpiArtis: "+8%",
     heroOnceki: "Önceki sayfa",
     heroSonraki: "Sonraki sayfa",
-    canliTitle: "Ekran görüntüsü değil. Kurcala.",
+    canliTitle: "Senin ürünün bu panelde nasıl görünürdü?",
     canliBody:
       "Aşağıdaki panel Tamga'nın bileşenleriyle kuruldu ve gerçekten çalışıyor: menüde gezin, hesapları süz, seç, arşivle. Sonra soldan kendi ürününün adını ve marka rengini gir; bütün panel o an senin markana döner.",
     canli: {
+      daralt: "Menüyü daralt",
+      genislet: "Menüyü genişlet",
       masa: "Kontrol masası",
       canli: "canlı",
       ad: "Ürününün adı",
@@ -241,7 +243,7 @@ const T = {
     nameP2:
       "Bu işaretler süslü olsun diye değil, tanınsın diye çizildi. Kayaya kazınırken de sikkeye basılırken de kendisi kalması gerekiyordu.",
     nameP3:
-      "Bir bileşenden beklediğimiz de bu. Hangi üründe, hangi ölçekte kullanılırsa kullanılsın kendisi kalması.",
+      "Bir tasarım sisteminden beklediğimiz de bu: hangi ekranı açarsan aç, kimin ürünü olduğu belli olsun.",
 
     live: "Yayında",
     waiting: "Bekliyor",
@@ -331,8 +333,10 @@ const T = {
     masa: {
       renk: "Rengin",
       renkDegistir: "değiştir",
+      ozet: "bileşen",
+      ozetVurgu: "· bunların {k}'i bu masada, hepsi çalışıyor",
       kategoriler: [
-        "Hepsi",
+        "Masadakiler",
         "Veri",
         "Form",
         "Eylem",
@@ -438,10 +442,12 @@ const T = {
     heroKpiArtis: "+8%",
     heroOnceki: "Previous page",
     heroSonraki: "Next page",
-    canliTitle: "Not a screenshot. Poke at it.",
+    canliTitle: "What would your product look like in this dashboard?",
     canliBody:
       "The panel below is built from Tamga's components and really works: walk the menu, filter the accounts, select them, archive them. Then type your own product name and brand colour on the left; the whole panel turns into your brand.",
     canli: {
+      daralt: "Collapse menu",
+      genislet: "Expand menu",
       masa: "Control desk",
       canli: "live",
       ad: "Your product's name",
@@ -604,7 +610,7 @@ const T = {
     nameP2:
       "These signs were not drawn to be admired. They were drawn to be recognized, and to survive being cut into rock or struck onto a coin.",
     nameP3:
-      "That is what we want from a component. Whatever product it lands in and whatever size it runs at, it stays itself.",
+      "That is what we want from a design system: whichever screen you open, it is clear whose product it is.",
 
     live: "Live",
     waiting: "Waiting",
@@ -692,8 +698,10 @@ const T = {
     masa: {
       renk: "Your colour",
       renkDegistir: "change",
+      ozet: "components",
+      ozetVurgu: "· {k} of them on this board, all working",
       kategoriler: [
-        "All",
+        "On the board",
         "Data",
         "Form",
         "Action",
@@ -994,7 +1002,6 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
             çiziliyor, içindeki her şey kitin bileşeni, rengi ziyaretçinin
             yazdığı hex'ten `makePalette` üretiyor. */}
         <section id="canli" className="home-bolum">
-          <p className="home-etiket">{t.b01}</p>
           <h2 className="home-h2 mt-4 max-w-4xl">{t.canliTitle}</h2>
           <p className="home-lead mt-5 max-w-3xl">{t.canliBody}</p>
           <CanliOnizleme labels={t.canli} />
@@ -1010,7 +1017,6 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
             tamamının konusu. Kapı şeridi kaldı: altı sözü derleme anında tutan
             mekanizmanın adı orada, hikâyesi bir alttaki bölümde. */}
         <section id="icinde" className="home-bolum">
-          <p className="home-etiket">{t.b02}</p>
           <h2 className="home-h2 mt-4 max-w-4xl">{t.whatLead}</h2>
           <p className="home-lead mt-5">{t.masaBody}</p>
 

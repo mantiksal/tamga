@@ -3871,6 +3871,39 @@ li code {
    On beş parça, ziyaretçinin seçtiği renkte. Masanın zemini paletin SAYFA
    rengi: karolar onun üstünde duran yüzeyler, yani gösterilen şey bir
    bileşen dizisi değil bir PANELİN içi. */
+/* SAYI BİR ROZET, metin değil: vurgu dolgulu, sert gölgeli · sayfadaki
+   düğmelerle aynı fizik. Çip satırındaki "15"ten önce ve ondan büyük. */
+.masa-ozet {
+  align-items: center;
+  color: var(--color-ink-faint);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: var(--text-body);
+  gap: 10px;
+  margin: 0;
+  min-width: 0;
+}
+.masa-ozet-sayi {
+  background: var(--color-accent);
+  border: 1.5px solid var(--color-accent-shadow);
+  border-radius: var(--radius-chip);
+  box-shadow: 3px 3px 0 var(--color-accent-shadow);
+  color: var(--color-accent-ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-title);
+  font-weight: 800;
+  line-height: 1;
+  padding: 6px 12px;
+}
+.masa-ozet strong {
+  color: var(--color-ink);
+  font-size: var(--text-title);
+  font-weight: 800;
+}
+.masa-ozet b {
+  color: var(--color-ink);
+  font-weight: 700;
+}
 .masa-bas {
   align-items: flex-end;
   display: flex;

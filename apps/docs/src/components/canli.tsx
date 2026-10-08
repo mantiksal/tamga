@@ -15,6 +15,7 @@ import {
   Field,
   ImageField,
   Icon,
+  RailLink,
   IconButton,
   Input,
   Kbd,
@@ -40,7 +41,7 @@ import {
   type Tone,
 } from "tamga-ui";
 import { AppShell, type NavEntry } from "tamga-ui/patterns";
-import { Delete, GridView, ListView, Plus, Search, Settings } from "tamga-ui/icons";
+import { Delete, GridView, ListView, Plus, Search, Settings, SidebarSimple } from "tamga-ui/icons";
 import { makePalette, paletteVars } from "tamga-ui/palette";
 import { useMarkaRengi, VARSAYILAN_RENK } from "@/components/marka-rengi";
 
@@ -57,6 +58,8 @@ import { useMarkaRengi, VARSAYILAN_RENK } from "@/components/marka-rengi";
  */
 
 export type CanliMetin = {
+  daralt: string;
+  genislet: string;
   masa: string;
   canli: string;
   ad: string;
@@ -197,7 +200,13 @@ export function CanliOnizleme({ labels: t }: { labels: CanliMetin }) {
   const [renk, setRenk] = useMarkaRengi();
   const [tema, setTema] = useState<ThemeChoice>("light");
   const [ray, setRay] = useState<RailChoice>("wide");
-  const [gorunum, setGorunum] = useState("/genel");
+  /* "Serbest" rayın anlamı: kullanıcı daraltıp genişletebilir. O düğme olmadan
+     serbest ile geniş aynı görünüyordu · seçeneğin bir karşılığı yoktu. */
+  const [dar, setDar] = useState(false);
+  const rayDar = ray === "narrow" || (ray === "free" && dar);
+  /* Varsayılan ekran AYARLAR: panelin asıl numarası (renk, tema, ray) orada
+     görünüyor; ziyaretçi genel bakışa bir tıkla dönüyor. */
+  const [gorunum, setGorunum] = useState("/ayarlar");
   const [ara, setAra] = useState("");
   const [suzgec, setSuzgec] = useState(0);
   const [secili, setSecili] = useState<Set<string>>(new Set());
@@ -686,16 +695,23 @@ export function CanliOnizleme({ labels: t }: { labels: CanliMetin }) {
           <AppShell
             nav={nav}
             activePath={gorunum}
-            rail={ray === "narrow" ? "narrow" : "wide"}
+            rail={rayDar ? "narrow" : "wide"}
             linkComponent={RayBaglanti}
             labels={{ home: urun.trim() || "Marka", primaryNav: t.genelBakis }}
+            railFooter={
+              ray === "free" ? (
+                <RailLink label={dar ? t.genislet : t.daralt} showLabel={!dar} onClick={() => setDar((d) => !d)}>
+                  <Icon icon={SidebarSimple} size="md" />
+                </RailLink>
+              ) : undefined
+            }
             brand={
               /* DAR RAY AMBLEM, GENİŞ RAY LOGO · ikisi bir arada değil: logo
                  zaten amblemi taşıyor, yan yana konduğunda işaret iki kez
                  çiziliyordu. Ürün adı değiştiyse logo düşüyor, yerine amblem
                  ve ad geliyor: logo artık o ürünün logosu değil. */
               <span className="canli-marka">
-                {ray === "narrow" ? (
+                {rayDar ? (
                   amblem ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={amblem} alt={urun.trim() || "Marka"} className="canli-amblem-gorsel" />

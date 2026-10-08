@@ -66,6 +66,10 @@ import { useMarkaRengi } from "@/components/marka-rengi";
  */
 
 export type MasaMetin = {
+  /** Sayının yanındaki sözcük: "bileşen". Sayı ayrı basılıyor, rozet olarak. */
+  ozet: string;
+  /** "· bunların {k}'i bu masada" · k masadaki karo sayısı, `KAROLAR`dan. */
+  ozetVurgu: string;
   renk: string;
   renkDegistir: string;
   kategoriler: readonly [string, string, string, string, string, string, string, string, string];
@@ -579,7 +583,21 @@ export function Masa({
   return (
     <>
       <div className="masa-bas">
-        <div className="min-w-0" />
+        {/* İKİ SAYI YAN YANA, ve büyüğü önce: çip satırındaki "15" ziyaretçinin
+            gördüğü ilk sayıydı ve kitin toplamı gibi okunuyordu. 129 artık
+            masanın başında, çipten önce; ikisi de kaynaktan geliyor. */}
+        <p className="masa-ozet">
+          <span className="masa-ozet-sayi">{bilesen}</span>
+          <strong>{t.ozet}</strong>
+          <span>
+            {t.ozetVurgu.split("{k}").map((parca, i, hepsi) => (
+              <span key={i}>
+                {parca}
+                {i < hepsi.length - 1 ? <b>{KAROLAR.length}</b> : null}
+              </span>
+            ))}
+          </span>
+        </p>
         {/* RENK KUTUSU BİR ETİKET: tarayıcının renk girdisi görünmez, üstüne
             serilmiş bir tetik · kitin `ColorSwatches`ında da aynı çözüm. */}
         <label className="masa-renk">

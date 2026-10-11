@@ -1037,8 +1037,7 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
         <section id="kontroller" className="home-bolum">
           <div className="home-zincir-ust">
             <div>
-              <p className="home-etiket">{t.b03}</p>
-              <h2 className="home-h2 mt-4 max-w-4xl">{t.zincirTitle}</h2>
+                            <h2 className="home-h2 mt-4 max-w-4xl">{t.zincirTitle}</h2>
               <p className="home-lead mt-5">{t.zincirBody}</p>
             </div>
             <span className="home-surum-etiket">{t.sonSurum}</span>
@@ -1075,8 +1074,7 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
         <section id="kurulum" className="home-bolum">
           <div className="home-zincir-ust">
             <div>
-              <p className="home-etiket">{t.b04}</p>
-              <h2 className="home-h2 mt-4">{t.startTitle}</h2>
+                            <h2 className="home-h2 mt-4">{t.startTitle}</h2>
               <p className="home-lead mt-5 max-w-3xl">{t.startBody}</p>
             </div>
             {/* ÜÇ GEREKSİNİM BAŞLIKLA AYNI SATIRDA: "ne gerekiyor" sorusu
@@ -1113,8 +1111,7 @@ export default async function Home({ params }: { params: Promise<{ lang: Locale 
             <img src="/tamga-mark-dark.svg" alt={t.markAdi} className="hidden w-1/2 dark:block" />
           </span>
           <div>
-            <p className="home-etiket">{t.b05}</p>
-            <h2 className="home-h2 mt-4">{t.nameTitle}</h2>
+                        <h2 className="home-h2 mt-4">{t.nameTitle}</h2>
             <div className="mt-7 flex flex-col gap-5 text-[length:var(--docs-text)] leading-relaxed text-ink-faint">
               <p className="m-0">{t.nameP1}</p>
               <p className="m-0">{t.nameP2}</p>

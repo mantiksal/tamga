@@ -1109,6 +1109,9 @@ li code {
 }
 /* Şeritteki bölüm bağlantısı: hover'da yüzey kazanıyor, çünkü tıklanabilir
    olduğunu ancak o zaman söylemesi gerekiyor (Yasa 2). */
+/* SESSİZ DÜĞME: duruşta yazı, üstüne gelince yükselen düğme · yanındaki ikon
+   düğmeleriyle aynı fizik (`tamga-btn-quiet`). Önceki hover düz bir kutuydu,
+   kitin hiçbir diliyle konuşmuyordu. */
 .home-bolum-link {
   border: 1.5px solid transparent;
   border-radius: var(--radius-ctl);
@@ -1117,10 +1120,21 @@ li code {
   font-weight: 600;
   padding: 6px 10px;
   text-decoration: none;
+  transition:
+    background var(--duration-press) var(--ease-standard),
+    border-color var(--duration-press) var(--ease-standard),
+    box-shadow var(--duration-press) var(--ease-standard),
+    transform var(--duration-press) var(--ease-standard);
 }
 .home-bolum-link:hover {
   background: var(--color-shell);
-  border-color: var(--color-edge);
+  border-color: var(--color-edge-strong);
+  box-shadow: 2px 2px 0 var(--color-edge-strong);
+  transform: translate(-1px, -1px);
+}
+.home-bolum-link:active {
+  box-shadow: none;
+  transform: translate(1px, 1px);
 }
 .home-etiket {
   color: var(--color-ink-faint);

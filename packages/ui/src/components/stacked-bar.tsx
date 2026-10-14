@@ -52,8 +52,8 @@ export function StackedBarChart({
   const cizgiler = [0, 0.25, 0.5, 0.75, 1].map((o) => enBuyuk * o);
 
   return (
-    <figure className={cn("flex flex-col", className)}>
-      <div {...dataProps(rest)} className="flex gap-3" style={{ height }}>
+    <figure {...dataProps(rest)} className={cn("flex flex-col", className)}>
+      <div className="flex gap-3" style={{ height }}>
         {/* Y ekseni etiketleri: en üstte en büyük. */}
         <div className="flex shrink-0 flex-col justify-between py-1 text-right text-micro tabular-nums text-ink-faint">
           {[...cizgiler].reverse().map((v) => (

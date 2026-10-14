@@ -2699,10 +2699,14 @@
      (seated) tarafı. */
   .tamga-segment {
     display: inline-flex;
+    /* DAR EKRANDA SARAR: 390 px'te beş filtre sağdan taşıyordu. Sarınca kuyu
+       büyür, ama tek satırda kontrol yüksekliğinin altına inmez · `min-height`
+       bu yüzden, `height` değil. Öğenin yüksekliği aşağıda ayrıca veriliyor. */
+    flex-wrap: wrap;
     /* YÜKSEKLİK KUYUNUN, İÇİNDEKİ DÜĞMENİN DEĞİL: düğmeye verilince kuyu
        kendi dolgusunu ekleyip taşıyor. `check-olcu-hizasi` sınıyor.
        Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md */
-    height: var(--control);
+    min-height: var(--control);
     align-items: stretch;
     gap: 3px;
     padding: 3px;
@@ -2720,8 +2724,11 @@
     display: inline-flex;
     align-items: center;
     /* Dikey dolgu YOK: öğe kuyunun yüksekliğine geriliyor. Dikey dolgu da
-       verilseydi kuyunun yüksekliğiyle toplanır ve taşardı. */
+       verilseydi kuyunun yüksekliğiyle toplanır ve taşardı. Kuyu sarınca
+       satır yüksekliğini öğe belirliyor: kontrol eksi kuyunun dolgusu ve
+       kenarı (3+3+1+1), böylece tek satır tam `--control` kalıyor. */
     padding: 0 14px;
+    min-height: calc(var(--control) - 8px);
     /* İKONLA METİN ARASINDA BOŞLUK. Segment bir ikon + sözcük taşıyabiliyor
        (tema anahtarı, görünüm seçici) ve boşluk olmadan ikisi yapışıyordu. */
     gap: 6px;

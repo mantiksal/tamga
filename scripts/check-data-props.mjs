@@ -55,8 +55,38 @@ for (const dosya of readdirSync(DIZIN).filter((f) => f.endsWith(".tsx") && !f.in
     satir += parca.split("\n").length - 1;
     if (!ad || MUAF.has(ad)) continue;
     if (!HOST.test(parca)) continue;
-    if (/\.\.\.rest|\.\.\.props|dataProps|\[k: `data-/.test(parca)) continue;
-    hatalar.push(`  ${relative(KOK, yol)}:${basSatir}  ${ad}`);
+    if (!/\.\.\.rest|\.\.\.props|dataProps|\[k: `data-/.test(parca)) {
+      hatalar.push(`  ${relative(KOK, yol)}:${basSatir}  ${ad}  · data-* kabul etmiyor`);
+      continue;
+    }
+    /* İKİNCİ KURAL: KABUL ETMEK YETMEZ, HER DALDA İLETMELİ. `ListRow` kancayı
+       kabul ediyordu ama üç `return` dalından yalnız birinde yayıyordu; kapı
+       "kabul ediyor" deyip geçti, panel iki dalda sarmalayıcı `div` koymak
+       zorunda kaldı. Bir bileşen `dataProps(rest)` kullanıyorsa, JSX döndüren
+       her `return`ın İLK etiketi onu taşımalı · `return null` dışarıda. */
+    /* Yalnız bileşenin KENDİ gövdesi (ilk sütun-0 `}`e kadar) ve yalnız iki
+       boşluk girintili `return`ler: içerideki `map` geri çağrılarının ve
+       parçanın devamındaki yardımcı fonksiyonların return'leri sayılmaz ·
+       ilk denemede 41 yanlış alarm verdi. */
+    const govde = parca.slice(0, parca.indexOf("\n}\n") + 2);
+    if (/dataProps\(rest\)/.test(govde)) {
+      /* İki boşluk bileşenin kendi `return`ü, dört boşluk bir `if` dalının: ikisi de
+         bileşenin kökü. Altı ve üstü JSX içindeki geri çağrılar · sayılmaz. */
+      for (const m of govde.matchAll(/\n( {2,4})return\s*\(?\s*<([A-Za-z][\w.]*)([^>]*)>/g)) {
+        /* Dört boşluklu bir `return` yalnız bir `if`/`else` dalıysa kök sayılır;
+           bileşen içinde tanımlanmış bir çizim fonksiyonunun (`TreeSelect`in
+           düğüm çizicisi) return'ü kök değil · ona kanca vermek her düğüme
+           kanca vermek olurdu. Ölçüt: geriye doğru ilk iki boşluklu blok açan
+           satır `if (` ya da `} else` ile başlıyor mu. */
+        if (m[1].length === 4) {
+          const once = govde.slice(0, m.index).split("\n").reverse().find((l) => /^  \S.*\{\s*$/.test(l));
+          if (!once || !/^  (if \(|\} else)/.test(once)) continue;
+        }
+        if (/dataProps\(rest\)|\.\.\.rest/.test(m[3])) continue;
+        const satirNo = basSatir + govde.slice(0, m.index).split("\n").length;
+        hatalar.push(`  ${relative(KOK, yol)}:${satirNo}  ${ad}  · \`return <${m[2]}>\` dalı kancayı iletmiyor`);
+      }
+    }
   }
 }
 
@@ -71,4 +101,4 @@ if (hatalar.length) {
   );
   process.exit(1);
 }
-console.log("✓ Sunan eleman çizen her bileşen `data-*` kabul ediyor.");
+console.log("✓ Sunan eleman çizen her bileşen `data-*` kabul ediyor ve her dalda köke iletiyor.");

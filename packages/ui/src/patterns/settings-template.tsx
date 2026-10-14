@@ -86,7 +86,10 @@ export function SettingsTemplate({
         </ul>
       </nav>
 
-      <div className="tamga-gutter min-h-0 flex-1 py-4">
+      {/* `min-w-0` OLMADAN sütun içeriğinden küçülmüyor: geniş bir tablo sayfayı
+          yana taşırıyordu, tablonun kendi yatay kaydırması hiç devreye
+          giremiyordu. Panel bunu dışarıdan yamalamak zorunda kalmıştı. */}
+      <div className="tamga-gutter min-h-0 min-w-0 flex-1 py-4">
         <div className="flex flex-wrap items-start gap-4">
           <div className="min-w-0">
             <h2 className="text-title font-semibold text-ink">{title}</h2>

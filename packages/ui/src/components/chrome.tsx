@@ -190,6 +190,7 @@ export function ThemeToggle({
     }
     return (
       <Select
+        {...dataProps(rest)}
         options={[labels.light, labels.dark]}
         value={dark ? labels.dark : labels.light}
         onChange={(v) => {
@@ -237,6 +238,7 @@ export function ThemeToggle({
      duruma bağlı kalıyor — ve kontrollü kullanımda ürün doğru değeri veriyor. */
   return (
     <button
+      {...dataProps(rest)}
       type="button"
       onClick={toggle}
       className={cn("tamga-icon-btn", className)}
@@ -297,6 +299,7 @@ export function LocaleSwitcher({
      işletim sisteminin, ve kitin hiçbir kuralı orada geçmiyordu. */
   return (
     <Select
+      {...dataProps(rest)}
       className={cn("w-auto min-w-40", className)}
       aria-label={label}
       placeholder={label}
@@ -384,7 +387,7 @@ export function AccountButton({
 
   if (href && Link) {
     return (
-      <Link href={href} aria-label={label} className={sinif}>
+      <Link {...dataProps(rest)} href={href} aria-label={label} className={sinif}>
         {ic}
       </Link>
     );
@@ -397,7 +400,7 @@ export function AccountButton({
     );
   }
   return (
-    <button type="button" onClick={onClick} aria-label={label} className={sinif}>
+    <button {...dataProps(rest)} type="button" onClick={onClick} aria-label={label} className={sinif}>
       {ic}
     </button>
   );

@@ -153,7 +153,7 @@ export function Tabs<T extends string>({
   }
 
   return (
-    <div role="tablist" aria-label={label} className={kap} onKeyDown={oklar}>
+    <div {...dataProps(rest)} role="tablist" aria-label={label} className={kap} onKeyDown={oklar}>
       {items.map(({ value: v, label: etiket, icon, href: _href, disabled, count, ...rest }) => (
         <button
           key={v}

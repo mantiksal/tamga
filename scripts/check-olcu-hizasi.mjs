@@ -63,9 +63,13 @@ for (const sinif of KONTROLLER) {
     kusurlu.push([sinif, "bu seçici kit.css'te yok — adı değiştiyse listeyi güncelle"]);
     continue;
   }
-  const m = g.match(/(?:^|;|\s)height:\s*([^;}]+)/);
+  /* `min-height` de sayılıyor, yalnız sarabilen kuyu için: `.tamga-segment`
+     dar ekranda ikinci satıra geçince büyümek zorunda, ama tek satırda yine
+     tam `--control` · hizayı bozan şey büyümek değil, kısalmak. Değer yine
+     `var(--control)` olmak zorunda. */
+  const m = g.match(/(?:^|;|\s)(min-)?height:\s*([^;}]+)/);
   if (!m) kusurlu.push([sinif, "yükseklik bildirmiyor · dolgudan gelen yükseklik hizalanmaz"]);
-  else if (m[1].trim() !== "var(--control)") kusurlu.push([sinif, `height: ${m[1].trim()}`]);
+  else if (m[2].trim() !== "var(--control)") kusurlu.push([sinif, `${m[1] ?? ""}height: ${m[2].trim()}`]);
 }
 
 if (kusurlu.length) {

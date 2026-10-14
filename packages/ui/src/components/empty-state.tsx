@@ -261,7 +261,7 @@ export function EmptyState({
   const words = (
     <>
       {kicker ? <p className="tamga-kicker mb-2">{kicker}</p> : null}
-      <h3 {...dataProps(rest)} className="font-display text-display-sm font-extrabold tracking-tight text-ink">{title}</h3>
+      <h3 className="font-display text-display-sm font-extrabold tracking-tight text-ink">{title}</h3>
       {children ? (
         <p className="mt-3 max-w-[var(--measure)] text-body leading-relaxed text-ink-soft">
           {children}
@@ -298,7 +298,7 @@ export function EmptyState({
 
   if (layout === "banner") {
     return (
-      <div className={cn("flex flex-col overflow-hidden", className)}>
+      <div {...dataProps(rest)} className={cn("flex flex-col overflow-hidden", className)}>
         <div className="flex flex-1 flex-col sm:flex-row sm:items-stretch">
           <div className="tamga-art-well tamga-art-stage tamga-art-floor sm:border-b-0">{figure}</div>
           <div className="flex min-w-0 flex-1 flex-col gap-7 px-6 py-7 sm:flex-row sm:items-center sm:justify-between sm:gap-10 sm:px-9 sm:py-9">
@@ -324,7 +324,7 @@ export function EmptyState({
 
   if (layout === "ticket") {
     return (
-      <div className={cn("flex justify-center px-6 py-10", className)}>
+      <div {...dataProps(rest)} className={cn("flex justify-center px-6 py-10", className)}>
         <div className="tamga-card w-full max-w-90 overflow-hidden">
           <div className="tamga-art-well tamga-art-band">{figure}</div>
           <div className="px-6 pt-6 pb-7 text-center [&_p]:mx-auto">{words}</div>
@@ -342,6 +342,7 @@ export function EmptyState({
   /* routes — three columns on one line: the figure, the words, the ways in */
   return (
     <div
+      {...dataProps(rest)}
       className={cn(
         "flex flex-col gap-8 px-6 py-9 sm:flex-row sm:items-center sm:gap-10 sm:px-10 sm:py-10",
         className,

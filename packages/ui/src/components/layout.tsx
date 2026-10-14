@@ -124,12 +124,15 @@ export function ListRow({
   }
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} className={cn(cls, "w-full text-left")}>
+      <button {...dataProps(rest)} type="button" onClick={onClick} className={cn(cls, "w-full text-left")}>
         {children}
       </button>
     );
   }
-  return <div className={cls}>{children}</div>;
+  /* Kanca ÜÇ DALDA DA KÖKTE. Bir süre yalnız `<a>` dalında yayılıyordu; panel
+     düğme ve düz satırın etrafına kancayı taşıyan bir `div` sarmak zorunda
+     kalmıştı. `check-data-props` artık her `return` dalını sınıyor. */
+  return <div {...dataProps(rest)} className={cls}>{children}</div>;
 }
 
 /**

@@ -95,6 +95,7 @@ export function SquarePicker({
 
   return (
     <Dialog
+      {...dataProps(rest)}
       open={open}
       onClose={onClose}
       title={labels.title}
@@ -110,7 +111,7 @@ export function SquarePicker({
         </>
       }
     >
-      <div {...dataProps(rest)} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <Label>{labels.hint}</Label>
 
         {/* DOLGU DIŞARIDA, SAHNE İÇERİDE. Konumlandırma bağlamı dolgusuz bir

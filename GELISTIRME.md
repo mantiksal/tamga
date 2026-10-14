@@ -61,7 +61,7 @@ docs/                   kararlar ve kılavuzlar
 | `check:durum-hover` | Hover seçili hâlin fiziğini ezmiyor |
 | `check:yuvarlak` | Tam yuvarlak yalnız radyo, skor halkası ve spinner'da |
 | `check:olcu-hizasi` | Sekiz taban kontrolün hepsi `--control` yüksekliğini okuyor |
-| `check:data-props` | Her bileşen `data-*` kabul ediyor |
+| `check:data-props` | Her bileşen `data-*` kabul ediyor ve her `return` dalında köke iletiyor |
 | `check:item-hooks` | Liste bileşenlerinin öğeleri de kanca taşıyor |
 | `check:kit-class` | Kullanılan her `tamga-*` sınıfı tanımlı |
 | `check:token-parity` | Her token iki temada da tanımlı |

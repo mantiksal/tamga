@@ -5,6 +5,33 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.5.9
+
+> The hook lands on the root, in every branch.
+
+### Fixed
+
+- **`data-*` reaches the root element in every render branch.** `ListRow` forwarded it only as a
+  link; as a button or a plain row it was dropped, and products had to wrap rows in an extra
+  `div` just to carry a selector. The same defect turned up in thirteen more components once the
+  gate started checking branches: `Dialog` (the hook sat on the title strip, not on the
+  `role="dialog"` element), `ConfirmDialog` (did not accept it at all), `SquarePicker`, `Kpi`,
+  `Badge`, `Tabs`, `TreeSelect` (every node carried the hook), `LineChart`, `StackedBarChart`,
+  `EmptyState` (the hook was on the `<h3>`), `Avatar` with a status mark, `AccountButton`,
+  `ThemeToggle` and `LocaleSwitcher`. A test or a product selector written against any of these
+  now finds the component, not one of its parts.
+- **`SettingsTemplate` content column can shrink** (`min-w-0`). A wide table inside it used to
+  push the page sideways instead of scrolling inside the table.
+- **`.tamga-segment` wraps on narrow screens.** The well keeps the control height on one line
+  (`min-height: var(--control)`) and grows when the options need a second row; the items carry
+  their own height so a single row still measures exactly `--control`.
+
+### Gate
+
+- `check-data-props` now has a second rule: a component that spreads `dataProps(rest)` must do
+  so on the first tag of every `return` — the component's own and its `if` branches. Accepting
+  the hook was never the hard part; forwarding it in every branch was.
+
 ## 0.5.8
 
 > A ticked checkbox stays down.

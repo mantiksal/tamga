@@ -90,7 +90,7 @@ export function TreeSelect({
       altlar.length > 0 ? secilenAlt === altlar.length : secili.has(node.id);
     const kismi = altlar.length > 0 && secilenAlt > 0 && secilenAlt < altlar.length;
     return (
-      <li {...dataProps(rest)} role="none">
+      <li role="none">
         <div
           className="flex items-center gap-1.5 rounded-(--radius-mark) py-1 hover:bg-[var(--color-hover)]"
           style={{ paddingLeft: `${derinlik * 20}px` }}
@@ -144,7 +144,7 @@ export function TreeSelect({
   }
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
+    <div {...dataProps(rest)} className={cn("flex flex-col gap-2", className)}>
       {searchable && (
         <span className="relative flex items-center">
           <Icon

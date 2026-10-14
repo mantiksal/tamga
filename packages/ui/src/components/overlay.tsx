@@ -656,6 +656,7 @@ function DialogShell({
   label,
   size = "md",
   children,
+  ...rest
 }: {
   open: boolean;
   onClose: () => void;
@@ -664,6 +665,7 @@ function DialogShell({
   label: string;
   size?: DialogSize;
   children: React.ReactNode;
+  [k: `data-${string}`]: unknown;
 }) {
   const panel = useFocusTrap<HTMLDivElement>(open);
   /* Aynı kaçak `Dialog`da da vardı: odak hapsediliyor ama arkadaki sayfa
@@ -683,6 +685,10 @@ function DialogShell({
   const tam = size === "full";
   return (
     <div
+      /* KANCA BURADA, `role="dialog"` ile aynı elemanda: diyaloğu rolüyle
+         bulan bir test kancayı da orada bulmalı. Bir süre başlık şeridindeydi
+         ve iki diyalog aynı anda açıkken ayırt edilemiyordu. */
+      {...dataProps(rest)}
       className={cn("fixed inset-0 z-50 flex items-center justify-center", tam ? "p-0" : "p-6")}
       role="dialog"
       aria-modal
@@ -728,6 +734,7 @@ export function ConfirmDialog({
   tone = "danger",
   busy = false,
   confirmDisabled = false,
+  ...rest
 }: {
   open: boolean;
   onClose: () => void;
@@ -751,6 +758,8 @@ export function ConfirmDialog({
    * sürerken: iki düğme de kilitleniyor, çift gönderim olmuyor.
    */
   busy?: boolean;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
   /**
    * Disables the confirm button: the dialog OPENS but the action cannot be taken. WHY IT IS
    * NEEDED. Some destructive actions have a precondition ("a customer with orders cannot be
@@ -768,6 +777,7 @@ export function ConfirmDialog({
 }) {
   return (
     <Dialog
+      {...dataProps(rest)}
       open={open}
       onClose={onClose}
       title={title}
@@ -827,8 +837,8 @@ export function Dialog({
   [k: `data-${string}`]: unknown;
 }) {
   return (
-    <DialogShell open={open} onClose={onClose} loading={loading} label={title} size={size}>
-      <div {...dataProps(rest)} className="tamga-head tamga-gutter tamga-section shrink-0">
+    <DialogShell {...dataProps(rest)} open={open} onClose={onClose} loading={loading} label={title} size={size}>
+      <div className="tamga-head tamga-gutter tamga-section shrink-0">
         <h3 className="text-subhead font-semibold">{title}</h3>
         <MiniButton onClick={onClose} aria-label={closeLabel} className="ml-auto">
           <Icon icon={Close} size="xs" />

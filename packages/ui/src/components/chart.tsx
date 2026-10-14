@@ -95,8 +95,8 @@ export function LineChart({
   const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => max * f);
 
   return (
-    <figure className={cn("tamga-surface p-4", className)}>
-      <div {...dataProps(rest)} className="flex gap-3">
+    <figure {...dataProps(rest)} className={cn("tamga-surface p-4", className)}>
+      <div className="flex gap-3">
         {/* Y ekseni ETİKETLERİ SVG'nin DIŞINDA. İçine konsaydı viewBox
             ölçeklendikçe yazı da ölçeklenir ve dar ekranda okunmaz olurdu. */}
         <div

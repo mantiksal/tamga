@@ -164,7 +164,6 @@ export function Kpi({
 
   const karo = icon ? (
     <span
-      {...dataProps(rest)}
       className="tamga-kpi-tile"
       style={iconTone ? { background: toneOf(iconTone).bg, color: toneOf(iconTone).fg } : undefined}
       aria-hidden
@@ -249,7 +248,7 @@ export function Kpi({
 
   if (href) {
     return (
-      <Link href={href} className={sinif}>
+      <Link {...dataProps(rest)} href={href} className={sinif}>
         {govde}
       </Link>
     );
@@ -258,6 +257,7 @@ export function Kpi({
   if (onClick) {
     return (
       <button
+        {...dataProps(rest)}
         type="button"
         onClick={onClick}
         aria-pressed={pressed}
@@ -269,7 +269,7 @@ export function Kpi({
     );
   }
 
-  return <div className={sinif}>{govde}</div>;
+  return <div {...dataProps(rest)} className={sinif}>{govde}</div>;
 }
 
 /**
@@ -484,7 +484,6 @@ export function Badge({
   const shown = (count ?? 0) > max ? `${max}+` : String(count ?? 0);
   const isaret = dot ? (
     <span
-      {...dataProps(rest)}
       className="tamga-count-dot"
       style={{ background: c.mark }}
       role="status"
@@ -498,7 +497,6 @@ export function Badge({
        okunuyor · dolu bir daire üstündeki açık rakam, iki hanede zaten
        sıkışıyordu. */
     <span
-{...dataProps(rest)}
       className="tamga-count tabular-nums"
       style={{ background: c.bg, color: c.fg, borderColor: c.fg }}
     >
@@ -513,7 +511,7 @@ export function Badge({
      `children` herhangi bir eleman olabilir. Hover'da onunla birlikte gitmesini
      `.tamga-count-yuva` sağlıyor (kit.css, düğmenin kaymalarıyla aynı). */
   return (
-    <span className={cn("tamga-badge-wrap relative inline-flex", className)}>
+    <span {...dataProps(rest)} className={cn("tamga-badge-wrap relative inline-flex", className)}>
       {children}
       <span className="tamga-count-yuva">{isaret}</span>
     </span>

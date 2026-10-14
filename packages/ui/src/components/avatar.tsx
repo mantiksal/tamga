@@ -95,8 +95,8 @@ export function Avatar({
     const t = toneOf(status);
     const mark = Math.max(8, Math.round(size * 0.3));
     return (
-      <span className="relative inline-flex shrink-0">
-        <Avatar name={name} size={size} src={src} bare={bare} look={look} letters={letters} {...rest} />
+      <span {...dataProps(rest)} className="relative inline-flex shrink-0">
+        <Avatar name={name} size={size} src={src} bare={bare} look={look} letters={letters} />
         <span
           className="absolute rounded-[var(--radius-mark)]"
           style={{

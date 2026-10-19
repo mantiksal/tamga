@@ -1,8 +1,9 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, useId, useState } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import { Icon } from "../components/icon.js";
+import { CaretDown } from "../components/icons.js";
 import { RailLink } from "../components/rail-link.js";
 import { cn } from "../lib/cn.js";
 import { PlainLink, type LinkComponent } from "./shared.js";
@@ -87,6 +88,25 @@ export type AppShellProps = {
    */
   mainClassName?: string;
   linkComponent?: LinkComponent;
+  /**
+   * Section headers fold. On, each header in the wide rail is a button that hides its entries; the
+   * open page's section never folds, and a route landing inside a folded section finds it open.
+   * Off, headers are plain labels, the pre-0.6 rail. TR: Bölüm başlıkları katlanır. Açıkken geniş
+   * raydaki her başlık girişlerini gizleyen bir düğme; açık sayfanın bölümü hiç katlanmaz, kapalı
+   * bir bölüme düşen rota onu açık bulur. Kapalıyken başlıklar düz etiket, 0.6 öncesi ray.
+   */
+  collapsibleSections?: boolean;
+  /**
+   * The folded sections, by name. Given, the shell is controlled: a click only reports through
+   * `onSectionToggle`, and the product decides. Absent, the shell keeps the state itself and forgets
+   * it on reload · where a preference lives (browser, account, device) is the product's call.
+   * TR: Kapalı bölümler, adıyla. Verilirse kabuk kontrollü: tık yalnız `onSectionToggle` ile haber
+   * verir, kararı ürün verir. Verilmezse kabuk durumu kendi tutar ve yenilemede unutur · tercihin
+   * nerede yaşadığı (tarayıcı, hesap, cihaz) ürünün kararı.
+   */
+  collapsedSections?: readonly string[];
+  /** Fires with the section name and whether it is now open. TR: Bölüm adı ve artık açık olup olmadığıyla ateşlenir. */
+  onSectionToggle?: (section: string, open: boolean) => void;
   labels: { home: string; primaryNav: string };
   children: ReactNode;
 };
@@ -100,6 +120,9 @@ export function AppShell({
   railFooter,
   mainClassName,
   linkComponent: Link = PlainLink,
+  collapsibleSections = true,
+  collapsedSections,
+  onSectionToggle,
   labels,
   children,
 }: AppShellProps) {
@@ -119,6 +142,33 @@ export function AppShell({
     entry.href ? entry.href === enOzel : entry.key === activePath;
 
   const wide = rail === "wide";
+
+  /* KATLAMA. Kapalı liste ya üründen gelir (kontrollü) ya da burada tutulur.
+     AÇIK SAYFANIN BÖLÜMÜ HEP AÇIK: "neredeyim" raydan okunmalı · kapalı bir
+     bölüme yönlendirmeyle düşen kullanıcı da onu açık bulur, listeyi
+     değiştirmeden. Dar rayda başlık yok, dolayısıyla katlanacak şey de yok. */
+  const [icKapali, setIcKapali] = useState<readonly string[]>([]);
+  const kapali = collapsedSections ?? icKapali;
+  const aktifBolum = nav.find(isCurrent)?.section;
+  const acikMi = (bolum: string) =>
+    !wide || !collapsibleSections || bolum === aktifBolum || !kapali.includes(bolum);
+  const degistir = (bolum: string) => {
+    if (bolum === aktifBolum) return;
+    const sonraki = !acikMi(bolum);
+    onSectionToggle?.(bolum, sonraki);
+    if (collapsedSections === undefined) {
+      setIcKapali((k) => (sonraki ? k.filter((x) => x !== bolum) : [...k, bolum]));
+    }
+  };
+  /* Ardışık girişler bölüm adına göre kümeleniyor; adı olmayanlar kendi
+     kümesinde, başlıksız. Veri düz kalıyor (bkz. `section`), küme çizim için. */
+  const gruplar: { bolum?: string; girisler: NavEntry[] }[] = [];
+  for (const entry of nav) {
+    const son = gruplar[gruplar.length - 1];
+    if (son && son.bolum === entry.section) son.girisler.push(entry);
+    else gruplar.push({ bolum: entry.section, girisler: [entry] });
+  }
+  const kimlik = useId();
 
   return (
     /* ÇERÇEVE KENDİ ZEMİNİNDE, ve bu 2026-09-24'e kadar öyle DEĞİLDİ.
@@ -153,53 +203,74 @@ export function AppShell({
           aria-label={labels.primaryNav}
           className={`tamga-rail-scroll flex w-full flex-1 flex-col gap-2 py-1 ${wide ? "" : "items-center"}`}
         >
-          {nav.map((entry, i) => (
-            <Fragment key={entry.key}>
-              {/* BAŞLIK GRUP DEĞİŞTİĞİNDE. Ardışık girişler aynı adı taşıdığı sürece tek grup;
-                  ad değişince yeni bir başlık çıkıyor. Tıklanmaz ve tıklanır GÖRÜNMEZ: bir
-                  gezinme listesinde tıklanamayan bir şeyin bağlantıya benzemesi, kullanıcıya
-                  çalışmayan bir hedef gösterir. */}
-              {entry.section && entry.section !== nav[i - 1]?.section ? (
-                wide ? (
-                  <p className={`px-2.5 text-caption font-bold uppercase tracking-label text-ink-faint ${i > 0 ? "mt-5 pb-1.5" : "pb-1.5"}`}>
-                    {entry.section}
-                  </p>
-                ) : i > 0 ? (
-                  /* DAR RAYDA GRUP BİR ÇİZGİ, ve bir süre HİÇBİR ŞEYDİ: başlık `wide`
-                     koşuluna bağlıydı, dolayısıyla daralan ray altı simgeyi tek bir
-                     ayrımsız sütuna çeviriyordu · "başlangıç" ile "araçlar" aynı şey
-                     gibi okunuyordu. İlk grubun önüne çizgi girmiyor: marka ayracı
-                     orada zaten var, ikisi üst üste biner. */
-                  <span className="my-1.5 h-0 w-6 shrink-0 border-t border-line" aria-hidden />
-                ) : null
-              ) : null}
-            {/* RAY BAĞLANTISI KİTİN `RailLink`İ, ELLE ÇİZİLMİYOR: elle yazılan kopya geniş
-                rayda `tamga-rail-link-wide`ı atlıyordu ve etiket kırpılıyordu. `RailLink`
-                artık `linkComponent` de alıyor.
-                Gerekçe: docs/gerekce/08-blok-ve-sablon.md */}
-            <RailLink
-              href={entry.href}
-              onClick={entry.onSelect}
-              label={entry.label}
-              active={isCurrent(entry)}
-              showLabel={wide}
-              linkComponent={Link}
-              data-nav={entry.key}
-            >
-              {/* 20px: ikon rayda tek başına da taşınıyor (dar hâlde etiket
-                  yok), yani satırı tanıtan şey o · 18px'te bir metin glifi
-                  kadar kalıyordu. AĞIRLIK SEÇİLİYKEN DEĞİŞİYOR: seçili glif
-                  dolu, ötekiler ince · tasarımın "buradasın" işareti bu, ve
-                  çerçeveyle birlikte iki kanaldan okunuyor. Bir ara hepsi iki
-                  tonluydu ve fark yalnız çerçeveden okunuyordu. */}
-              <Icon
-                icon={entry.icon}
-                size="md"
-                weight={isCurrent(entry) ? "fill" : "regular"}
-              />
-            </RailLink>
-            </Fragment>
-          ))}
+          {gruplar.map((grup, gi) => {
+            const id = `${kimlik}-${gi}`;
+            const acik = grup.bolum ? acikMi(grup.bolum) : true;
+            const kilitli = grup.bolum !== undefined && grup.bolum === aktifBolum;
+            return (
+              <Fragment key={grup.bolum ?? `_${gi}`}>
+                {/* BAŞLIK GRUP DEĞİŞTİĞİNDE. Katlanabilirken bir düğme: satırın tamamı
+                    tıklanır, ok sağda döner. Değilken düz etiket · tıklanmaz ve tıklanır
+                    GÖRÜNMEZ, çalışmayan bir hedef gösterilmesin diye. */}
+                {grup.bolum ? (
+                  wide ? (
+                    collapsibleSections ? (
+                      <button
+                        type="button"
+                        className={cn("tamga-rail-section", gi > 0 && "mt-3")}
+                        aria-expanded={acik}
+                        aria-controls={id}
+                        aria-disabled={kilitli || undefined}
+                        data-locked={kilitli || undefined}
+                        onClick={() => degistir(grup.bolum!)}
+                      >
+                        {grup.bolum}
+                        <Icon icon={CaretDown} size="xs" weight="bold" className="tamga-rail-section-caret" />
+                      </button>
+                    ) : (
+                      <p className={`px-2.5 text-caption font-bold uppercase tracking-label text-ink-faint ${gi > 0 ? "mt-5 pb-1.5" : "pb-1.5"}`}>
+                        {grup.bolum}
+                      </p>
+                    )
+                  ) : gi > 0 ? (
+                    /* DAR RAYDA GRUP BİR ÇİZGİ, ve bir süre HİÇBİR ŞEYDİ: başlık `wide`
+                       koşuluna bağlıydı, dolayısıyla daralan ray altı simgeyi tek bir
+                       ayrımsız sütuna çeviriyordu · "başlangıç" ile "araçlar" aynı şey
+                       gibi okunuyordu. İlk grubun önüne çizgi girmiyor: marka ayracı
+                       orada zaten var, ikisi üst üste biner. */
+                    <span className="my-1.5 h-0 w-6 shrink-0 border-t border-line" aria-hidden />
+                  ) : null
+                ) : null}
+                {/* Kapalı gövde `inert`: görünmeyen bağlantı sekmeyle de alınmıyor, ama
+                    DOM'da kalıyor · ürün `data-nav` ile hâlâ bulabilir. */}
+                <div id={id} className="tamga-rail-group-body" data-open={acik} inert={!acik}>
+                  <div className={wide ? undefined : "items-center"}>
+                    {grup.girisler.map((entry) => (
+                      /* RAY BAĞLANTISI KİTİN `RailLink`İ, ELLE ÇİZİLMİYOR: elle yazılan kopya
+                         geniş rayda `tamga-rail-link-wide`ı atlıyordu ve etiket kırpılıyordu.
+                         Gerekçe: docs/gerekce/08-blok-ve-sablon.md */
+                      <RailLink
+                        key={entry.key}
+                        href={entry.href}
+                        onClick={entry.onSelect}
+                        label={entry.label}
+                        active={isCurrent(entry)}
+                        showLabel={wide}
+                        linkComponent={Link}
+                        data-nav={entry.key}
+                      >
+                        {/* 20px: ikon rayda tek başına da taşınıyor (dar hâlde etiket
+                            yok), yani satırı tanıtan şey o · 18px'te bir metin glifi
+                            kadar kalıyordu. AĞIRLIK SEÇİLİYKEN DEĞİŞİYOR: seçili glif
+                            dolu, ötekiler ince · tasarımın "buradasın" işareti bu. */}
+                        <Icon icon={entry.icon} size="md" weight={isCurrent(entry) ? "fill" : "regular"} />
+                      </RailLink>
+                    ))}
+                  </div>
+                </div>
+              </Fragment>
+            );
+          })}
         </nav>
 
         {railFooter ? <div className="shrink-0">{railFooter}</div> : null}

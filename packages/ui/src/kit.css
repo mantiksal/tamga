@@ -572,6 +572,74 @@
     display: none;
   }
 
+  /* BÖLÜM BAŞLIĞI BİR KAT, NESNE DEĞİL: tıklanır ama yükselmez. Duruşta etiket,
+     imleç gelince hafif zemin · `tamga-btn-quiet`in sessiz yarısı, kalkışı yok.
+     Aktif sayfanın bölümü kilitli (`data-locked`): oku söner, imleç değişmez. */
+  .tamga-rail-section {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-ctl);
+    color: var(--color-ink-faint);
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    font-size: var(--text-caption);
+    font-weight: 700;
+    gap: 6px;
+    letter-spacing: var(--tracking-label);
+    padding: 4px 10px;
+    text-align: left;
+    text-transform: uppercase;
+    transition: background var(--duration-press) var(--ease-standard), color var(--duration-press) var(--ease-standard);
+    width: 100%;
+  }
+  .tamga-rail-section:hover {
+    background: var(--color-hover);
+    color: var(--color-ink);
+  }
+  .tamga-rail-section[data-locked="true"] {
+    cursor: default;
+  }
+  .tamga-rail-section[data-locked="true"]:hover {
+    background: transparent;
+    color: var(--color-ink-faint);
+  }
+  .tamga-rail-section-caret {
+    margin-left: auto;
+    transition: transform var(--duration-press) var(--ease-standard), opacity var(--duration-press) var(--ease-standard);
+  }
+  .tamga-rail-section[aria-expanded="false"] .tamga-rail-section-caret {
+    transform: rotate(-90deg);
+  }
+  .tamga-rail-section[data-locked="true"] .tamga-rail-section-caret {
+    opacity: 0.35;
+  }
+  /* GÖVDE YÜKSEKLİĞİNİ IZGARAYLA ALIYOR: `0fr → 1fr` geçişi, içeriğin boyunu
+     bilmeden kapanıp açılmanın tek yolu · `height: auto` geçiş almıyor. Kapalıyken
+     bağlantılar `inert`: görünmeyen şey sekmeyle de alınmıyor. */
+  .tamga-rail-group-body {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows var(--duration-press) var(--ease-standard);
+  }
+  .tamga-rail-group-body > div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .tamga-rail-group-body[data-open="false"] {
+    grid-template-rows: 0fr;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tamga-rail-group-body,
+    .tamga-rail-section-caret {
+      transition: none;
+    }
+  }
+
   .tamga-rail-link {
     position: relative;
     display: flex;

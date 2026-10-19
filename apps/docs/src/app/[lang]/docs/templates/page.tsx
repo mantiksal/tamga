@@ -122,6 +122,11 @@ const T = {
         bir kenar çubuğundaki her giriş o ürünün sözlüğüdür ve kütüphane hiçbir ürünün sözlüğünü
         taşımaz (<Xref to="icons">İkonlar</Xref>&apos;daki kuralın aynısı). O anki girişi de
         çağıran söylüyor, bir yönlendirici kancası değil.
+      {" "}
+        Geniş rayda bölüm başlıkları <strong>katlanır</strong>: başlığa basınca altındakiler kapanır,
+        açık sayfanın bölümü hiç kapanmaz, kapalı bir bölüme düşen rota onu açık bulur. Tercihi ürün
+        taşır (<code>collapsedSections</code>, <code>onSectionToggle</code>); kabuk hiçbir depoya
+        yazmaz. İstemeyen <code>collapsibleSections={false}</code> der.
       </>
     ),
     sonN: (
@@ -246,6 +251,12 @@ const T = {
         every entry in a sidebar is that product&apos;s vocabulary, and the library carries no
         product&apos;s vocabulary (the same rule as in <Xref to="icons">Icons</Xref>). The current
         entry is passed in too, not read from a router hook.
+      {" "}
+        In the wide rail section headers <strong>fold</strong>: click one and its entries close, the
+        open page&apos;s section never folds, and a route landing inside a folded section finds it
+        open. The product carries the preference (<code>collapsedSections</code>,{" "}
+        <code>onSectionToggle</code>); the shell never writes storage. Opt out with{" "}
+        <code>collapsibleSections={false}</code>.
       </>
     ),
     sonN: (

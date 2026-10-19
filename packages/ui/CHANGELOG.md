@@ -5,6 +5,29 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.6.0
+
+> Sections fold; the one you are in never does.
+
+### Added
+
+- **`AppShell` section headers fold.** In the wide rail every section header is now a button:
+  click it and the section's entries slide shut; click again and they return. A customer with
+  eight sections asked for exactly this — the rail had become a wall. Three rules keep it honest:
+  the open page's section never folds (you can always read where you are), a route that lands
+  inside a folded section finds it open, and the narrow rail is untouched (nothing to fold when
+  there are no headers). New props: `collapsibleSections` (default `true`), `collapsedSections`
+  for a controlled rail, `onSectionToggle(section, open)`. Where the preference lives — browser,
+  account, device — is the product's call; the shell never writes storage.
+
+### Breaking
+
+- Section headers in the wide rail are `<button aria-expanded>` elements instead of `<p>`, and
+  each section's links now sit inside a `.tamga-rail-group-body` wrapper rather than directly
+  under `<nav>`. A selector written as `nav > .tamga-rail-link` or a test that read the header
+  as a paragraph needs updating; `data-nav` on every link is unchanged and is the supported hook.
+  Pass `collapsibleSections={false}` to keep plain headers (the wrapper stays either way).
+
 ## 0.5.9
 
 > The hook lands on the root, in every branch.

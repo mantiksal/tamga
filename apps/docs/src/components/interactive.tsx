@@ -1351,6 +1351,8 @@ const N = {
     alerts: "Uyarılar", alertsBody: "Kim, ne zaman, hangi kanaldan haber alsın.",
     billing: "Faturalama", billingBody: "Plan, ödeme yöntemi ve fatura adresi.",
     threeItems: "3 madde", twoItems: "2 madde", oneItem: "1 madde",
+    a11y: "Erişilebilirlik", a11yPath: "· /fiyatlar", lastRun: "Son ölçüm 3 gün önce, sayılmadı: sayfa 500 döndü.",
+    loading: "Ölçüm yükleniyor…", loaded: "Skor 92 · 4 uyarı, 0 hata. Açılınca çekildi.",
     copy: "Kopyala", copied: "Kopyalandı", failed: "Kopyalanamadı",
     stepNames: ["Bilgiler", "Bağlantı", "Doğrulama", "Bitti"],
     pwPlaceholder: "Parolan", show: "Parolayı göster", hide: "Parolayı gizle",
@@ -1432,6 +1434,8 @@ const N = {
     alerts: "Alerts", alertsBody: "Who hears about what, when, and through which channel.",
     billing: "Billing", billingBody: "Plan, payment method and billing address.",
     threeItems: "3 items", twoItems: "2 items", oneItem: "1 item",
+    a11y: "Accessibility", a11yPath: "· /pricing", lastRun: "Last run 3 days ago, not counted: the page returned 500.",
+    loading: "Loading the measurement…", loaded: "Score 92 · 4 warnings, 0 errors. Fetched on open.",
     copy: "Copy", copied: "Copied", failed: "Copy failed",
     stepNames: ["Details", "Connection", "Verify", "Done"],
     pwPlaceholder: "Your password", show: "Show password", hide: "Hide password",
@@ -1530,6 +1534,36 @@ export function AccordionDemo({ lang }: L) {
     <div className="flex w-full flex-col gap-8">
       <Accordion>{bolumler}</Accordion>
       <Accordion look="list">{bolumler}</Accordion>
+    </div>
+  );
+}
+
+/* AÇILINCA VERİ ÇEKEN SATIR: açık durum üründe, çekme kararı da. Not şeridi
+   kapalıyken de görünüyor · ölçümün neden sayılmadığı, gövde açılmadan okunuyor. */
+export function CollapsibleControlledDemo({ lang }: L) {
+  const n = N[lang];
+  const [acik, setAcik] = useState(false);
+  const [veri, setVeri] = useState<string | null>(null);
+  useEffect(() => {
+    if (!acik || veri) return;
+    const t = window.setTimeout(() => setVeri(n.loaded), 900);
+    return () => window.clearTimeout(t);
+  }, [acik, veri, n.loaded]);
+  return (
+    <div className="w-full">
+      <Collapsible
+        title={
+          <>
+            {n.a11y} <span className="font-medium text-ink-faint">{n.a11yPath}</span>
+          </>
+        }
+        open={acik}
+        onOpenChange={setAcik}
+        note={n.lastRun}
+        unmountOnClose
+      >
+        <p className="text-body text-ink-soft">{veri ?? n.loading}</p>
+      </Collapsible>
     </div>
   );
 }

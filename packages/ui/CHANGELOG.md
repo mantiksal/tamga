@@ -5,6 +5,24 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.7.1
+
+> A section can be told whether it is open; it can say so too.
+
+### Added
+
+- **`Collapsible` controlled mode** · `open` + `onOpenChange(open)`. With `open` the product
+  holds the state and a click only reports; without it the section keeps its own, as before.
+  Both given, `open` wins and `defaultOpen` is ignored (React's contract). A product had rewritten
+  the row by hand because it needed to know when a row opened — it fetches on open.
+- **`title` takes a node.** "Accessibility · /pricing" with the path faint; the button's
+  accessible name is still read from the text.
+- **`note`** · a quiet line that stays visible while the section is closed, between head and
+  body, inside the same frame: why a measurement did not count, when it last ran.
+- **`unmountOnClose`** · off by default (the body stays in the DOM, `hidden`); on, a heavy body is
+  not rendered while closed.
+- The caret's turn now honours `prefers-reduced-motion`.
+
 ## 0.7.0
 
 > A calendar can say no; a picker can carry the hour.

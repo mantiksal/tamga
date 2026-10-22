@@ -1971,6 +1971,13 @@
     padding-left: 44px;
   }
 
+  .tamga-accordion-cards .tamga-collapsible-note {
+    padding: 0 14px 12px;
+  }
+  .tamga-accordion-cards .tamga-collapsible-note[data-indent] {
+    padding-left: 44px;
+  }
+
   /* AÇILIR BÖLÜM KENDİ KARTI · açık olan taban kazanıyor ve başlığı yıkanıyor:
      tek bir yüzeyin içinde çizgiyle ayrılmış satırlarda hangisinin açık olduğu
      yalnız okun yönünden okunuyordu.
@@ -2015,6 +2022,28 @@
     font-size: var(--text-body);
     line-height: 1.55;
     color: var(--color-ink-soft);
+  }
+
+  /* NOT ŞERİDİ: kapalıyken de görünen sessiz satır, başlıkla gövde arasında ·
+     gövdeyle aynı sol hizada, ondan küçük ve soluk. */
+  .tamga-collapsible-note {
+    padding: 0 14px 12px;
+    font-size: var(--text-small);
+    line-height: 1.5;
+    color: var(--color-ink-faint);
+  }
+  .tamga-collapsible-note[data-indent] {
+    padding-left: 44px;
+  }
+
+  /* OK DÖNÜYOR, değişmiyor; azaltılmış harekette anında döner. */
+  .tamga-collapsible-caret {
+    transition: transform var(--duration-press) var(--ease-standard);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tamga-collapsible-caret {
+      transition: none;
+    }
   }
 
   /* GÖVDE BAŞLIĞIN METNİYLE HİZALI: glif varken 44px içeriden başlıyor, yoksa

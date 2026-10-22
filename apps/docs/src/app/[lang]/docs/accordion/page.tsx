@@ -1,4 +1,4 @@
-import { AccordionDemo } from "@/components/interactive";
+import { AccordionDemo, CollapsibleControlledDemo } from "@/components/interactive";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -69,6 +69,16 @@ const T = {
         kararı her çağrı yerinde tekrar almak olurdu.
       </>
     ),
+    kontrolH: "Açık durumu ürün tutuyor",
+    kontrolP: (
+      <>
+        <code>open</code> verilince bölüm <strong>kontrollü</strong>: tık yalnız{" "}
+        <code>onOpenChange</code> ile haber verir, kararı ürün verir · satır açılınca veri çekip
+        çekmeyeceğine karar verdiği gibi. Verilmezse bölüm durumu kendi tutar (<code>defaultOpen</code>).
+        Başlık bir düğüm olabilir, erişilebilir ad metninden okunur. <code>note</code> kapalıyken
+        de görünen sessiz satır; <code>unmountOnClose</code> ağır gövdeyi kapalıyken hiç çizmez.
+      </>
+    ),
     rules: "Kurallar",
     related: "İlgili",
     rel: (
@@ -119,6 +129,17 @@ const T = {
         would be the same decision taken again at every call site.
       </>
     ),
+    kontrolH: "The product holds the open state",
+    kontrolP: (
+      <>
+        With <code>open</code> the section is <strong>controlled</strong>: a click only reports
+        through <code>onOpenChange</code>, the product decides · the way it decides whether to
+        fetch when a row opens. Without it the section keeps its own state (<code>defaultOpen</code>).
+        The title can be a node; the accessible name is read from its text. <code>note</code> is a
+        quiet line that stays visible when closed; <code>unmountOnClose</code> leaves a heavy body
+        unrendered while closed.
+      </>
+    ),
     rules: "Rules",
     related: "Related",
     rel: (
@@ -149,6 +170,20 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       </Demo>
 
       <P>{t.kiliklar}</P>
+
+      <H2>{t.kontrolH}</H2>
+      <P>{t.kontrolP}</P>
+      <Demo labels={dict.demo} align="start" code={`<Collapsible
+  title={<>Accessibility <span className="text-ink-faint">· /pricing</span></>}
+  open={open}
+  onOpenChange={setOpen}
+  note="Last run 3 days ago, not counted."
+  unmountOnClose
+>
+  {data ?? "Loading…"}
+</Collapsible>`}>
+        <CollapsibleControlledDemo lang={lang} />
+      </Demo>
 
       <H2>{t.rules}</H2>
       <Note>{t.whyNotDetails}</Note>

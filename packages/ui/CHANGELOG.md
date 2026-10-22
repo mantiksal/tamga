@@ -5,179 +5,10 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
-## 0.9.0
-
-> The image field can talk to a server. Also fixes to 0.8.1 found in review before any of 0.6.1 through 0.8.1 shipped.
-
-### Added
-
-- **`ImageField` upload path** · `onUpload(file) => Promise<string | false>` and
-  `onRemove() => Promise<boolean | void>`. Given `onUpload`, the field no longer converts to a
-  data URL: it hands the `File` to the caller and carries the states. Waiting: the input and
-  every button lock, the button is named by `labels.uploading` / `labels.removing`. Failure: the
-  rejected reason (a string, an `Error`, or `{ message }`) under the field as a `danger` alert,
-  shown as it is, so map a raw network error to your own words first; an empty reason shows the
-  new `labels.errorUpload`. The chosen file and its preview stay, "confirm" retries. Resolving
-  `onUpload` with `false` keeps the kit silent, for a caller that already handled the value or
-  the error (a plan-wall dialog); any other non-string result warns in development, because a
-  forgotten `return` must never read as "uploaded". `onRemove` resolving `false` is silent the
-  same way. Success: the returned address goes to `onChange`, and a quiet inline `role="status"`
-  line (`labels.uploaded` / `labels.removed`); the live region is in the DOM from the start,
-  only its text changes. `confirm` previews the pick and waits for a click (for a logo); the
-  default uploads on pick (for an avatar). `accept` and `maxBytes` are checked on both paths
-  before anything else runs; `disabled` + `lockedNote` show the reason as visible text wired to
-  the buttons with `aria-describedby`. The preview is an object URL, revoked on cancel, on a new
-  pick, on success, when `value` changes from outside, and on unmount; a result arriving after
-  unmount or after an outside `value` change is dropped; the caller's own `onChange` with the
-  same result (a cache update inside `onUpload`) is not "outside". `maxEdge` is optional in the
-  type: not used with `onUpload`, and without either the image is kept at its own size. An
-  empty file (0 bytes) is refused with `errorUnreadable` on both paths; `labels.empty` takes a
-  `ReactNode`. The failure alert sits in a `role="alert"` region that is in the DOM from the
-  start, like the status line; both regions exist with `onRemove` alone as well.
-  The pre-existing synchronous path (no `onUpload`) renders the same markup, locked by test; its
-  only change is that a file outside `accept` is now refused before `prepareImage` (the input's
-  own list said so already). A product had written this field four times.
-- **`Select` `disabled`** · locks the trigger, and looks locked (sunk ground, dashed edge, faint
-  ink). Needed by `DateTimePicker` below.
-
-### Fixed
-
-- **`DateTimePicker` DST rule in western zones** · the wall-to-instant step guessed one offset
-  and corrected once, which worked east of UTC and inverted west of it: New York 2026-03-08
-  02:30 became 01:30-05:00 (pushed back, the docs said forward), 2026-11-01 01:30 took -04:00
-  (the earlier offset, the docs said later). Now both candidates are built from the offsets on
-  either side; in an ambiguous hour the later instant wins, in a gap the hour is pushed forward.
-  A value coming from outside in an ambiguous hour keeps its own offset instead of being
-  re-emitted an hour off, and a `min` sitting in the second occurrence no longer hides the
-  whole hour. Tested for New York and Berlin, both seasons, under four `TZ`s.
-- **`DateTimePicker` boxes always formatted** · a stored value outside `[min, max]` showed its
-  raw hour ("9", or "14" in a 12-hour locale) because the option was filtered away; the value's
-  own hour and minute are always offered now, so the box reads "09" and the next pick clamps.
-- **`DateTimePicker` hour boxes locked until a day is picked** · picking an hour with no day
-  emitted today's date.
-- **`DateTimePicker` `minuteStep` below 1** hung the page (an endless loop); it reads as 1.
-- **`DatePicker` / `DateTimePicker` `disabled`** left the clear and open buttons live: a locked
-  date could be cleared. Both buttons are disabled with the field.
-- **`DateTimePicker` minute change inside an ambiguous hour** keeps the value's own offset
-  (01:30-04:00 to :45 gives 01:45-04:00; it jumped to -05:00). `DatePicker` refuses days that
-  are not on the calendar (`2026-02-30`).
-- **Development warnings** are now written as plain `process.env.NODE_ENV`, the form bundlers
-  replace; the previous `globalThis.process` form never matched and would have warned in
-  production.
-- **Invalid `timeZone` or unparseable `value` / `min` / `max`** threw a `RangeError` and took the
-  component down; the zone falls back to the browser's, the value reads as empty, the console
-  warns. `DatePicker` and `Calendar` the same.
-- **`Button` busy without `busyLabel`** had no accessible name: the label was `invisible` and
-  `aria-hidden`. The button's own text now stays in the tree as sr-only, as the docs claimed.
-- **`Tag` lost its JSDoc** in 0.8.1: the hex constant was inserted between the comment and the
-  function, so `display.d.ts` carried no description for `Tag`. The swatch's Turkish note still
-  said "any CSS colour"; it says hex only.
-- **Props tables** · `ErrorState` lost `onRetry` / `retryLabel` (a parenthesised union was not
-  read), `Button` lost `busy` / `busyLabel` and `Input` `leading` (an alias body was cut at its
-  first `;`). Both read now.
-- **`DangerZone` props table** mixed in the row's props (`label`, `disabledReason`, `busy` …) and
-  dropped the row's own `title` / `description`, because the extractor expanded every alias
-  named anywhere in the type. Only top-level intersections expand now, and `DangerAction` has
-  its own table.
-- **`ImageField` and `DateTimePicker` JSDoc** · one block each (the IDE showed internal history
-  instead of the public note), `id` and `invalid` documented on `DateTimePicker`, `Collapsible`'s
-  accessible name stated correctly (`title` and `meta`), the SSR note for `timeZone`.
-
-## 0.8.1
-
-> Fixed before release: 0.6.1 through 0.8.0 were reviewed and corrected before any of them shipped.
-
-### Fixed
-
-- **Calendar / DatePicker / DateTimePicker** (0.7.0)
-  - Keyboard: the tab stop no longer vanished after moving to another month, and never lands on a
-    disabled day; it follows the selected day, else the first open day. External `value` changes
-    move the view and the stop. Focus search is scoped to the calendar's own root.
-  - Grid semantics: `role="grid"` with rows and `gridcell`s, every day named with its full date,
-    `aria-selected` for the chosen day, native `disabled` only (no duplicate `aria-disabled`).
-    `Home`/`End` (week edges) and `PageUp`/`PageDown` (months) join the arrows.
-  - `timeZone` (IANA) on all three. Wall clock ↔ instant goes through `Intl`; "today", `min`/`max`
-    day comparison, the field's text and the emitted offset all use that zone, never the
-    browser's. DST: an hour inside a spring gap is not offered (a wall time in it is pushed
-    forward); an autumn ambiguous hour is written with the later, standard offset.
-  - `DateTimePicker` never emits outside `[min, max]`: day, hour, minute and AM/PM changes are
-    clamped to the nearest valid time and the selects follow. Hours with no valid minute are not
-    offered. A stored minute off the `minuteStep` grid is shown as-is (added as an option), not
-    rounded.
-  - `id` and `invalid` on both pickers, like `Input`. AM/PM words come from `Intl` or the new
-    `labels.am`/`labels.pm`; the kit no longer writes "AM"/"PM" itself.
-  - Tests run green under `TZ=UTC`, `TZ=Europe/Istanbul` and `TZ=America/New_York`.
-- **Tag `swatch`** (0.7.2)
-  - Security: only a hex colour is accepted (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`); anything
-    else draws no mark. Before, the string went into `style` as given, so a value carrying
-    `;background-image:url(…)` would have made the page fetch it on the server render.
-  - The mark is now `ColorMark`, exported on its own (for a clickable suggestion inside a
-    `Button`), built on the kit's `tamga-mark` family (`--mark-dot`, `--mark-dot-radius`), not a
-    hand-sized square. Inside `look="solid"` the ring derives from the page colour, so it reads on
-    the inked ground.
-  - `ColorSwatches` gains `noneLabel`: a "no colour" option; an empty value selects it instead of
-    lighting the custom box.
-- **DangerZone** (0.8.0): `data-action` sits on the **button** (the product's e2e clicks it and
-  checks `disabled`); the row carries `data-key`. `busyLabel` keeps the button named while busy.
-  A row's `title` is optional. Zone `title`/`description` are documented on their own.
-- **Collapsible** (0.7.1): `aria-controls` is omitted while the body is unmounted; `note` is bound
-  to the head with `aria-describedby`. Duplicate CSS and comment removed.
-- **LogoTile** (0.6.1): the no-prop and `surface="auto"` outputs are locked to one literal string.
-
-## 0.8.0
-
-> The bottom of the settings page, in one shape.
-
-### Added
-
-- **`DangerZone` block** (`tamga-ui/blocks`) · the irreversible actions at the bottom of a
-  settings page. A title, an optional description and one or more action rows: name, one
-  sentence, a `danger` button. `disabledReason` closes a row and shows the reason as **visible
-  text** bound to the button with `aria-describedby` · a disabled button is not a reason, and a
-  tooltip on one is invisible to most browsers, the keyboard and touch. `warning` takes the
-  kit's `Alert` when a precondition stopped the action. The block never opens a confirm dialog:
-  the click is the caller's, the product builds `ConfirmDialog`. Edge and glyph tile in the
-  critical tone, not the whole card; the heading and the warning glyph say "danger" without
-  colour. Every row takes `data-*`. A product had hand-written this zone three ways on three
-  pages.
-- `check-item-hooks` now also reads `actions` lists, and no longer mistakes `=>` for a closing
-  bracket (it was cutting item types short before their `Record<string, unknown>`).
-
-## 0.7.2
-
-> A label can carry the user's colour; the kit says nothing with it.
-
-### Added
-
-- **`Tag` `swatch`** · any CSS colour (hex only since 0.8.1); a small square mark (the kit's mark radius, not a circle)
-  before the text, `aria-hidden`. This is the one **written** exception to Law 3 ("colour is for
-  deviation and interaction"): the colour is the user's own data, an identity mark, never a
-  ground or a text colour, never status. The ring around the mark derives from the ink, so a
-  near-white or near-black choice stays visible in both themes. Written into the physics page
-  and `docs/gerekce/06`, so nobody deletes it as a violation or cites it as a precedent. Without
-  `swatch` the output is unchanged.
-
-## 0.7.1
-
-> A section can be told whether it is open; it can say so too.
-
-### Added
-
-- **`Collapsible` controlled mode** · `open` + `onOpenChange(open)`. With `open` the product
-  holds the state and a click only reports; without it the section keeps its own, as before.
-  Both given, `open` wins and `defaultOpen` is ignored (React's contract). A product had rewritten
-  the row by hand because it needed to know when a row opened — it fetches on open.
-- **`title` takes a node.** "Accessibility · /pricing" with the path faint; the button's
-  accessible name is still read from the text.
-- **`note`** · a quiet line that stays visible while the section is closed, between head and
-  body, inside the same frame: why a measurement did not count, when it last ran.
-- **`unmountOnClose`** · off by default (the body stays in the DOM, `hidden`); on, a heavy body is
-  not rendered while closed.
-- The caret's turn now honours `prefers-reduced-motion`.
-
 ## 0.7.0
 
-> A calendar can say no; a picker can carry the hour.
+> A calendar can say no and carry the hour; a section can be told whether it is open; a label can
+> carry the user's colour; the settings page has a bottom; the image field can talk to a server.
 
 ### Added
 
@@ -186,28 +17,95 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   month is out of reach. A product had fallen back to `<input type="date" min=…>` for "not before
   today"; that field looks different in every browser and lets the user type a date the kit had
   decided should only be picked.
-- **Arrow keys in the calendar.** One day is in the tab order, the arrows move between days
-  (±1, ±7) across month edges, disabled days are skipped. Before this every day was a tab stop.
+- **Calendar keyboard and grid semantics.** One day is in the tab order; the arrows move between
+  days (±1, ±7) across month edges, `Home`/`End` to the week's edges, `PageUp`/`PageDown` across
+  months; disabled days are skipped and the stop never lands on one (it follows the selected
+  day, else the first open day, and moves with an external `value`). `role="grid"` with rows
+  and `gridcell`s, every day named with its full date, `aria-selected` on the chosen day, native
+  `disabled` only.
 - **`DateTimePicker`.** Date plus time, picked not typed: a calendar and hour/minute selects
-  (AM/PM only in 12-hour locales, words from `Intl`). The value is `DateTimeISO`, an instant in
-  the user's own offset — `2026-04-15T14:30:00+03:00`; send `new Date(v).toISOString()` to the
-  server. `min`/`max` take the same shape; on the boundary day earlier (or later) hours and
-  minutes are simply not offered. A separate component rather than a prop: the value's shape is
-  different, and an `onChange` whose type depends on a prop is a trap. `labels` adds `hour`,
-  `minute`, `period`.
-
-### Changed
-
-- The calendar's keyboard model: one tab stop and arrow keys instead of a tab stop on every day.
-  A `DatePicker` without `min`/`max` renders the same, but Tab now leaves the grid after one
-  stop; the arrows move inside it.
-
-## 0.6.1
-
-> A logo is drawn for one theme; the tile can say which.
-
-### Added
-
+  (AM/PM only in 12-hour locales; the words from `Intl`, else `labels.am`/`labels.pm`, never
+  the kit's own English). The value is `DateTimeISO`, an instant written with the offset of the
+  picker's `timeZone` at that instant, `2026-04-15T14:30:00+03:00`; send
+  `new Date(v).toISOString()` to the server. A separate component rather than a prop: the
+  value's shape is different, and an `onChange` whose type depends on a prop is a trap.
+  `labels` adds `hour`, `minute`, `period`.
+  - `timeZone` (IANA) on `Calendar`, `DatePicker` and `DateTimePicker`. Wall clock and instant
+    meet through `Intl`; "today", `min`/`max`, the field's text and the emitted offset all use
+    that zone, never the browser's. Give it explicitly in a server-rendered app. DST: an hour
+    inside a spring gap is not offered and a wall time in it is pushed forward; an autumn
+    ambiguous hour is written with the later, standard offset, while a value coming from
+    outside keeps its own offset, also when only its minute changes. Checked against an
+    independent oracle over the 2026 transitions of 418 zones.
+  - Every emitted value is inside `[min, max]`: day, hour, minute and AM/PM changes are clamped
+    to the nearest valid time and the selects follow; hours with no valid minute are not
+    offered. A stored minute off the `minuteStep` grid, or a stored value outside the range, is
+    shown as it is rather than rounded or hidden: the field never lies about a stored value.
+    The hour boxes stay locked until a day is picked, so an hour alone never emits today.
+    `minuteStep` below 1 reads as 1.
+  - `id` and `invalid` on both pickers, like `Input`. An invalid `timeZone` falls back to the
+    browser's and an unparseable `value` / `min` / `max` reads as empty, with a console warning
+    in development, instead of a `RangeError`.
+- **`Collapsible` controlled mode** · `open` + `onOpenChange(open)`. With `open` the product
+  holds the state and a click only reports; without it the section keeps its own, as before.
+  Both given, `open` wins and `defaultOpen` is ignored (React's contract). A product had rewritten
+  the row by hand because it needed to know when a row opened: it fetches on open.
+  - **`title` takes a node.** "Accessibility · /pricing" with the path faint; the accessible
+    name is `title` and `meta` together.
+  - **`note`** · a quiet line that stays visible while the section is closed, between head and
+    body, inside the same frame, bound to the head with `aria-describedby`: why a measurement
+    did not count, when it last ran.
+  - **`unmountOnClose`** · off by default (the body stays in the DOM, `hidden`); on, a heavy body
+    is not rendered while closed and `aria-controls` is omitted meanwhile.
+  - The caret's turn honours `prefers-reduced-motion`.
+- **`Tag` `swatch`** · the user's own colour as a small mark before the text, `aria-hidden`.
+  Hex only (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`); anything else draws no mark, so user data
+  reaches `style` only as a validated value. This is the one **written** exception to Law 3
+  ("colour is for deviation and interaction"): the colour is the user's data, an identity mark,
+  never a ground or a text colour, never status. The ring around the mark derives from the ink
+  (from the page colour inside `look="solid"`), so a near-white or near-black choice stays
+  visible in both themes. Written into the physics page and `docs/gerekce/06`, so nobody deletes
+  it as a violation or cites it as a precedent. Without `swatch` the output is unchanged.
+  - **`ColorMark`** · the mark on its own, on the kit's `tamga-mark` family, for a clickable
+    suggestion inside a `Button`.
+  - **`ColorSwatches` `noneLabel`** · a "no colour" option; an empty value selects it instead
+    of lighting the custom box.
+- **`DangerZone` block** (`tamga-ui/blocks`) · the irreversible actions at the bottom of a
+  settings page. A title, an optional description and one or more action rows: an optional
+  name, one sentence, a `danger` button. `disabledReason` closes a row and shows the reason as
+  **visible text** bound to the button with `aria-describedby` · a disabled button is not a
+  reason, and a tooltip on one is invisible to most browsers, the keyboard and touch. `warning`
+  takes the kit's `Alert` when a precondition stopped the action; `busy` + `busyLabel` keep the
+  button named while it runs. The block never opens a confirm dialog: the click is the caller's,
+  the product builds `ConfirmDialog`. Edge and glyph tile in the critical tone, not the whole
+  card; the heading and the warning glyph say "danger" without colour. `data-action` sits on the
+  button, `data-key` on the row; every row takes `data-*`. A product had hand-written this zone
+  three ways on three pages.
+- **`ImageField` upload path** · `onUpload(file) => Promise<string | false>` and
+  `onRemove() => Promise<boolean | void>`. Given `onUpload`, the field no longer converts to a
+  data URL: it hands the `File` to the caller and carries the states. Waiting: the input and
+  every button lock, the button is named by `labels.uploading` / `labels.removing`. Failure: the
+  rejected reason (a string, an `Error`, or `{ message }`) under the field in a `role="alert"`
+  region, shown as it is, so map a raw network error to your own words first; an empty reason
+  shows the new `labels.errorUpload`. The chosen file and its preview stay, "confirm" retries.
+  Resolving `onUpload` with `false` keeps the kit silent, for a caller that already handled the
+  value or the error (a plan-wall dialog); any other non-string result warns in development,
+  because a forgotten `return` must never read as "uploaded". `onRemove` resolving `false` is
+  silent the same way. Success: the returned address goes to `onChange`, and a quiet inline
+  `role="status"` line (`labels.uploaded` / `labels.removed`). Both live regions are in the DOM
+  from the start, only their text changes. `confirm` previews the pick and waits for a click
+  (for a logo); the default uploads on pick (for an avatar). `accept` and `maxBytes` are
+  checked on both paths before anything else runs, an empty file is refused with
+  `errorUnreadable`; `disabled` + `lockedNote` show the reason as visible text wired to the
+  buttons with `aria-describedby`. The preview is an object URL, revoked on cancel, on a new
+  pick, on success, when `value` changes from outside, and on unmount; a result arriving after
+  unmount or after an outside `value` change is dropped, while the caller's own `onChange` with
+  the same result (a cache update inside `onUpload`) is not "outside". `maxEdge` is optional in
+  the type: not used with `onUpload`, and without either the image is kept at its own size.
+  `labels.empty` takes a `ReactNode`. The pre-existing synchronous path (no `onUpload`) renders
+  the same markup, locked by test; its only change is that a file outside `accept` is refused
+  before `prepareImage` (the input's own list said so already). A product had written this
+  field four times.
 - **`LogoTile` `surface`** · `"auto" | "light" | "dark"`, default `auto` (today's behaviour,
   follows the page). `dark` draws the dark theme's ground even on a light page, for a logo drawn
   for dark; `light` the reverse. Ground, edge and initial come as a fixed trio of tokens
@@ -217,6 +115,28 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   can drop the wrapper · note the ground differs by one step: the new dark surface is the dark
   theme's **card** (`#16233a`), the old wrapper with `bg-page` gave the dark **page** (`#101a2c`).
   Not pixel-identical; the card is what a tile sits on.
+- **`Select` `disabled`** · locks the trigger, and looks locked (sunk ground, dashed edge, faint
+  ink).
+- `check-item-hooks` also reads `actions` lists, and no longer mistakes `=>` for a closing
+  bracket (it was cutting item types short before their `Record<string, unknown>`).
+
+### Changed
+
+- The calendar's keyboard model: one tab stop and arrow keys instead of a tab stop on every day.
+  A `DatePicker` without `min`/`max` renders the same, but Tab now leaves the grid after one
+  stop; the arrows move inside it.
+
+### Fixed
+
+- **`DatePicker` `disabled`** left the clear and open buttons live: a locked date could be
+  cleared. Both buttons are disabled with the field.
+- **`Button` busy without `busyLabel`** had no accessible name: the label was `invisible` and
+  `aria-hidden`. The button's own text now stays in the tree as sr-only, as the docs claimed.
+- **Props tables on the docs site** · `ErrorState` lacked `onRetry` / `retryLabel` (a
+  parenthesised union was not read), `Button` lacked `busy` / `busyLabel` and `Input` `leading`
+  (an alias body was cut at its first `;`), and tables carried rows from types named inside a
+  prop (`AppShell` showed `NavEntry`'s fields). Only top-level intersections expand now, and a
+  row type such as `DangerAction` gets its own table.
 
 ## 0.6.0
 

@@ -429,7 +429,7 @@ Bir kullanıcı, tek kullanıcı. Bulut ürünü aynı alanı dört kez kendisi 
 avatar, favicon · ve dördünde de sebep aynıydı: kitin alanı ağı bilmiyordu. Bekleme yoktu, hata
 yoktu, "sunucu reddetti ama dosya elimde dursun" yoktu.
 
-0.9.0'da ikinci yol eklendi: `onUpload` verilince dosya ÇAĞIRANA gider. Ağ işi (imzalı adres, PUT,
+0.7.0'da ikinci yol eklendi: `onUpload` verilince dosya ÇAĞIRANA gider. Ağ işi (imzalı adres, PUT,
 PATCH) ürünün; alan yalnız üç durumu taşır. Senkron yol birebir korunuyor ve `innerHTML`'i testle
 kilitli: masaüstü ürün o yolu kullanıyor ve bir markup değişikliğini fark etmez.
 

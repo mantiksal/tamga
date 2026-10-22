@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 
-/* KAPALI SELECT KAPALI GÖRÜNÜR: `disabled` prop'u (0.9.0) gelince kutunun
+/* KAPALI SELECT KAPALI GÖRÜNÜR: `disabled` prop'u (0.7.0) gelince kutunun
    görünümü yoktu; hover kenarı koyulaşıyor, imleç el oluyordu. Kitin diğer
    kapalı kontrolleriyle aynı dil: çukur zemin, kesik kenar, soluk mürekkep. */
 describe(".tamga-select:disabled", () => {

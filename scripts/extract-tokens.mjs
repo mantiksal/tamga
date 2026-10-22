@@ -155,6 +155,7 @@ const temaKoyu = new Map(bildirimler("theme.css", "tamga:tema-koyu").map((d) => 
 
 /** Ad → grup. Sıra önemli: ilk eşleşen kazanıyor. */
 const GRUPLAR = [
+  [/^--color-logo-/, "logo"],
   [/^--color-(page|shell|sunk|hover|band|rail|scrim|chart-fill)$/, "zemin"],
   [/^--color-ink|^--color-inverse-ink$/, "murekkep"],
   [/^--color-inverse/, "zemin"],
@@ -357,6 +358,19 @@ function kontrasti(ad, grup, deger, palet) {
     return oranla(deger, al(zemin), "zemin");
   }
 
+  /* Logo karosunun üçlüleri KENDİ zeminine karşı ölçülüyor, sayfaya değil:
+     zemin temayı izlemiyor, ölçüm de izlememeli. */
+  if (grup === "logo") {
+    const yuz = ad.endsWith("-dark") ? "dark" : "light";
+    const zemin = al(`--color-logo-ground-${yuz}`);
+    if (ad.includes("-ink-")) return oranla(deger, zemin, "zemin");
+    if (ad.includes("-edge-")) {
+      if (!zemin || !/^#/.test(zemin)) return null;
+      const d = Number(dL(deger, zemin).toFixed(1));
+      return kus("dL", d, "zemin", d >= 4);
+    }
+    return null;
+  }
   if (grup === "zemin") return oranla(al("--color-ink"), deger, "murekkep");
   if (grup === "murekkep") return oranla(deger, al("--color-page"), "sayfa");
   if (grup === "durum" && !ad.endsWith("-bg")) return oranla(deger, al("--color-shell"), "kart");

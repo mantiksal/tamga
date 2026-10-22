@@ -63,6 +63,15 @@ const T = {
         içine sığması gerektiğinde.
       </>
     ),
+    surface: (
+      <>
+        <code>surface</code> karonun <strong>zeminini</strong> seçer. <code>auto</code> sayfanın
+        temasını izler. Bir logo bir temaya göre çizilmiştir: koyu temanın beyaz logosu açık
+        zeminde kaybolur. Koyuya göre çizilmiş görsel için <code>dark</code>, açığa göre çizilmiş
+        için <code>light</code>; zemin, kenar ve baş harf sabit bir üçlü gelir, tema değişince
+        karo değişmez.
+      </>
+    ),
     rules: "Kurallar",
     related: "İlgili",
   },
@@ -100,6 +109,15 @@ const T = {
         has to fit inside a list row.
       </>
     ),
+    surface: (
+      <>
+        <code>surface</code> picks the tile&apos;s <strong>ground</strong>. <code>auto</code> follows
+        the page&apos;s theme. A logo is drawn for one theme: the dark theme&apos;s white logo
+        vanishes on a light ground. Use <code>dark</code> for an image drawn for dark and{" "}
+        <code>light</code> for one drawn for light; ground, edge and initial come as a fixed trio,
+        and the tile does not change when the theme does.
+      </>
+    ),
     rules: "Rules",
     related: "Related",
   },
@@ -124,6 +142,17 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       </Demo>
 
       <P>{t.size}</P>
+
+      <P>{t.surface}</P>
+      <Demo labels={dict.demo} code={`<LogoTile name="Tamga" src="/tamga-mark-light.svg" surface="auto" />
+<LogoTile name="Tamga" src="/tamga-mark-light.svg" surface="light" />
+<LogoTile name="Tamga" src="/tamga-mark-dark.svg" surface="dark" />
+<LogoTile name="Koyu" surface="dark" />`}>
+        <LogoTile name="Tamga" src="/tamga-mark-light.svg" surface="auto" />
+        <LogoTile name="Tamga" src="/tamga-mark-light.svg" surface="light" />
+        <LogoTile name="Tamga" src="/tamga-mark-dark.svg" surface="dark" />
+        <LogoTile name="Koyu" surface="dark" />
+      </Demo>
 
 
       <H2>{t.rules}</H2>

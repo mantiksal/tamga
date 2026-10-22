@@ -60,6 +60,7 @@ const SIRA = [
   "olcu",
   "tipografi",
   "hareket",
+  "logo",
   "rampa",
 ];
 
@@ -117,6 +118,10 @@ const BASLIK: Record<string, { tr: [string, string]; en: [string, string] }> = {
   hareket: {
     tr: ["Hareket", "Süreler ve eğriler. Kitin imzası, ve değiştirilmiyor."],
     en: ["Motion", "Durations and curves. The kit's signature, and it is not changed."],
+  },
+  logo: {
+    tr: ["Logo zeminleri", "Karonun sabit açık ve koyu zemini; temayı izlemez, çünkü logo bir temaya göre çizilmiştir."],
+    en: ["Logo grounds", "The tile's fixed light and dark grounds; they ignore the theme, because a logo is drawn for one."],
   },
   rampa: {
     tr: ["Ham marka rampası", "Hiçbir şey doğrudan tüketmiyor: arayüz semantik token'lar."],

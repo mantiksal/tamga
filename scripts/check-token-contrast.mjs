@@ -58,6 +58,9 @@ const ZEMIN = ["--color-page", "--color-shell", "--color-sunk", "--color-hover"]
 
 /* Kendi zeminini taşıyan metin çiftleri. */
 const CIFTLER = [
+  /* Logo karosunun baş harfi KENDİ sabit zemininde: iki temada da aynı çift. */
+  ["--color-logo-ink-light", "--color-logo-ground-light"],
+  ["--color-logo-ink-dark", "--color-logo-ground-dark"],
   ["--color-accent-ink", "--color-accent"],
   ["--color-accent-ink", "--color-accent-hover"],
   ["--color-accent-ink", "--color-accent-active"],

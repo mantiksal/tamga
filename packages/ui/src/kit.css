@@ -97,6 +97,14 @@
 
 /* tamga:kit-koyu */
 .dark {
+  /* Logo karosunun sabit zeminleri: gece de aynı altı değer, karo temayı
+     izlemiyor · tanımı theme.css'te. */
+  --color-logo-ground-light: #fffefb;
+  --color-logo-edge-light: #0a1f3d;
+  --color-logo-ink-light: #1e4fd8;
+  --color-logo-ground-dark: #16233a;
+  --color-logo-edge-dark: #6b7f9f;
+  --color-logo-ink-dark: #709dfd;
 
   color-scheme: dark;
 
@@ -5275,6 +5283,20 @@
     border: 1.5px solid var(--color-edge-strong);
     border-radius: var(--radius-btn);
     background: var(--color-shell);
+    /* Harfin rengi KARODAN miras: zemin zorlanınca üçü birden değişsin. */
+    color: var(--color-accent);
+  }
+  /* ZORLANAN ZEMİN: logo bir temaya göre çizilmiştir, karo o temanın zeminini
+     sayfa hangi temadaysa ona bakmadan verir · token'lar sabit, theme.css'te. */
+  .tamga-logo-tile[data-surface="light"] {
+    background: var(--color-logo-ground-light);
+    border-color: var(--color-logo-edge-light);
+    color: var(--color-logo-ink-light);
+  }
+  .tamga-logo-tile[data-surface="dark"] {
+    background: var(--color-logo-ground-dark);
+    border-color: var(--color-logo-edge-dark);
+    color: var(--color-logo-ink-dark);
   }
   .tamga-logo-tile-sm {
     width: 40px;

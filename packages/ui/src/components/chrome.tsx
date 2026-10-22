@@ -320,6 +320,7 @@ export function LogoTile({
   name,
   src,
   size = "base",
+  surface = "auto",
   className,
   ...rest
 }: {
@@ -330,12 +331,25 @@ export function LogoTile({
   name: string;
   src?: string;
   size?: "base" | "sm";
+  /**
+   * The ground the tile draws on. `auto` follows the page's theme, today's behaviour. `dark` draws
+   * the dark theme's ground even on a light page, for a logo drawn for dark; `light` the reverse.
+   * The ground, its edge and the initial come as a fixed trio, so the tile reads the same in both
+   * themes. TR: Karonun çizildiği zemin. `auto` sayfanın temasını izler, bugünkü davranış. `dark`
+   * açık sayfada da koyu temanın zeminini çizer, koyuya göre çizilmiş bir logo için; `light`
+   * tersi. Zemin, kenarı ve baş harf sabit bir üçlü gelir; karo iki temada da aynı okunur.
+   */
+  surface?: "auto" | "light" | "dark";
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
   return (
-    <span {...dataProps(rest)} className={cn("tamga-logo-tile", size === "sm" && "tamga-logo-tile-sm", className)}>
+    <span
+      {...dataProps(rest)}
+      data-surface={surface === "auto" ? undefined : surface}
+      className={cn("tamga-logo-tile", size === "sm" && "tamga-logo-tile-sm", className)}
+    >
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt="" className="h-full w-full object-contain p-1.5" />
@@ -343,7 +357,7 @@ export function LogoTile({
         /* HARF MARKANIN HARFİ: display yüzü, en ağır kesim ve vurgu rengi.
            Mono ve soluk çizildiğinde karo bir logo yerine bir KOD gibi
            okunuyordu · oysa bu kutu görselin yerini tutuyor. */
-        <span aria-hidden className="font-display text-subhead font-black text-accent">
+        <span aria-hidden className="font-display text-subhead font-black">
           {name.trim().charAt(0).toLocaleUpperCase()}
         </span>
       )}

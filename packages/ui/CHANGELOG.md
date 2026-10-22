@@ -5,6 +5,20 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.6.1
+
+> A logo is drawn for one theme; the tile can say which.
+
+### Added
+
+- **`LogoTile` `surface`** · `"auto" | "light" | "dark"`, default `auto` (today's behaviour,
+  follows the page). `dark` draws the dark theme's ground even on a light page, for a logo drawn
+  for dark; `light` the reverse. Ground, edge and initial come as a fixed trio of tokens
+  (`--color-logo-ground/edge/ink-light|dark`), identical in both themes, so the tile reads the
+  same at night. Measured: initial 6.6:1 on light, 5.9:1 on dark; edge 3.9:1 on dark
+  (WCAG 1.4.11). A product that had been wrapping the tile in a local `.dark` class to get this
+  can drop the wrapper.
+
 ## 0.6.0
 
 > Sections fold; the one you are in never does.

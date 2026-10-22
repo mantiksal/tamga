@@ -552,6 +552,18 @@
      açılıyor, bu ise koyu kalmak zorunda. */
   --color-edge-strong: #0a1f3d;
 
+  /* LOGO KAROSU SABİT ZEMİNDE. Koyu temaya göre çizilmiş bir logo açık sayfada
+     koyu bir zemin ister, açık çizilmişi koyu sayfada açık zemin · sayfanın
+     token'ları temayı izlediği için karo onları ödünç alamaz. İki üçlü (zemin,
+     kenar, baş harf), iki temada da aynı değer: karo gece de aynı okunur.
+     Değerler iki temanın kendi kartı, vurgusu ve ölçülmüş bir kenarı. */
+  --color-logo-ground-light: #fffefb; /* light tile ground, the light theme's card TR: açık karo zemini, açık temanın kartı */
+  --color-logo-edge-light: #0a1f3d; /* edge on the light ground, 16.3:1 TR: açık zeminde kenar, 16.3:1 */
+  --color-logo-ink-light: #1e4fd8; /* initial on the light ground, 6.6:1 TR: açık zeminde baş harf, 6.6:1 */
+  --color-logo-ground-dark: #16233a; /* dark tile ground, the dark theme's card TR: koyu karo zemini, koyu temanın kartı */
+  --color-logo-edge-dark: #6b7f9f; /* edge on the dark ground, 3.9:1 (WCAG 1.4.11 wants 3) TR: koyu zeminde kenar, 3.9:1 (1.4.11 3 ister) */
+  --color-logo-ink-dark: #709dfd; /* initial on the dark ground, 5.9:1 TR: koyu zeminde baş harf, 5.9:1 */
+
   /* Instrument scale marks: the progress dial's ticks. NOT --color-edge: a tick is
      READ, so it answers to a floor (visible on card, page AND the sunk wash), never
      to the rule line's deliberate softness. On --color-sunk the edge measured ΔL* 7.0

@@ -81,4 +81,24 @@ describe("Collapsible · kontrollü", () => {
     expect(screen.queryByText("ağır")).toBeNull();
     expect(screen.getByText("hafif")).not.toBeVisible();
   });
+
+  it("unmountOnClose: kapalıyken aria-controls yok, açınca var ve gövdeyi gösteriyor; aç→kapat döngüsü", () => {
+    const { rerender } = render(<Collapsible title="A" open={false} unmountOnClose><p>ağır</p></Collapsible>);
+    const b = screen.getByRole("button", { name: "A" });
+    expect(b).not.toHaveAttribute("aria-controls");
+    rerender(<Collapsible title="A" open unmountOnClose><p>ağır</p></Collapsible>);
+    const id = b.getAttribute("aria-controls")!;
+    expect(document.getElementById(id)?.textContent).toBe("ağır");
+    rerender(<Collapsible title="A" open={false} unmountOnClose><p>ağır</p></Collapsible>);
+    expect(screen.queryByText("ağır")).toBeNull();
+    expect(b).not.toHaveAttribute("aria-controls");
+  });
+
+  it("not düğmeye aria-describedby ile bağlı", () => {
+    render(<Collapsible title="Bölüm" note="Son ölçüm 3 gün önce">gövde</Collapsible>);
+    const b = screen.getByRole("button", { name: "Bölüm" });
+    const id = b.getAttribute("aria-describedby");
+    expect(id).toBeTruthy();
+    expect(document.getElementById(id!)?.textContent).toBe("Son ölçüm 3 gün önce");
+  });
 });

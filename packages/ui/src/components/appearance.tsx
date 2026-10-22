@@ -8,7 +8,7 @@ import { IMAGE_ACCEPT, prepareImage } from "../lib/image.js";
 import { Alert } from "./primitives.js";
 import { Button } from "./button.js";
 import { Icon } from "./icon.js";
-import { Check, Eyedropper } from "./icons.js";
+import { Check, Eyedropper, Close } from "./icons.js";
 
 /* ------------------------------------------------------------------ *
  * Bir görünüm ayarı ekranının üç parçası: renk, tema, görsel.
@@ -35,25 +35,51 @@ export function ColorSwatches({
   onChange,
   customLabel,
   custom = true,
+  noneLabel,
   className,
   ...rest
 }: {
   options: readonly SwatchOption[];
+  /** The chosen hex; `""` means "no colour" when `noneLabel` is given. TR: Seçili hex; `noneLabel` verilmişse `""` "renk yok" demek. */
   value: string;
+  /** Fires with the hex, or `""` for the "no colour" box. TR: Hex ile ateşlenir; "renk yok" kutusu için `""`. */
   onChange: (hex: string) => void;
   /** Accessible name of the "my own colour" control. TR: "Kendi rengim" kontrolünün erişilebilir adı. */
   customLabel: string;
   /** Whether a free colour is offered at all. TR: Serbest rengin hiç sunulup sunulmadığı. */
   custom?: boolean;
+  /**
+   * Given, a first box means "no colour" and an empty `value` selects it. Without it an empty
+   * value lit the custom box, so an optional colour read as a choice. TR: Verilirse ilk kutu
+   * "renk yok" demek ve boş `value` onu seçer. Yokken boş değer "kendi rengim" kutusunu
+   * yakıyordu, isteğe bağlı bir renk bir seçim gibi okunuyordu.
+   */
+  noneLabel?: string;
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
   const secili = (hex: string) => hex.toLowerCase() === value.toLowerCase();
-  const hazirMi = options.some((o) => secili(o.hex));
+  const yokSecili = noneLabel !== undefined && value === "";
+  const hazirMi = yokSecili || options.some((o) => secili(o.hex));
 
   return (
     <span {...dataProps(rest)} className={cn("flex flex-wrap items-center gap-3", className)}>
+      {noneLabel !== undefined ? (
+        /* "RENK YOK" DA BİR KUTU: kesik kenar, boş zemin · kitin "henüz bir şey
+           değil" dili. Boş değer onu seçer, kendi-rengim kutusunu değil. */
+        <button
+          type="button"
+          className="tamga-swatch tamga-swatch-none"
+          data-selected={yokSecili}
+          aria-pressed={yokSecili}
+          aria-label={noneLabel}
+          title={noneLabel}
+          onClick={() => onChange("")}
+        >
+          {yokSecili ? <Icon icon={Check} size="base" weight="bold" /> : <Icon icon={Close} size="base" weight="bold" />}
+        </button>
+      ) : null}
       {options.map(({ hex, label: etiket, ...rest }) => (
         <button
           key={hex}

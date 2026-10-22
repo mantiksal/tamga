@@ -38,4 +38,12 @@ describe("LogoTile · surface", () => {
     expect(g.textContent).toBe("");
     expect(g.getAttribute("data-surface")).toBe("dark");
   });
+
+  it("prop'suz ve surface=auto çıktısı birebir aynı sabit dize", () => {
+    const { container: a } = render(<LogoTile name="Tamga" />);
+    const { container: b } = render(<LogoTile name="Tamga" surface="auto" />);
+    const beklenen = '<span class="tamga-logo-tile"><span aria-hidden="true" class="font-display text-subhead font-black">T</span></span>';
+    expect(a.innerHTML).toBe(beklenen);
+    expect(b.innerHTML).toBe(beklenen);
+  });
 });

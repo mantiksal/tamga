@@ -407,6 +407,31 @@ export function Kbd({
  *
  * Gerekçe: docs/gerekce/06-isaret-ve-ton.md
  */
+/** Yalnız hex: üç, dört, altı ya da sekiz basamak. Kullanıcı verisi style'a başka biçimde giremez. */
+const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
+
+/**
+ * Kullanıcının kendi rengi için küçük işaret · Yasa 3'ün yazılı istisnası
+ * (bkz. `Tag swatch`). Tek başına dışa açık: tıklanabilir bir öneri satırı
+ * işareti bir `Button`un içine koyar, `Tag`i değil · kutu içinde kutu olmaz.
+ * Geçersiz renk (hex değil) HİÇ çizilmez: style'a kullanıcı verisi yalnız
+ * doğrulanmış bir hex olarak girer.
+ */
+export function ColorMark({
+  color,
+  className,
+  ...rest
+}: {
+  /** A hex colour (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`). Anything else draws nothing. TR: Bir hex renk. Başka her şey hiçbir şey çizmez. */
+  color: string;
+  className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
+}) {
+  if (!HEX.test(color)) return null;
+  return <span {...dataProps(rest)} aria-hidden="true" className={cn("tamga-mark tamga-color-mark", className)} style={{ backgroundColor: color }} />;
+}
+
 export function Tag({
   children,
   look = "outline",
@@ -416,7 +441,8 @@ export function Tag({
 }: {
   children: ReactNode;
   /**
-   * The user's own colour for the label, any CSS colour. A small mark before the text, nothing
+   * The user's own colour for the label, as a hex (`#rrggbb`; `#rgb`, `#rgba`, `#rrggbbaa` too).
+   * Anything else draws no mark: user data reaches `style` only as a validated hex. A small mark before the text, nothing
    * more: not a ground, not a text colour, and `aria-hidden` · the name carries the meaning, the
    * colour is an identity mark. This is the one WRITTEN exception to Law 3 (colour is for
    * deviation and interaction): the kit says nothing with it, it only carries the user's data.
@@ -452,7 +478,7 @@ export function Tag({
         className,
       )}
     >
-      {swatch ? <span aria-hidden="true" className="tamga-tag-swatch" style={{ backgroundColor: swatch }} /> : null}
+      {swatch ? <ColorMark color={swatch} /> : null}
       {children}
     </span>
   );

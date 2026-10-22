@@ -56,7 +56,8 @@ const T = {
       <>
         <strong>Zaman dilimi yok.</strong> Bileşen yalnız yıl-ay-gün ile çalışır. Bir sipariş
         filtresi &quot;15 Nisan&quot; ister, &quot;15 Nisan 00:00 UTC+3&quot; değil; saat
-        karıştırıldığında gün sınırında bir kayma doğar ve kimse sebebini bulamaz. Saat
+        karıştırıldığında gün sınırında bir kayma doğar ve kimse sebebini bulamaz. Alanın metninde
+        gün <strong>UTC gece yarısı</strong> okunur; tarayıcının dilimi günü kaydırmaz. Saat
         gerekiyorsa aşağıdaki <code>DateTimePicker</code>: o bir <em>an</em> döndürür, dilimiyle.
       </>
     ),
@@ -74,10 +75,12 @@ const T = {
       <>
         <code>DateTimePicker</code> ayrı bir bileşen, <code>DatePicker</code>&apos;a bir prop değil:
         dönen değer gün değil bir <strong>an</strong>, <code>2026-04-15T14:30:00+03:00</code>
-        gibi, kullanıcının kendi dilimiyle. Sunucuya <code>new Date(v).toISOString()</code> gider;
-        dilim, &quot;İstanbul&apos;da 14:30&quot;u kaydırmadan taşıyan şey. Saat de yazılmaz,
-        seçilir; 12 ya da 24 saat yerelin kararı. <code>min</code> aynı güne düşüyorsa önceki
-        saatler sunulmaz · bitiş başlangıçtan önce olamaz.
+        gibi, <code>timeZone</code>&apos;un (IANA, ör. çalışma alanının <code>Europe/Istanbul</code>&apos;u;
+        verilmezse tarayıcının) o andaki ofsetiyle. Sunucuya <code>new Date(v).toISOString()</code>
+        gider; dilim, &quot;İstanbul&apos;da 14:30&quot;u kaydırmadan taşıyan şey. Saat de yazılmaz,
+        seçilir; 12 ya da 24 saat yerelin kararı. Yayılan her değer <code>[min, max]</code> içinde:
+        sınırı delecek bir seçim en yakın geçerli saate kısılır. DST boşluğundaki saat sunulmaz;
+        belirsiz saat sonraki (standart) ofsetle yazılır.
       </>
     ),
     related: "İlgili",
@@ -125,11 +128,13 @@ const T = {
       <>
         <code>DateTimePicker</code> is a separate component, not a prop on <code>DatePicker</code>:
         the value is not a day but an <strong>instant</strong>, like{" "}
-        <code>2026-04-15T14:30:00+03:00</code>, in the user&apos;s own offset. The server gets{" "}
-        <code>new Date(v).toISOString()</code>; the offset is what carries &quot;14:30 in
-        Istanbul&quot; without drift. Time is picked, not typed; 12 or 24 hours is the locale&apos;s
-        call. With <code>min</code> on the same day, earlier hours are not offered · an end cannot
-        precede its start.
+        <code>2026-04-15T14:30:00+03:00</code>, in the offset of <code>timeZone</code> (IANA, say the
+        workspace&apos;s <code>Europe/Istanbul</code>; the browser&apos;s when absent) at that instant.
+        The server gets <code>new Date(v).toISOString()</code>; the offset is what carries
+        &quot;14:30 in Istanbul&quot; without drift. Time is picked, not typed; 12 or 24 hours is the
+        locale&apos;s call. Every emitted value is inside <code>[min, max]</code>: a pick that would
+        cross a bound is clamped to the nearest valid time. An hour inside a DST gap is not offered;
+        an ambiguous hour is written with the later (standard) offset.
       </>
     ),
     tz: (
@@ -137,7 +142,9 @@ const T = {
         <strong>No time zone.</strong> The component works only with year-month-day. An order
         filter asks for &quot;15 April&quot;, not &quot;15 April 00:00 UTC+3&quot;; mixing in a
         clock creates a shift at the day boundary that nobody can trace.
-      If you need the time, <code>DateTimePicker</code> below returns an <em>instant</em>, offset included.
+        The field&apos;s own text reads the day as <strong>UTC midnight</strong>; the browser&apos;s
+        zone never shifts it. If you need the time, <code>DateTimePicker</code> below returns an{" "}
+        <em>instant</em>, offset included.
       </>
     ),
     related: "Related",

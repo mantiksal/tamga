@@ -29,9 +29,10 @@ export function Collapsible({
 }: {
   /**
    * The head's text, or a node with text in it: "Accessibility · /pricing" with the path faint.
-   * The button's accessible name is read from it, so it must carry words. TR: Başlığın metni ya
-   * da içinde metin olan bir düğüm: yolu soluk "Erişilebilirlik · /fiyatlar". Düğmenin
-   * erişilebilir adı buradan okunur, o yüzden sözcük taşımalı.
+   * It sits inside a `<button>`: no interactive or block elements in it. The accessible name is
+   * the head's text, `title` and `meta` together. TR: Başlığın metni ya da içinde metin olan bir
+   * düğüm: yolu soluk "Erişilebilirlik · /fiyatlar". Bir `<button>`un içinde durur: içine
+   * etkileşimli ya da blok öğe konmaz. Erişilebilir ad başlığın metni, `title` ve `meta` birlikte.
    */
   title: ReactNode;
   /**
@@ -102,13 +103,12 @@ export function Collapsible({
         type="button"
         className="tamga-collapsible-head"
         aria-expanded={acik}
-        aria-controls={id}
+        /* Gövde çizilmiyorsa `aria-controls` var olmayan bir id'yi göstermesin. */
+        aria-controls={unmountOnClose && !acik ? undefined : id}
+        aria-describedby={note ? `${id}-not` : undefined}
         onClick={degistir}
       >
         {icon ? <Icon icon={icon} size="base" className="shrink-0 text-accent" /> : null}
-        {/* Ok DÖNÜYOR, değişmiyor: iki ayrı ikon (sağ/aşağı) kullanmak geçişi
-            bir takas yapardı; döndürmek onu bir hareket yapıyor ve hangi
-            yönde gittiğini gösteriyor. */}
         <span className="min-w-0 flex-1 text-body font-bold text-ink">{title}</span>
         {meta ? <span className="text-small text-ink-faint">{meta}</span> : null}
         {/* Ok DÖNÜYOR, değişmiyor: iki ayrı ikon (sağ/aşağı) kullanmak geçişi
@@ -122,7 +122,7 @@ export function Collapsible({
         />
       </button>
       {note ? (
-        <div className="tamga-collapsible-note" data-indent={icon ? "true" : undefined}>
+        <div id={`${id}-not`} className="tamga-collapsible-note" data-indent={icon ? "true" : undefined}>
           {note}
         </div>
       ) : null}

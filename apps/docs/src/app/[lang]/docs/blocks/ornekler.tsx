@@ -577,7 +577,7 @@ function TehlikeliBolgeOrnegi({ lang }: { lang: Dil }) {
         title={s.tehlike}
         description={s.tehlikeNot}
         actions={[
-          { key: "devret", title: s.devret, description: s.devretNot, label: s.devret, disabledReason: s.devretGerekce },
+          { key: "devret", description: s.devretNot, label: s.devret, disabledReason: s.devretGerekce },
           {
             key: "sil",
             title: s.alaniSil,
@@ -940,10 +940,10 @@ const OGELER: GaleriOgesi[] = [
   title="Tehlikeli bölge"
   description="Buradaki işlemler geri alınamaz."
   actions={[
-    { key: "devret", title: "Çalışma alanını devret", description: "…", label: "Devret",
-      disabledReason: "Yalnız sahip devredebilir." },
+    { key: "devret", description: "Sahiplik başka bir üyeye geçer.", label: "Çalışma alanını devret",
+      disabledReason: "Yalnız sahip devredebilir." },          // title isteğe bağlı: düğme zaten adlandırıyor
     { key: "sil", title: "Çalışma alanını sil", description: "…", label: "Sil",
-      onClick: () => setAcik(true),
+      onClick: () => setAcik(true), busyLabel: "Siliniyor…",   // data-action="sil" düğmede
       warning: <Alert state="caution" title="Önce canlı mülkleri kapat">2 mülk yayında.</Alert> },
   ]}
 />

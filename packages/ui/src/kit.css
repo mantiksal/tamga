@@ -1971,12 +1971,6 @@
     padding-left: 44px;
   }
 
-  .tamga-accordion-cards .tamga-collapsible-note {
-    padding: 0 14px 12px;
-  }
-  .tamga-accordion-cards .tamga-collapsible-note[data-indent] {
-    padding-left: 44px;
-  }
 
   /* AÇILIR BÖLÜM KENDİ KARTI · açık olan taban kazanıyor ve başlığı yıkanıyor:
      tek bir yüzeyin içinde çizgiyle ayrılmış satırlarda hangisinin açık olduğu
@@ -2202,6 +2196,8 @@
   .tamga-tag {
     display: inline-flex;
     align-items: center;
+    /* İşaretle metin arası: segment düğmesindeki ikon-metin boşluğuyla aynı. */
+    gap: 6px;
     border-radius: var(--radius-mark);
     padding: 1px 6px;
     font-size: var(--text-caption);
@@ -2233,19 +2229,18 @@
   }
 
   /* KULLANICI RENGİ İŞARETİ · Yasa 3'ün yazılı istisnası (bkz. Tag JSDoc ve
-     docs/gerekce/06). Kitin işaret ailesinden kare (`--radius-mark`), daire
-     değil. Halka mürekkepten türüyor: kullanıcı açık zemine çok açık bir renk
-     seçebilir, halka her renkte ve iki temada işareti ZEMİNDEN ayırıyor · yüzde
-     altmış ölçülerek seçildi: açık zeminde beyaz, koyu zeminde siyah seçimde
-     halka/zemin 3:1'in üstünde kalıyor (1.4.11). */
-  .tamga-tag-swatch {
+     docs/gerekce/06). Ölçü ve köşe `tamga-mark`tan (işaret ailesi); burada
+     yalnız halka. Halka mürekkepten türüyor (%60, ölçülerek): kullanıcı açık
+     zemine beyaz, koyuya siyah seçse de işaret zeminden ayrılıyor (1.4.11). */
+  .tamga-color-mark {
     display: inline-block;
     flex-shrink: 0;
-    width: 8px;
-    height: 8px;
-    margin-right: 5px;
-    border-radius: var(--radius-mark);
     box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-ink) 60%, transparent);
+  }
+  /* DOLU etiketin zemini mürekkep: halka orada sayfadan türüyor, yoksa
+     işaret zemine karışıyordu (halka/zemin 1.0–1.3 ölçüldü). */
+  .tamga-tag-solid .tamga-color-mark {
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-page) 60%, transparent);
   }
 
   /* BÖLÜNMÜŞ KÜNYE: satırlar sığdığı kadar sütuna dağılıyor, ve her sütun
@@ -3994,12 +3989,6 @@
   .tamga-option[data-selected="true"] {
     background: var(--color-accent-bg);
   }
-
-  /* ---------- feedback and structure ---------- */
-
-  /* inline banner — status wash, no fill, a left rule carries the state */
-  /* TON ZEMİNDE, SOL ÇİZGİDE DEĞİL · ve 3 piksellik sol kenar buna rağmen
-     duruyordu: yorum kuralı yazmış, CSS eskisini uygulamaya devam etmişti. */
   /* TEHLİKELİ BÖLGE: kenar ve karo kritik tonda, kart değil · bütün kartı
      boyamak içindeki uyarıyı ve düğmeleri yutuyor. Satırlar çizgiyle ayrı.
      Gerekçe: docs/gerekce/08-blok-ve-sablon.md */
@@ -4045,6 +4034,13 @@
     font-weight: var(--weight-strong);
     color: var(--color-critical);
   }
+
+
+  /* ---------- feedback and structure ---------- */
+
+  /* inline banner — status wash, no fill, a left rule carries the state */
+  /* TON ZEMİNDE, SOL ÇİZGİDE DEĞİL · ve 3 piksellik sol kenar buna rağmen
+     duruyordu: yorum kuralı yazmış, CSS eskisini uygulamaya devam etmişti. */
 
   .tamga-alert {
     display: flex;
@@ -4787,6 +4783,12 @@
      kenar kalıyor · kutu hâlâ ötekilerden farklı bir şey yapıyor. */
   .tamga-swatch-custom {
     border-style: dashed;
+  }
+  /* "Renk yok" kutusu: kesik kenar, kartın zemini, mürekkep glif. */
+  .tamga-swatch-none {
+    border-style: dashed;
+    background: var(--color-shell);
+    color: var(--color-ink);
   }
 
   /* Tarayıcının renk kutusu GÖRÜNMEZ, kutunun üstüne serilmiş bir tetik.

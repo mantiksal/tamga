@@ -189,3 +189,29 @@ decision, and a template that learns it stops being a template.
 THE PALETTE IS NOT APPLIED HERE EITHER. This screen reports the chosen colour;
 turning it into tokens is `makePalette` plus `paletteVars`, and the product decides
 when that happens, because the product owns the root element.
+
+---
+
+## `danger-zone.tsx`
+
+### Tehlikeli bölge: kapalı düğmenin gerekçesi görünür metin.
+
+Üç ayar sayfası aynı bölgeyi üç ayrı biçimde elle yazıyordu; birinde
+yetkisi olmayana düğme kapalıydı ve gerekçe yalnız `title=` ipucundaydı.
+Kapalı bir düğmede ipucu çoğu tarayıcıda görünmez, klavyede ve dokunmatikte
+hiç. Kapalı düğme tek başına bir gerekçe değildir (`ConfirmDialog`un
+`confirmDisabled` belgesi de aynı şeyi söylüyor). Bu yüzden `disabledReason`
+bir metindir: düğmenin yanında durur ve `aria-describedby` ile ona bağlıdır.
+
+ONAY PENCERESİNİ BLOK AÇMAZ. Tık çağıranındır; `ConfirmDialog`u ürün kurar,
+çünkü "adını yazdır" gibi kararlar ürüne aittir ve bir blok onları
+bilemez. Önkoşula takılan eylem (sunucu "önce şunu yap" dedi) için satırın
+altında `warning` yuvası var; oraya kitin `Alert`i girer.
+
+KENAR VE KARO KIRMIZI, KART DEĞİL. Burası gerçekten bir sapma bölgesi ve
+Yasa 3 izin verir; ama bütün kartı boyamak içindeki uyarıyı ve düğmeleri
+yutar. Tehlike yalnız renkle söylenmez: başlık ve uyarı glifi de söyler.
+
+`data-action` DÜĞMEDEDİR, satırda değil: ürünün e2e'si o kancayla düğmeye
+tıklar ve kapalı mı diye bakar. Satırın kendi kancası `data-key`.
+

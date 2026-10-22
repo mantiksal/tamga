@@ -5,6 +5,47 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.8.1
+
+> Fixed before release: 0.6.1 through 0.8.0 were reviewed and corrected before any of them shipped.
+
+### Fixed
+
+- **Calendar / DatePicker / DateTimePicker** (0.7.0)
+  - Keyboard: the tab stop no longer vanished after moving to another month, and never lands on a
+    disabled day; it follows the selected day, else the first open day. External `value` changes
+    move the view and the stop. Focus search is scoped to the calendar's own root.
+  - Grid semantics: `role="grid"` with rows and `gridcell`s, every day named with its full date,
+    `aria-selected` for the chosen day, native `disabled` only (no duplicate `aria-disabled`).
+    `Home`/`End` (week edges) and `PageUp`/`PageDown` (months) join the arrows.
+  - `timeZone` (IANA) on all three. Wall clock ↔ instant goes through `Intl`; "today", `min`/`max`
+    day comparison, the field's text and the emitted offset all use that zone, never the
+    browser's. DST: an hour inside a spring gap is not offered (a wall time in it is pushed
+    forward); an autumn ambiguous hour is written with the later, standard offset.
+  - `DateTimePicker` never emits outside `[min, max]`: day, hour, minute and AM/PM changes are
+    clamped to the nearest valid time and the selects follow. Hours with no valid minute are not
+    offered. A stored minute off the `minuteStep` grid is shown as-is (added as an option), not
+    rounded.
+  - `id` and `invalid` on both pickers, like `Input`. AM/PM words come from `Intl` or the new
+    `labels.am`/`labels.pm`; the kit no longer writes "AM"/"PM" itself.
+  - Tests run green under `TZ=UTC`, `TZ=Europe/Istanbul` and `TZ=America/New_York`.
+- **Tag `swatch`** (0.7.2)
+  - Security: only a hex colour is accepted (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`); anything
+    else draws no mark. Before, the string went into `style` as given, so a value carrying
+    `;background-image:url(…)` would have made the page fetch it on the server render.
+  - The mark is now `ColorMark`, exported on its own (for a clickable suggestion inside a
+    `Button`), built on the kit's `tamga-mark` family (`--mark-dot`, `--mark-dot-radius`), not a
+    hand-sized square. Inside `look="solid"` the ring derives from the page colour, so it reads on
+    the inked ground.
+  - `ColorSwatches` gains `noneLabel`: a "no colour" option; an empty value selects it instead of
+    lighting the custom box.
+- **DangerZone** (0.8.0): `data-action` sits on the **button** (the product's e2e clicks it and
+  checks `disabled`); the row carries `data-key`. `busyLabel` keeps the button named while busy.
+  A row's `title` is optional. Zone `title`/`description` are documented on their own.
+- **Collapsible** (0.7.1): `aria-controls` is omitted while the body is unmounted; `note` is bound
+  to the head with `aria-describedby`. Duplicate CSS and comment removed.
+- **LogoTile** (0.6.1): the no-prop and `surface="auto"` outputs are locked to one literal string.
+
 ## 0.8.0
 
 > The bottom of the settings page, in one shape.
@@ -77,8 +118,11 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   different, and an `onChange` whose type depends on a prop is a trap. `labels` adds `hour`,
   `minute`, `period`.
 
-Nothing changes without the new props: a `DatePicker` without `min`/`max` renders and behaves as
-before, except that the calendar now has one tab stop instead of thirty.
+### Changed
+
+- The calendar's keyboard model: one tab stop and arrow keys instead of a tab stop on every day.
+  A `DatePicker` without `min`/`max` renders the same, but Tab now leaves the grid after one
+  stop; the arrows move inside it.
 
 ## 0.6.1
 
@@ -92,7 +136,9 @@ before, except that the calendar now has one tab stop instead of thirty.
   (`--color-logo-ground/edge/ink-light|dark`), identical in both themes, so the tile reads the
   same at night. Measured: initial 6.6:1 on light, 5.9:1 on dark; edge 3.9:1 on dark
   (WCAG 1.4.11). A product that had been wrapping the tile in a local `.dark` class to get this
-  can drop the wrapper.
+  can drop the wrapper · note the ground differs by one step: the new dark surface is the dark
+  theme's **card** (`#16233a`), the old wrapper with `bg-page` gave the dark **page** (`#101a2c`).
+  Not pixel-identical; the card is what a tile sits on.
 
 ## 0.6.0
 

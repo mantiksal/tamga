@@ -62,4 +62,41 @@ describe("DangerZone", () => {
     expect(bolge).toBeTruthy();
     expect(bolge.querySelector("svg")).not.toBeNull();
   });
+
+  it("data-action DÜĞMEDE, satırda data-key: e2e [data-action] ile düğmeye tıklıyor", () => {
+    render(<DangerZone {...ETIKET} actions={[{ key: "delete-x", title: "Sil", description: "b", label: "Sil", disabledReason: "Yetki yok" }]} />);
+    const dugme = document.querySelector('[data-action="delete-x"]')!;
+    expect(dugme.tagName).toBe("BUTTON");
+    expect(dugme).toBeDisabled();
+    expect(document.querySelector('li[data-key="delete-x"]')).not.toBeNull();
+  });
+
+  it("kapalı ya da busy satırda tık onClick'i çağırmıyor; busy düğmenin adı boş değil", () => {
+    const a = vi.fn(), b = vi.fn();
+    render(
+      <DangerZone {...ETIKET} actions={[
+        { key: "a", title: "A", description: "b", label: "Sil", onClick: a, disabledReason: "Yetki yok" },
+        { key: "b", title: "B", description: "b", label: "Devret", onClick: b, busy: true, busyLabel: "Devrediliyor" },
+      ]} />,
+    );
+    fireEvent.click(document.querySelector('[data-action="a"]')!);
+    fireEvent.click(document.querySelector('[data-action="b"]')!);
+    expect(a).not.toHaveBeenCalled();
+    expect(b).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Devrediliyor" })).toBeTruthy();
+  });
+
+  it("aynı sayfada iki bölge: id'ler benzersiz; açıklamasız bölge ve başlıksız satır çiziliyor", () => {
+    render(
+      <>
+        <DangerZone title="Bir" actions={[{ key: "x", description: "Her şey gider.", label: "Sil", disabledReason: "Yok" }]} />
+        <DangerZone title="İki" actions={[{ key: "y", description: "Her şey gider.", label: "Sil", disabledReason: "Yok" }]} />
+      </>,
+    );
+    const idler = [...document.querySelectorAll("[id]")].map((e) => e.id);
+    expect(new Set(idler).size).toBe(idler.length);
+    expect(screen.getByRole("region", { name: "Bir" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "İki" })).toBeTruthy();
+    expect(screen.getAllByText("Her şey gider.")).toHaveLength(2);
+  });
 });

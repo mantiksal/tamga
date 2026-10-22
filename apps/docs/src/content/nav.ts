@@ -268,7 +268,7 @@ const PAGES: DocPage[] = [
   c("card", "Card", "Kitin tek yükseltilmiş yüzeyi", "The kit's one raised surface"),
   c("checkbox", "Checkbox", "İşaretlendiğinde dolar", "It fills when checked"),
   c("combobox", "Combobox", "Uzun listede arayarak seçim", "Search to pick from a long list"),
-  c("date-picker", "Date picker", "Yıl-ay-gün; saat yok", "Year-month-day; no clock"),
+  c("date-picker", "Date picker", "Yıl-ay-gün; saat için DateTimePicker", "Year-month-day; DateTimePicker for the clock"),
   c("dialog", "Dialog", "Bir karar ister", "It asks for a decision"),
   c("dot", "Dot", "Bir satır yüksekliğinde durum", "State, one row tall"),
   c("dropdown-menu", "Dropdown menu", "Tetikleyiciye yapışan eylem listesi", "An action list stuck to its trigger"),

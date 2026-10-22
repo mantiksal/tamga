@@ -216,8 +216,11 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 <Tag swatch="#1f7a46">Müşteri</Tag>
 <Tag swatch={tag.color}>{tag.name}</Tag>
 
-{/* oluşturma formunda rengi ColorSwatches seçiyor */}
-<ColorSwatches value={color} onChange={setColor} options={…} customLabel="…" />`}>
+{/* tıklanabilir öneri: işaret Button'un içinde */}
+<Button size="sm"><ColorMark color={tag.color} /> {tag.name}</Button>
+
+{/* oluşturma formunda rengi ColorSwatches seçiyor; "renk yok" da bir seçenek */}
+<ColorSwatches value={color} onChange={setColor} options={…} customLabel="…" noneLabel="…" />`}>
         <TagSwatchDemo lang={lang} />
       </Demo>
       <Props of="Tag" lang={lang} etiketli />

@@ -56,6 +56,7 @@ import {
   TreeSelect,
   type Tone, DateTimePicker,
   Tag, ColorSwatches,
+  ColorMark,
 } from "tamga-ui";
 import { Archive, Bell, Copy, CurrencyDollar, Delete, Download, Edit, Filter, More, Print, Refresh, Settings, Truck } from "tamga-ui/icons";
 import { Demo, type DemoLabels } from "@/components/demo";
@@ -1352,7 +1353,8 @@ const N = {
     alerts: "Uyarılar", alertsBody: "Kim, ne zaman, hangi kanaldan haber alsın.",
     billing: "Faturalama", billingBody: "Plan, ödeme yöntemi ve fatura adresi.",
     threeItems: "3 madde", twoItems: "2 madde", oneItem: "1 madde",
-    tagName: "Etiket adı", tagColour: "Rengi", custom: "Kendi rengim", preview: "Böyle görünecek",
+    tagName: "Etiket adı", tagColour: "Rengi", custom: "Kendi rengim", preview: "Böyle görünecek", noColour: "Renk yok",
+    tagCustomer: "Müşteri", tagCampaign: "Kampanya", tagWhite: "Beyaz", tagBlack: "Siyah", suggest: "Öneri",
     a11y: "Erişilebilirlik", a11yPath: "· /fiyatlar", lastRun: "Son ölçüm 3 gün önce, sayılmadı: sayfa 500 döndü.",
     loading: "Ölçüm yükleniyor…", loaded: "Skor 92 · 4 uyarı, 0 hata. Açılınca çekildi.",
     copy: "Kopyala", copied: "Kopyalandı", failed: "Kopyalanamadı",
@@ -1436,7 +1438,8 @@ const N = {
     alerts: "Alerts", alertsBody: "Who hears about what, when, and through which channel.",
     billing: "Billing", billingBody: "Plan, payment method and billing address.",
     threeItems: "3 items", twoItems: "2 items", oneItem: "1 item",
-    tagName: "Label name", tagColour: "Colour", custom: "My own colour", preview: "It will look like this",
+    tagName: "Label name", tagColour: "Colour", custom: "My own colour", preview: "It will look like this", noColour: "No colour",
+    tagCustomer: "Customer", tagCampaign: "Campaign", tagWhite: "White", tagBlack: "Black", suggest: "Suggestion",
     a11y: "Accessibility", a11yPath: "· /pricing", lastRun: "Last run 3 days ago, not counted: the page returned 500.",
     loading: "Loading the measurement…", loaded: "Score 92 · 4 warnings, 0 errors. Fetched on open.",
     copy: "Copy", copied: "Copied", failed: "Copy failed",
@@ -1576,15 +1579,19 @@ export function CollapsibleControlledDemo({ lang }: L) {
 export function TagSwatchDemo({ lang }: L) {
   const n = N[lang];
   const [ad, setAd] = useState("Acil");
-  const [renk, setRenk] = useState("#b4451f");
+  const [renk, setRenk] = useState("");
   return (
     <div className="flex w-full flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
         <Tag>PRO</Tag>
-        <Tag swatch="#1f7a46">Müşteri</Tag>
-        <Tag swatch="#6b3fa0">Kampanya</Tag>
-        <Tag swatch="#fafafa">Beyaz</Tag>
-        <Tag swatch="#0a0a0a">Siyah</Tag>
+        <Tag swatch="#1f7a46">{n.tagCustomer}</Tag>
+        <Tag swatch="#6b3fa0">{n.tagCampaign}</Tag>
+        <Tag look="solid" swatch="#fafafa">{n.tagWhite}</Tag>
+        <Tag swatch="#0a0a0a">{n.tagBlack}</Tag>
+        {/* Tıklanabilir öneri: işaret Button'un içinde, Tag'in değil · kutu içinde kutu olmaz. */}
+        <Button size="sm">
+          <ColorMark color="#1f7a46" /> {n.suggest}
+        </Button>
       </div>
       <Field label={n.tagName}>
         <Input value={ad} onChange={(e) => setAd(e.target.value)} aria-label={n.tagName} />
@@ -1593,6 +1600,7 @@ export function TagSwatchDemo({ lang }: L) {
         <ColorSwatches
           value={renk}
           customLabel={n.custom}
+          noneLabel={n.noColour}
           onChange={setRenk}
           options={[
             { hex: "#b4451f", label: "Kiremit" },
@@ -1603,7 +1611,7 @@ export function TagSwatchDemo({ lang }: L) {
         />
       </Field>
       <p className="flex items-center gap-2 text-small text-ink-faint">
-        {n.preview} <Tag swatch={renk}>{ad || "…"}</Tag>
+        {n.preview} <Tag swatch={renk || undefined}>{ad || "…"}</Tag>
       </p>
     </div>
   );

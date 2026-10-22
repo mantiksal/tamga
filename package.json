@@ -30,6 +30,7 @@
     "check:durum-hover": "node scripts/check-durum-hover.mjs",
     "check:yuvarlak": "node scripts/check-yuvarlak.mjs",
     "check:olcu-hizasi": "node scripts/check-olcu-hizasi.mjs",
+    "olc:ray": "node scripts/olc/ray-kirpma.mjs",
     "check:data-props": "node scripts/check-data-props.mjs",
     "check:item-hooks": "node scripts/check-item-hooks.mjs"
   },

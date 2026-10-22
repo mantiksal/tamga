@@ -46,6 +46,11 @@
      diye YANINDA ihtiyaç duyduğu yer. 3px, kaydırmadan bir fazla; §2'deki kırpılma
      tuzağı tam olarak bu. */
   --offset-room: 3px;
+  /* The room a LIFTED and FOCUSED rail item needs: its 1px lift plus the focus ring (1px, offset
+     2px). 4px; with 3px the ring's top-left pixel was clipped on the current item.
+     TR: KALKMIŞ ve ODAKLI bir ray girişinin yeri: 1px kalkış artı odak halkası (1px, 2px aralık).
+     4px; 3px'te seçili girişin halkasının sol üst pikseli kesiliyordu. */
+  --offset-room-ring: 4px;
   /* The instrument marks: a 2px tick and a 6px dot. Below the spacing scale on purpose: these are
      read as marks, not as boxes, and 4px is already too heavy for a dial tick.
      TR: Gösterge işaretleri: 2px'lik bir çentik ve 6px'lik bir nokta. Boşluk ölçeğinin
@@ -565,13 +570,11 @@
   .tamga-rail-scroll {
     min-height: 0;
     overflow-y: auto;
-    /* DÖRT YANDAN DA YER, yalnız sağ ve alttan değil.
-       İlk hâli kaydırma gölgesini (sağ+alt) düşünüp hover'ı unutmuştu: seçili
-       giriş hover'da `translate(-1px, -1px)` ile YUKARI ve SOLA kayıyor, ve
-       sol kenarda yer olmadığı için oradan kesiliyordu. Simetrik dolgu ayrıca
-       ikinci bir şeyi düzeltiyor: dar rayda `items-center` artık gerçekten
-       ortalıyor — tek yönlü dolgu ikonları 1.5 piksel sola çekiyordu. */
-    padding: var(--offset-room);
+    /* DÖRT YANDAN DA YER, yalnız sağ ve alttan değil: seçili giriş yukarı ve
+       sola kalkıyor, sol kenarda yer yokken oradan kesiliyordu. Simetrik dolgu
+       dar rayda `items-center`ı da gerçekten ortalıyor. Yer `--offset-room-ring`:
+       giriş hem kalkıyor hem odak halkası taşıyor. Gerekçe: docs/gerekce/10-kit-css.md */
+    padding: var(--offset-room-ring);
     /* Kaydırma çubuğu gizli: ray dar ve bir çubuk orada ikonların yerini
        daraltıyor. Kaydırma yine çalışıyor. */
     scrollbar-width: none;
@@ -637,12 +640,28 @@
     gap: 8px;
     min-height: 0;
     overflow: hidden;
+    /* KESME KUTUSU İÇERİKTEN BÜYÜK: seçili girişin kalkışı, gölgesi ve odak
+       çerçevesi kutunun dışında kalıyor ve `hidden` üçünü de kesiyordu. Dolgu
+       kadar eksi kenar boşluğu: düzen bir piksel oynamıyor, kesme sınırı
+       `--offset-room-ring` kadar dışarıda. */
+    padding: var(--offset-room-ring);
+    margin: calc(-1 * var(--offset-room-ring));
+    visibility: visible;
+    transition: visibility 0s;
   }
   .tamga-rail-group-body[data-open="false"] {
     grid-template-rows: 0fr;
   }
+  /* KAPALIYKEN GÖRÜNMEZ: dolgu alanı 0fr'de de duruyor ve içeriğin ilk üç
+     pikseli oradan sızardı. Gecikme animasyon kadar: önce kapanır, sonra
+     saklanır; açılırken gecikmesiz görünür. */
+  .tamga-rail-group-body[data-open="false"] > div {
+    visibility: hidden;
+    transition: visibility 0s var(--duration-press);
+  }
   @media (prefers-reduced-motion: reduce) {
     .tamga-rail-group-body,
+    .tamga-rail-group-body > div,
     .tamga-rail-section-caret {
       transition: none;
     }

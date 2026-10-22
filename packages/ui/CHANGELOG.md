@@ -5,6 +5,26 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.7.2
+
+> The current rail item is drawn whole.
+
+### Fixed
+
+- **`AppShell` rail: the current item's lift, shadow and focus ring were clipped.** Every entry
+  sits inside the group body's inner box, which carries `overflow: hidden` for the 0fr/1fr
+  open-close animation, and the box was exactly the content's size: the lifted item lost its
+  top and left edge, the 3px shadow its right end, and a keyboard focus ring its sides (WCAG
+  2.4.7 / 2.4.11). The inner box now has `--offset-room-ring` (4px: 1px lift plus the 1px ring
+  at 2px offset) of padding with the same negative margin, so the layout does not move but the
+  clip edge sits outside the painted area; the rail's own scroll padding grows from 3px to 4px
+  for the same reason. A closed group is hidden with `visibility: hidden` once the animation
+  ends (the padding would otherwise leak the first pixels), shown again without delay on open;
+  `inert` is unchanged. Plain CSS, works in Safari; no `overflow-clip-margin`. Measured in Chrome
+  on the docs site's real-size shell: `pnpm olc:ray` (needs Chrome and the docs server) checks
+  that the painted area of the current and of a focused item stays inside the nearest clipping
+  ancestor and that a closed group leaks nothing.
+
 ## 0.7.1
 
 > An empty calendar opens where something can be picked.

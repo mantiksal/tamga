@@ -30,9 +30,9 @@ export function Collapsible({
   /**
    * The head's text, or a node with text in it: "Accessibility · /pricing" with the path faint.
    * It sits inside a `<button>`: no interactive or block elements in it. The accessible name is
-   * the head's text, `title` and `meta` together. TR: Başlığın metni ya da içinde metin olan bir
-   * düğüm: yolu soluk "Erişilebilirlik · /fiyatlar". Bir `<button>`un içinde durur: içine
-   * etkileşimli ya da blok öğe konmaz. Erişilebilir ad başlığın metni, `title` ve `meta` birlikte.
+   * `title` and `meta` together. TR: Başlığın metni ya da içinde metin olan bir düğüm: yolu
+   * soluk "Erişilebilirlik · /fiyatlar". Bir `<button>`un içinde durur: içine etkileşimli ya da
+   * blok öğe konmaz. Erişilebilir ad `title` ve `meta` birlikte.
    */
   title: ReactNode;
   /**

@@ -390,23 +390,6 @@ export function Kbd({
   return <kbd className={cn("tamga-kbd", inline && "tamga-kbd-inline", className)}>{children}</kbd>;
 }
 
-/**
- * Sayaç rozeti: bir ikonun köşesindeki SAYI (`StatusChip` bir DURUM taşır).
- * `max` üstünde "+" ile kesiliyor, yoksa dört hane kutuyu şişirip altındaki
- * ikonu eziyor. Sıfır gösterilmiyor.
- *
- * Doküman: /docs/badge
- */
-/**
- * Etiket rozeti · bir özelliğin durumu: BETA, YENİ, PRO.
- *
- * SAYACIN (`Badge`) KARDEŞİ AMA AYNI ŞEY DEĞİL: sayaç bir MİKTAR taşıyor ve
- * okunduktan sonra kayboluyor; etiket bir DURUM taşıyor ve yerinde duruyor.
- * İkisini tek bileşene koymak, "sayı verilmemişse etiket" gibi bir kural
- * demekti.
- *
- * Gerekçe: docs/gerekce/06-isaret-ve-ton.md
- */
 /** Yalnız hex: üç, dört, altı ya da sekiz basamak. Kullanıcı verisi style'a başka biçimde giremez. */
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 
@@ -432,6 +415,16 @@ export function ColorMark({
   return <span {...dataProps(rest)} aria-hidden="true" className={cn("tamga-mark tamga-color-mark", className)} style={{ backgroundColor: color }} />;
 }
 
+/**
+ * Etiket rozeti · bir özelliğin durumu: BETA, YENİ, PRO.
+ *
+ * SAYACIN (`Badge`) KARDEŞİ AMA AYNI ŞEY DEĞİL: sayaç bir MİKTAR taşıyor ve
+ * okunduktan sonra kayboluyor; etiket bir DURUM taşıyor ve yerinde duruyor.
+ * İkisini tek bileşene koymak, "sayı verilmemişse etiket" gibi bir kural
+ * demekti.
+ *
+ * Gerekçe: docs/gerekce/06-isaret-ve-ton.md
+ */
 export function Tag({
   children,
   look = "outline",
@@ -447,7 +440,9 @@ export function Tag({
    * colour is an identity mark. This is the one WRITTEN exception to Law 3 (colour is for
    * deviation and interaction): the kit says nothing with it, it only carries the user's data.
    * Never for status or severity · that is `StatusChip`. TR: Kullanıcının etikete verdiği renk,
-   * herhangi bir CSS rengi. Metnin önünde küçük bir işaret, fazlası değil: zemin değil, metin
+   * yalnız hex (`#rrggbb`; `#rgb`, `#rgba`, `#rrggbbaa` da); başka biçim hiç çizilmez,
+   * kullanıcı verisi `style`'a yalnız doğrulanmış hex olarak girer. Metnin önünde küçük bir
+   * işaret, fazlası değil: zemin değil, metin
    * rengi değil, ve `aria-hidden` · anlamı ad taşıyor, renk bir kimlik işareti. Yasa 3'ün
    * (renk sapma ve etkileşim içindir) tek YAZILI istisnası: kit bununla bir şey söylemiyor,
    * yalnız kullanıcının verisini taşıyor. Durum ya da önem için asla · o `StatusChip`.
@@ -484,6 +479,13 @@ export function Tag({
   );
 }
 
+/**
+ * Sayaç rozeti: bir ikonun köşesindeki SAYI (`StatusChip` bir DURUM taşır).
+ * `max` üstünde "+" ile kesiliyor, yoksa dört hane kutuyu şişirip altındaki
+ * ikonu eziyor. Sıfır gösterilmiyor.
+ *
+ * Doküman: /docs/badge
+ */
 export function Badge({
   count,
   max = 99,

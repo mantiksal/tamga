@@ -81,7 +81,12 @@ const T = {
         <code>aria-hidden</code> · anlamı ad taşıyor. <strong>Ne zaman:</strong> kullanıcının
         oluşturduğu, adlandırdığı, renklendirdiği etiketler. <strong>Ne zaman asla:</strong> durum
         ya da önem bildirmek için · onun için <code>StatusChip</code> var. İşaretin halkası
-        mürekkepten türüyor; çok açık ya da çok koyu bir renk iki temada da görünür kalıyor.
+        mürekkepten türüyor; çok açık ya da çok koyu bir renk iki temada da görünür kalıyor;{" "}
+        <code>solid</code> görünümde halka zeminden türüyor, mürekkep üstünde kayboluyordu.{" "}
+        <strong>Yalnız hex</strong> (<code>#rgb</code>, <code>#rrggbb</code>, <code>#rrggbbaa</code>):
+        başka biçim hiç çizilmez, kullanıcı verisi <code>style</code>&apos;a yalnız doğrulanmış bir hex
+        olarak girer. İşaret <code>ColorMark</code> olarak tek başına da dışa açık: tıklanabilir bir
+        öneri işareti bir <code>Button</code>&apos;un içine koyar, <code>Tag</code>&apos;i değil.
       </>
     ),
     rules: "Kurallar",
@@ -154,7 +159,12 @@ const T = {
         <code>aria-hidden</code> · the name carries the meaning. <strong>When:</strong> labels the
         user creates, names and colours. <strong>Never:</strong> to signal status or severity · that
         is what <code>StatusChip</code> is for. The mark&apos;s ring derives from the ink, so a very
-        light or very dark colour stays visible in both themes.
+        light or very dark colour stays visible in both themes; in the <code>solid</code> look it
+        derives from the page colour, since on ink it vanished. <strong>Hex only</strong> (
+        <code>#rgb</code>, <code>#rrggbb</code>, <code>#rrggbbaa</code>): any other form draws
+        nothing, user data reaches <code>style</code> only as a validated hex. The mark is also
+        exported on its own as <code>ColorMark</code>: a clickable suggestion puts the mark inside a{" "}
+        <code>Button</code>, not a <code>Tag</code>.
       </>
     ),
     rules: "Rules",
@@ -224,6 +234,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         <TagSwatchDemo lang={lang} />
       </Demo>
       <Props of="Tag" lang={lang} etiketli />
+      <Props of="ColorMark" lang={lang} etiketli />
 
       <H2>{t.rules}</H2>
       <Note>{t.zero}</Note>

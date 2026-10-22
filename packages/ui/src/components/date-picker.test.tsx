@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
-import { DatePicker, DateTimePicker, Calendar } from "./date-picker.js";
+import { DatePicker, DateTimePicker, Calendar, anYap } from "./date-picker.js";
 
 /**
  * Açılan takvimin KAPANMA yolları; sınır, klavye ve saat.
  *
  * Dilim: testler makinenin dilimine BAĞLI DEĞİL · `timeZone` açıkça veriliyor
- * ve beklenen değerler o dilime göre yazılı. `TZ=UTC` ve `TZ=Europe/Istanbul`
- * ile ikisi de yeşil olmak zorunda.
+ * ve beklenen değerler o dilime göre yazılı. `TZ=UTC`, `Europe/Istanbul`,
+ * `America/New_York` ve `Europe/Berlin` ile dördü de yeşil olmak zorunda.
  */
 
 const ETIKETLER = { previousMonth: "Önceki ay", nextMonth: "Sonraki ay", open: "Takvimi aç", clear: "Temizle" };
@@ -201,11 +201,15 @@ describe("DateTimePicker · dilim", () => {
     expect(screen.getByRole("option", { name: "03" })).toBeTruthy();
   });
 
-  it("DST: belirsiz saat (Berlin, 25 Ekim 2026 02:30) SONRAKİ ofsetle, +01:00", () => {
+  it("DST: belirsiz saate YENİ seçim (Berlin, 25 Ekim 2026 02:30) SONRAKİ ofsetle, +01:00", () => {
+    /* Değer 01:30+02:00 (tek anlamlı); saat 02 seçilince iki aday var, sonraki
+       kazanıyor. Dışarıdan belirsiz saatte gelen değer ise kendi ofsetini korur
+       (bkz. G1 bloğu). */
     const onChange = vi.fn();
-    render(<DateTimePicker locale="de-DE" timeZone="Europe/Berlin" value="2026-10-25T02:30:00+02:00" onChange={onChange} placeholder="Zeit" labels={{ ...SAATLI, hour: "Stunde", minute: "Minute", period: "Periode" }} />);
+    render(<DateTimePicker locale="de-DE" timeZone="Europe/Berlin" value="2026-10-25T01:30:00+02:00" onChange={onChange} placeholder="Zeit" labels={{ ...SAATLI, hour: "Stunde", minute: "Minute", period: "Periode" }} />);
     fireEvent.click(screen.getByRole("textbox"));
-    fireEvent.click(gun("25")!);
+    fireEvent.click(screen.getByRole("button", { name: "Stunde" }));
+    fireEvent.click(screen.getByRole("option", { name: "02" }));
     expect(onChange).toHaveBeenLastCalledWith("2026-10-25T02:30:00+01:00");
   });
 
@@ -217,5 +221,114 @@ describe("DateTimePicker · dilim", () => {
     fireEvent.click(screen.getByRole("option", { name: "PM" }));
     /* 09:30 → 21:30 max'ı deler → 20:00'a kısılır. */
     expect(onChange).toHaveBeenLastCalledWith("2026-04-15T20:00:00+03:00");
+  });
+});
+
+describe("DateTimePicker · DST kuralı (G1)", () => {
+  const NY = "America/New_York";
+  const BER = "Europe/Berlin";
+  const SAATLI = { ...ETIKETLER, hour: "Saat", minute: "Dakika", period: "Öğle" };
+  const acNY = (props: Partial<React.ComponentProps<typeof DateTimePicker>>) => {
+    const onChange = vi.fn();
+    render(<DateTimePicker locale="tr-TR" timeZone={NY} onChange={onChange} placeholder="Zaman" labels={SAATLI} {...props} />);
+    fireEvent.click(screen.getByRole("textbox"));
+    return onChange;
+  };
+
+  it("anYap · boşlukta İLERİ: New York 8 Mart 02:30 → 03:30-04:00; Berlin 29 Mart 02:30 → 03:30+02:00", () => {
+    expect(anYap({ y: 2026, m: 2, d: 8, h: 2, mi: 30 }, NY).toISOString()).toBe("2026-03-08T07:30:00.000Z");
+    expect(anYap({ y: 2026, m: 2, d: 29, h: 2, mi: 30 }, BER).toISOString()).toBe("2026-03-29T01:30:00.000Z");
+  });
+
+  it("anYap · belirsizlikte SONRAKİ: New York 1 Kasım 01:30 → -05:00; Berlin 25 Ekim 02:30 → +01:00", () => {
+    expect(anYap({ y: 2026, m: 10, d: 1, h: 1, mi: 30 }, NY).toISOString()).toBe("2026-11-01T06:30:00.000Z");
+    expect(anYap({ y: 2026, m: 9, d: 25, h: 2, mi: 30 }, BER).toISOString()).toBe("2026-10-25T01:30:00.000Z");
+  });
+
+  it("New York güz: saat 01 seçilince -05:00 ile yayılıyor", () => {
+    const onChange = acNY({ value: "2026-11-01T00:30:00-04:00" });
+    fireEvent.click(screen.getByRole("button", { name: "Saat" }));
+    fireEvent.click(screen.getByRole("option", { name: "01" }));
+    expect(onChange).toHaveBeenLastCalledWith("2026-11-01T01:30:00-05:00");
+  });
+
+  it("belirsiz saatteki dış değer kendi ofsetini koruyor: aynı güne tıklanınca kaymıyor", () => {
+    for (const v of ["2026-11-01T01:30:00-04:00", "2026-11-01T01:30:00-05:00"]) {
+      const onChange = vi.fn();
+      const { unmount } = render(<DateTimePicker locale="tr-TR" timeZone={NY} value={v} onChange={onChange} placeholder="Zaman" labels={SAATLI} />);
+      fireEvent.click(screen.getByRole("textbox"));
+      fireEvent.click(gun("1")!);
+      expect(onChange).toHaveBeenLastCalledWith(v);
+      unmount();
+    }
+  });
+
+  it("min belirsiz saatin ikinci yaşanışındaysa (01:15-05:00) saat 01 yine sunuluyor", () => {
+    acNY({ value: "2026-11-01T03:00:00-05:00", min: "2026-11-01T01:15:00-05:00" });
+    fireEvent.click(screen.getByRole("button", { name: "Saat" }));
+    expect(screen.getByRole("option", { name: "01" })).toBeTruthy();
+    expect(screen.queryByRole("option", { name: "00" })).toBeNull();
+  });
+});
+
+describe("DateTimePicker · kutu, gün, adım, geçersiz girdi (G2-G6)", () => {
+  const SAATLI = { ...ETIKETLER, hour: "Saat", minute: "Dakika", period: "Öğle" };
+  const kutu = (ad: string) => screen.getByRole("button", { name: ad });
+
+  it("kayıtlı değer aralık dışındaysa kutu yine biçimli ve kendi saatini gösteriyor (G2)", () => {
+    render(<DateTimePicker locale="tr-TR" timeZone={IST} value="2026-04-15T09:00:00+03:00" min="2026-04-15T14:00:00+03:00" onChange={vi.fn()} placeholder="Zaman" labels={SAATLI} />);
+    fireEvent.click(screen.getByRole("textbox"));
+    expect(kutu("Saat").textContent).toBe("09");
+    expect(kutu("Dakika").textContent).toBe("00");
+  });
+
+  it("gün seçilmeden saat kutuları kapalı; bugünün tarihi yayılmıyor (G3)", () => {
+    const onChange = vi.fn();
+    render(<DateTimePicker locale="tr-TR" timeZone={IST} onChange={onChange} placeholder="Zaman" labels={SAATLI} />);
+    fireEvent.click(screen.getByRole("textbox"));
+    expect(kutu("Saat")).toBeDisabled();
+    expect(kutu("Dakika")).toBeDisabled();
+    fireEvent.click(kutu("Saat"));
+    expect(onChange).not.toHaveBeenCalled();
+    fireEvent.click(gun("20")!);
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange.mock.calls[0]![0]).toMatch(/^\d{4}-\d{2}-20T\d{2}:\d{2}:00\+03:00$/);
+  });
+
+  it("minuteStep 0 ya da eksi takılmıyor: 1 dakika sayılıyor (G4)", () => {
+    render(<DateTimePicker locale="tr-TR" timeZone={IST} value="2026-04-15T14:30:00+03:00" minuteStep={0} onChange={vi.fn()} placeholder="Zaman" labels={SAATLI} />);
+    fireEvent.click(screen.getByRole("textbox"));
+    fireEvent.click(kutu("Dakika"));
+    expect(screen.getByRole("option", { name: "01" })).toBeTruthy();
+  });
+
+  it("geçersiz dilim ya da ISO bileşeni düşürmüyor; alan boş, konsola uyarı (G5)", () => {
+    const uyar = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const a = render(<DateTimePicker locale="tr-TR" timeZone="Mars/Olympus" value="2026-04-15T14:30:00+03:00" onChange={vi.fn()} placeholder="Zaman" labels={SAATLI} />);
+    expect((screen.getByRole("textbox") as HTMLInputElement).value).toMatch(/15 Nis 2026/);
+    a.unmount();
+    const b = render(<DateTimePicker locale="tr-TR" timeZone={IST} value="bugün" min="dün" onChange={vi.fn()} placeholder="Zaman" labels={SAATLI} />);
+    expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("");
+    fireEvent.click(screen.getByRole("textbox"));
+    expect(gun("20")).toBeTruthy();
+    b.unmount();
+    render(<DatePicker locale="tr-TR" timeZone="Mars/Olympus" value="bugün" onChange={vi.fn()} placeholder="Tarih" labels={ETIKETLER} />);
+    expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("");
+    expect(uyar).toHaveBeenCalled();
+  });
+
+  it("DateTimePicker · id ve invalid Input gibi (G6)", () => {
+    render(<DateTimePicker id="baslangic" invalid locale="tr-TR" timeZone={IST} onChange={vi.fn()} placeholder="Zaman" labels={SAATLI} />);
+    const alan = screen.getByRole("textbox");
+    expect(alan.id).toBe("baslangic");
+    expect(alan).toHaveAttribute("aria-invalid", "true");
+  });
+
+  it("ok tuşu odağı gerçekten taşıyor: document.activeElement yeni günde (G6)", async () => {
+    render(<Calendar locale="tr-TR" timeZone={IST} value="2026-04-15" labels={ETIKETLER} />);
+    gun("15")!.focus();
+    fireEvent.keyDown(gun("15")!, { key: "ArrowRight" });
+    await new Promise((r) => queueMicrotask(() => r(null)));
+    expect(document.activeElement).toBe(gun("16"));
   });
 });

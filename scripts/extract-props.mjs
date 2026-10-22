@@ -30,7 +30,7 @@
  * kendiliğinden oluyor — tablo bileşenin KENDİ API'sini gösteriyor, kalanı
  * için sayfa metni "geri kalan tüm <button> nitelikleri geçerli" diyor.
  */
-import { readdirSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dilAyir } from "./dil.mjs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -189,26 +189,63 @@ function expandAliases(text, seen = new Set()) {
   return out;
 }
 
-/** Bir tip ifadesindeki TÜM nesne gövdelerini toplar — takma adların içindekiler dahil. */
+/** Bir kesişimi üst seviye `&` ile böler: `A & { x: 1 } & B`. */
+function kesisim(text) {
+  const parts = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === "=" && text[i + 1] === ">") { i++; continue; }
+    if ("{([<".includes(c)) depth++;
+    else if ("})]>".includes(c)) depth--;
+    else if (c === "&" && depth === 0) {
+      parts.push(text.slice(start, i));
+      start = i + 1;
+    }
+  }
+  parts.push(text.slice(start));
+  return parts.map((p) => p.trim()).filter(Boolean);
+}
+
+/** Bir tip ifadesinin ÜST SEVİYE nesne gövdeleri: satır içi `{…}` parçaları ve
+    kesişimdeki takma adların gövdeleri. Bir ÜYENİN tipinde geçen takma ad
+    (`actions: DangerAction[]`) açılmaz: onun üyeleri o bileşenin propu değil,
+    ve açıldığı dönemde `DangerZone` tablosu satırın `label`ını kendi propu
+    sanıyordu. */
 function typeLiterals(text, seen = new Set()) {
   const bodies = [];
-  const scan = (t) => {
-    let i = 0;
-    while ((i = t.indexOf("{", i)) >= 0) {
-      const end = matchBrace(t, i);
-      if (end < 0) break;
-      bodies.push(t.slice(i + 1, end));
-      i = end + 1;
+  for (const part of kesisim(text)) {
+    if (part.startsWith("{")) {
+      const end = matchBrace(part, 0);
+      if (end > 0) bodies.push({ body: part.slice(1, end) });
+      continue;
     }
-  };
-  scan(text);
-  for (const m of text.matchAll(/\b([A-Z][\w$]*)\b/g)) {
-    const body = aliases.get(m[1]);
-    if (!body || seen.has(m[1])) continue;
-    seen.add(m[1]);
-    bodies.push(...typeLiterals(body, seen));
+    /* `Omit<ScoreProps, "a" | "b">`, `Pick<…>`, `Partial<…>`: üst seviyede sarılmış
+       takma ad da açılır; dışlanan anahtar tabloya girmez (eskiden giriyordu). */
+    const sarili = part.match(/^(Omit|Pick|Partial|Required)<\s*([A-Z][\w$]*)\s*(?:,\s*([\s\S]*))?>$/);
+    const ad = sarili ? sarili[2] : part.match(/^([A-Z][\w$]*)$/)?.[1];
+    const body = ad && aliases.get(ad);
+    if (!body || seen.has(ad)) continue;
+    seen.add(ad);
+    const anahtarlar = sarili?.[3] ? new Set([...sarili[3].matchAll(/"([^"]+)"/g)].map((m) => m[1])) : null;
+    for (const ic of typeLiterals(body, seen)) {
+      const drop = sarili?.[1] === "Omit" ? anahtarlar : ic.drop;
+      const keep = sarili?.[1] === "Pick" ? anahtarlar : ic.keep;
+      const optional = sarili?.[1] === "Partial" ? true : sarili?.[1] === "Required" ? false : ic.optional;
+      bodies.push({ ...ic, drop, keep, optional });
+    }
   }
   return bodies;
+}
+
+/** Üst seviye gövdelerin üyeleri, sarmalayıcının süzgeciyle. */
+function uyeler(text) {
+  return typeLiterals(text).flatMap(({ body, drop, keep, optional }) =>
+    membersOf(body)
+      .filter((p) => (!drop || !drop.has(p.name)) && (!keep || keep.has(p.name)))
+      .map((p) => (optional === undefined ? p : { ...p, required: !optional })),
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -340,7 +377,7 @@ for (const f of files) {
     /* Tip bir KESİŞİM olabilir: `ScoreProps & { segments?: number }`. Yalnız
        ilk parçaya bakmak `segments`i, yalnız satır içine bakmak `value` ve
        `label`ı düşürürdü — ikisi de sessiz bir eksiklik. */
-    props = typeLiterals(typeText).flatMap(membersOf);
+    props = uyeler(typeText);
     typeText = expandAliases(typeText);
 
     /* cva varyantları — `VariantProps<typeof xVariants>` nerede geçerse. */
@@ -379,6 +416,24 @@ for (const f of files) {
     /* Kamusal olmayan (giriş dosyasından vurulmayan) bileşen tabloya girmiyor. */
     if (kamusal.has(name)) result[name] = props;
   }
+}
+
+/* 3 · Doküman sayfasının istediği TİP tabloları. `<Props of="DangerAction">`
+      bir bileşen değil, kamusal bir nesne tipi: satırın propları bölgenin
+      tablosuna karışmasın diye kendi tablosunu alıyor. Yalnız istenen ve
+      kamusal olan; her dışa vurulan tip kendiliğinden tablo olmuyor. */
+const sayfalar = join(root, "apps", "docs", "src", "app", "[lang]", "docs");
+const istenen = new Set();
+for (const d of readdirSync(sayfalar)) {
+  const sayfa = join(sayfalar, d, "page.tsx");
+  if (!existsSync(sayfa)) continue;
+  for (const m of readFileSync(sayfa, "utf8").matchAll(/<Props of="([A-Za-z]+)"/g)) istenen.add(m[1]);
+}
+for (const ad of istenen) {
+  if (result[ad] || !kamusal.has(ad) || !aliases.has(ad)) continue;
+  const props = uyeler(ad);
+  props.sort((a, b) => Number(b.required) - Number(a.required) || a.name.localeCompare(b.name));
+  result[ad] = props;
 }
 
 mkdirSync(dirname(out), { recursive: true });

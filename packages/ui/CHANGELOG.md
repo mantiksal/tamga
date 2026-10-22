@@ -5,6 +5,67 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.9.0
+
+> The image field can talk to a server. Also fixes to 0.8.1 found in review before any of 0.6.1 through 0.8.1 shipped.
+
+### Added
+
+- **`ImageField` upload path** · `onUpload(file) => Promise<string | false>` and
+  `onRemove() => Promise<boolean | void>`. Given `onUpload`, the field no longer converts to a
+  data URL: it hands the `File` to the caller and carries the states. Waiting: the input and
+  every button lock, the button is named by `labels.uploading` / `labels.removing`. Failure: the
+  rejected reason (a string, an `Error`, or `{ message }`) under the field as a `danger` alert,
+  shown as it is, so map a raw network error to your own words first; an empty reason shows the
+  new `labels.errorUpload`. The chosen file and its preview stay, "confirm" retries. Resolving
+  `onUpload` with `false` keeps the kit silent, for a caller that already handled the value or
+  the error (a plan-wall dialog); any other non-string result warns in development, because a
+  forgotten `return` must never read as "uploaded". `onRemove` resolving `false` is silent the
+  same way. Success: the returned address goes to `onChange`, and a quiet inline `role="status"`
+  line (`labels.uploaded` / `labels.removed`); the live region is in the DOM from the start,
+  only its text changes. `confirm` previews the pick and waits for a click (for a logo); the
+  default uploads on pick (for an avatar). `accept` and `maxBytes` are checked on both paths
+  before anything else runs; `disabled` + `lockedNote` show the reason as visible text wired to
+  the buttons with `aria-describedby`. The preview is an object URL, revoked on cancel, on a new
+  pick, on success, when `value` changes from outside, and on unmount; a result arriving after
+  unmount or after an outside `value` change is dropped. `maxEdge` is optional with `onUpload`.
+  The pre-existing synchronous path (no `onUpload`) renders the same markup, locked by test; its
+  only change is that a file outside `accept` is now refused before `prepareImage` (the input's
+  own list said so already). A product had written this field four times.
+- **`Select` `disabled`** · locks the trigger. Needed by `DateTimePicker` below.
+
+### Fixed
+
+- **`DateTimePicker` DST rule in western zones** · the wall-to-instant step guessed one offset
+  and corrected once, which worked east of UTC and inverted west of it: New York 2026-03-08
+  02:30 became 01:30-05:00 (pushed back, the docs said forward), 2026-11-01 01:30 took -04:00
+  (the earlier offset, the docs said later). Now both candidates are built from the offsets on
+  either side; in an ambiguous hour the later instant wins, in a gap the hour is pushed forward.
+  A value coming from outside in an ambiguous hour keeps its own offset instead of being
+  re-emitted an hour off, and a `min` sitting in the second occurrence no longer hides the
+  whole hour. Tested for New York and Berlin, both seasons, under four `TZ`s.
+- **`DateTimePicker` boxes always formatted** · a stored value outside `[min, max]` showed its
+  raw hour ("9", or "14" in a 12-hour locale) because the option was filtered away; the value's
+  own hour and minute are always offered now, so the box reads "09" and the next pick clamps.
+- **`DateTimePicker` hour boxes locked until a day is picked** · picking an hour with no day
+  emitted today's date.
+- **`DateTimePicker` `minuteStep` below 1** hung the page (an endless loop); it reads as 1.
+- **Invalid `timeZone` or unparseable `value` / `min` / `max`** threw a `RangeError` and took the
+  component down; the zone falls back to the browser's, the value reads as empty, the console
+  warns. `DatePicker` and `Calendar` the same.
+- **`Button` busy without `busyLabel`** had no accessible name: the label was `invisible` and
+  `aria-hidden`. The button's own text now stays in the tree as sr-only, as the docs claimed.
+- **`Tag` lost its JSDoc** in 0.8.1: the hex constant was inserted between the comment and the
+  function, so `display.d.ts` carried no description for `Tag`. The swatch's Turkish note still
+  said "any CSS colour"; it says hex only.
+- **`DangerZone` props table** mixed in the row's props (`label`, `disabledReason`, `busy` …) and
+  dropped the row's own `title` / `description`, because the extractor expanded every alias
+  named anywhere in the type. Only top-level intersections expand now, and `DangerAction` has
+  its own table.
+- **`ImageField` and `DateTimePicker` JSDoc** · one block each (the IDE showed internal history
+  instead of the public note), `id` and `invalid` documented on `DateTimePicker`, `Collapsible`'s
+  accessible name stated correctly (`title` and `meta`), the SSR note for `timeZone`.
+
 ## 0.8.1
 
 > Fixed before release: 0.6.1 through 0.8.0 were reviewed and corrected before any of them shipped.
@@ -71,7 +132,7 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ### Added
 
-- **`Tag` `swatch`** · any CSS colour; a small square mark (the kit's mark radius, not a circle)
+- **`Tag` `swatch`** · any CSS colour (hex only since 0.8.1); a small square mark (the kit's mark radius, not a circle)
   before the text, `aria-hidden`. This is the one **written** exception to Law 3 ("colour is for
   deviation and interaction"): the colour is the user's own data, an identity mark, never a
   ground or a text colour, never status. The ring around the mark derives from the ink, so a

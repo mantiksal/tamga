@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent }
 import { useDismiss } from "./a11y.js";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
+import { uyar } from "../lib/uyar.js";
 import { Icon } from "./icon.js";
 import { Select } from "./primitives.js";
 import { CaretLeft, CaretRight, CalendarPlus, Close } from "./icons.js";
@@ -35,7 +36,8 @@ export type DateRange = { from?: DateISO; to?: DateISO };
 
 /* ── Dilim: duvar saati ↔ an. Hepsi Intl üzerinden; tarayıcının dilimi hiç okunmuyor. ── */
 
-type Duvar = { y: number; m: number; d: number; h: number; mi: number };
+/** Bir duvar saati: yıl, sıfır tabanlı ay, gün, saat, dakika. Dilimsiz. */
+export type Duvar = { y: number; m: number; d: number; h: number; mi: number };
 
 const p2 = (n: number) => String(n).padStart(2, "0");
 
@@ -68,24 +70,66 @@ function ofsetDk(an: Date, tz: string): number {
   return Math.round((Date.UTC(w.y, w.m, w.d, w.h, w.mi) - an.getTime()) / 60000 + an.getSeconds() / 60);
 }
 
-/**
- * Duvar saatinden an. DST boşluğunda (ilkbahar, olmayan saat) an İLERİ itilir:
- * 02:30 istenir, 03:30 döner. Belirsiz saatte (sonbahar, iki kez yaşanan saat)
- * SONRAKİ, yani standart ofset seçilir · ikisi de aşağıdaki testte sabitlenmiş.
- */
-function anYap(w: Duvar, tz: string): Date {
-  const tahmin = Date.UTC(w.y, w.m, w.d, w.h, w.mi);
-  const o1 = ofsetDk(new Date(tahmin), tz);
-  const t1 = new Date(tahmin - o1 * 60000);
-  const o2 = ofsetDk(t1, tz);
-  return o2 === o1 ? t1 : new Date(tahmin - o2 * 60000);
+const SAAT_MS = 3600000;
+/** Tahminin iki yanındaki ofsetler: bir geçiş yakındaysa öncesi ve sonrası, yoksa ikisi aynı. */
+function ikiOfset(tahmin: number, tz: string) {
+  return { once: ofsetDk(new Date(tahmin - 15 * SAAT_MS), tz), sonra: ofsetDk(new Date(tahmin + 15 * SAAT_MS), tz) };
 }
 
-/** Duvar saati bu dilimde gerçekten var mı (DST boşluğu değil mi). */
-function duvarVar(w: Duvar, tz: string): boolean {
-  const geri = duvar(anYap(w, tz), tz);
-  return geri.h === w.h && geri.mi === w.mi && geri.d === w.d;
+/**
+ * Bir duvar saatinin bu dilimde karşılık geldiği anlar, erken olan önce: sıfır
+ * (DST boşluğu), bir, ya da iki (sonbaharda iki kez yaşanan saat).
+ */
+export function adaylar(w: Duvar, tz: string): Date[] {
+  const tahmin = Date.UTC(w.y, w.m, w.d, w.h, w.mi);
+  const { once, sonra } = ikiOfset(tahmin, tz);
+  const out: Date[] = [];
+  for (const o of once === sonra ? [once] : [once, sonra]) {
+    const t = new Date(tahmin - o * 60000);
+    if (ofsetDk(t, tz) === o) out.push(t);
+  }
+  return out.sort((x, y) => x.getTime() - y.getTime());
 }
+
+/**
+ * Duvar saatinden an. Belirsiz saatte (sonbahar) SONRAKİ an, yani geçiş sonrası
+ * standart ofset. Boşlukta (ilkbahar, olmayan saat) önceki ofsetle kurulur, bu
+ * da saati İLERİ iter: 02:30 istenir, 03:30 döner. İki yarımkürede de aynı;
+ * New York ve Berlin için testte sabit.
+ */
+export function anYap(w: Duvar, tz: string): Date {
+  const a = adaylar(w, tz);
+  if (a.length) return a[a.length - 1]!;
+  const tahmin = Date.UTC(w.y, w.m, w.d, w.h, w.mi);
+  return new Date(tahmin - ikiOfset(tahmin, tz).once * 60000);
+}
+
+/** Geçersiz girdi bileşeni düşürmez: dilim tarayıcınınkine, değer boşa düşer, konsol uyarır. */
+function dilim(tz: string | undefined): string {
+  const aday = tz ?? varsayilanDilim();
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: aday });
+    return aday;
+  } catch {
+    uyar(`timeZone "${aday}" is not a valid IANA zone; using the browser's.`);
+    return varsayilanDilim();
+  }
+}
+const GUN = /^\d{4}-\d{2}-\d{2}$/;
+function gunOku(v: string | undefined, ad: string): DateISO | undefined {
+  if (v === undefined) return undefined;
+  if (GUN.test(v) && !Number.isNaN(Date.parse(`${v}T00:00:00Z`))) return v;
+  uyar(`DatePicker: ${ad} "${v}" is not a YYYY-MM-DD day; ignored.`);
+  return undefined;
+}
+function anOku(v: string | undefined, ad: string): Date | undefined {
+  if (!v) return undefined;
+  const d = new Date(v);
+  if (!Number.isNaN(d.getTime())) return d;
+  uyar(`DateTimePicker: ${ad} "${v}" is not an ISO instant; ignored.`);
+  return undefined;
+}
+const useGun = (v: string | undefined, ad: string) => useMemo(() => gunOku(v, ad), [v, ad]);
 
 function isoWithOffset(an: Date, tz: string): DateTimeISO {
   const w = duvar(an, tz);
@@ -134,10 +178,10 @@ function weekStart(locale: string): number {
 export function Calendar({
   locale,
   timeZone,
-  value,
+  value: hamDeger,
   range,
-  min,
-  max,
+  min: hamMin,
+  max: hamMax,
   onSelect,
   labels,
   className,
@@ -173,7 +217,10 @@ export function Calendar({
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
-  const tz = timeZone ?? varsayilanDilim();
+  const tz = useMemo(() => dilim(timeZone), [timeZone]);
+  const value = useGun(hamDeger, "value");
+  const min = useGun(hamMin, "min");
+  const max = useGun(hamMax, "max");
   /* ISO günler sözlük sırasıyla karşılaştırılıyor: `2026-04-05 < 2026-04-15`. */
   const kapali = (d: DateISO) => (min !== undefined && d < min) || (max !== undefined && d > max);
   const bugun = gunParcasi(new Date(), tz);
@@ -406,7 +453,7 @@ export function DatePicker({
   id,
   locale,
   timeZone,
-  value,
+  value: hamDeger,
   onChange,
   placeholder,
   labels,
@@ -441,6 +488,7 @@ export function DatePicker({
   /* Takvim dışarı tıklayınca ve Escape ile kapanıyor; kutu tetiği de kapsıyor. */
   const kapat = useCallback(() => setOpen(false), []);
   const kutu = useDismiss(open, kapat);
+  const value = useGun(hamDeger, "value");
   /* Gün UTC gece yarısı okunuyor (bkz. `DateISO`): tarayıcı dilimi günü kaydırmıyor. */
   const shown = value
     ? new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`))
@@ -505,16 +553,25 @@ export function DateTimePicker({
   className,
   ...rest
 }: {
+  /** Reaches the field, so `Field htmlFor` can bind. TR: Alana iner, `Field htmlFor` bağlanabilir. */
   id?: string;
   locale: string;
   /**
    * The IANA zone the clock is shown and picked in, e.g. the workspace's `Europe/Istanbul`.
-   * Defaults to the browser's. The value's offset is this zone's offset at that instant. TR:
-   * Saatin gösterildiği ve seçildiği IANA dilimi, ör. çalışma alanının `Europe/Istanbul`u.
-   * Varsayılan tarayıcınınki. Değerin ofseti bu dilimin o andaki ofsetidir.
+   * Defaults to the browser's; give it explicitly in a server-rendered app, or the server's zone
+   * renders one clock and the browser another (a hydration mismatch). The value's offset is this
+   * zone's offset at that instant. An invalid name falls back to the browser's, with a console
+   * warning. TR: Saatin gösterildiği ve seçildiği IANA dilimi, ör. çalışma alanının
+   * `Europe/Istanbul`u. Varsayılan tarayıcınınki; sunucuda çizilen bir uygulamada açıkça ver,
+   * yoksa sunucu bir saati, tarayıcı başkasını çizer (hidrasyon uyuşmazlığı). Değerin ofseti bu
+   * dilimin o andaki ofsetidir. Geçersiz ad tarayıcınınkine düşer, konsol uyarır.
    */
   timeZone?: string;
-  /** See `DateTimeISO`; any ISO instant is accepted in (`Z` or an offset). TR: Bkz. `DateTimeISO`; içeri her ISO an kabul edilir (`Z` ya da ofset). */
+  /**
+   * See `DateTimeISO`; any ISO instant is accepted in (`Z` or an offset). An unparseable one is
+   * read as empty, with a console warning. TR: Bkz. `DateTimeISO`; içeri her ISO an kabul edilir
+   * (`Z` ya da ofset). Okunamayan boş sayılır, konsol uyarır.
+   */
   value?: DateTimeISO;
   /**
    * Fires with `DateTimeISO` in `timeZone`'s offset, e.g. `2026-04-15T14:30:00+03:00`, always
@@ -542,8 +599,10 @@ export function DateTimePicker({
   /**
    * The earliest selectable instant. Earlier days are disabled; on the boundary day earlier
    * hours and minutes are not offered, and a selection that would fall before it is clamped to
-   * it. TR: Seçilebilen en erken an. Önceki günler kapalı; sınır gününde önceki saat ve
-   * dakikalar sunulmaz, öncesine düşecek bir seçim ona kısılır.
+   * it. A stored `value` outside the range is still shown as it is; the next pick clamps. TR:
+   * Seçilebilen en erken an. Önceki günler kapalı; sınır gününde önceki saat ve dakikalar
+   * sunulmaz, öncesine düşecek bir seçim ona kısılır. Aralık dışı kayıtlı `value` yine olduğu
+   * gibi gösterilir; sonraki seçim kısar.
    */
   min?: DateTimeISO;
   /** The latest selectable instant; the mirror of `min`. TR: Seçilebilen en geç an; `min`in aynası. */
@@ -553,28 +612,32 @@ export function DateTimePicker({
    * (`:07`) is shown as it is, added to the options rather than rounded: the field never lies
    * about a stored value. TR: Dakika seçenekleri N dakikada bir; varsayılan 5. Dakikası ızgara
    * dışı bir değer (`:07`) olduğu gibi gösterilir, yuvarlanmak yerine seçeneklere eklenir: alan
-   * kayıtlı değeri hiç yalanlamaz.
+   * kayıtlı değeri hiç yalanlamaz. Below 1, or not a number, reads as 1. TR: 1'in altı ya da
+   * sayı olmayan 1 sayılır.
    */
   minuteStep?: number;
+  /** Marks the field invalid (`aria-invalid`), like `Input`. TR: Alanı geçersiz işaretler (`aria-invalid`), `Input` gibi. */
   invalid?: boolean;
   disabled?: boolean;
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
-  const tz = timeZone ?? varsayilanDilim();
+  const tz = useMemo(() => dilim(timeZone), [timeZone]);
   const [open, setOpen] = useState(false);
   const kapat = useCallback(() => setOpen(false), []);
   const kutu = useDismiss(open, kapat);
+  /* Sıfır ya da eksi adım sonsuz döngüydü; 1'e kısılıyor. */
+  const adim = Math.max(1, Math.floor(minuteStep) || 1);
 
-  const an = value ? new Date(value) : undefined;
+  const an = useMemo(() => anOku(value, "value"), [value]);
   const w = an ? duvar(an, tz) : undefined;
   const gun = w ? iso(w.y, w.m, w.d) : undefined;
   const simdi = duvar(new Date(), tz);
   /* Saat durumu değerden, değer yoksa şu andan: gün seçilir seçilmez anlamlı
      bir saat çıksın, 00:00 değil. */
   const [saat, setSaat] = useState(() => (w ?? simdi).h);
-  const [dakika, setDakika] = useState(() => (w ? w.mi : Math.floor(simdi.mi / minuteStep) * minuteStep));
+  const [dakika, setDakika] = useState(() => (w ? w.mi : Math.floor(simdi.mi / adim) * adim));
   useEffect(() => {
     if (!w) return;
     setSaat(w.h);
@@ -582,26 +645,26 @@ export function DateTimePicker({
     /* eslint-disable-next-line react-hooks/exhaustive-deps -- yalnız dışarıdan gelen değer */
   }, [value, tz]);
 
-  const minAn = min ? new Date(min) : undefined;
-  const maxAn = max ? new Date(max) : undefined;
+  const minAn = useMemo(() => anOku(min, "min"), [min]);
+  const maxAn = useMemo(() => anOku(max, "max"), [max]);
   const minGun = minAn ? gunParcasi(minAn, tz) : undefined;
   const maxGun = maxAn ? gunParcasi(maxAn, tz) : undefined;
 
-  /* Bir duvar saati geçerli mi: dilimde var ve [min, max] içinde. */
-  const gecerli = (g: DateISO, h: number, mi: number) => {
+  /* Bir duvar saatinin [min, max] içindeki anları: dilimde var olan her aday
+     sayılır, yani belirsiz saatin iki yaşanışı da. */
+  const icinde = (t: Date) => (!minAn || t.getTime() >= minAn.getTime()) && (!maxAn || t.getTime() <= maxAn.getTime());
+  const anlar = (g: DateISO, h: number, mi: number) => {
     const { y, m, d } = parcala(g);
-    const wd = { y, m, d, h, mi };
-    if (!duvarVar(wd, tz)) return false;
-    const t = anYap(wd, tz).getTime();
-    return (!minAn || t >= minAn.getTime()) && (!maxAn || t <= maxAn.getTime());
+    return adaylar({ y, m, d, h, mi }, tz).filter(icinde);
   };
+  const gecerli = (g: DateISO, h: number, mi: number) => anlar(g, h, mi).length > 0;
   /* Dakika ızgarası: adımın katları + (varsa) kayıtlı değerin ızgara dışı dakikası. */
   const izgara = useMemo(() => {
     const d = new Set<number>();
-    for (let m = 0; m < 60; m += minuteStep) d.add(m);
+    for (let m = 0; m < 60; m += adim) d.add(m);
     if (w) d.add(w.mi);
     return [...d].sort((a, b) => a - b);
-  }, [minuteStep, w?.mi]);
+  }, [adim, w?.mi]);
 
   /* KISMA: istenen (saat, dakika) geçerli değilse ileri doğru ilk geçerli,
      o da yoksa geri doğru ilk geçerli. Yayılan her değer aralık içinde. */
@@ -623,14 +686,19 @@ export function DateTimePicker({
     if (!k) return;
     setSaat(k.h);
     setDakika(k.mi);
-    const { y, m, d } = parcala(g);
-    onChange?.(isoWithOffset(anYap({ y, m, d, h: k.h, mi: k.mi }, tz), tz));
+    const secenekler = anlar(g, k.h, k.mi);
+    /* Belirsiz saatte dış değer kendi anını korur; yoksa sonraki (standart ofset). */
+    const secim = (an && secenekler.find((t) => t.getTime() === an.getTime())) ?? secenekler[secenekler.length - 1]!;
+    onChange?.(isoWithOffset(secim, tz));
   };
 
-  /* Seçenekler: yalnız en az bir geçerli dakikası olan saatler, yalnız geçerli dakikalar. */
-  const g = gun ?? iso(simdi.y, simdi.m, simdi.d);
-  const saatler = Array.from({ length: 24 }, (_, h) => h).filter((h) => (g ? izgara.some((mm) => gecerli(g, h, mm)) : true));
-  const dakikalar = izgara.filter((mm) => (g ? gecerli(g, saat, mm) : true));
+  /* Seçenekler: yalnız en az bir geçerli dakikası olan saatler, yalnız geçerli
+     dakikalar · artı kayıtlı değerin kendi saati ve dakikası, aralık dışında
+     kalsa da: kutu hep biçimli ve hep bir seçeneği gösteriyor. Gün yokken liste
+     tam, kutular kapalı: saat seçmek bugünü yayıyordu. */
+  const g = gun;
+  const saatler = Array.from({ length: 24 }, (_, h) => h).filter((h) => !g || h === w?.h || izgara.some((mm) => gecerli(g, h, mm)));
+  const dakikalar = izgara.filter((mm) => !g || (w && saat === w.h && mm === w.mi) || gecerli(g, saat, mm));
 
   /* 12/24 saat yerelin kararı; öğle sözcükleri Intl'den, yoksa labels'tan, o da
      yoksa 24 saate düşülür · kit İngilizce yazmaz. */
@@ -679,6 +747,7 @@ export function DateTimePicker({
             <Select
               aria-label={labels.hour}
               placeholder={labels.hour}
+              disabled={!g}
               value={String(saat)}
               onChange={(v) => yay(g, Number(v), dakika)}
               options={(donem ? saatler.filter((h) => (saat < 12 ? h < 12 : h >= 12)) : saatler).map((h) => ({ value: String(h), label: saatEtiketi(h) }))}
@@ -686,6 +755,7 @@ export function DateTimePicker({
             <Select
               aria-label={labels.minute}
               placeholder={labels.minute}
+              disabled={!g}
               value={String(dakika)}
               onChange={(v) => yay(g, saat, Number(v))}
               options={dakikalar.map((m) => ({ value: String(m), label: p2(m) }))}
@@ -694,6 +764,7 @@ export function DateTimePicker({
               <Select
                 aria-label={labels.period}
                 placeholder={labels.period}
+                disabled={!g}
                 value={saat < 12 ? "am" : "pm"}
                 onChange={(v) => yay(g, v === "am" ? saat % 12 : (saat % 12) + 12, dakika)}
                 options={[{ value: "am", label: donem.am }, { value: "pm", label: donem.pm }]}

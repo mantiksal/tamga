@@ -419,3 +419,23 @@ kutusunun tıklanabilir alanı zaten bütün satır.
 
 Tablonun küçük kutusu (`.tamga-check-sm`) kuralın dışında: o zaten hiç kalkmıyor, çünkü bir sütunda
 yirmi beş yükselmiş kutu listeyi düğme ızgarasına çeviriyor.
+
+## `appearance.tsx`
+
+### ImageField · iki yol, tek alan.
+
+İlk gün alan yalnız tarayıcıda çalışıyordu: dosyayı küçült, data-URL ver, `localStorage`'a sığsın.
+Bir kullanıcı, tek kullanıcı. Bulut ürünü aynı alanı dört kez kendisi yazdı · logo, amblem,
+avatar, favicon · ve dördünde de sebep aynıydı: kitin alanı ağı bilmiyordu. Bekleme yoktu, hata
+yoktu, "sunucu reddetti ama dosya elimde dursun" yoktu.
+
+0.9.0'da ikinci yol eklendi: `onUpload` verilince dosya ÇAĞIRANA gider. Ağ işi (imzalı adres, PUT,
+PATCH) ürünün; alan yalnız üç durumu taşır. Senkron yol birebir korunuyor ve `innerHTML`'i testle
+kilitli: masaüstü ürün o yolu kullanıyor ve bir markup değişikliğini fark etmez.
+
+İki karar tartışıldı. **"Sus" değeri açık:** çağıran sonucu kendisi ele aldıysa (plan duvarı
+penceresi açtı, `onChange`'i kendisi çağırdı) `false` döner. İlk taslak `void`u "sus" sayıyordu;
+o zaman `return`ü unutan bir çağıran sessizce "yüklendi" izlenimi veriyordu. Şimdi `false` dışı
+her şey geliştirmede uyarır. **Red metni olduğu gibi:** kit "Failed to fetch"i çeviremez, çünkü
+hangi dilde olduğunu bilemez. Çağıran ağ hatasını kendi sözüne çevirip öyle reddeder; boş sebep
+`labels.errorUpload`a düşer.

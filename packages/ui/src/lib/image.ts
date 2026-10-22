@@ -9,7 +9,7 @@
 export type ImageError = "type" | "size" | "unreadable";
 
 /** Raw file limit, before resizing. Over 8 MB is not a logo, it is an accident. */
-const RAW_LIMIT = 8 * 1024 * 1024;
+export const RAW_LIMIT = 8 * 1024 * 1024;
 
 export const IMAGE_ACCEPT = "image/png,image/jpeg,image/svg+xml,image/webp";
 

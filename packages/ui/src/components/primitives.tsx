@@ -388,6 +388,7 @@ export function Select({
   placeholder,
   loading = false,
   loadingRows = 4,
+  disabled = false,
   "aria-label": ariaLabel,
   className,
   ...rest
@@ -473,6 +474,8 @@ export function Select({
    * hiçbir şey duymuyordu.
    */
   "aria-label"?: string;
+  /** Locks the trigger; the list cannot open. TR: Tetiği kilitler; liste açılmaz. */
+  disabled?: boolean;
   /** Genişlik ve konum çağıranın. Varsayılan `w-56`; `w-full` verildiğinde
    *  tailwind-merge onu ezer, yani kontrol kabına uyar. */
   className?: string;
@@ -519,6 +522,7 @@ export function Select({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={ariaLabel}
+        disabled={disabled || undefined}
         onClick={() => setOpen((o) => !o)}
       >
         {/* ETİKET KIRPILIR, OK KIRPILMAZ: `.tamga-btn` `nowrap` taşıyor ve `min-width:

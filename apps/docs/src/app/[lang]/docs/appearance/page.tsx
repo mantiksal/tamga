@@ -2,6 +2,7 @@ import { GorunumOrnek } from "./ornek";
 import { Icon } from "tamga-ui";
 import { BoardView, Contrast, Crop, Image, Palette } from "tamga-ui/icons";
 import { Demo } from "@/components/demo";
+import { ImageUploadDemo } from "@/components/interactive";
 import { getDictionary } from "@/i18n/get-dictionary";
 import type { Locale } from "@/i18n/config";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -209,6 +210,23 @@ const T = {
         çalışan bir cevap.
       </>
     ),
+    yukleH: "Sunucuya yükleme",
+    yukleP: (
+      <>
+        <code>ImageField</code> bugüne kadar görseli tarayıcıda küçültüp data-URL veriyordu; ağ yoktu.{" "}
+        <code>onUpload</code> verilince dosyayı <strong>çağırana</strong> verir ve durumları taşır:
+        bekleme (düğmeler kilitli, erişilebilir ad <code>labels.uploading</code>), hata (çağıranın
+        reddettiği metin alanın altında; dosya ve önizleme yerinde, &quot;Gönder&quot; yeniden dener),
+        sessiz onay (<code>role=&quot;status&quot;</code>, satır içi). Dönen adres <code>onChange</code>&apos;e
+        gider; <code>false</code> ile çözülürse kit susar · çağıran değeri ya da hatayı kendisi ele aldı
+        (plan duvarı penceresi gibi); başka bir değer geliştirmede uyarır, unutulan bir{" "}
+        <code>return</code> &quot;yüklendi&quot; sayılmaz. Red metni olduğu gibi gösterilir: ağ hatasını
+        kendi sözüne çevirip öyle reddet. <code>onRemove</code> da aynı: <code>false</code> susturur. <code>confirm</code> ile seçim önce önizlenir, sonra gönderilir:
+        bir logo için yanlış dosyayı göndermeden fark etme şansı; avatar için varsayılan &quot;seçince
+        yükle&quot; yeter. Ağ işi (imzalı adres, PUT, PATCH) ürünün. Kilitliyken gerekçe görünür metin
+        (<code>lockedNote</code>). Aşağıdaki örnek 900 ms&apos;lik sahte bir sunucu.
+      </>
+    ),
     propsH: "Props",
   },
   en: {
@@ -382,6 +400,25 @@ const T = {
         and that is a working answer.
       </>
     ),
+    yukleH: "Uploading to a server",
+    yukleP: (
+      <>
+        Until now <code>ImageField</code> shrank the image in the browser and handed back a data URL;
+        no network. With <code>onUpload</code> it hands the <strong>file</strong> to the caller and
+        carries the states: waiting (buttons locked, accessible name <code>labels.uploading</code>),
+        failure (the text the caller rejected with, under the field; file and preview stay,
+        &quot;Send&quot; retries), a quiet confirmation (<code>role=&quot;status&quot;</code>, inline). The
+        returned address goes to <code>onChange</code>; resolving with <code>false</code> keeps the kit
+        silent · the caller handled the value or the error itself (a plan-wall dialog, say); anything
+        else warns in development, a forgotten <code>return</code> never reads as &quot;uploaded&quot;.
+        The rejection text is shown as it is: map a network error to your own words first.{" "}
+        <code>onRemove</code> works the same way: <code>false</code> keeps it quiet. With{" "}
+        <code>confirm</code> the pick is previewed first and sent on a click: for a logo, a chance to
+        notice the wrong file before sending it; for an avatar the default &quot;upload on pick&quot; is
+        enough. The network work (signed URL, PUT, PATCH) is the product&apos;s. Locked, the reason is
+        visible text (<code>lockedNote</code>). The example below is a fake 900 ms server.
+      </>
+    ),
     propsH: "Props",
   },
 };
@@ -432,6 +469,23 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
           </a>
         ))}
       </div>
+
+      <H2>{t.yukleH}</H2>
+      <P>{t.yukleP}</P>
+      <Demo labels={dict.demo} align="start" code={`<ImageField
+  value={logo}
+  onChange={setLogo}
+  onUpload={(file) => uploadToServer(file)}   // Promise<string | false>
+  onRemove={() => removeOnServer()}            // Promise<boolean | void>
+  confirm
+  accept="image/png,image/jpeg"
+  maxBytes={4 * 1024 * 1024}
+  disabled={!canEdit}
+  lockedNote="…"
+  labels={{ …, uploading: "…", removing: "…", uploaded: "…", removed: "…", confirm: "…", cancel: "…" }}
+/>`}>
+        <ImageUploadDemo lang={lang} />
+      </Demo>
 
       <H2>{t.propsH}</H2>
       {(

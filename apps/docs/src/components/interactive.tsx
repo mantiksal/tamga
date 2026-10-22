@@ -57,6 +57,7 @@ import {
   type Tone, DateTimePicker,
   Tag, ColorSwatches,
   ColorMark,
+  ImageField, LogoTile,
 } from "tamga-ui";
 import { Archive, Bell, Copy, CurrencyDollar, Delete, Download, Edit, Filter, More, Print, Refresh, Settings, Truck } from "tamga-ui/icons";
 import { Demo, type DemoLabels } from "@/components/demo";
@@ -1354,7 +1355,13 @@ const N = {
     billing: "Faturalama", billingBody: "Plan, ödeme yöntemi ve fatura adresi.",
     threeItems: "3 madde", twoItems: "2 madde", oneItem: "1 madde",
     tagName: "Etiket adı", tagColour: "Rengi", custom: "Kendi rengim", preview: "Böyle görünecek", noColour: "Renk yok",
+    imgEmpty: "Henüz logo yok", imgUpload: "Logo yükle", imgReplace: "Değiştir", imgRemove: "Kaldır",
+    imgType: "Desteklenmeyen tür", imgSize: "4 MB'tan büyük", imgUnreadable: "Dosya okunamadı",
+    imgUploading: "Yükleniyor…", imgRemoving: "Kaldırılıyor…", imgUploaded: "Yüklendi", imgRemoved: "Kaldırıldı",
+    imgConfirm: "Gönder", imgCancel: "Vazgeç", imgFail: "Sunucu hatasını taklit et", imgFailText: "Sunucu 500 döndü; dosya yerinde, yeniden dene.",
+    imgLocked: "Logo yalnız Pro planda değiştirilebilir.", imgLock: "Kilitli göster",
     tagCustomer: "Müşteri", tagCampaign: "Kampanya", tagWhite: "Beyaz", tagBlack: "Siyah", suggest: "Öneri",
+    tagUrgent: "Acil", tagBrick: "Kiremit", tagGreen: "Yeşil", tagBlue: "Mavi", tagPurple: "Mor",
     a11y: "Erişilebilirlik", a11yPath: "· /fiyatlar", lastRun: "Son ölçüm 3 gün önce, sayılmadı: sayfa 500 döndü.",
     loading: "Ölçüm yükleniyor…", loaded: "Skor 92 · 4 uyarı, 0 hata. Açılınca çekildi.",
     copy: "Kopyala", copied: "Kopyalandı", failed: "Kopyalanamadı",
@@ -1439,7 +1446,13 @@ const N = {
     billing: "Billing", billingBody: "Plan, payment method and billing address.",
     threeItems: "3 items", twoItems: "2 items", oneItem: "1 item",
     tagName: "Label name", tagColour: "Colour", custom: "My own colour", preview: "It will look like this", noColour: "No colour",
+    imgEmpty: "No logo yet", imgUpload: "Upload a logo", imgReplace: "Replace", imgRemove: "Remove",
+    imgType: "Unsupported type", imgSize: "Larger than 4 MB", imgUnreadable: "The file could not be read",
+    imgUploading: "Uploading…", imgRemoving: "Removing…", imgUploaded: "Uploaded", imgRemoved: "Removed",
+    imgConfirm: "Send", imgCancel: "Cancel", imgFail: "Simulate a server error", imgFailText: "The server returned 500; the file stays, try again.",
+    imgLocked: "The logo can only be changed on the Pro plan.", imgLock: "Show locked",
     tagCustomer: "Customer", tagCampaign: "Campaign", tagWhite: "White", tagBlack: "Black", suggest: "Suggestion",
+    tagUrgent: "Urgent", tagBrick: "Brick", tagGreen: "Green", tagBlue: "Blue", tagPurple: "Purple",
     a11y: "Accessibility", a11yPath: "· /pricing", lastRun: "Last run 3 days ago, not counted: the page returned 500.",
     loading: "Loading the measurement…", loaded: "Score 92 · 4 warnings, 0 errors. Fetched on open.",
     copy: "Copy", copied: "Copied", failed: "Copy failed",
@@ -1578,7 +1591,7 @@ export function CollapsibleControlledDemo({ lang }: L) {
    işaret olarak taşıyor · renksiz ve renkli yan yana. */
 export function TagSwatchDemo({ lang }: L) {
   const n = N[lang];
-  const [ad, setAd] = useState("Acil");
+  const [ad, setAd] = useState(n.tagUrgent);
   const [renk, setRenk] = useState("");
   return (
     <div className="flex w-full flex-col gap-4">
@@ -1603,16 +1616,56 @@ export function TagSwatchDemo({ lang }: L) {
           noneLabel={n.noColour}
           onChange={setRenk}
           options={[
-            { hex: "#b4451f", label: "Kiremit" },
-            { hex: "#1f7a46", label: "Yeşil" },
-            { hex: "#1e4fd8", label: "Mavi" },
-            { hex: "#6b3fa0", label: "Mor" },
+            { hex: "#b4451f", label: n.tagBrick },
+            { hex: "#1f7a46", label: n.tagGreen },
+            { hex: "#1e4fd8", label: n.tagBlue },
+            { hex: "#6b3fa0", label: n.tagPurple },
           ]}
         />
       </Field>
       <p className="flex items-center gap-2 text-small text-ink-faint">
         {n.preview} <Tag swatch={renk || undefined}>{ad || "…"}</Tag>
       </p>
+    </div>
+  );
+}
+
+/* SUNUCUYA YÜKLEME: sahte 900 ms gecikme; anahtarla hata ve kilit taklidi.
+   Ağ işi ürünün; alan yalnız bekleme, hata ve onayı taşıyor. */
+export function ImageUploadDemo({ lang }: L) {
+  const n = N[lang];
+  const [logo, setLogo] = useState<string | null>(null);
+  const [hata, setHata] = useState(false);
+  const [kilit, setKilit] = useState(false);
+  const yukle = (file: File) =>
+    new Promise<string>((ok, hayir) => {
+      window.setTimeout(() => (hata ? hayir(n.imgFailText) : ok(URL.createObjectURL(file))), 900);
+    });
+  const kaldir = () => new Promise<void>((ok, hayir) => window.setTimeout(() => (hata ? hayir(n.imgFailText) : ok()), 600));
+  return (
+    <div className="flex w-full flex-col gap-4">
+      <ImageField
+        value={logo}
+        onChange={setLogo}
+        maxEdge={512}
+        onUpload={yukle}
+        onRemove={kaldir}
+        confirm
+        maxBytes={4 * 1024 * 1024}
+        disabled={kilit}
+        lockedNote={n.imgLocked}
+        preview={(src) => <LogoTile name="Tamga" src={src} />}
+        labels={{
+          name: "Logo", upload: n.imgUpload, replace: n.imgReplace, remove: n.imgRemove, empty: n.imgEmpty,
+          errorType: n.imgType, errorSize: n.imgSize, errorUnreadable: n.imgUnreadable,
+          uploading: n.imgUploading, removing: n.imgRemoving, uploaded: n.imgUploaded, removed: n.imgRemoved,
+          confirm: n.imgConfirm, cancel: n.imgCancel,
+        }}
+      />
+      <div className="flex flex-wrap gap-4">
+        <Switch label={n.imgFail} on={hata} onChange={setHata} />
+        <Switch label={n.imgLock} on={kilit} onChange={setKilit} />
+      </div>
     </div>
   );
 }

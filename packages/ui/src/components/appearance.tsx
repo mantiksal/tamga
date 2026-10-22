@@ -1,10 +1,11 @@
 "use client";
 
-import { useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { cn } from "../lib/cn.js";
 import { makePalette } from "../lib/palette.js";
 import { dataProps } from "../lib/data-props.js";
-import { IMAGE_ACCEPT, prepareImage } from "../lib/image.js";
+import { IMAGE_ACCEPT, RAW_LIMIT, prepareImage } from "../lib/image.js";
+import { uyar } from "../lib/uyar.js";
 import { Alert } from "./primitives.js";
 import { Button } from "./button.js";
 import { Icon } from "./icon.js";
@@ -392,6 +393,15 @@ export function RailCards({
  * offers reorder arrows with nothing to reorder.
  * TR: `FileUpload` DEĞİL: o bir GALERİ (çoklu seçim, sıralama okları, "kapak"
  * rozeti). Ürün fotoğrafları için doğru, tek bir logo için yanlış.
+ *
+ * Two paths, one field. Without `onUpload` the image is shrunk in the browser
+ * and a data URL goes to `onChange`. With `onUpload` the file goes to the
+ * caller and the field carries the states: waiting, failure, a quiet
+ * confirmation. TR: İki yol, tek alan. `onUpload` yokken görsel tarayıcıda
+ * küçültülür, data-URL `onChange`'e gider. `onUpload` verilince dosya çağırana
+ * gider; alan bekleme, hata ve sessiz onayı taşır.
+ *
+ * Gerekçe: docs/gerekce/01-form-ve-girdi.md
  */
 export function ImageField({
   value,
@@ -400,13 +410,24 @@ export function ImageField({
   labels,
   preview,
   extra,
+  onUpload,
+  onRemove,
+  confirm = false,
+  accept = IMAGE_ACCEPT,
+  maxBytes = RAW_LIMIT,
+  disabled = false,
+  lockedNote,
   className,
   ...rest
 }: {
   value: string | null;
   onChange: (next: string | null) => void;
-  /** Longest edge of the stored image, in pixels. TR: Saklanan görselin en uzun kenarı, piksel. */
-  maxEdge: number;
+  /**
+   * Longest edge of the stored image, in pixels; the browser path shrinks to it, so give it
+   * there. Not used with `onUpload`: the server decides. TR: Saklanan görselin en uzun kenarı,
+   * piksel; tarayıcı yolu ona küçültür, orada ver. `onUpload` ile kullanılmaz: sunucu karar verir.
+   */
+  maxEdge?: number;
   labels: {
     /** "Logo", "Mark": used inside the buttons. TR: "Logo", "Amblem": düğmelerin içinde geçiyor. */
     name: string;
@@ -417,11 +438,74 @@ export function ImageField({
     errorType: string;
     errorSize: string;
     errorUnreadable: string;
+    /**
+     * Shown when `onUpload` or `onRemove` rejects without a message (an empty string, `undefined`);
+     * falls back to `errorUnreadable`. TR: `onUpload` ya da `onRemove` mesajsız reddedince (boş
+     * metin, `undefined`); yoksa `errorUnreadable`.
+     */
+    errorUpload?: string;
+    /** The button's name while `onUpload` runs; falls back to `upload`. TR: `onUpload` sürerken düğmenin adı; yoksa `upload`. */
+    uploading?: string;
+    /** The button's name while `onRemove` runs; falls back to `remove`. TR: `onRemove` sürerken düğmenin adı; yoksa `remove`. */
+    removing?: string;
+    /** The quiet line after a successful upload; omitted, nothing is said. TR: Başarılı yüklemeden sonraki sessiz satır; yoksa susar. */
+    uploaded?: string;
+    /** The quiet line after a successful removal. TR: Başarılı kaldırmadan sonraki sessiz satır. */
+    removed?: string;
+    /** The button that sends a previewed pick; falls back to `upload`. TR: Önizlenen seçimi gönderen düğme; yoksa `upload`. */
+    confirm?: string;
+    /** The button that drops a previewed pick; falls back to `remove`. TR: Önizlenen seçimi bırakan düğme; yoksa `remove`. */
+    cancel?: string;
   };
   /** The caller draws the preview: a logo is wide, a mark is square. TR: Önizlemeyi çağıran çiziyor: logo geniş, amblem kare. */
   preview: (src: string) => ReactNode;
   /** An extra control beside the buttons. TR: Düğmelerin yanına giren ek kontrol. */
   extra?: ReactNode;
+  /**
+   * Hands the chosen file to the caller instead of converting it. Resolve with the stored
+   * address: it goes to `onChange` and `labels.uploaded` is announced. Resolve with `false` when
+   * you handled the result yourself (a plan-wall dialog, your own `onChange`): the kit stays
+   * silent. Anything else is a bug and warns in development, because a forgotten `return` must
+   * not read as "uploaded". Reject with a string, an `Error` or `{ message }`: that text is shown
+   * under the field AS IT IS, so map a raw network error to your own words before rejecting; an
+   * empty reason shows `labels.errorUpload`. The file and its preview stay, "confirm" retries. A
+   * result that arrives after `value` changed from outside, or after unmount, is dropped. TR:
+   * Seçilen dosyayı dönüştürmek yerine çağırana verir. Saklanan adresle çözülür: `onChange`'e
+   * gider, `labels.uploaded` duyurulur. Sonucu kendin ele aldıysan `false` ile çöz: kit susar.
+   * Başka bir değer geliştirmede uyarır; unutulan bir `return` "yüklendi" sayılmaz. Metin, `Error`
+   * ya da `{ message }` ile reddedilirse metin alanın altında OLDUĞU GİBİ gösterilir, ağ hatasını
+   * reddetmeden önce kendi sözüne çevir; boş sebep `labels.errorUpload` gösterir. Dosya ve
+   * önizleme kalır, "confirm" yeniden dener. `value` dışarıdan değiştikten ya da bileşen
+   * kalktıktan sonra gelen sonuç atılır.
+   */
+  onUpload?: (file: File) => Promise<string | false>;
+  /**
+   * Awaited before `onChange(null)`; `false` keeps the kit silent (you handled it); a rejection
+   * shows under the field like `onUpload`'s. TR: `onChange(null)`'dan önce beklenir; `false` kiti
+   * susturur (sen ele aldın); red `onUpload`'daki gibi alanın altında.
+   */
+  onRemove?: () => Promise<boolean | void>;
+  /**
+   * Preview first, send on a click: for a logo, a chance to notice the wrong file. Off, the pick
+   * uploads at once (an avatar). TR: Önce önizle, tıklayınca gönder: logo için yanlış dosyayı fark
+   * etme şansı. Kapalıyken seçim hemen gider (avatar).
+   */
+  confirm?: boolean;
+  /**
+   * The input's accept list; the pick is checked against it on both paths, before `prepareImage`
+   * or `onUpload`. TR: Girdinin accept listesi; seçim iki yolda da `prepareImage` ya da
+   * `onUpload`'dan önce buna göre denetlenir.
+   */
+  accept?: string;
+  /** Refused on both paths with `errorSize`; 8 MB by default. TR: İki yolda da `errorSize` ile reddedilir; varsayılan 8 MB. */
+  maxBytes?: number;
+  disabled?: boolean;
+  /**
+   * Why the field is locked, as visible text under it and `aria-describedby` on the buttons; a
+   * tooltip hides from touch and keyboards. TR: Alanın neden kilitli olduğu, altında görünür
+   * metin ve düğmelerde `aria-describedby`; ipucu dokunmatikten ve klavyeden saklanır.
+   */
+  lockedNote?: string;
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
@@ -429,24 +513,121 @@ export function ImageField({
   const id = useId();
   const girdi = useRef<HTMLInputElement>(null);
   const [hata, setHata] = useState<string | null>(null);
+  const [bekleyen, setBekleyen] = useState<{ file: File; url: string } | null>(null);
+  const [mesgul, setMesgul] = useState<"upload" | "remove" | null>(null);
+  const [onay, setOnay] = useState<string | null>(null);
+  /* Adres ref'te de: kalkışta son adresi bırakmak için state okunamıyor. İstek
+     sayacı, "canlı" bayrağı ve son değer bayat cevabı ayırıyor: kalkıştan ya da
+     dış değer değişiminden sonra gelen sonuç ne onChange'e gider ne ekrana. */
+  const adres = useRef<string | null>(null);
+  const istek = useRef(0);
+  const canli = useRef(true);
+  const sonDeger = useRef(value);
+  sonDeger.current = value;
+
+  function birak() {
+    if (adres.current) URL.revokeObjectURL(adres.current);
+    adres.current = null;
+    setBekleyen(null);
+  }
+  useEffect(() => {
+    canli.current = true;
+    return () => {
+      canli.current = false;
+      if (adres.current) URL.revokeObjectURL(adres.current);
+      adres.current = null;
+    };
+  }, []);
+  /* Değer dışarıdan geldiyse bekleyen önizleme bayat kaldı. */
+  useEffect(() => {
+    if (value && adres.current) birak();
+  }, [value]);
+
+  const kilit = disabled || mesgul !== null;
+  const bayat = (benim: number, baslangic: string | null) =>
+    !canli.current || istek.current !== benim || sonDeger.current !== baslangic;
+
+  function sifirla() {
+    /* GİRDİ SIFIRLANIYOR: aynı dosya ikinci kez seçilince `change` hiç
+       çıkmıyor, çünkü değer değişmiyor. Kullanıcı için bu "ikinci denemede
+       çalışmıyor" demek. */
+    if (girdi.current) girdi.current.value = "";
+  }
 
   async function al(file: File | undefined) {
-    if (!file) return;
+    if (!file || kilit) return;
+    sifirla();
     setHata(null);
+    setOnay(null);
+    if (!kabul(file, accept)) return setHata(labels.errorType);
+    if (file.size > maxBytes) return setHata(labels.errorSize);
+    if (!onUpload) {
+      try {
+        onChange(await prepareImage(file, maxEdge ?? Infinity));
+      } catch (e) {
+        const kod = e instanceof Error ? e.message : "unreadable";
+        setHata(
+          kod === "type" ? labels.errorType : kod === "size" ? labels.errorSize : labels.errorUnreadable,
+        );
+      }
+      return;
+    }
+    birak();
+    const url = URL.createObjectURL(file);
+    adres.current = url;
+    setBekleyen({ file, url });
+    if (!confirm) await gonder(file);
+  }
+
+  async function gonder(file: File) {
+    if (!onUpload || mesgul) return;
+    const benim = ++istek.current;
+    const baslangic = sonDeger.current;
+    setHata(null);
+    setOnay(null);
+    setMesgul("upload");
     try {
-      onChange(await prepareImage(file, maxEdge));
+      const sonuc = await onUpload(file);
+      if (bayat(benim, baslangic)) return;
+      if (typeof sonuc === "string") {
+        birak();
+        onChange(sonuc);
+        setOnay(labels.uploaded ?? null);
+      } else if (sonuc !== false) {
+        uyar("ImageField: onUpload resolved with neither an address nor `false`; nothing was announced. Return the stored address, or `false` when you handled the result yourself.");
+      }
     } catch (e) {
-      const kod = e instanceof Error ? e.message : "unreadable";
-      setHata(
-        kod === "type" ? labels.errorType : kod === "size" ? labels.errorSize : labels.errorUnreadable,
-      );
+      if (bayat(benim, baslangic)) return;
+      setHata(metin(e, labels));
     } finally {
-      /* GİRDİ SIFIRLANIYOR: aynı dosya ikinci kez seçilince `change` hiç
-         çıkmıyor, çünkü değer değişmiyor. Kullanıcı için bu "ikinci denemede
-         çalışmıyor" demek. */
-      if (girdi.current) girdi.current.value = "";
+      if (canli.current) setMesgul(null);
     }
   }
+
+  async function kaldir() {
+    if (kilit) return;
+    setHata(null);
+    setOnay(null);
+    if (!onRemove) return onChange(null);
+    const benim = ++istek.current;
+    const baslangic = sonDeger.current;
+    setMesgul("remove");
+    try {
+      const sonuc = await onRemove();
+      if (bayat(benim, baslangic) || sonuc === false) return;
+      onChange(null);
+      setOnay(labels.removed ?? null);
+    } catch (e) {
+      if (bayat(benim, baslangic)) return;
+      setHata(metin(e, labels));
+    } finally {
+      if (canli.current) setMesgul(null);
+    }
+  }
+
+  const gosterilen = bekleyen?.url ?? value;
+  const notKimligi = `${id}-kilit`;
+  const tarif = disabled && lockedNote ? notKimligi : undefined;
 
   return (
     <div {...dataProps(rest)} className={cn("flex flex-col gap-3", className)}>
@@ -454,27 +635,93 @@ export function ImageField({
         ref={girdi}
         id={id}
         type="file"
-        accept={IMAGE_ACCEPT}
+        accept={accept}
         className="sr-only"
+        disabled={kilit || undefined}
         onChange={(e) => al(e.target.files?.[0])}
       />
       <div className="flex flex-wrap items-center gap-4">
-        <span className="tamga-image-field" data-empty={value ? undefined : "true"}>
-          {value ? preview(value) : labels.empty}
+        <span className="tamga-image-field" data-empty={gosterilen ? undefined : "true"}>
+          {gosterilen ? preview(gosterilen) : labels.empty}
         </span>
         <span className="flex flex-wrap items-center gap-2">
-          <Button type="button" onClick={() => girdi.current?.click()}>
-            {value ? labels.replace : labels.upload}
-          </Button>
+          {bekleyen ? (
+            <>
+              <Button
+                type="button"
+                busy={mesgul === "upload"}
+                busyLabel={labels.uploading ?? labels.upload}
+                disabled={kilit || undefined}
+                aria-describedby={tarif}
+                onClick={() => gonder(bekleyen.file)}
+              >
+                {labels.confirm ?? labels.upload}
+              </Button>
+              <Button type="button" variant="ghost" disabled={kilit || undefined} onClick={birak}>
+                {labels.cancel ?? labels.remove}
+              </Button>
+            </>
+          ) : (
+            <Button
+              type="button"
+              busy={mesgul === "upload"}
+              busyLabel={labels.uploading ?? labels.upload}
+              disabled={kilit || undefined}
+              aria-describedby={tarif}
+              onClick={() => girdi.current?.click()}
+            >
+              {value ? labels.replace : labels.upload}
+            </Button>
+          )}
           {extra}
-          {value ? (
-            <Button type="button" variant="ghost" onClick={() => onChange(null)}>
+          {value && !bekleyen ? (
+            <Button
+              type="button"
+              variant="ghost"
+              busy={mesgul === "remove"}
+              busyLabel={labels.removing ?? labels.remove}
+              disabled={kilit || undefined}
+              aria-describedby={tarif}
+              onClick={kaldir}
+            >
               {labels.remove}
             </Button>
           ) : null}
         </span>
       </div>
+      {lockedNote && disabled ? (
+        <p id={notKimligi} className="text-small text-ink-faint">
+          {lockedNote}
+        </p>
+      ) : null}
+      {/* CANLI BÖLGE HEP DOM'DA, yalnız metni değişiyor: sonradan eklenen bir
+          `role=status` çoğu ekran okuyucuda hiç okunmuyor. Boşken sr-only, yani
+          yer kaplamıyor ama ağaçta duruyor. */}
+      {onUpload ? (
+        <p role="status" className={cn("text-small text-ink-faint", !onay && "sr-only")}>
+          {onay}
+        </p>
+      ) : null}
       {hata ? <Alert state="danger" title={hata} /> : null}
     </div>
   );
+}
+
+/** `accept` listesine karşı ön denetim: MIME, `image/*` ve `.png` biçimleri. Boş liste her şeyi geçirir. */
+function kabul(file: File, accept: string) {
+  const liste = accept.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+  if (liste.length === 0) return true;
+  const tur = file.type.toLowerCase();
+  const ad = file.name.toLowerCase();
+  return liste.some((k) =>
+    k.startsWith(".") ? ad.endsWith(k) : k.endsWith("/*") ? tur.startsWith(k.slice(0, -1)) : tur === k,
+  );
+}
+
+/** Çağıranın reddi: metin, `Error` ya da `{ message }` olduğu gibi; boşsa kitin genel sözü. */
+function metin(e: unknown, labels: { errorUpload?: string; errorUnreadable: string }) {
+  const yedek = labels.errorUpload ?? labels.errorUnreadable;
+  if (typeof e === "string") return e || yedek;
+  if (e && typeof e === "object" && "message" in e && typeof e.message === "string" && e.message) return e.message;
+  return yedek;
 }

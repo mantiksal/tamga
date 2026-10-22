@@ -80,7 +80,16 @@ const T = {
         gider; dilim, &quot;İstanbul&apos;da 14:30&quot;u kaydırmadan taşıyan şey. Saat de yazılmaz,
         seçilir; 12 ya da 24 saat yerelin kararı. Yayılan her değer <code>[min, max]</code> içinde:
         sınırı delecek bir seçim en yakın geçerli saate kısılır. DST boşluğundaki saat sunulmaz;
-        belirsiz saat sonraki (standart) ofsetle yazılır.
+        belirsiz saat sonraki (standart) ofsetle yazılır, dışarıdan gelen bir değer kendi ofsetini
+        korur. Gün seçilmeden saat kutuları kapalı: saat seçmek bugünü yaymasın.
+      </>
+    ),
+    ssr: (
+      <>
+        <strong>Sunucuda çiziyorsan <code>timeZone</code> ver.</strong> Verilmezse dilim tarayıcınınki
+        olur, ama sunucuda &quot;tarayıcı&quot; sunucunun kendisidir: sunucu bir saati, tarayıcı başka
+        bir saati çizer ve React hidrasyon uyuşmazlığı verir. Çalışma alanının dilimi zaten doğru
+        cevap; onu geçir.
       </>
     ),
     related: "İlgili",
@@ -134,7 +143,17 @@ const T = {
         &quot;14:30 in Istanbul&quot; without drift. Time is picked, not typed; 12 or 24 hours is the
         locale&apos;s call. Every emitted value is inside <code>[min, max]</code>: a pick that would
         cross a bound is clamped to the nearest valid time. An hour inside a DST gap is not offered;
-        an ambiguous hour is written with the later (standard) offset.
+        an ambiguous hour is written with the later (standard) offset, and a value coming from
+        outside keeps its own. The hour boxes stay locked until a day is picked, so picking an hour
+        never emits today.
+      </>
+    ),
+    ssr: (
+      <>
+        <strong>Rendering on the server, give <code>timeZone</code>.</strong> Absent, the zone is the
+        browser&apos;s, but on the server &quot;the browser&quot; is the server itself: it renders one
+        clock, the browser another, and React reports a hydration mismatch. The workspace&apos;s
+        zone is the right answer anyway; pass it.
       </>
     ),
     tz: (
@@ -197,6 +216,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 <DateTimePicker value={end} min={start} … />`}>
         <DateTimePickerDemo lang={lang} />
       </Demo>
+      <Note>{t.ssr}</Note>
 
       <H2>Props</H2>
       <Props of="DatePicker" lang={lang} />

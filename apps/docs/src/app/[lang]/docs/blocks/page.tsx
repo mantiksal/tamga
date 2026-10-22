@@ -207,6 +207,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <H2>{t.tehlikeH}</H2>
       <P>{t.tehlikeP}</P>
       <Props of="DangerZone" lang={lang} etiketli />
+      <Props of="DangerAction" lang={lang} etiketli />
 
       <Note>{t.kararN}</Note>
     </>

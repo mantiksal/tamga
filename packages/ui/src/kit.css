@@ -796,7 +796,6 @@
      dead band is the outer 5px of a tile well over 160px tall, whereas on a
      36px button the same band is most of the control. */
 
-
   /* ---------- raised objects ---------- */
   /* The few genuinely detached surfaces that are not cards. Same height as a
      card and the same faint edge — the weight of the rule, not the height of
@@ -971,7 +970,6 @@
     transform: translate(3px, 3px);
     box-shadow: 0 0 0 var(--color-critical);
   }
-
 
   /* The edge is the BASE colour, not the pressed colour. A keycap and the base
      it sits on are one object seen from two sides, so they share an outline —
@@ -1213,7 +1211,6 @@
     transform: translate(3px, 3px);
     box-shadow: 0 0 0 var(--color-edge-strong);
   }
-
 
   /* ALANIN İÇİNDEKİ KONTROL (parola gözü, temizle, kopyala) YÜKSELMİYOR: yükselen
      bir nesne kâğıdın üstünde durur, başka bir yükseltinin üstünde değil. Bu düğme
@@ -1970,7 +1967,6 @@
   .tamga-accordion-cards .tamga-collapsible-body[data-indent] {
     padding-left: 44px;
   }
-
 
   /* AÇILIR BÖLÜM KENDİ KARTI · açık olan taban kazanıyor ve başlığı yıkanıyor:
      tek bir yüzeyin içinde çizgiyle ayrılmış satırlarda hangisinin açık olduğu
@@ -3394,7 +3390,6 @@
     left: 19px;
   }
 
-
   /* HAFTA GÜNÜ DÜĞMESİ · seçiliyken BASILI duruyor: bir gün bir hedef değil
      bir değer, ve açık olan değer dolu görünüyor (Yasa 2).
      Gerekçe: docs/gerekce/01-form-ve-girdi.md */
@@ -4035,7 +4030,6 @@
     color: var(--color-critical);
   }
 
-
   /* ---------- feedback and structure ---------- */
 
   /* inline banner — status wash, no fill, a left rule carries the state */
@@ -4158,7 +4152,6 @@
   .tamga-swap > [data-hidden="true"] {
     visibility: hidden;
   }
-
 
   /* AYRAÇ MERDİVENİ, ve basamakları tasarımın kendi dosyasından: yatay kural
      en sessiz (`--div`), kesikli bir tık koyu (`--dash` = bizim `line`), dikey
@@ -4741,7 +4734,6 @@
   .tamga-sheet-start {
     animation: tamga-sheet-start var(--duration-base) var(--ease-standard);
   }
-
 
   /* ------------------------------------------------------------------ *
    * GÖRÜNÜM AYARLARININ PARÇALARI.

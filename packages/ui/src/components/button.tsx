@@ -68,7 +68,8 @@ export type ButtonProps = React.ComponentProps<"button"> &
      *
      * ZORUNLU DEĞİL AMA VARSAYILANI YOK: kit çeviri yapmıyor, ve "Loading"
      * diye İngilizce bir varsayılan her Türkçe panele İngilizce bir cümle
-     * gönderirdi. Verilmezse düğmenin kendi metni okunuyor.
+     * gönderirdi. Verilmezse düğmenin kendi metni ad olarak kalıyor (görünmez
+     * ama okunur); adsız bir düğme olmuyor.
      */
     busyLabel?: string;
   };
@@ -98,6 +99,9 @@ export function Button({
       {busy ? (
         <>
           <Spinner size={16} label={busyLabel ?? ""} />
+          {/* ADSIZ DÜĞME OLMAZ: `busyLabel` yoksa metin sr-only olarak ağaçta
+              kalıyor; `invisible` olanı okuyucu görmüyor. */}
+          {busyLabel ? null : <span className="sr-only">{children}</span>}
           {/* ETİKET KALIYOR ama görünmüyor: düğmenin genişliği sabit kalsın
               diye. Metni kaldırmak düğmeyi büzüyor ve yanındaki her şeyi
               kaydırıyor — tam da bir kaydetme anında. */}

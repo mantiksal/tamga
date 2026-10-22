@@ -4,7 +4,7 @@ import { Demo } from "@/components/demo";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
-import { BadgeDemo } from "@/components/interactive";
+import { TagSwatchDemo, BadgeDemo } from "@/components/interactive";
 import { Xref } from "@/components/xref";
 import { Props } from "@/components/props";
 import { sayfaMeta } from "@/content/meta";
@@ -71,6 +71,19 @@ const T = {
         ürün yazıyor, biçimi kit veriyor.
       </>
     ),
+    renkH: "Kullanıcının rengi: Yasa 3'e yazılı istisna",
+    renkP: (
+      <>
+        Kullanıcı kendi etiketine bir renk seçebilir; <code>swatch</code> onu metnin önünde
+        küçük bir işaret olarak taşır. Bu, &quot;renk yalnız sapma ve etkileşim içindir&quot;
+        yasasının <strong>tek yazılı istisnası</strong>: renk kitin söylediği bir şey değil,
+        kullanıcının verisi · bir kimlik işareti. Sınırı dar: zemin değil, metin rengi değil,{" "}
+        <code>aria-hidden</code> · anlamı ad taşıyor. <strong>Ne zaman:</strong> kullanıcının
+        oluşturduğu, adlandırdığı, renklendirdiği etiketler. <strong>Ne zaman asla:</strong> durum
+        ya da önem bildirmek için · onun için <code>StatusChip</code> var. İşaretin halkası
+        mürekkepten türüyor; çok açık ya da çok koyu bir renk iki temada da görünür kalıyor.
+      </>
+    ),
     rules: "Kurallar",
     sepet: "Sepet",
     yeniUrun: "Sepette yeni ürün var",
@@ -131,6 +144,19 @@ const T = {
         tier. The product writes the word, the kit gives the shape.
       </>
     ),
+    renkH: "The user's colour: the written exception to Law 3",
+    renkP: (
+      <>
+        A user can give their own label a colour; <code>swatch</code> carries it as a small mark
+        before the text. This is the <strong>one written exception</strong> to &quot;colour is for
+        deviation and interaction&quot;: the colour is not something the kit says, it is the
+        user&apos;s data · an identity mark. The boundary is narrow: not a ground, not a text colour,{" "}
+        <code>aria-hidden</code> · the name carries the meaning. <strong>When:</strong> labels the
+        user creates, names and colours. <strong>Never:</strong> to signal status or severity · that
+        is what <code>StatusChip</code> is for. The mark&apos;s ring derives from the ink, so a very
+        light or very dark colour stays visible in both themes.
+      </>
+    ),
     rules: "Rules",
     sepet: "Cart",
     yeniUrun: "There is something new in the cart",
@@ -182,6 +208,17 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         <Tag look="dashed">BETA</Tag>
         <Tag look="solid">{t.yeni}</Tag>
         <Tag look="outline">PRO</Tag>
+      </Demo>
+
+      <H2>{t.renkH}</H2>
+      <P>{t.renkP}</P>
+      <Demo labels={dict.demo} align="start" code={`<Tag>PRO</Tag>
+<Tag swatch="#1f7a46">Müşteri</Tag>
+<Tag swatch={tag.color}>{tag.name}</Tag>
+
+{/* oluşturma formunda rengi ColorSwatches seçiyor */}
+<ColorSwatches value={color} onChange={setColor} options={…} customLabel="…" />`}>
+        <TagSwatchDemo lang={lang} />
       </Demo>
       <Props of="Tag" lang={lang} etiketli />
 

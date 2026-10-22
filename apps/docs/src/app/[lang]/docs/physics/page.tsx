@@ -217,6 +217,11 @@ const T = {
       <>
         <strong>Sessize alınan tek nötr durumdur</strong>, yani gri bir satır kendi başına
         &quot;raporlamıyor&quot; demektir. Bu ancak gri tek renksiz durum kaldığı sürece işe yarar.
+        <br />
+        <strong>Yazılı tek istisna:</strong> kullanıcının kendi etiketine verdiği renk (
+        <code>Tag swatch</code>). O renk kitin söylediği bir şey değil, kullanıcının verisi · bir
+        kimlik işareti. Kit onu yalnız taşır: küçük bir işaret, zemin ya da metin rengi değil,
+        anlam yüklenmez. Durum ya da önem için asla; emsal de değil.
       </>
     ),
 
@@ -460,6 +465,11 @@ const T = {
       <>
         <strong>Muted is the only neutral state</strong>, so a grey row on its own means &quot;not
         reporting&quot;. That only works for as long as grey stays the single colourless state.
+        <br />
+        <strong>The one written exception:</strong> the colour a user gives their own label (
+        <code>Tag swatch</code>). That colour is not something the kit says; it is the user&apos;s
+        data, an identity mark. The kit only carries it: a small mark, never a ground or a text
+        colour, no meaning attached. Never for status or severity; not a precedent either.
       </>
     ),
 

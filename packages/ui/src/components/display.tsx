@@ -410,10 +410,23 @@ export function Kbd({
 export function Tag({
   children,
   look = "outline",
+  swatch,
   className,
   ...rest
 }: {
   children: ReactNode;
+  /**
+   * The user's own colour for the label, any CSS colour. A small mark before the text, nothing
+   * more: not a ground, not a text colour, and `aria-hidden` · the name carries the meaning, the
+   * colour is an identity mark. This is the one WRITTEN exception to Law 3 (colour is for
+   * deviation and interaction): the kit says nothing with it, it only carries the user's data.
+   * Never for status or severity · that is `StatusChip`. TR: Kullanıcının etikete verdiği renk,
+   * herhangi bir CSS rengi. Metnin önünde küçük bir işaret, fazlası değil: zemin değil, metin
+   * rengi değil, ve `aria-hidden` · anlamı ad taşıyor, renk bir kimlik işareti. Yasa 3'ün
+   * (renk sapma ve etkileşim içindir) tek YAZILI istisnası: kit bununla bir şey söylemiyor,
+   * yalnız kullanıcının verisini taşıyor. Durum ya da önem için asla · o `StatusChip`.
+   */
+  swatch?: string;
   /**
    * `dashed` not real yet (beta, coming), `solid` the loudest one, for what is new right now,
    * `outline` the quiet standing fact (a plan name, a tier). TR: `dashed` henüz gerçek değil
@@ -439,6 +452,7 @@ export function Tag({
         className,
       )}
     >
+      {swatch ? <span aria-hidden="true" className="tamga-tag-swatch" style={{ backgroundColor: swatch }} /> : null}
       {children}
     </span>
   );

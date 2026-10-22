@@ -2232,6 +2232,22 @@
     color: var(--color-ink-faint);
   }
 
+  /* KULLANICI RENGİ İŞARETİ · Yasa 3'ün yazılı istisnası (bkz. Tag JSDoc ve
+     docs/gerekce/06). Kitin işaret ailesinden kare (`--radius-mark`), daire
+     değil. Halka mürekkepten türüyor: kullanıcı açık zemine çok açık bir renk
+     seçebilir, halka her renkte ve iki temada işareti ZEMİNDEN ayırıyor · yüzde
+     altmış ölçülerek seçildi: açık zeminde beyaz, koyu zeminde siyah seçimde
+     halka/zemin 3:1'in üstünde kalıyor (1.4.11). */
+  .tamga-tag-swatch {
+    display: inline-block;
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    margin-right: 5px;
+    border-radius: var(--radius-mark);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-ink) 60%, transparent);
+  }
+
   /* BÖLÜNMÜŞ KÜNYE: satırlar sığdığı kadar sütuna dağılıyor, ve her sütun
      kendi etiket sütununu koruyor · `subgrid` yalnız kendi kabına bakıyor.
      Tailwind sınıfları ezilmiyor, yalnız üst ızgara değişiyor. */

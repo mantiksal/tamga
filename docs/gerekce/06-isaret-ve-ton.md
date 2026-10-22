@@ -206,3 +206,28 @@ düşerdi.
 KAPI KAYNAĞI OKUYOR. İlk hâlinde çiftler `check-token-contrast`e elle yazılmıştı ve kasıtlı bir
 ihlal denendiğinde kapı geçti: ölçtüğü şey `tone.ts`in kullandığı çift değil, kendi listesiydi.
 Şimdi çiftler `tone.ts`ten okunuyor, ve aynı sabotaj kapıyı düşürüyor.
+
+---
+
+## `display.tsx` · `Tag`
+
+### Yasa 3'ün tek yazılı istisnası: kullanıcının rengi.
+
+"Renk yalnız sapma ve etkileşim içindir." Kullanıcı kendi etiketine bir
+renk seçtiğinde o renk ne sapma ne etkileşim · ve bir ürün bunu kitin
+dışında, elle, `rounded-full` bir nokta ile çözmüştü. Karar (Berika,
+2026-10-22): kullanıcı renkli etiket kite girer, yasaya YAZILI bir istisna
+olarak. Gerekçe: bu renk kitin söylediği bir şey değil, kullanıcının kendi
+verisi; bir kimlik işareti. Kit onu yalnız taşır, anlam yüklemez.
+
+SINIRI. Yalnız kullanıcının verdiği renk, yalnız küçük bir işaret olarak
+(`Tag swatch`): zemin değil, metin rengi değil, `aria-hidden` · adı etiket
+taşıyor. Durum ya da önem için asla; onun için `StatusChip` var. Bu bir
+emsal DEĞİL: başka bir yere renk sızdırmak isteyen biri bu paragrafa değil
+yasanın kendisine bakar.
+
+İŞARET. Kitin işaret ailesinden kare (`--radius-mark`), daire değil.
+Halkası mürekkepten türüyor (`color-mix` ile yüzde altmış): kullanıcı
+açık zemine çok açık bir renk seçebilir, halka işareti her renkte ve iki
+temada görünür tutuyor · bilgi taşımasa da görünmeyen bir işaret anlamsız.
+

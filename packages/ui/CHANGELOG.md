@@ -5,6 +5,20 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.7.2
+
+> A label can carry the user's colour; the kit says nothing with it.
+
+### Added
+
+- **`Tag` `swatch`** · any CSS colour; a small square mark (the kit's mark radius, not a circle)
+  before the text, `aria-hidden`. This is the one **written** exception to Law 3 ("colour is for
+  deviation and interaction"): the colour is the user's own data, an identity mark, never a
+  ground or a text colour, never status. The ring around the mark derives from the ink, so a
+  near-white or near-black choice stays visible in both themes. Written into the physics page
+  and `docs/gerekce/06`, so nobody deletes it as a violation or cites it as a precedent. Without
+  `swatch` the output is unchanged.
+
 ## 0.7.1
 
 > A section can be told whether it is open; it can say so too.

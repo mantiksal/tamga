@@ -381,3 +381,54 @@ describe("DateTimePicker · isteğe bağlı küçükler", () => {
     expect(uyar).toHaveBeenCalledTimes(2);
   });
 });
+
+describe("boş alan en erken seçilebilir ayda açılıyor", () => {
+  const SAATLI = { ...ETIKETLER, hour: "Saat", minute: "Dakika", period: "Öğle" };
+  const ayAdi = () => screen.getByRole("grid").getAttribute("aria-label");
+  const durak = () => document.querySelector('[role="gridcell"][tabindex="0"]');
+
+  it("Calendar: min ileri bir aydayken o ay görünüyor ve bir sekme durağı var", () => {
+    render(<Calendar locale="tr-TR" timeZone={IST} min="2031-05-10" labels={ETIKETLER} />);
+    expect(ayAdi()).toBe("Mayıs 2031");
+    expect(durak()).not.toBeNull();
+    expect(durak()!.textContent).toBe("10");
+  });
+
+  it("Calendar: bugün max'tan sonraysa max'ın ayı", () => {
+    render(<Calendar locale="tr-TR" timeZone={IST} min="2020-01-01" max="2021-03-15" labels={ETIKETLER} />);
+    expect(ayAdi()).toBe("Mart 2021");
+    expect(durak()!.textContent).toBe("1");
+  });
+
+  it("Calendar: bugün aralıktaysa bugünün ayı, değer varsa değerin ayı", () => {
+    const { unmount } = render(<Calendar locale="tr-TR" timeZone={IST} min="2000-01-01" max="2099-12-31" labels={ETIKETLER} />);
+    const bugun = new Intl.DateTimeFormat("tr-TR", { month: "long", year: "numeric", timeZone: IST }).format(new Date());
+    expect(ayAdi()).toBe(bugun);
+    unmount();
+    render(<Calendar locale="tr-TR" timeZone={IST} value="2027-02-03" min="2031-05-10" labels={ETIKETLER} />);
+    expect(ayAdi()).toBe("Şubat 2027");
+  });
+
+  it("DatePicker ve DateTimePicker: açılınca aynı kural", () => {
+    const a = render(<DatePicker locale="tr-TR" timeZone={IST} min="2031-05-10" onChange={vi.fn()} placeholder="Tarih" labels={ETIKETLER} />);
+    fireEvent.click(screen.getByRole("textbox"));
+    expect(ayAdi()).toBe("Mayıs 2031");
+    expect(durak()).not.toBeNull();
+    a.unmount();
+    render(<DateTimePicker locale="tr-TR" timeZone={IST} min="2031-05-10T09:00:00+03:00" onChange={vi.fn()} placeholder="Zaman" labels={SAATLI} />);
+    fireEvent.click(screen.getByRole("textbox"));
+    expect(ayAdi()).toBe("Mayıs 2031");
+    expect(durak()).not.toBeNull();
+  });
+
+  it("açık takvim min değişince yerinden oynamıyor; sonraki açılış yeni kuralı izliyor", () => {
+    const { rerender } = render(<DatePicker locale="tr-TR" timeZone={IST} min="2031-05-10" onChange={vi.fn()} placeholder="Tarih" labels={ETIKETLER} />);
+    fireEvent.click(screen.getByRole("textbox"));
+    expect(ayAdi()).toBe("Mayıs 2031");
+    rerender(<DatePicker locale="tr-TR" timeZone={IST} min="2032-08-01" onChange={vi.fn()} placeholder="Tarih" labels={ETIKETLER} />);
+    expect(ayAdi()).toBe("Mayıs 2031");
+    fireEvent.keyDown(document, { key: "Escape" });
+    fireEvent.click(screen.getByRole("textbox"));
+    expect(ayAdi()).toBe("Ağustos 2032");
+  });
+});

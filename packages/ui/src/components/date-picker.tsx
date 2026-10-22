@@ -230,9 +230,13 @@ export function Calendar({
   const kapali = (d: DateISO) => (min !== undefined && d < min) || (max !== undefined && d > max);
   const bugun = gunParcasi(new Date(), tz);
 
-  /* AÇILAN AY DEĞERİN AYI, bugünün ayı değil. Değer yoksa bugün. */
+  /* AÇILAN AY DEĞERİN AYI. Değer yoksa bugün, bugün aralıktaysa; değilse en
+     erken seçilebilir gün (bugün max'ı geçtiyse en geç). Bugünün ayı bütünüyle
+     kapalıyken ızgarada sekme durağı kalmıyor, klavye takvime hiç giremiyordu.
+     Yalnız ilk çizimde: açık bir takvim min/max değişince yerinden oynamaz. */
   const ayi = (d: DateISO) => { const { y, m } = parcala(d); return { y, m }; };
-  const [view, setView] = useState(ayi(value ?? bugun));
+  const baslangic = value ?? (!kapali(bugun) ? bugun : max !== undefined && bugun > max ? max : (min ?? bugun));
+  const [view, setView] = useState(ayi(baslangic));
   const kok = useRef<HTMLDivElement>(null);
 
   const first = weekStart(locale);
@@ -245,6 +249,7 @@ export function Calendar({
   /* SEKME DURAĞI HEP GÖRÜNEN AYDA VE AÇIK BİR GÜNDE. `odak` yalnız tercihtir;
      ay değişince ya da odak kapalı/görünmez olunca durak seçili güne, o da
      yoksa ilk açık güne düşer · yoksa klavye ızgaraya hiç giremiyordu. */
+  /* Durak görünümden bağımsız: görünen ayda değilse ilk açık güne düşüyor. */
   const [odak, setOdak] = useState<DateISO>(value ?? bugun);
   const gorunur = (d: DateISO | undefined): d is DateISO => d !== undefined && d.startsWith(`${view.y}-${p2(view.m + 1)}`);
   const etkinOdak =

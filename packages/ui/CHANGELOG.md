@@ -5,6 +5,21 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.7.1
+
+> An empty calendar opens where something can be picked.
+
+### Fixed
+
+- **`Calendar` / `DatePicker` / `DateTimePicker` opened on today's month even when `min` sat
+  months ahead.** Every visible day was disabled and no cell carried `tabindex="0"`, so the
+  keyboard could not enter the grid and the mouse had to press "next month" for years (a
+  maintenance window whose end is bounded by a start in 2031 opened in 2026). The first month
+  is now the value's; without a value, today's if today is inside `[min, max]`, else the month
+  of `min` (of `max` when today is past it). The tab stop lands on the selected day or the first
+  open day of that month, as before. Only the first render decides: an open calendar does not
+  jump when `min`/`max` change from outside, the next opening follows the new bounds.
+
 ## 0.7.0
 
 > A calendar can say no and carry the hour; a section can be told whether it is open; a label can

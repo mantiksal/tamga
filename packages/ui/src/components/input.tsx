@@ -42,7 +42,8 @@ export type InputProps = Omit<React.ComponentProps<"input">, "size"> &
     /**
      * There is an icon absolutely positioned over the left of this field, so reserve room for it.
      * Opt-in on purpose: the padding used to be unconditional and every plain field opened with a
-     * 40px hole where nothing was.
+     * 40px hole where nothing was. TR: Alanın solunda mutlak konumlu bir ikon var, ona yer ayır.
+     * Bilerek isteğe bağlı: dolgu koşulsuzdu ve her düz alan 40 px'lik boş bir delikle açılıyordu.
      */
     leading?: boolean;
   };

@@ -1637,17 +1637,18 @@ export function ImageUploadDemo({ lang }: L) {
   const [logo, setLogo] = useState<string | null>(null);
   const [hata, setHata] = useState(false);
   const [kilit, setKilit] = useState(false);
+  /* Sahte sunucunun "adresi" bir nesne adresi; eskisi her değişimde bırakılıyor. */
+  const birak = () => { if (logo) URL.revokeObjectURL(logo); };
   const yukle = (file: File) =>
     new Promise<string>((ok, hayir) => {
-      window.setTimeout(() => (hata ? hayir(n.imgFailText) : ok(URL.createObjectURL(file))), 900);
+      window.setTimeout(() => { if (hata) return hayir(n.imgFailText); birak(); ok(URL.createObjectURL(file)); }, 900);
     });
-  const kaldir = () => new Promise<void>((ok, hayir) => window.setTimeout(() => (hata ? hayir(n.imgFailText) : ok()), 600));
+  const kaldir = () => new Promise<void>((ok, hayir) => window.setTimeout(() => { if (hata) return hayir(n.imgFailText); birak(); ok(); }, 600));
   return (
     <div className="flex w-full flex-col gap-4">
       <ImageField
         value={logo}
         onChange={setLogo}
-        maxEdge={512}
         onUpload={yukle}
         onRemove={kaldir}
         confirm

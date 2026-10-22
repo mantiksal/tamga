@@ -28,11 +28,17 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   before anything else runs; `disabled` + `lockedNote` show the reason as visible text wired to
   the buttons with `aria-describedby`. The preview is an object URL, revoked on cancel, on a new
   pick, on success, when `value` changes from outside, and on unmount; a result arriving after
-  unmount or after an outside `value` change is dropped. `maxEdge` is optional with `onUpload`.
+  unmount or after an outside `value` change is dropped; the caller's own `onChange` with the
+  same result (a cache update inside `onUpload`) is not "outside". `maxEdge` is optional in the
+  type: not used with `onUpload`, and without either the image is kept at its own size. An
+  empty file (0 bytes) is refused with `errorUnreadable` on both paths; `labels.empty` takes a
+  `ReactNode`. The failure alert sits in a `role="alert"` region that is in the DOM from the
+  start, like the status line; both regions exist with `onRemove` alone as well.
   The pre-existing synchronous path (no `onUpload`) renders the same markup, locked by test; its
   only change is that a file outside `accept` is now refused before `prepareImage` (the input's
   own list said so already). A product had written this field four times.
-- **`Select` `disabled`** · locks the trigger. Needed by `DateTimePicker` below.
+- **`Select` `disabled`** · locks the trigger, and looks locked (sunk ground, dashed edge, faint
+  ink). Needed by `DateTimePicker` below.
 
 ### Fixed
 
@@ -50,6 +56,14 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 - **`DateTimePicker` hour boxes locked until a day is picked** · picking an hour with no day
   emitted today's date.
 - **`DateTimePicker` `minuteStep` below 1** hung the page (an endless loop); it reads as 1.
+- **`DatePicker` / `DateTimePicker` `disabled`** left the clear and open buttons live: a locked
+  date could be cleared. Both buttons are disabled with the field.
+- **`DateTimePicker` minute change inside an ambiguous hour** keeps the value's own offset
+  (01:30-04:00 to :45 gives 01:45-04:00; it jumped to -05:00). `DatePicker` refuses days that
+  are not on the calendar (`2026-02-30`).
+- **Development warnings** are now written as plain `process.env.NODE_ENV`, the form bundlers
+  replace; the previous `globalThis.process` form never matched and would have warned in
+  production.
 - **Invalid `timeZone` or unparseable `value` / `min` / `max`** threw a `RangeError` and took the
   component down; the zone falls back to the browser's, the value reads as empty, the console
   warns. `DatePicker` and `Calendar` the same.
@@ -58,6 +72,9 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 - **`Tag` lost its JSDoc** in 0.8.1: the hex constant was inserted between the comment and the
   function, so `display.d.ts` carried no description for `Tag`. The swatch's Turkish note still
   said "any CSS colour"; it says hex only.
+- **Props tables** · `ErrorState` lost `onRetry` / `retryLabel` (a parenthesised union was not
+  read), `Button` lost `busy` / `busyLabel` and `Input` `leading` (an alias body was cut at its
+  first `;`). Both read now.
 - **`DangerZone` props table** mixed in the row's props (`label`, `disabledReason`, `busy` …) and
   dropped the row's own `title` / `description`, because the extractor expanded every alias
   named anywhere in the type. Only top-level intersections expand now, and `DangerAction` has

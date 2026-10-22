@@ -1669,8 +1669,17 @@
     transition: transform var(--duration-press) var(--ease-standard), box-shadow var(--duration-press) var(--ease-standard),
       border-color var(--duration-press) var(--ease-standard);
   }
-  .tamga-select:hover {
+  .tamga-select:hover:not(:disabled) {
     border-color: var(--color-edge-strong);
+  }
+  /* KAPALI: kitin diğer kapalı kontrolleriyle aynı dil · çukur zemin, kesik
+     kenar, soluk mürekkep, el değil ok. */
+  .tamga-select:disabled {
+    background: var(--color-sunk);
+    border-style: dashed;
+    border-color: var(--color-edge);
+    color: var(--color-ink-faint);
+    cursor: default;
   }
   /* DOLU HÂL: kenar koyulaşıyor ve nesne bir taban kazanıyor. */
   /* DEĞERİ OLAN SEÇİM YÜKSELMİYOR: aynı satırda aynı işi yapan kontroller ayrı

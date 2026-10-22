@@ -189,23 +189,54 @@ function expandAliases(text, seen = new Set()) {
   return out;
 }
 
-/** Bir kesişimi üst seviye `&` ile böler: `A & { x: 1 } & B`. */
-function kesisim(text) {
+/** Üst seviye `ayrac` ile böler (`&` kesişim, `|` birleşim); dizgi ve yorum atlanır. */
+function bol(text, ayrac) {
   const parts = [];
   let depth = 0;
   let start = 0;
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
+    if (c === '"' || c === "'" || c === "`") {
+      const q = c;
+      i++;
+      while (i < text.length && text[i] !== q) { if (text[i] === "\\") i++; i++; }
+      continue;
+    }
+    if (c === "/" && text[i + 1] === "*") { i = text.indexOf("*/", i) + 1; continue; }
     if (c === "=" && text[i + 1] === ">") { i++; continue; }
     if ("{([<".includes(c)) depth++;
     else if ("})]>".includes(c)) depth--;
-    else if (c === "&" && depth === 0) {
+    else if (c === ayrac && depth === 0) {
       parts.push(text.slice(start, i));
       start = i + 1;
     }
   }
   parts.push(text.slice(start));
-  return parts.map((p) => p.trim()).filter(Boolean);
+  /* Kolun başındaki blok yorum kolun değil üyenin değil, anlatının: atılıyor. */
+  return parts.map((p) => p.replace(/^\s*(?:\/\*[\s\S]*?\*\/\s*)*/, "").trim()).filter(Boolean);
+}
+const kesisim = (text) => bol(text, "&");
+
+/** Kaynakta `at`ten sonraki ÜST SEVİYE `;`: bir takma adın gövdesi `A & { x: 1; y: 2 };`
+    olabilir ve ilk `;` gövdenin içindedir. */
+function ustNoktaliVirgul(src, at) {
+  let depth = 0;
+  for (let i = at; i < src.length; i++) {
+    const c = src[i];
+    if (c === '"' || c === "'" || c === "`") {
+      const q = c;
+      i++;
+      while (i < src.length && src[i] !== q) { if (src[i] === "\\") i++; i++; }
+      continue;
+    }
+    if (c === "/" && src[i + 1] === "*") { i = src.indexOf("*/", i) + 1; continue; }
+    if (c === "/" && src[i + 1] === "/") { i = src.indexOf("\n", i); continue; }
+    if (c === "=" && src[i + 1] === ">") { i++; continue; }
+    if ("{([<".includes(c)) depth++;
+    else if ("})]>".includes(c)) depth--;
+    else if (c === ";" && depth === 0) return i;
+  }
+  return -1;
 }
 
 /** Bir tip ifadesinin ÜST SEVİYE nesne gövdeleri: satır içi `{…}` parçaları ve
@@ -219,6 +250,16 @@ function typeLiterals(text, seen = new Set()) {
     if (part.startsWith("{")) {
       const end = matchBrace(part, 0);
       if (end > 0) bodies.push({ body: part.slice(1, end) });
+      continue;
+    }
+    /* PARANTEZLİ BİRLEŞİM: `( | { onRetry?: undefined } | { onRetry: () => void; retryLabel } )`.
+       Her kolun üyesi tabloya girer, isteğe bağlı sayılır: bir kolda zorunlu
+       olan öbür kolda yok. `ErrorState`in `onRetry`ı böyle düşüyordu. */
+    if (part.startsWith("(")) {
+      const end = matchBrace(part, 0);
+      if (end < 0) continue;
+      for (const kol of bol(part.slice(1, end), "|"))
+        for (const ic of typeLiterals(kol, seen)) bodies.push({ ...ic, optional: true });
       continue;
     }
     /* `Omit<ScoreProps, "a" | "b">`, `Pick<…>`, `Partial<…>`: üst seviyede sarılmış
@@ -337,7 +378,7 @@ for (const f of files) {
       const end = matchBrace(src, at);
       if (end > 0) aliases.set(m[1], src.slice(at, end + 1));
     } else {
-      const nl = src.indexOf(";", at);
+      const nl = ustNoktaliVirgul(src, at);
       if (nl > 0) aliases.set(m[1], src.slice(at, nl));
     }
   }
@@ -407,7 +448,8 @@ for (const f of files) {
     const teklestir = new Map();
     for (const p of props) {
       const onceki = teklestir.get(p.name);
-      if (!onceki || (!onceki.doc && p.doc)) teklestir.set(p.name, p);
+      /* Birleşimin `onRetry?: undefined` kolu gerçek tipi ezmesin. */
+      if (!onceki || (!onceki.doc && p.doc) || onceki.type === "undefined") teklestir.set(p.name, p);
     }
     props = [...teklestir.values()];
 

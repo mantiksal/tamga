@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen } from "@testing-library/react";
+import { useState } from "react";
 
 vi.mock("../lib/image.js", async (orig) => {
   const m = await orig<typeof import("../lib/image.js")>();
@@ -263,6 +264,69 @@ describe("ImageField", () => {
       expect(olustur).toHaveBeenCalledTimes(1);
       expect(birak).not.toHaveBeenCalled();
       coz("x"); await bekle();
+    });
+  });
+
+  describe("çağıranın kendi güncellemesi bayat değil (3)", () => {
+    it("onUpload içinde value sonuçla güncellenirse yine 'yüklendi' deniyor", async () => {
+      function Sahip() {
+        const [v, setV] = useState<string | null>(null);
+        const onUpload = async () => { setV("https://cdn.test/yeni.png"); return "https://cdn.test/yeni.png"; };
+        return <ImageField value={v} onChange={setV} labels={ETIKET} preview={goster} onUpload={onUpload} />;
+      }
+      render(<Sahip />);
+      sec(dosya());
+      await bekle();
+      expect(onay()?.textContent).toBe("Yüklendi");
+      expect(onizleme("https://cdn.test/yeni.png")).not.toBeNull();
+    });
+    it("onRemove içinde value null yapılırsa yine 'kaldırıldı' deniyor", async () => {
+      function Sahip() {
+        const [v, setV] = useState<string | null>("https://cdn.test/eski.png");
+        return <ImageField value={v} onChange={setV} labels={ETIKET} preview={goster} onUpload={async () => "x"} onRemove={async () => { setV(null); }} />;
+      }
+      render(<Sahip />);
+      fireEvent.click(screen.getByRole("button", { name: "Kaldır" }));
+      await bekle();
+      expect(onay()?.textContent).toBe("Kaldırıldı");
+    });
+  });
+
+  describe("duyuru bölgeleri (4 · 5)", () => {
+    it("hata bölgesi hep DOM'da (role=alert), metin gelince doluyor", async () => {
+      render(<ImageField value={null} onChange={vi.fn()} labels={ETIKET} preview={goster} onUpload={async () => { throw "Olmadı"; }} />);
+      const bolge = document.querySelector('[role="alert"]');
+      expect(bolge).not.toBeNull();
+      expect(bolge?.textContent).toBe("");
+      sec(dosya()); await bekle();
+      expect(document.querySelector('[role="alert"]')).toBe(bolge);
+      expect(bolge?.textContent).toContain("Olmadı");
+    });
+    it("yalnız onRemove verilince de onay kabı var: 'kaldırıldı' kaybolmuyor", async () => {
+      render(<ImageField value="https://cdn.test/eski.png" onChange={vi.fn()} maxEdge={256} labels={ETIKET} preview={goster} onRemove={async () => undefined} />);
+      expect(onay()).not.toBeNull();
+      fireEvent.click(screen.getByRole("button", { name: "Kaldır" }));
+      await bekle();
+      expect(onay()?.textContent).toBe("Kaldırıldı");
+    });
+  });
+
+  describe("boş dosya ve boş durum (6 · 7)", () => {
+    it("0 bayt iki yolda da errorUnreadable; ne prepareImage ne onUpload çağrılıyor", () => {
+      const onUpload = vi.fn(async () => "x");
+      const a = render(<ImageField value={null} onChange={vi.fn()} labels={ETIKET} preview={goster} onUpload={onUpload} />);
+      sec(dosya("bos.png", "image/png", 0));
+      expect(screen.getByText("Okunamadı")).toBeTruthy();
+      expect(onUpload).not.toHaveBeenCalled();
+      a.unmount();
+      render(<ImageField value={null} onChange={vi.fn()} maxEdge={256} labels={ETIKET} preview={goster} />);
+      sec(dosya("bos.png", "image/png", 0));
+      expect(screen.getByText("Okunamadı")).toBeTruthy();
+      expect(prepareImage).not.toHaveBeenCalled();
+    });
+    it("labels.empty bir ReactNode olabiliyor", () => {
+      render(<ImageField value={null} onChange={vi.fn()} maxEdge={256} labels={{ ...ETIKET, empty: <em data-bos>Henüz yok</em> }} preview={goster} />);
+      expect(document.querySelector("em[data-bos]")).not.toBeNull();
     });
   });
 

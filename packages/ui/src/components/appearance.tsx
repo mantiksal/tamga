@@ -434,7 +434,8 @@ export function ImageField({
     upload: string;
     replace: string;
     remove: string;
-    empty: string;
+    /** The empty state's content: a sentence, or a node. TR: Boş durumun içeriği: bir cümle ya da bir düğüm. */
+    empty: ReactNode;
     errorType: string;
     errorSize: string;
     errorUnreadable: string;
@@ -544,8 +545,13 @@ export function ImageField({
   }, [value]);
 
   const kilit = disabled || mesgul !== null;
-  const bayat = (benim: number, baslangic: string | null) =>
-    !canli.current || istek.current !== benim || sonDeger.current !== baslangic;
+  /* Dış değer değiştiyse sonuç bayat · ama çağıranın KENDİ güncellemesi değil:
+     onUpload içinde önbelleği sonuçla, onRemove içinde null ile güncelleyen bir
+     çağıran "yüklendi"yi yine duymalı. */
+  const bayat = (benim: number, baslangic: string | null, beklenen: string | null | undefined) =>
+    !canli.current ||
+    istek.current !== benim ||
+    (sonDeger.current !== baslangic && (beklenen === undefined || sonDeger.current !== beklenen));
 
   function sifirla() {
     /* GİRDİ SIFIRLANIYOR: aynı dosya ikinci kez seçilince `change` hiç
@@ -560,6 +566,7 @@ export function ImageField({
     setHata(null);
     setOnay(null);
     if (!kabul(file, accept)) return setHata(labels.errorType);
+    if (file.size === 0) return setHata(labels.errorUnreadable);
     if (file.size > maxBytes) return setHata(labels.errorSize);
     if (!onUpload) {
       try {
@@ -588,7 +595,7 @@ export function ImageField({
     setMesgul("upload");
     try {
       const sonuc = await onUpload(file);
-      if (bayat(benim, baslangic)) return;
+      if (bayat(benim, baslangic, typeof sonuc === "string" ? sonuc : undefined)) return;
       if (typeof sonuc === "string") {
         birak();
         onChange(sonuc);
@@ -597,7 +604,7 @@ export function ImageField({
         uyar("ImageField: onUpload resolved with neither an address nor `false`; nothing was announced. Return the stored address, or `false` when you handled the result yourself.");
       }
     } catch (e) {
-      if (bayat(benim, baslangic)) return;
+      if (bayat(benim, baslangic, undefined)) return;
       setHata(metin(e, labels));
     } finally {
       if (canli.current) setMesgul(null);
@@ -614,11 +621,11 @@ export function ImageField({
     setMesgul("remove");
     try {
       const sonuc = await onRemove();
-      if (bayat(benim, baslangic) || sonuc === false) return;
+      if (bayat(benim, baslangic, null) || sonuc === false) return;
       onChange(null);
       setOnay(labels.removed ?? null);
     } catch (e) {
-      if (bayat(benim, baslangic)) return;
+      if (bayat(benim, baslangic, undefined)) return;
       setHata(metin(e, labels));
     } finally {
       if (canli.current) setMesgul(null);
@@ -626,6 +633,7 @@ export function ImageField({
   }
 
   const gosterilen = bekleyen?.url ?? value;
+  const asenkron = Boolean(onUpload || onRemove);
   const notKimligi = `${id}-kilit`;
   const tarif = disabled && lockedNote ? notKimligi : undefined;
 
@@ -697,12 +705,20 @@ export function ImageField({
       {/* CANLI BÖLGE HEP DOM'DA, yalnız metni değişiyor: sonradan eklenen bir
           `role=status` çoğu ekran okuyucuda hiç okunmuyor. Boşken sr-only, yani
           yer kaplamıyor ama ağaçta duruyor. */}
-      {onUpload ? (
+      {asenkron ? (
         <p role="status" className={cn("text-small text-ink-faint", !onay && "sr-only")}>
           {onay}
         </p>
       ) : null}
-      {hata ? <Alert state="danger" title={hata} /> : null}
+      {/* Hata bölgesi de hep DOM'da: sonradan eklenen `Alert` okunmuyordu. Senkron
+          yol eski markup'ını koruyor. */}
+      {asenkron ? (
+        <div role="alert" className={cn(!hata && "sr-only")}>
+          {hata ? <Alert state="danger" title={hata} /> : null}
+        </div>
+      ) : hata ? (
+        <Alert state="danger" title={hata} />
+      ) : null}
     </div>
   );
 }

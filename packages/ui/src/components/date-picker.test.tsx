@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
-import { DatePicker, DateTimePicker, Calendar, anYap } from "./date-picker.js";
+import { DatePicker, DateTimePicker, Calendar, anYap, gunOku } from "./date-picker.js";
 
 /**
  * Açılan takvimin KAPANMA yolları; sınır, klavye ve saat.
@@ -305,7 +305,10 @@ describe("DateTimePicker · kutu, gün, adım, geçersiz girdi (G2-G6)", () => {
   it("geçersiz dilim ya da ISO bileşeni düşürmüyor; alan boş, konsola uyarı (G5)", () => {
     const uyar = vi.spyOn(console, "warn").mockImplementation(() => {});
     const a = render(<DateTimePicker locale="tr-TR" timeZone="Mars/Olympus" value="2026-04-15T14:30:00+03:00" onChange={vi.fn()} placeholder="Zaman" labels={SAATLI} />);
-    expect((screen.getByRole("textbox") as HTMLInputElement).value).toMatch(/15 Nis 2026/);
+    /* Geçersiz dilim tarayıcınınkine düşüyor; beklenti de makinenin dilimiyle
+       yazılıyor (Chatham'da gün 16'ya devriliyor, bu doğru). */
+    const makinede = new Intl.DateTimeFormat("tr-TR", { dateStyle: "medium", timeStyle: "short" }).format(new Date("2026-04-15T14:30:00+03:00"));
+    expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe(makinede);
     a.unmount();
     const b = render(<DateTimePicker locale="tr-TR" timeZone={IST} value="bugün" min="dün" onChange={vi.fn()} placeholder="Zaman" labels={SAATLI} />);
     expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("");
@@ -330,5 +333,51 @@ describe("DateTimePicker · kutu, gün, adım, geçersiz girdi (G2-G6)", () => {
     fireEvent.keyDown(gun("15")!, { key: "ArrowRight" });
     await new Promise((r) => queueMicrotask(() => r(null)));
     expect(document.activeElement).toBe(gun("16"));
+  });
+});
+
+describe("DatePicker · DateTimePicker · disabled (1)", () => {
+  const SAATLI = { ...ETIKETLER, hour: "Saat", minute: "Dakika", period: "Öğle" };
+  it("kapalı DatePicker: temizle ve aç düğmeleri kapalı, tıklama bir şey yapmıyor", () => {
+    const onChange = vi.fn();
+    render(<DatePicker locale="tr-TR" value="2026-04-15" onChange={onChange} placeholder="Tarih" labels={ETIKETLER} disabled />);
+    const temizle = screen.getByRole("button", { name: "Temizle" });
+    const ac = screen.getByRole("button", { name: "Takvimi aç" });
+    expect(temizle).toBeDisabled();
+    expect(ac).toBeDisabled();
+    fireEvent.click(temizle);
+    fireEvent.click(ac);
+    fireEvent.click(screen.getByRole("textbox"));
+    expect(onChange).not.toHaveBeenCalled();
+    expect(gun("20")).toBeUndefined();
+  });
+  it("kapalı DateTimePicker: aynı", () => {
+    const onChange = vi.fn();
+    render(<DateTimePicker locale="tr-TR" timeZone={IST} value="2026-04-15T14:30:00+03:00" onChange={onChange} placeholder="Zaman" labels={SAATLI} disabled />);
+    expect(screen.getByRole("button", { name: "Temizle" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Takvimi aç" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Temizle" }));
+    fireEvent.click(screen.getByRole("button", { name: "Takvimi aç" }));
+    expect(onChange).not.toHaveBeenCalled();
+    expect(gun("20")).toBeUndefined();
+  });
+});
+
+describe("DateTimePicker · isteğe bağlı küçükler", () => {
+  const SAATLI = { ...ETIKETLER, hour: "Saat", minute: "Dakika", period: "Öğle" };
+  it("belirsiz saatte dakika değişince eldeki ofset korunuyor: 01:30-04:00 → :45 → 01:45-04:00", () => {
+    const onChange = vi.fn();
+    render(<DateTimePicker locale="tr-TR" timeZone="America/New_York" value="2026-11-01T01:30:00-04:00" onChange={onChange} placeholder="Zaman" labels={SAATLI} />);
+    fireEvent.click(screen.getByRole("textbox"));
+    fireEvent.click(screen.getByRole("button", { name: "Dakika" }));
+    fireEvent.click(screen.getByRole("option", { name: "45" }));
+    expect(onChange).toHaveBeenLastCalledWith("2026-11-01T01:45:00-04:00");
+  });
+  it("gunOku takvimde olmayan günü reddediyor: 2026-02-30, 2026-13-01", () => {
+    const uyar = vi.spyOn(console, "warn").mockImplementation(() => {});
+    expect(gunOku("2026-02-30", "value")).toBeUndefined();
+    expect(gunOku("2026-13-01", "value")).toBeUndefined();
+    expect(gunOku("2028-02-29", "value")).toBe("2028-02-29");
+    expect(uyar).toHaveBeenCalledTimes(2);
   });
 });

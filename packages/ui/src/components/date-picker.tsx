@@ -116,9 +116,14 @@ function dilim(tz: string | undefined): string {
   }
 }
 const GUN = /^\d{4}-\d{2}-\d{2}$/;
-function gunOku(v: string | undefined, ad: string): DateISO | undefined {
+export function gunOku(v: string | undefined, ad: string): DateISO | undefined {
   if (v === undefined) return undefined;
-  if (GUN.test(v) && !Number.isNaN(Date.parse(`${v}T00:00:00Z`))) return v;
+  if (GUN.test(v)) {
+    /* `2026-02-30` Date.UTC'de 2 Mart'a taşar; gidip gelince aynı kalan gün gerçek. */
+    const { y, m, d } = parcala(v);
+    const t = new Date(Date.UTC(y, m, d));
+    if (t.getUTCFullYear() === y && t.getUTCMonth() === m && t.getUTCDate() === d) return v;
+  }
   uyar(`DatePicker: ${ad} "${v}" is not a YYYY-MM-DD day; ignored.`);
   return undefined;
 }
@@ -429,12 +434,14 @@ function Alan({
         aria-invalid={invalid || undefined}
       />
       <span className="absolute right-1.5 flex gap-0.5">
+        {/* KAPALI ALANIN DÜĞMELERİ DE KAPALI: girdi `disabled` iken mini düğmeler
+            açıktı, kilitli bir tarih temizlenebiliyordu. */}
         {hasValue ? (
-          <button type="button" className="tamga-mini-btn" data-inset="true" aria-label={labels.clear} onClick={onClear}>
+          <button type="button" className="tamga-mini-btn" data-inset="true" aria-label={labels.clear} disabled={disabled} onClick={() => !disabled && onClear()}>
             <Icon icon={Close} size="xs" />
           </button>
         ) : null}
-        <button type="button" className="tamga-mini-btn" data-inset="true" aria-label={labels.open} onClick={onToggle}>
+        <button type="button" className="tamga-mini-btn" data-inset="true" aria-label={labels.open} disabled={disabled} onClick={() => !disabled && onToggle()}>
           <Icon icon={CalendarPlus} size="xs" />
         </button>
       </span>
@@ -687,8 +694,14 @@ export function DateTimePicker({
     setSaat(k.h);
     setDakika(k.mi);
     const secenekler = anlar(g, k.h, k.mi);
-    /* Belirsiz saatte dış değer kendi anını korur; yoksa sonraki (standart ofset). */
-    const secim = (an && secenekler.find((t) => t.getTime() === an.getTime())) ?? secenekler[secenekler.length - 1]!;
+    /* Belirsiz saatte dış değer kendi anını korur; aynı belirsiz saatin içinde
+       dakika değişince ofsetini korur (01:30-04:00 → 01:45-04:00); yoksa
+       sonraki (standart ofset). */
+    const belirsizde = an && w && adaylar(w, tz).length === 2 ? ofsetDk(an, tz) : undefined;
+    const secim =
+      (an && secenekler.find((t) => t.getTime() === an.getTime())) ??
+      (belirsizde !== undefined ? secenekler.find((t) => ofsetDk(t, tz) === belirsizde) : undefined) ??
+      secenekler[secenekler.length - 1]!;
     onChange?.(isoWithOffset(secim, tz));
   };
 
@@ -697,8 +710,8 @@ export function DateTimePicker({
      kalsa da: kutu hep biçimli ve hep bir seçeneği gösteriyor. Gün yokken liste
      tam, kutular kapalı: saat seçmek bugünü yayıyordu. */
   const g = gun;
-  const saatler = Array.from({ length: 24 }, (_, h) => h).filter((h) => !g || h === w?.h || izgara.some((mm) => gecerli(g, h, mm)));
-  const dakikalar = izgara.filter((mm) => !g || (w && saat === w.h && mm === w.mi) || gecerli(g, saat, mm));
+  const saatler = open ? Array.from({ length: 24 }, (_, h) => h).filter((h) => !g || h === w?.h || izgara.some((mm) => gecerli(g, h, mm))) : [];
+  const dakikalar = open ? izgara.filter((mm) => !g || (w && saat === w.h && mm === w.mi) || gecerli(g, saat, mm)) : [];
 
   /* 12/24 saat yerelin kararı; öğle sözcükleri Intl'den, yoksa labels'tan, o da
      yoksa 24 saate düşülür · kit İngilizce yazmaz. */

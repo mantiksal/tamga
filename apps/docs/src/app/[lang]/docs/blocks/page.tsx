@@ -68,6 +68,19 @@ const T = {
         hizalıyor, ama yüzeyin kendi alt dolgusu var ve içerik o boşluktan akıp geçiyordu.
       </>
     ),
+    tehlikeH: "Tehlikeli bölge",
+    tehlikeP: (
+      <>
+        Ayarlar sayfasının en altı, geri alınamayan eylemler: <code>DangerZone</code>. Bir ürün aynı
+        bölgeyi üç sayfada üç ayrı biçimde elle yazmıştı; birinde kapalı düğmenin gerekçesi yalnız{" "}
+        <code>title=</code> ipucundaydı · kapalı düğmede ipucu çoğu tarayıcıda görünmez, klavyede ve
+        dokunmatikte hiç. Burada <code>disabledReason</code> <strong>görünür metin</strong> ve
+        düğmeye bağlı. Önkoşula takılan eylem için <code>warning</code> yuvası (kitin{" "}
+        <code>Alert</code>&apos;i). Blok onay penceresi <strong>açmaz</strong>: tık çağıranın,{" "}
+        <code>ConfirmDialog</code>&apos;u ürün kurar. Kenar ve glif karosu kritik tonda, kart değil:
+        burası bir sapma bölgesi ama bütün kartı boyamak içindeki uyarıyı yutar.
+      </>
+    ),
     kararN: (
       <>
 ADR-0003&apos;ün katman şeması <code>tamga-ui</code> kutusunun içine
@@ -135,6 +148,21 @@ ADR-0003&apos;ün katman şeması <code>tamga-ui</code> kutusunun içine
         box, but a surface has its own bottom padding, and content was flowing through that gap.
       </>
     ),
+    tehlikeH: "Danger zone",
+    tehlikeP: (
+      <>
+        The bottom of a settings page, the actions that cannot be undone: <code>DangerZone</code>. A
+        product had hand-written the same zone three ways on three pages; in one the disabled
+        button&apos;s reason lived only in a <code>title=</code> tooltip · invisible on a disabled
+        button in most browsers, and to the keyboard and touch entirely. Here{" "}
+        <code>disabledReason</code> is <strong>visible text</strong>, bound to the button. A{" "}
+        <code>warning</code> slot takes the kit&apos;s <code>Alert</code> when a precondition stopped
+        the action. The block <strong>does not open</strong> a confirm dialog: the click is the
+        caller&apos;s, the product builds the <code>ConfirmDialog</code>. Edge and glyph tile in
+        the critical tone, not the whole card: this is a deviation zone, but painting the card
+        swallows the warning inside it.
+      </>
+    ),
     kararN: (
       <>
 ADR-0003&apos;s layer diagram writes &ldquo;filter panel · bulk action
@@ -175,6 +203,10 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <H2>{t.kaydetH}</H2>
       <P>{t.kaydetP}</P>
       <Props of="SaveBar" lang={lang} etiketli />
+
+      <H2>{t.tehlikeH}</H2>
+      <P>{t.tehlikeP}</P>
+      <Props of="DangerZone" lang={lang} etiketli />
 
       <Note>{t.kararN}</Note>
     </>

@@ -18,3 +18,4 @@ export {
 } from "./filter-bar.js";
 export { SaveBar } from "./save-bar.js";
 export { CountRow } from "./count-row.js";
+export { DangerZone, type DangerAction } from "./danger-zone.js";

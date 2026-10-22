@@ -24,7 +24,7 @@ import {
   SelectionBar,
   Table,
 } from "tamga-ui";
-import { CountRow, FilterBar, SaveBar, type FilterValues } from "tamga-ui/blocks";
+import { CountRow, FilterBar, SaveBar, type FilterValues, DangerZone } from "tamga-ui/blocks";
 import { Delete, Edit, File, GithubLogo, GoogleLogo, Plus } from "tamga-ui/icons";
 import { Galeri, type GaleriOgesi } from "@/components/gallery";
 import type { Locale as Dil } from "@/i18n/config";
@@ -128,6 +128,15 @@ const S = {
     hesabiKapat: "Hesabı kapat",
     hesapNot: "Kayıtların, dosyaların ve geçmişin kalıcı olarak silinir. Bu işlem geri alınamaz.",
     hesapOnay: "Bütün kayıtların, dosyaların ve geçmişin kalıcı olarak silinecek.",
+    tehlike: "Tehlikeli bölge",
+    tehlikeNot: "Buradaki işlemler geri alınamaz.",
+    devret: "Çalışma alanını devret",
+    devretNot: "Sahiplik başka bir üyeye geçer; sen yönetici olarak kalırsın.",
+    devretGerekce: "Yalnız sahip devredebilir.",
+    alaniSil: "Çalışma alanını sil",
+    silNot: "Bütün mülkler, üyeler ve geçmiş kalıcı olarak silinir.",
+    onkosul: "Önce canlı mülkleri kapat",
+    onkosulNot: "2 mülk hâlâ yayında; yayındaki bir mülkle çalışma alanı silinemez.",
 
     ucAlan: "Üç alan eksik",
     adBos: "boş bırakılamaz.",
@@ -248,6 +257,15 @@ const S = {
     hesabiKapat: "Close account",
     hesapNot: "Your records, files and history are permanently deleted. This cannot be undone.",
     hesapOnay: "All of your records, files and history will be permanently deleted.",
+    tehlike: "Danger zone",
+    tehlikeNot: "Nothing here can be undone.",
+    devret: "Transfer the workspace",
+    devretNot: "Ownership passes to another member; you stay an admin.",
+    devretGerekce: "Only the owner can transfer.",
+    alaniSil: "Delete the workspace",
+    silNot: "All properties, members and history are permanently deleted.",
+    onkosul: "Close the live properties first",
+    onkosulNot: "2 properties are still live; a workspace with a live property cannot be deleted.",
 
     ucAlan: "Three fields are missing",
     adBos: "cannot be left blank.",
@@ -547,20 +565,33 @@ function TehlikeliBolgeOrnegi({ lang }: { lang: Dil }) {
   const s = S[lang];
   const [acik, setAcik] = useState(false);
   return (
-    <>
-      <Card>
-        <CardBody>
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="min-w-0 flex-1">
-              <h3 className="text-body font-medium text-ink">{s.hesabiKapat}</h3>
-              <Label>{s.hesapNot}</Label>
-            </div>
-            <Button variant="danger" onClick={() => setAcik(true)}>
-              {s.hesabiKapat}
-            </Button>
-          </div>
-        </CardBody>
-      </Card>
+    <div className="flex w-full flex-col gap-6">
+      {/* Tek eylem; onay penceresini ÜRÜN kuruyor, blok değil. */}
+      <DangerZone
+        title={s.tehlike}
+        description={s.tehlikeNot}
+        actions={[{ key: "kapat", title: s.hesabiKapat, description: s.hesapNot, label: s.hesabiKapat, onClick: () => setAcik(true) }]}
+      />
+      {/* İki eylem: biri yetkiye kapalı ve gerekçesi görünür, öteki önkoşula takılmış. */}
+      <DangerZone
+        title={s.tehlike}
+        description={s.tehlikeNot}
+        actions={[
+          { key: "devret", title: s.devret, description: s.devretNot, label: s.devret, disabledReason: s.devretGerekce },
+          {
+            key: "sil",
+            title: s.alaniSil,
+            description: s.silNot,
+            label: s.alaniSil,
+            onClick: () => setAcik(true),
+            warning: (
+              <Alert state="caution" title={s.onkosul}>
+                {s.onkosulNot}
+              </Alert>
+            ),
+          },
+        ]}
+      />
       <ConfirmDialog
         open={acik}
         onClose={() => setAcik(false)}
@@ -573,7 +604,7 @@ function TehlikeliBolgeOrnegi({ lang }: { lang: Dil }) {
       >
         {s.hesapOnay}
       </ConfirmDialog>
-    </>
+    </div>
   );
 }
 
@@ -898,24 +929,27 @@ const OGELER: GaleriOgesi[] = [
   {
     key: "danger-zone",
     grup: G.form,
-    tur: "tarif",
-    ad: { tr: "Tehlikeli bölge", en: "Danger zone" },
+    tur: "paket",
+    ad: { tr: "DangerZone", en: "DangerZone" },
     aciklama: {
-      tr: "Geri alınamayan işlem, kendi kartında ve sayfanın en altında. Onay diyaloğu ne gideceğini sayıyor.",
-      en: "The irreversible action, in its own card at the very bottom of the page. The confirm dialog names what will go.",
+      tr: "Geri alınamayan eylemler, sayfanın en altında, tek biçimde. Kapalı satırın gerekçesi görünür metin; onay penceresini ürün kurar.",
+      en: "The irreversible actions, at the very bottom of the page, in one shape. A closed row shows its reason as text; the product builds the confirm dialog.",
     },
     ornek: (lang) => <TehlikeliBolgeOrnegi lang={lang} />,
-    kod: `<Card>
-  <CardBody>
-    <div className="flex flex-wrap items-center gap-4">
-      <div className="min-w-0 flex-1">
-        <h3 className="text-body font-medium text-ink">Hesabı kapat</h3>
-        <Label>Kayıtların, dosyaların ve geçmişin kalıcı olarak silinir.</Label>
-      </div>
-      <Button variant="danger" onClick={() => setAcik(true)}>Hesabı kapat</Button>
-    </div>
-  </CardBody>
-</Card>`,
+    kod: `<DangerZone
+  title="Tehlikeli bölge"
+  description="Buradaki işlemler geri alınamaz."
+  actions={[
+    { key: "devret", title: "Çalışma alanını devret", description: "…", label: "Devret",
+      disabledReason: "Yalnız sahip devredebilir." },
+    { key: "sil", title: "Çalışma alanını sil", description: "…", label: "Sil",
+      onClick: () => setAcik(true),
+      warning: <Alert state="caution" title="Önce canlı mülkleri kapat">2 mülk yayında.</Alert> },
+  ]}
+/>
+<ConfirmDialog open={acik} tone="danger" confirmDisabled={ad !== calismaAlani.ad} …>
+  {/* adı yazdırma gibi kararlar üründe kalır */}
+</ConfirmDialog>`,
   },
   {
     key: "validation",

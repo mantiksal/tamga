@@ -14,7 +14,7 @@
  * Kapı o yüzden var: bir sonraki liste alan bileşen eklendiğinde soru
  * SORULMASIN, cevap zorunlu olsun.
  *
- * NE YAKALAR: `options`/`items`/`steps`/`nav`/`entries`/`tabs` gibi bir liste
+ * NE YAKALAR: `options`/`items`/`steps`/`nav`/`entries`/`tabs`/`actions` gibi bir liste
  * alan ve öğe başına bir eleman çizen bir bileşenin öğe tipinde
  * `Record<string, unknown>` yoksa hata.
  *
@@ -26,7 +26,7 @@ import { join, relative } from "node:path";
 
 const KOK = new URL("..", import.meta.url).pathname;
 const KAYNAK = join(KOK, "packages/ui/src");
-const LISTE = /\b(options|items|steps|nav|entries|tabs)\s*:\s*readonly\b/g;
+const LISTE = /\b(options|items|steps|nav|entries|tabs|actions)\s*:\s*readonly\b/g;
 
 /* Öğesi bir DOM elemanı OLMAYAN listeler. Kanca takılacak bir şey yok. */
 const MUAF = new Map([
@@ -60,8 +60,11 @@ function takmaAdlar() {
       let i = m.index + m[0].length, derinlik = 0, son = i;
       while (i < s.length) {
         const c = s[i];
+        /* `=>` bir ok, kapanan bir köşeli ayraç değil: `onClick?: () => void;`
+           derinliği sıfıra indirip bildirimi orada kesiyordu ve tipin sonundaki
+           `& Record<…>` hiç görülmüyordu (DangerAction'da yakalandı). */
         if ("{([<".includes(c)) derinlik++;
-        else if ("})]>".includes(c)) derinlik--;
+        else if ("})]>".includes(c) && !(c === ">" && s[i - 1] === "=")) derinlik--;
         else if (c === ";" && derinlik <= 0) { son = i; break; }
         i++;
       }
@@ -85,8 +88,11 @@ for (const dosya of gez(KAYNAK)) {
       let i = m.index + m[0].length, derinlik = 0, son = i;
       while (i < parca.length) {
         const c = parca[i];
+        /* `=>` bir ok, kapanan bir köşeli ayraç değil: `onClick?: () => void;`
+           derinliği sıfıra indirip bildirimi orada kesiyordu ve tipin sonundaki
+           `& Record<…>` hiç görülmüyordu (DangerAction'da yakalandı). */
         if ("{([<".includes(c)) derinlik++;
-        else if ("})]>".includes(c)) derinlik--;
+        else if ("})]>".includes(c) && !(c === ">" && parca[i - 1] === "=")) derinlik--;
         else if (c === ";" && derinlik <= 0) { son = i; break; }
         i++;
       }

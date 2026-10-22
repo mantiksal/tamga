@@ -5,6 +5,25 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.8.0
+
+> The bottom of the settings page, in one shape.
+
+### Added
+
+- **`DangerZone` block** (`tamga-ui/blocks`) · the irreversible actions at the bottom of a
+  settings page. A title, an optional description and one or more action rows: name, one
+  sentence, a `danger` button. `disabledReason` closes a row and shows the reason as **visible
+  text** bound to the button with `aria-describedby` · a disabled button is not a reason, and a
+  tooltip on one is invisible to most browsers, the keyboard and touch. `warning` takes the
+  kit's `Alert` when a precondition stopped the action. The block never opens a confirm dialog:
+  the click is the caller's, the product builds `ConfirmDialog`. Edge and glyph tile in the
+  critical tone, not the whole card; the heading and the warning glyph say "danger" without
+  colour. Every row takes `data-*`. A product had hand-written this zone three ways on three
+  pages.
+- `check-item-hooks` now also reads `actions` lists, and no longer mistakes `=>` for a closing
+  bracket (it was cutting item types short before their `Record<string, unknown>`).
+
 ## 0.7.2
 
 > A label can carry the user's colour; the kit says nothing with it.

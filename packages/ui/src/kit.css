@@ -4000,6 +4000,52 @@
   /* inline banner — status wash, no fill, a left rule carries the state */
   /* TON ZEMİNDE, SOL ÇİZGİDE DEĞİL · ve 3 piksellik sol kenar buna rağmen
      duruyordu: yorum kuralı yazmış, CSS eskisini uygulamaya devam etmişti. */
+  /* TEHLİKELİ BÖLGE: kenar ve karo kritik tonda, kart değil · bütün kartı
+     boyamak içindeki uyarıyı ve düğmeleri yutuyor. Satırlar çizgiyle ayrı.
+     Gerekçe: docs/gerekce/08-blok-ve-sablon.md */
+  .tamga-danger-zone {
+    border: 1.5px solid var(--color-critical);
+    border-radius: var(--radius-card);
+    background: var(--color-shell);
+  }
+  .tamga-danger-zone-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .tamga-danger-zone-tile {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--color-critical);
+    border-radius: calc(var(--radius) - 1px);
+    background: var(--color-critical-bg);
+    color: var(--color-critical);
+  }
+  .tamga-danger-zone-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tamga-danger-zone-row {
+    padding: 14px 18px;
+  }
+  .tamga-danger-zone-row + .tamga-danger-zone-row {
+    border-top: 1px solid var(--color-line);
+  }
+  /* GEREKÇE GÖRÜNÜR METİN, ipucu değil: kritik tonda, düğmeyle aynı satırda
+     okunuyor ve `aria-describedby` ile ona bağlı. */
+  .tamga-danger-zone-reason {
+    margin-top: 6px;
+    font-size: var(--text-small);
+    font-weight: var(--weight-strong);
+    color: var(--color-critical);
+  }
+
   .tamga-alert {
     display: flex;
     gap: 12px;

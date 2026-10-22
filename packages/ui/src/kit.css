@@ -3410,8 +3410,14 @@
     justify-content: center;
     width: 36px;
   }
-  .tamga-gun:hover {
+  .tamga-gun:hover:not(:disabled) {
     background: var(--color-hover);
+  }
+  /* KAPALI GÜN: soluk mürekkep, imleç "olmaz" diyor, zemin almıyor · aralık
+     dışı bir gün bir hedef değil, bir bilgi. */
+  .tamga-gun:disabled {
+    color: var(--color-ink-faint);
+    cursor: not-allowed;
   }
   .tamga-gun[data-today] {
     border-color: var(--color-edge-strong);

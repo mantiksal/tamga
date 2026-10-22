@@ -5,6 +5,30 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.7.0
+
+> A calendar can say no; a picker can carry the hour.
+
+### Added
+
+- **`DatePicker` / `Calendar` `min` and `max`** (`DateISO`). Days outside the range are disabled
+  and announced as such, the arrow keys skip them, and a month button closes when the whole
+  month is out of reach. A product had fallen back to `<input type="date" min=…>` for "not before
+  today"; that field looks different in every browser and lets the user type a date the kit had
+  decided should only be picked.
+- **Arrow keys in the calendar.** One day is in the tab order, the arrows move between days
+  (±1, ±7) across month edges, disabled days are skipped. Before this every day was a tab stop.
+- **`DateTimePicker`.** Date plus time, picked not typed: a calendar and hour/minute selects
+  (AM/PM only in 12-hour locales, words from `Intl`). The value is `DateTimeISO`, an instant in
+  the user's own offset — `2026-04-15T14:30:00+03:00`; send `new Date(v).toISOString()` to the
+  server. `min`/`max` take the same shape; on the boundary day earlier (or later) hours and
+  minutes are simply not offered. A separate component rather than a prop: the value's shape is
+  different, and an `onChange` whose type depends on a prop is a trap. `labels` adds `hour`,
+  `minute`, `period`.
+
+Nothing changes without the new props: a `DatePicker` without `min`/`max` renders and behaves as
+before, except that the calendar now has one tab stop instead of thirty.
+
 ## 0.6.1
 
 > A logo is drawn for one theme; the tile can say which.

@@ -54,7 +54,7 @@ import {
   type UploadItem,
   RichText,
   TreeSelect,
-  type Tone,
+  type Tone, DateTimePicker,
 } from "tamga-ui";
 import { Archive, Bell, Copy, CurrencyDollar, Delete, Download, Edit, Filter, More, Print, Refresh, Settings, Truck } from "tamga-ui/icons";
 import { Demo, type DemoLabels } from "@/components/demo";
@@ -151,6 +151,13 @@ const D = {
     noResult: "Sonuç yok",
     openList: "Listeyi aç",
     pickDate: "Tarih seç",
+    pickTime: "Zaman seç",
+    notBeforeToday: "Bugünden önce olmaz",
+    windowStart: "Başlangıç",
+    windowEnd: "Bitiş",
+    hour: "Saat",
+    minute: "Dakika",
+    period: "Öğle öncesi/sonrası",
     prevMonth: "Önceki ay",
     nextMonth: "Sonraki ay",
     openCalendar: "Takvimi aç",
@@ -233,6 +240,13 @@ const D = {
     noResult: "No results",
     openList: "Open the list",
     pickDate: "Pick a date",
+    pickTime: "Pick a time",
+    notBeforeToday: "Not before today",
+    windowStart: "Start",
+    windowEnd: "End",
+    hour: "Hour",
+    minute: "Minute",
+    period: "AM/PM",
     prevMonth: "Previous month",
     nextMonth: "Next month",
     openCalendar: "Open the calendar",
@@ -1150,6 +1164,59 @@ export function DatePickerDemo({ lang }: L) {
           clear: d.clear,
         }}
       />
+    </div>
+  );
+}
+
+/* "Bugünden önce olmaz": bir API anahtarının bitiş tarihi geçmişte olamaz ·
+   takvim bunu hiç teklif etmiyor. */
+export function DatePickerMinDemo({ lang }: L) {
+  const d = D[lang];
+  const [date, setDate] = useState<string>();
+  const bugun = new Date();
+  const min = `${bugun.getFullYear()}-${String(bugun.getMonth() + 1).padStart(2, "0")}-${String(bugun.getDate()).padStart(2, "0")}`;
+  return (
+    <div className="w-full max-w-72">
+      <DatePicker
+        locale={lang === "tr" ? "tr-TR" : "en-US"}
+        value={date}
+        min={min}
+        onChange={setDate}
+        placeholder={d.notBeforeToday}
+        labels={{ previousMonth: d.prevMonth, nextMonth: d.nextMonth, open: d.openCalendar, clear: d.clear }}
+      />
+    </div>
+  );
+}
+
+/* Bakım penceresi: başlangıç ve bitiş, tarih + saat. Bitiş başlangıçtan önce
+   olamaz · ikincinin `min`i birincinin değeri. */
+export function DateTimePickerDemo({ lang }: L) {
+  const d = D[lang];
+  const [bas, setBas] = useState<string>();
+  const [son, setSon] = useState<string>();
+  const labels = {
+    previousMonth: d.prevMonth,
+    nextMonth: d.nextMonth,
+    open: d.openCalendar,
+    clear: d.clear,
+    hour: d.hour,
+    minute: d.minute,
+    period: d.period,
+  };
+  const locale = lang === "tr" ? "tr-TR" : "en-US";
+  return (
+    <div className="flex w-full flex-col gap-3 sm:flex-row">
+      <div className="flex-1">
+        <Field label={d.windowStart}>
+          <DateTimePicker locale={locale} value={bas} onChange={setBas} placeholder={d.pickTime} labels={labels} />
+        </Field>
+      </div>
+      <div className="flex-1">
+        <Field label={d.windowEnd}>
+          <DateTimePicker locale={locale} value={son} min={bas} onChange={setSon} placeholder={d.pickTime} labels={labels} />
+        </Field>
+      </div>
     </div>
   );
 }

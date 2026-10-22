@@ -1,4 +1,4 @@
-import { DatePickerDemo } from "@/components/interactive";
+import { DatePickerDemo, DatePickerMinDemo, DateTimePickerDemo } from "@/components/interactive";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -56,7 +56,28 @@ const T = {
       <>
         <strong>Zaman dilimi yok.</strong> Bileşen yalnız yıl-ay-gün ile çalışır. Bir sipariş
         filtresi &quot;15 Nisan&quot; ister, &quot;15 Nisan 00:00 UTC+3&quot; değil; saat
-        karıştırıldığında gün sınırında bir kayma doğar ve kimse sebebini bulamaz.
+        karıştırıldığında gün sınırında bir kayma doğar ve kimse sebebini bulamaz. Saat
+        gerekiyorsa aşağıdaki <code>DateTimePicker</code>: o bir <em>an</em> döndürür, dilimiyle.
+      </>
+    ),
+    minH: "En erken, en geç",
+    minP: (
+      <>
+        <code>min</code> ve <code>max</code> birer gün. Aralık dışı günler <strong>kapalı</strong>:
+        tıklanmaz, ok tuşları atlar, ekran okuyucu &quot;kapalı&quot; der; ay tümüyle dışarıda
+        kalınca ay düğmesi de kapanır. Bir API anahtarının bitiş tarihi geçmişte olamaz · takvim
+        bunu hiç teklif etmiyor.
+      </>
+    ),
+    zamanH: "Tarih + saat",
+    zamanP: (
+      <>
+        <code>DateTimePicker</code> ayrı bir bileşen, <code>DatePicker</code>&apos;a bir prop değil:
+        dönen değer gün değil bir <strong>an</strong>, <code>2026-04-15T14:30:00+03:00</code>
+        gibi, kullanıcının kendi dilimiyle. Sunucuya <code>new Date(v).toISOString()</code> gider;
+        dilim, &quot;İstanbul&apos;da 14:30&quot;u kaydırmadan taşıyan şey. Saat de yazılmaz,
+        seçilir; 12 ya da 24 saat yerelin kararı. <code>min</code> aynı güne düşüyorsa önceki
+        saatler sunulmaz · bitiş başlangıçtan önce olamaz.
       </>
     ),
     related: "İlgili",
@@ -90,11 +111,33 @@ const T = {
       </>
     ),
     rules: "Rules",
+    minH: "Earliest, latest",
+    minP: (
+      <>
+        <code>min</code> and <code>max</code> are days. Days outside the range are{" "}
+        <strong>disabled</strong>: not clickable, skipped by the arrow keys, announced as such; when
+        a whole month is out of reach its button closes too. An API key cannot expire in the past ·
+        the calendar never offers it.
+      </>
+    ),
+    zamanH: "Date + time",
+    zamanP: (
+      <>
+        <code>DateTimePicker</code> is a separate component, not a prop on <code>DatePicker</code>:
+        the value is not a day but an <strong>instant</strong>, like{" "}
+        <code>2026-04-15T14:30:00+03:00</code>, in the user&apos;s own offset. The server gets{" "}
+        <code>new Date(v).toISOString()</code>; the offset is what carries &quot;14:30 in
+        Istanbul&quot; without drift. Time is picked, not typed; 12 or 24 hours is the locale&apos;s
+        call. With <code>min</code> on the same day, earlier hours are not offered · an end cannot
+        precede its start.
+      </>
+    ),
     tz: (
       <>
         <strong>No time zone.</strong> The component works only with year-month-day. An order
         filter asks for &quot;15 April&quot;, not &quot;15 April 00:00 UTC+3&quot;; mixing in a
         clock creates a shift at the day boundary that nobody can trace.
+      If you need the time, <code>DateTimePicker</code> below returns an <em>instant</em>, offset included.
       </>
     ),
     related: "Related",
@@ -130,8 +173,27 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <H2>{t.rules}</H2>
       <Note>{t.tz}</Note>
 
+      <H2>{t.minH}</H2>
+      <P>{t.minP}</P>
+      <Demo labels={dict.demo} align="start" code={`<DatePicker min={today} … />`}>
+        <DatePickerMinDemo lang={lang} />
+      </Demo>
+
+      <H2>{t.zamanH}</H2>
+      <P>{t.zamanP}</P>
+      <Demo labels={dict.demo} align="start" code={`<DateTimePicker
+  locale="${lang}-${lang === "tr" ? "TR" : "US"}"
+  value={start}
+  onChange={setStart}
+  labels={{ …, hour: "…", minute: "…", period: "…" }}
+/>
+<DateTimePicker value={end} min={start} … />`}>
+        <DateTimePickerDemo lang={lang} />
+      </Demo>
+
       <H2>Props</H2>
       <Props of="DatePicker" lang={lang} />
+      <Props of="DateTimePicker" lang={lang} />
 
       <H2>{t.related}</H2>
       <P>{t.rel}</P>

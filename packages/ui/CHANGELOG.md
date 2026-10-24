@@ -7,9 +7,34 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ## 0.7.3
 
-> One card around the filters, not two.
+> What the first real consumer found: the filter bar's names, its phone layout, its option values, a thin progress bar, one card instead of two.
+
+### Added
+
+- **`FilterBar` on a narrow screen** (below `sm`) collapses to the search box and a "Filter · N"
+  button beside it; N counts the applied filters other than the search, and is omitted at zero.
+  The button opens the existing sheet, where the top fields come first as an untitled group,
+  then the drawer groups, with the same "Clear" and "Apply" in the footer. Applied chips and
+  "Clear all" stay visible. With an empty drawer the button is still drawn on narrow screens,
+  since it is the only way to the top fields. The switch is a CSS breakpoint, both views are in
+  the DOM and one is hidden, so the server's output matches the browser's. The kit writes no
+  word: `labels.filter` is optional and falls back to `allFilters`.
+- **`FilterBar` options with a value and a label** · `options` and `optionSource` take
+  `{ value, label }` pairs beside plain strings. `values` holds the value, the box and the chip
+  show the label, `tones` is keyed by the value. Plain `string[]` works as before.
+- **`Progress` `size="sm"`** · a 4px line for a table cell: no edge, no shadow, no stripes, no
+  label line; width from `className`; `role="progressbar"`, value and `ariaLabel` unchanged.
+  `tone` colours the fill from the kit's roles, else the accent. `md` is today's bar, locked
+  pixel for pixel by test.
+- **`aria-label`** on `Combobox`, `MultiSelect`, `DatePicker` and `DateTimePicker`, for a box
+  with no bound visible label.
 
 ### Fixed
+
+- **`FilterBar` fields had no accessible name**: the label was a `<span>` beside the control,
+  so a screen reader read every box as "All" (WCAG 4.1.2, 2.5.3) and tests could not find a
+  field by role. Every control carries `aria-label={field.label}`; the date range's two boxes
+  are "<label> <rangeStart>" and "<label> <rangeEnd>", on top and in the drawer.
 
 - **`FilterBar` inside `ListTemplate` drew a card inside the template's card** and, in the slot's
   flex row, shrank to its content. The bar's box is now a kit class, `.tamga-filter-bar` (the

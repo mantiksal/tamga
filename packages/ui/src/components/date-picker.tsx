@@ -401,6 +401,7 @@ export function Calendar({
 /* ── Ortak alan: salt okunur girdi + temizle/aç düğmeleri ── */
 function Alan({
   id,
+  ariaLabel,
   shown,
   placeholder,
   disabled,
@@ -412,6 +413,7 @@ function Alan({
   onClear,
 }: {
   id?: string;
+  ariaLabel?: string;
   shown: string;
   placeholder: string;
   disabled: boolean;
@@ -436,6 +438,7 @@ function Alan({
         className="tamga-input w-full cursor-pointer pr-16 pl-9"
         aria-haspopup="dialog"
         aria-expanded={open}
+        aria-label={ariaLabel}
         aria-invalid={invalid || undefined}
       />
       <span className="absolute right-1.5 flex gap-0.5">
@@ -463,6 +466,7 @@ function Alan({
  */
 export function DatePicker({
   id,
+  "aria-label": ariaLabel,
   locale,
   timeZone,
   value: hamDeger,
@@ -478,6 +482,8 @@ export function DatePicker({
 }: {
   /** Reaches the field, so `Field htmlFor` can bind. TR: Alana iner, `Field htmlFor` bağlanabilir. */
   id?: string;
+  /** The field's accessible name when no visible label is bound to it. TR: Bağlı görünür bir etiket yoksa alanın erişilebilir adı. */
+  "aria-label"?: string;
   locale: string;
   /** Which day is "today"; see `Calendar`. TR: "Bugün" hangi gün; bkz. `Calendar`. */
   timeZone?: string;
@@ -510,6 +516,7 @@ export function DatePicker({
     <div ref={kutu} {...dataProps(rest)} className={cn("relative", className)}>
       <Alan
         id={id}
+        ariaLabel={ariaLabel}
         shown={shown}
         placeholder={placeholder}
         disabled={disabled}
@@ -551,6 +558,7 @@ export function DatePicker({
  */
 export function DateTimePicker({
   id,
+  "aria-label": ariaLabel,
   locale,
   timeZone,
   value,
@@ -567,6 +575,8 @@ export function DateTimePicker({
 }: {
   /** Reaches the field, so `Field htmlFor` can bind. TR: Alana iner, `Field htmlFor` bağlanabilir. */
   id?: string;
+  /** The field's accessible name when no visible label is bound to it. TR: Bağlı görünür bir etiket yoksa alanın erişilebilir adı. */
+  "aria-label"?: string;
   locale: string;
   /**
    * The IANA zone the clock is shown and picked in, e.g. the workspace's `Europe/Istanbul`.
@@ -739,6 +749,7 @@ export function DateTimePicker({
     <div ref={kutu} {...dataProps(rest)} className={cn("relative", className)}>
       <Alan
         id={id}
+        ariaLabel={ariaLabel}
         shown={shown}
         placeholder={placeholder}
         disabled={disabled}

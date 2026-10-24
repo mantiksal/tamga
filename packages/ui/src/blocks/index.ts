@@ -13,6 +13,7 @@ export {
   type FilterBarProps,
   type FilterField,
   type FilterFieldKind,
+  type FilterOption,
   type FilterGroup,
   type FilterValues,
 } from "./filter-bar.js";

@@ -43,7 +43,8 @@ function kur(props: Partial<Parameters<typeof FilterBar>[0]> = {}) {
       {...props}
     />,
   );
-  fireEvent.click(screen.getByRole("button", { name: "Tüm filtreler" }));
+  /* Düğme iki metin taşıyor (geniş/dar); jsdom CSS bilmediği için adı ikisinin toplamı. */
+  fireEvent.click(screen.getByRole("button", { name: /Tüm filtreler/ }));
   return { onChange, onFile };
 }
 
@@ -104,5 +105,116 @@ describe("FilterBar · kök kutu", () => {
     expect(k).toMatch(/border-radius:\s*0/);
     expect(k).toMatch(/background:\s*none/);
     expect(k).toMatch(/box-shadow:\s*none/);
+  });
+});
+
+/* İLK GERÇEK TÜKETİCİNİN BULDUKLARI (0.7.3): alanların adı yoktu, telefonda
+   çubuk ilk ekranı kaplıyordu, seçeneğin değeri ile adı aynı dizgeydi. */
+import type { FilterField } from "./filter-bar.js";
+const ALANLAR: FilterField[] = [
+  { key: "durum", label: "Durum", kind: "select", options: ["Açık", "Kapalı"] },
+  { key: "musteri", label: "Müşteri", kind: "searchable", options: ["A", "B"] },
+  { key: "etiket", label: "Etiket", kind: "multi", options: ["x", "y"] },
+  { key: "tarih", label: "Tarih", kind: "dateRange" },
+  { key: "not", label: "Not", kind: "text" },
+];
+const cubuk = (props: Partial<Parameters<typeof FilterBar>[0]> = {}) => {
+  const onChange = vi.fn();
+  render(<FilterBar values={{}} onChange={onChange} top={ALANLAR} drawer={[]} labels={ETIKETLER} {...props} />);
+  return onChange;
+};
+
+describe("FilterBar · erişilebilir ad (1)", () => {
+  it("her üst alan kendi adıyla bulunuyor; tarih aralığı iki kutu, iki ad", () => {
+    cubuk();
+    expect(screen.getByRole("button", { name: "Durum" })).toBeTruthy();
+    expect(screen.getByRole("combobox", { name: "Müşteri" })).toBeTruthy();
+    expect(screen.getByRole("combobox", { name: "Etiket" })).toBeTruthy();
+    expect(screen.getByRole("textbox", { name: "Tarih Başlangıç" })).toBeTruthy();
+    expect(screen.getByRole("textbox", { name: "Tarih Bitiş" })).toBeTruthy();
+    expect(screen.getByRole("textbox", { name: "Not" })).toBeTruthy();
+  });
+  it("çekmecedeki alanlar da", () => {
+    cubuk({ top: [], drawer: [{ title: "Diğer", fields: [{ key: "oncelik", label: "Öncelik", kind: "select", options: ["Düşük"] }] }] });
+    fireEvent.click(screen.getByRole("button", { name: /Tüm filtreler/ }));
+    expect(screen.getByRole("button", { name: "Öncelik" })).toBeTruthy();
+  });
+});
+
+describe("FilterBar · dar ekran (2 · 4)", () => {
+  const css = (() => {
+    const { existsSync, readFileSync } = require("node:fs") as typeof import("node:fs");
+    return readFileSync(["src/kit.css", "packages/ui/src/kit.css"].find(existsSync)!, "utf8");
+  })();
+  it("düğme iki metin taşıyor: genişte 'Tüm filtreler' + sayaç, darda 'Filtrele · N' (N aramayı saymıyor)", () => {
+    cubuk({ values: { durum: "Açık", q: "x" }, top: [ALANLAR[0]!], labels: { ...ETIKETLER, filter: "Filtrele" } });
+    const dugme = screen.getByRole("button", { name: /Filtrele/ });
+    expect(dugme.querySelector(".tamga-filter-genis")?.textContent).toBe("Tüm filtreler");
+    expect(dugme.querySelector(".tamga-filter-dar")?.textContent).toBe("Filtrele · 1");
+  });
+  it("etiket yoksa allFilters; uygulanan yoksa sayı yok; çekmece boş ama üst alan varsa düğme dar görünüm için duruyor", () => {
+    cubuk({ top: [ALANLAR[0]!] });
+    const dugme = screen.getByRole("button", { name: /Tüm filtreler/ });
+    expect(dugme.querySelector(".tamga-filter-dar")?.textContent).toBe("Tüm filtreler");
+    expect(dugme.classList.contains("tamga-filter-dar")).toBe(true);
+  });
+  it("çekmece de üst alan da yoksa düğme yok", () => {
+    cubuk({ top: [] });
+    expect(screen.queryByRole("button", { name: /Tüm filtreler/ })).toBeNull();
+  });
+  it("üst alanlar satırda `tamga-filter-genis`; çekmecede başlıksız ilk grup `tamga-filter-dar`; arama `tamga-filter-ara`", () => {
+    cubuk({ top: [ALANLAR[0]!], drawer: [{ title: "Diğer", fields: [ALANLAR[4]!] }] });
+    expect(document.querySelector(".tamga-filter-row .tamga-filter-genis .tamga-select")).not.toBeNull();
+    expect(document.querySelector(".tamga-filter-row .tamga-filter-ara input[type=search]")).not.toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /Tüm filtreler/ }));
+    const form = document.querySelector("form")!;
+    const ilk = form.firstElementChild!;
+    expect(ilk.classList.contains("tamga-filter-dar")).toBe(true);
+    expect(ilk.querySelector("p")).toBeNull();
+    expect(ilk.querySelector(".tamga-select")).not.toBeNull();
+    expect(form.children[1]!.querySelector("p")?.textContent).toBe("Diğer");
+  });
+  it("geçiş CSS kırılımıyla: dar sınıf genişte, geniş sınıf darda gizli; arama darda tabansız; aynı kök", () => {
+    expect(css).toMatch(/@media \(min-width: 40rem\)\s*\{\s*\.tamga-filter-dar\s*\{\s*display:\s*none/);
+    expect(css).toMatch(/@media \(max-width: 39\.9375rem\)\s*\{[^@]*\.tamga-filter-genis\s*\{\s*display:\s*none/);
+    expect(css).toMatch(/\.tamga-filter-row > \.tamga-filter-ara\s*\{\s*flex-basis:\s*0/);
+    cubuk({ top: [ALANLAR[0]!] });
+    expect(document.querySelectorAll(".tamga-filter-bar").length).toBe(1);
+  });
+});
+
+describe("FilterBar · değer ve etiket ayrı (5)", () => {
+  const SECENEKLI: FilterField = {
+    key: "state", label: "Durum", kind: "select",
+    options: [{ value: "ok", label: "Sağlam" }, { value: "critical", label: "Kritik" }],
+    tones: { critical: "danger" },
+  };
+  it("nesne seçenek: kutu ve çip etiketi gösteriyor, yazılan değer; ton değere göre", () => {
+    const onChange = cubuk({ values: { state: "critical" }, top: [SECENEKLI] });
+    const kutu = screen.getByRole("button", { name: "Durum" });
+    expect(kutu.textContent).toBe("Kritik");
+    const cip = document.querySelector(".tamga-token")!;
+    expect(cip.textContent).toContain("Kritik");
+    expect(cip.textContent).not.toContain("critical");
+    fireEvent.click(kutu);
+    const kritik = screen.getByRole("option", { name: "Kritik" });
+    expect(kritik.innerHTML).toMatch(/var\(--color-/);
+    fireEvent.click(screen.getByRole("option", { name: "Sağlam" }));
+    expect(onChange).toHaveBeenCalledWith({ state: "ok" });
+  });
+  it("çoklu ve aranabilir de etiketle; optionSource nesne de kabul ediyor", () => {
+    cubuk({
+      values: { etiket: "x,y", musteri: "b" },
+      top: [{ key: "etiket", label: "Etiket", kind: "multi", options: [{ value: "x", label: "Bir" }, { value: "y", label: "İki" }] }, { key: "musteri", label: "Müşteri", kind: "searchable" }],
+      optionSource: { musteri: [{ value: "b", label: "Beta" }] },
+    });
+    const cipler = [...document.querySelectorAll(".tamga-token")].map((c) => c.textContent);
+    expect(cipler.some((c) => c?.includes("Bir, İki"))).toBe(true);
+    expect(cipler.some((c) => c?.includes("Beta"))).toBe(true);
+  });
+  it("düz string[] bugünkü gibi", () => {
+    cubuk({ values: { durum: "Açık" }, top: [ALANLAR[0]!] });
+    expect(screen.getByRole("button", { name: "Durum" }).textContent).toBe("Açık");
+    expect(document.querySelector(".tamga-token")?.textContent).toContain("Açık");
   });
 });

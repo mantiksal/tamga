@@ -49,6 +49,7 @@ export function Combobox<T extends string>({
   labels,
   disabled = false,
   invalid = false,
+  "aria-label": ariaLabel,
   className,
   ...rest
 }: {
@@ -64,6 +65,8 @@ export function Combobox<T extends string>({
   labels: { empty: string; clear: string; open: string };
   disabled?: boolean;
   invalid?: boolean;
+  /** The box's accessible name when no visible label is bound to it. TR: Bağlı görünür bir etiket yoksa kutunun erişilebilir adı. */
+  "aria-label"?: string;
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
@@ -113,6 +116,7 @@ export function Combobox<T extends string>({
           aria-controls={`${id}-list`}
           aria-autocomplete="list"
           aria-activedescendant={open && shown[active] ? `${id}-opt-${active}` : undefined}
+          aria-label={ariaLabel}
           aria-invalid={invalid || undefined}
           disabled={disabled}
           placeholder={selected ? selected.label : placeholder}

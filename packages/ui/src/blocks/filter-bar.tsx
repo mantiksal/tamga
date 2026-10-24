@@ -36,12 +36,23 @@ export type FilterFieldKind =
   /** İKİ TARİH: başlangıç ve bitiş. Tek bir kutu bir aralık soramaz. */
   | "dateRange";
 
+/**
+ * An option whose stored VALUE differs from its shown LABEL: the address carries `critical`, the
+ * box shows "Kritik". A plain string is both at once. TR: Saklanan DEĞERİ ile görünen ADI
+ * farklı seçenek: adres `critical` taşır, kutu "Kritik" gösterir. Düz dizgi ikisi birden.
+ */
+export type FilterOption = { value: string; label: string };
+
 export type FilterField = {
   key: string;
   label: string;
   kind: FilterFieldKind;
-  /** Falls back to `optionSource[key]`; with neither, the list is empty. TR: Verilmezse `optionSource[key]` kullanılır; ikisi de yoksa liste boş. */
-  options?: string[];
+  /**
+   * Plain strings, or `{ value, label }` pairs. Falls back to `optionSource[key]`; with neither,
+   * the list is empty. TR: Düz dizgiler ya da `{ value, label }` çiftleri. Verilmezse
+   * `optionSource[key]`; ikisi de yoksa liste boş.
+   */
+  options?: readonly (string | FilterOption)[];
   /**
    * Start a new row before this field. TR: Bu alandan önce yeni bir satır başlat.
    *
@@ -71,11 +82,12 @@ export type FilterField = {
    * A tone per option, for a filter whose items ARE states. TR: Öğeleri birer
    * DURUM olan filtrede, seçenek başına ton.
    *
-   * Keyed by the option's own text. The swatch it draws is the same square the
-   * table's chip draws, so the eye matches the list to the rows without reading
-   * either. Only where the option really is a state. TR: Anahtar, seçeneğin
-   * kendi metni. Çizdiği kare, tablodaki çipin çizdiği karenin aynısı · göz
-   * listeyi satırlara okumadan eşliyor. Yalnız seçenek gerçekten bir durumsa.
+   * Keyed by the option's VALUE (its text, for a plain string). The swatch it
+   * draws is the same square the table's chip draws, so the eye matches the
+   * list to the rows without reading either. Only where the option really is a
+   * state. TR: Anahtar seçeneğin DEĞERİ (düz dizgide metni). Çizdiği kare,
+   * tablodaki çipin çizdiği karenin aynısı · göz listeyi satırlara okumadan
+   * eşliyor. Yalnız seçenek gerçekten bir durumsa.
    */
   tones?: Record<string, Tone>;
 };
@@ -100,6 +112,12 @@ export type FilterBarLabels = {
    */
   all: string;
   allFilters: string;
+  /**
+   * The narrow screen's button, "Filter"; the count of applied filters follows it. Absent,
+   * `allFilters` is used. TR: Dar ekranın düğmesi, "Filtrele"; uygulanan filtre sayısı peşine
+   * gelir. Yoksa `allFilters`.
+   */
+  filter?: string;
   clearAll: string;
   clear: string;
   apply: string;
@@ -126,17 +144,20 @@ function FieldControl({
   field: FilterField;
   values: FilterValues;
   write: (key: string, value: string) => void;
-  optionSource: Record<string, string[]>;
+  optionSource: Record<string, readonly (string | FilterOption)[]>;
   locale: string;
   labels: FilterBarLabels;
 }) {
-  const options = field.options?.length ? field.options : (optionSource[field.key] ?? []);
+  const options = secenekler(field, optionSource);
 
+  /* HER KONTROLÜN ADI VAR: alanın adı bir <span>, kontrole bağlı değil; ekran
+     okuyucu beş kutuyu da "Tümü" diye okuyordu. */
   if (field.kind === "dateRange") {
     return (
       <div className="grid gap-2 sm:grid-cols-2">
         <DatePicker
           locale={locale}
+          aria-label={`${field.label} ${labels.rangeStart}`}
           value={values[rangeStart(field.key)] || undefined}
           onChange={(v) => write(rangeStart(field.key), v ?? "")}
           placeholder={labels.rangeStart}
@@ -144,6 +165,7 @@ function FieldControl({
         />
         <DatePicker
           locale={locale}
+          aria-label={`${field.label} ${labels.rangeEnd}`}
           value={values[rangeEnd(field.key)] || undefined}
           onChange={(v) => write(rangeEnd(field.key), v ?? "")}
           placeholder={labels.rangeEnd}
@@ -161,7 +183,8 @@ function FieldControl({
     return (
       <MultiSelect
         className="w-full"
-        options={options.map((o) => ({ value: o, label: o }))}
+        aria-label={field.label}
+        options={options}
         value={selected}
         onChange={(next) => write(field.key, next.join(","))}
         placeholder={labels.all}
@@ -178,7 +201,8 @@ function FieldControl({
     return (
       <Combobox
         className="w-full"
-        options={options.map((o) => ({ value: o, label: o }))}
+        aria-label={field.label}
+        options={options}
         value={values[field.key] || undefined}
         onChange={(v) => write(field.key, v ?? "")}
         placeholder={labels.all}
@@ -191,10 +215,11 @@ function FieldControl({
     return (
       <Select
         className="w-full"
+        aria-label={field.label}
         icon={field.icon}
         options={[
           labels.all,
-          ...options.map((o) => (field.tones?.[o] ? { value: o, tone: field.tones[o] } : o)),
+          ...options.map((o) => ({ value: o.value, label: o.label, tone: field.tones?.[o.value] })),
         ]}
         /* BOŞ FİLTRE "TÜMÜ"NÜN KENDİSİ · liste açıldığında onay işareti orada
            duruyor. Ama DOLU DEĞİL: `set` ayrı geçiliyor, yoksa "Tümü" yazan
@@ -212,10 +237,17 @@ function FieldControl({
   return (
     <Input
       full
+      aria-label={field.label}
       value={values[field.key] ?? ""}
       onChange={(e) => write(field.key, e.target.value)}
     />
   );
+}
+
+/** Seçenekler tek biçimde: düz dizgi, değeri de adı da kendisi olan bir çift. */
+function secenekler(field: FilterField, optionSource: Record<string, readonly (string | FilterOption)[]>): FilterOption[] {
+  const ham = field.options?.length ? field.options : (optionSource[field.key] ?? []);
+  return ham.map((o) => (typeof o === "string" ? { value: o, label: o } : o));
 }
 
 export type FilterBarProps = {
@@ -225,8 +257,8 @@ export type FilterBarProps = {
   top: readonly FilterField[];
   /** The groups inside the drawer. Grouped, not a flat pile. TR: Çekmecedeki gruplar. Düz bir yığın değil, gruplu. */
   drawer: readonly FilterGroup[];
-  /** Where the option lists come from; this will arrive from the server. TR: Seçim listelerinin kaynağı; sunucudan gelecek. */
-  optionSource?: Record<string, string[]>;
+  /** Where the option lists come from; this will arrive from the server. Strings or `{ value, label }` pairs. TR: Seçim listelerinin kaynağı; sunucudan gelecek. Dizgiler ya da `{ value, label }` çiftleri. */
+  optionSource?: Record<string, readonly (string | FilterOption)[]>;
   /**
    * THE KEY THE SEARCH BOX WRITES TO. TR: ARAMA KUTUSUNUN YAZDIĞI ANAHTAR.
    *
@@ -287,6 +319,10 @@ export function FilterBar({
   const active = Object.entries(values).filter(([, v]) => v);
   const drawerKeys = new Set(drawer.flatMap((g) => g.fields.map((f) => f.key)));
   const hiddenActive = active.filter(([k]) => drawerKeys.has(k)).length;
+  /* Dar ekranın sayısı: aramadan başka her uygulanmış filtre · arama kutusu
+     orada da görünür, sayılmasına gerek yok. */
+  const darAktif = active.filter(([k]) => k !== searchKey).length;
+  const darMetin = `${labels.filter ?? labels.allFilters}${darAktif > 0 ? ` · ${darAktif}` : ""}`;
 
   function write(key: string, value: string) {
     const next = { ...values };
@@ -310,6 +346,20 @@ export function FilterBar({
     if (key === searchKey) return labels.search;
     return key === fileSearchKey ? (labels.fileSearch?.label ?? key) : key;
   };
+  /* Çip DEĞERİ değil ADI gösteriyor: `critical` saklanır, "Kritik" okunur. */
+  const valueText = (key: string, value: string) => {
+    const field = allFields.find((f) => f.key === key);
+    if (!field || (field.kind !== "select" && field.kind !== "searchable" && field.kind !== "multi")) return value;
+    const adlar = new Map(secenekler(field, optionSource).map((o) => [o.value, o.label]));
+    return value.split(",").map((v) => adlar.get(v) ?? v).join(field.kind === "multi" ? ", " : ",");
+  };
+  const ustAlanlar = (sinif: string) =>
+    top.map((field) => (
+      <div key={field.key} className={`flex flex-col gap-1.5 ${field.kind === "dateRange" ? "sm:col-span-2" : ""}`}>
+        <span className={sinif}>{field.label}</span>
+        <FieldControl field={field} values={values} write={write} optionSource={optionSource} locale={locale} labels={labels} />
+      </div>
+    ));
 
   return (
     /* FİLTRE ÇUBUĞU KENDİ YÜZEYİNDE, ve `tamga-card-open` ŞART: `tamga-card`ın
@@ -322,7 +372,7 @@ export function FilterBar({
           TABANSIZ esneme, o yüzden çözüm `basis`. Arama iki pay, seçimler birer.
           Gerekçe: docs/gerekce/08-blok-ve-sablon.md */}
       <div className="tamga-filter-row">
-        <label className="flex min-w-0 shrink grow-[2] basis-75 flex-col gap-1.5">
+        <label className="tamga-filter-ara flex min-w-0 shrink grow-[2] basis-75 flex-col gap-1.5">
           <span className="text-small font-bold text-ink-faint">{labels.search}</span>
           {/* `leading` bir boolean: kite sol boşluğu açtırıyor, ikonu çağıran
               çiziyor. Böylece ikon seti kitin değil ürünün kararı kalıyor. */}
@@ -354,9 +404,9 @@ export function FilterBar({
                 Esnek bir kapta satır atlatmanın tek yolu bu: `basis-full` kalan
                 yeri doldurup sonrakini aşağı itiyor, `h-0` ise kendisi için yer
                 kaplamıyor. Bir `<br>` esnek kapta hiçbir şey yapmaz. */}
-            {field.break ? <span aria-hidden className="h-0 basis-full" /> : null}
+            {field.break ? <span aria-hidden className="tamga-filter-genis h-0 basis-full" /> : null}
           <div
-            className={`flex min-w-0 shrink grow flex-col gap-1.5 ${
+            className={`tamga-filter-genis flex min-w-0 shrink grow flex-col gap-1.5 ${
               field.kind === "dateRange" ? "basis-80" : "basis-40 tamga-filter-cap"
             }`}
           >
@@ -381,18 +431,23 @@ export function FilterBar({
             "bu listenin geri kalanı" demenin yeri. */}
         {/* ÇEKMECE BOŞSA DÜĞME DE YOK: bir alanı kalmayan "Tüm filtreler" boş bir panel
             açıyor, ve açan kişi aradığı filtrenin kaybolduğunu sanıyor. */}
-        {drawer.length > 0 && (
-        <Button className="ml-auto" onClick={() => setDrawerOpen(true)}>
+        {/* DAR EKRANDA ÜST ALANLARIN TEK YOLU BU DÜĞME: çekmece boşken de
+            çiziliyor, ama yalnız dar görünümde (`tamga-filter-dar`). */}
+        {(drawer.length > 0 || top.length > 0) && (
+        <Button className={drawer.length > 0 ? "ml-auto" : "tamga-filter-dar ml-auto"} onClick={() => setDrawerOpen(true)}>
           <Icon icon={Customize} size="xs" />
-          {labels.allFilters}
-          {hiddenActive > 0 && (
-            /* Sayaç kitin `tamga-count`u, elle çizilmiş bir daire değil: aynı
-               rozet `Badge`de de geçiyor ve ikisinin ayrı çizilmesi, işaret
-               ailesi değiştiğinde yalnız birinin değişmesi demekti. */
-            <span className="tamga-count ml-1 tabular-nums">
-              {hiddenActive}
-            </span>
-          )}
+          <span className="tamga-filter-genis">
+            {labels.allFilters}
+            {hiddenActive > 0 && (
+              /* Sayaç kitin `tamga-count`u, elle çizilmiş bir daire değil: aynı
+                 rozet `Badge`de de geçiyor ve ikisinin ayrı çizilmesi, işaret
+                 ailesi değiştiğinde yalnız birinin değişmesi demekti. */
+              <span className="tamga-count ml-1 tabular-nums">
+                {hiddenActive}
+              </span>
+            )}
+          </span>
+          <span className="tamga-filter-dar">{darMetin}</span>
         </Button>
         )}
 
@@ -406,7 +461,7 @@ export function FilterBar({
           {active.map(([key, value]) => (
             <span key={key} className="tamga-token">
               <span className="font-normal text-ink-faint">{labelFor(key)}:</span>
-              {value}
+              {valueText(key, value)}
               {/* Kitin `MiniButton`ı DEĞİL: o kendi kenarını ve tabanını
                   taşıyor, yani kenarlı bir çipin içinde ikinci bir nesne
                   oluyordu. Kaldırma karesi çipin bir parçası, ayrı bir kutu
@@ -453,6 +508,12 @@ export function FilterBar({
           }}
           className="flex flex-col"
         >
+          {/* ÜST ALANLAR DAR EKRANDA ÇEKMECENİN İLK, BAŞLIKSIZ GRUBU. */}
+          {top.length > 0 && (
+            <div className="tamga-filter-dar flex flex-col gap-3.5 border-b border-dashed border-line py-4.5 last:border-b-0">
+              <div className="grid gap-3 sm:grid-cols-[repeat(2,minmax(0,1fr))]">{ustAlanlar("text-small text-ink-soft")}</div>
+            </div>
+          )}
           {drawer.map((group) => (
             /* GRUPLAR KESİKLİ ÇİZGİYLE AYRILIYOR, boşlukla değil. Yirmi alanlık
                bir çekmecede yalnız boşluk, grubun nerede bittiğini söylemiyor

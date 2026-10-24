@@ -18,6 +18,8 @@ export function Progress({
   label,
   valueText,
   ariaLabel,
+  size = "md",
+  tone,
   className = "",
   ...rest
 }: {
@@ -62,6 +64,18 @@ export function Progress({
    * bir etiket yoksa erişilebilir ad
    */
   ariaLabel?: string;
+  /**
+   * `md` the page's bar: 16px, edged, striped, with the label line. `sm` a 4px line for a table
+   * cell: no edge, no label line; width is the caller's (`className`). Only for `bar`. TR: `md`
+   * sayfanın çubuğu: 16px, kenarlı, çizgili, etiket satırlı. `sm` tablo hücresi için 4px'lik
+   * çizgi: kenarsız, etiketsiz; genişlik çağıranın (`className`). Yalnız `bar` için.
+   */
+  size?: "md" | "sm";
+  /**
+   * The fill's colour from the kit's tone roles; absent, the accent. TR: Dolgunun rengi kitin
+   * ton rollerinden; yoksa vurgu.
+   */
+  tone?: Tone;
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
@@ -69,7 +83,7 @@ export function Progress({
   const pct = Math.max(0, Math.min(100, value));
 
   const ust =
-    label || valueText ? (
+    (label || valueText) && size === "md" ? (
       <div className="tamga-progress-ust">
         <span>{label}</span>
         <span className="tamga-progress-deger">{valueText ?? `%${Math.round(pct)}`}</span>
@@ -137,7 +151,7 @@ export function Progress({
           karşılaştırılan bir değer. */}
       {ust}
       <div
-        className="tamga-progress"
+        className={size === "sm" ? "tamga-progress tamga-progress-sm" : "tamga-progress"}
         role="progressbar"
         aria-valuenow={Math.round(pct)}
         aria-valuemin={0}
@@ -146,7 +160,7 @@ export function Progress({
            visible label, then to a plain description of what it is */
         aria-label={label ?? ariaLabel ?? "Progress"}
       >
-        <div className="tamga-progress-fill" style={{ width: `${pct}%` }} />
+        <div className="tamga-progress-fill" style={tone ? { width: `${pct}%`, background: toneOf(tone).mark } : { width: `${pct}%` }} />
       </div>
     </div>
   );

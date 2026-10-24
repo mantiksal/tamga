@@ -83,6 +83,29 @@ zemini, gölgeyi ve dolguyu düşürüp `flex: 1 1 100%` veriyor. Dolgunun Tailw
 (`p-4`) kit sınıfına taşınmasının sebebi bu kural: yardımcı sınıf katmanı bileşen katmanını
 ezer, `padding: 0` bir `p-4`e işlemezdi. Tek başına çubuk piksel piksel aynı.
 
+### Dar ekranda iki şey: arama ve "Filtrele · N".
+
+390 pikselde arama ve bütün üst alanlar alt alta diziliyordu; listenin ilk satırı ancak
+kaydırınca görünüyordu. Dar görünümde çubuk aramaya ve yanındaki bir düğmeye iniyor; üst alanlar
+çekmecenin başlıksız ilk grubu oluyor, çipler ve "Hepsini temizle" yerinde kalıyor (NN/g ve
+Baymard'ın mobil filtre bulguları: tam ekran panel, açık bir "Uygula", listenin üstünde görünür
+çipler). Seçim CSS KIRILIMIYLA, JS ekran ölçerek değil: iki görünüm DOM'da ve biri gizli,
+yoksa sunucunun çıktısı tarayıcınınkiyle uyuşmaz. Düğmenin sözcüğü kitin değil: `labels.filter`,
+yoksa `allFilters`. İki görünüm aynı kökte, yani şablonun tek-kart kuralı darda da geçerli.
+
+### Kutunun adı alanın adı.
+
+Alanın adı bir `<span>` idi, kontrole bağlı değildi; ekran okuyucu beş kutuyu da "Tümü" diye
+okuyordu (WCAG 4.1.2, 2.5.3) ve testler alanı rolüyle bulamıyordu. Her kontrol `aria-label`
+alıyor; tarih aralığının iki kutusu "Tarih Başlangıç" ve "Tarih Bitiş".
+
+### Değer ile ad ayrı.
+
+`values` görünen metni tutuyordu ("Kritik"), adres ise sözleşmenin değerini (`?state=critical`);
+her tüketici çevrilmiş etiketi değere çeviren bir eşleme yazıyordu, aynı adlı iki seçenek
+ayrılamıyordu. Seçenek artık `{ value, label }` da olabiliyor: değer saklanır, kutu ve çip adı
+gösterir, `tones` değere göre anahtarlanır. Düz `string[]` olduğu gibi çalışır.
+
 ### Tarih aralığı iki sütun kaplıyor, bir sütunu ikiye bölmüyor.
 
 Öncesinde tek bir alan yuvasının içinde `grid-cols-2` açıyordu, yani iki takvim bir

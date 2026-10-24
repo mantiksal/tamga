@@ -66,6 +66,18 @@ const T = {
         anda durduğunda güveni bir daha geri gelmemek üzere kırar.
       </>
     ),
+    inceH: "İnce: tablo hücresine",
+    inceP: (
+      <>
+        <code>size</code> iki boy: <code>md</code> sayfanın çubuğu, bugünkü hâl. <code>sm</code> dört
+        pikselllik bir çizgi: kenarsız, gölgesiz, çizgisiz dolgu, üstünde etiket satırı yok;
+        genişliği <code>className</code> ile sen verirsin. Yirmi beş satırlık bir tabloda her satıra
+        bir kapsam çubuğu koyunca ölçek bu. <code>role=&quot;progressbar&quot;</code>, değer ve{" "}
+        <code>ariaLabel</code> aynen; <code>tone</code> dolguya kitin rollerinden bir renk verir,
+        yoksa vurgu.
+      </>
+    ),
+    kapsam: "Kapsam",
     related: "İlgili",
     three: (
       <>
@@ -113,6 +125,18 @@ const T = {
         it is done breaks trust in a way it does not come back from.
       </>
     ),
+    inceH: "Thin: for a table cell",
+    inceP: (
+      <>
+        <code>size</code> has two sizes: <code>md</code>, the page&apos;s bar, today&apos;s look.{" "}
+        <code>sm</code> is a four-pixel line: no edge, no shadow, no stripes, no label line above;
+        you give the width with <code>className</code>. A coverage bar on every row of a 25-row
+        table is this scale. <code>role=&quot;progressbar&quot;</code>, the value and{" "}
+        <code>ariaLabel</code> stay; <code>tone</code> colours the fill from the kit&apos;s roles, else
+        the accent.
+      </>
+    ),
+    kapsam: "Coverage",
     related: "Related",
     three: (
       <>
@@ -179,6 +203,18 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <P>{t.ucBicim}</P>
 
       <P>{t.neutral}</P>
+
+      <H2>{t.inceH}</H2>
+      <P>{t.inceP}</P>
+      <Demo yuzey labels={dict.demo} align="start" code={`<Progress size="sm" value={94} ariaLabel="${t.kapsam}" className="w-32" />
+<Progress size="sm" value={62} tone="caution" ariaLabel="${t.kapsam}" className="w-32" />
+<Progress size="sm" value={18} tone="danger" ariaLabel="${t.kapsam}" className="w-32" />`}>
+        <div className="flex flex-col gap-3">
+          <Progress size="sm" value={94} ariaLabel={t.kapsam} className="w-32" />
+          <Progress size="sm" value={62} tone="caution" ariaLabel={t.kapsam} className="w-32" />
+          <Progress size="sm" value={18} tone="danger" ariaLabel={t.kapsam} className="w-32" />
+        </div>
+      </Demo>
 
       <H2>{t.rules}</H2>
       <Note>{t.fake}</Note>

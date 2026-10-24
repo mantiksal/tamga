@@ -38,7 +38,14 @@ const T = {
         kullanıcı listeyi eksik görür ve sebebini bulamaz; filtreyi gizlemenin tek gerçek riski
         budur, ve tek çaresi uygulanan her filtrenin bir çip olarak durması. Çubuk kendi kartında
         durur; <code>ListTemplate</code>&apos;in <code>filters</code> alanına girince o kartı
-        bırakır ve alanın tamamını alır · şablonun alanı zaten bir kart.
+        bırakır ve alanın tamamını alır · şablonun alanı zaten bir kart. Her kutunun erişilebilir
+        adı alanın adı (<code>aria-label</code>); tarih aralığının iki kutusu &quot;Tarih
+        Başlangıç&quot; ve &quot;Tarih Bitiş&quot;. Dar ekranda (<code>sm</code> altı) çubuk ikiye iner:
+        arama ve yanında &quot;Filtrele · N&quot; (<code>labels.filter</code>, yoksa{" "}
+        <code>allFilters</code>); üst alanlar çekmecenin başlıksız ilk grubu olur, çipler görünür
+        kalır. Geçiş CSS kırılımıyla, JS ekran ölçmüyor. Seçenekler düz dizgi ya da{" "}
+        <code>{"{ value, label }"}</code> çifti: değer saklanır, ad gösterilir; <code>tones</code> değere
+        göre anahtarlanır.
       </>
     ),
     filtreN: (
@@ -120,7 +127,13 @@ ADR-0003&apos;ün katman şeması <code>tamga-ui</code> kutusunun içine
         real risk of hiding filters, and its one remedy is that every applied filter stands as a
         chip. The bar sits in its own card; inside <code>ListTemplate</code>&apos;s{" "}
         <code>filters</code> slot it drops that card and takes the full width · the slot is a card
-        already.
+        already. Every box&apos;s accessible name is the field&apos;s label (<code>aria-label</code>);
+        the date range&apos;s two boxes read &quot;Date Start&quot; and &quot;Date End&quot;. Below{" "}
+        <code>sm</code> the bar collapses to two things: the search and a &quot;Filter · N&quot; button
+        beside it (<code>labels.filter</code>, else <code>allFilters</code>); the top fields become
+        the drawer&apos;s first, untitled group and the chips stay visible. The switch is a CSS
+        breakpoint, no JS measuring. Options are plain strings or <code>{"{ value, label }"}</code>{" "}
+        pairs: the value is stored, the label shown; <code>tones</code> is keyed by value.
       </>
     ),
     filtreN: (

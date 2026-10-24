@@ -282,6 +282,7 @@ export function MultiSelect({
   onChange,
   placeholder,
   labels,
+  "aria-label": ariaLabel,
   className,
   ...rest
 }: {
@@ -290,6 +291,8 @@ export function MultiSelect({
   onChange: (next: string[]) => void;
   placeholder: string;
   labels: { empty: string; remove: (label: string) => string; open: string };
+  /** The box's accessible name; falls back to `labels.open`. TR: Kutunun erişilebilir adı; yoksa `labels.open`. */
+  "aria-label"?: string;
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
@@ -412,7 +415,7 @@ export function MultiSelect({
           role="combobox"
           aria-expanded={open}
           aria-controls={id}
-          aria-label={labels.open}
+          aria-label={ariaLabel ?? labels.open}
           className="min-w-24 flex-1 bg-transparent text-body text-ink outline-none"
         />
       </span>

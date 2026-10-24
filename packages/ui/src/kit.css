@@ -1478,10 +1478,6 @@
       border-color var(--duration-press) var(--ease-standard);
     cursor: pointer;
   }
-  /* Filtre satırı: tavan yarım satır, yoksa sona tek başına düşen alan bütün
-     genişliğe yayılıyor. Tavan boşluktan TÜRETİLİYOR · iki bağımsız sayı olarak
-     yazılsalar satırın boşluğu ilk değiştiğinde sessizce kayarlar.
-     Gerekçe: docs/gerekce/10-kit-css.md */
   /* Çubuğun kutusu. Dolgu burada, Tailwind'de değil: yardımcı sınıf katmanı
      bileşen katmanından sonra geliyor, `p-4` kalsaydı aşağıdaki `padding: 0`
      onu ezemezdi. Gerekçe: docs/gerekce/08-blok-ve-sablon.md */
@@ -1501,6 +1497,27 @@
     background: none;
     box-shadow: none;
   }
+  /* DAR EKRAN: çubuk arama + "Filtrele · N"a iniyor, üst alanlar çekmecenin
+     başlıksız ilk grubu. Seçim CSS kırılımıyla, JS ile ekran ölçerek değil:
+     sunucu çıktısı tarayıcıyla uyuşmalı. İki görünüm DOM'da, biri gizli;
+     ikisi de aynı kökte, yani şablonun tek-kart kuralı darda da geçerli. */
+  @media (max-width: 39.9375rem) {
+    .tamga-filter-genis {
+      display: none;
+    }
+    .tamga-filter-row > .tamga-filter-ara {
+      flex-basis: 0;
+    }
+  }
+  @media (min-width: 40rem) {
+    .tamga-filter-dar {
+      display: none;
+    }
+  }
+  /* Filtre satırı: tavan yarım satır, yoksa sona tek başına düşen alan bütün
+     genişliğe yayılıyor. Tavan boşluktan TÜRETİLİYOR · iki bağımsız sayı olarak
+     yazılsalar satırın boşluğu ilk değiştiğinde sessizce kayarlar.
+     Gerekçe: docs/gerekce/10-kit-css.md */
   .tamga-filter-row {
     --filter-gap: 12px;
     display: flex;
@@ -3906,6 +3923,18 @@
     );
     border-right: 1.5px solid var(--color-edge-strong);
     transition: width var(--duration-base) var(--ease-standard);
+  }
+  /* İNCE: tablo hücresine sığan 4px; kenarsız, gölgesiz, düz dolgu, etiket
+     satırı yok. Yirmi beş satırda yirmi beş kenarlı çubuk listeyi ağırlaştırıyor.
+     Renk çağıranın tonundan (`--progress-renk`), yoksa vurgu. */
+  .tamga-progress-sm {
+    height: 4px;
+    border: 0;
+    box-shadow: none;
+  }
+  .tamga-progress-sm > .tamga-progress-fill {
+    background: var(--color-accent);
+    border-right: 0;
   }
 
   /* BLOK DOLULUK: sayılabilir bir kapasite. Hücreler kendi kenarlarını taşıyor

@@ -1482,6 +1482,25 @@
      genişliğe yayılıyor. Tavan boşluktan TÜRETİLİYOR · iki bağımsız sayı olarak
      yazılsalar satırın boşluğu ilk değiştiğinde sessizce kayarlar.
      Gerekçe: docs/gerekce/10-kit-css.md */
+  /* Çubuğun kutusu. Dolgu burada, Tailwind'de değil: yardımcı sınıf katmanı
+     bileşen katmanından sonra geliyor, `p-4` kalsaydı aşağıdaki `padding: 0`
+     onu ezemezdi. Gerekçe: docs/gerekce/08-blok-ve-sablon.md */
+  .tamga-filter-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+  }
+  /* ŞABLONUN FİLTRE ALANI ZATEN BİR KART: içindeki çubuk ikinci bir kart
+     çizmiyor ve sarmalayıcının esnek satırında tam genişlik alıyor. */
+  [data-filters] > .tamga-filter-bar {
+    flex: 1 1 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
   .tamga-filter-row {
     --filter-gap: 12px;
     display: flex;

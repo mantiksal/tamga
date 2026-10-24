@@ -36,7 +36,9 @@ const T = {
         görsel ağırlıkta. Buradaki fikir tek cümle: birkaçı üstte, gerisi çekmecede,{" "}
         <strong>ve çekmecede bir şey açıksa bunu görüyorsun</strong>. Gizli bir filtre açıkken
         kullanıcı listeyi eksik görür ve sebebini bulamaz; filtreyi gizlemenin tek gerçek riski
-        budur, ve tek çaresi uygulanan her filtrenin bir çip olarak durması.
+        budur, ve tek çaresi uygulanan her filtrenin bir çip olarak durması. Çubuk kendi kartında
+        durur; <code>ListTemplate</code>&apos;in <code>filters</code> alanına girince o kartı
+        bırakır ve alanın tamamını alır · şablonun alanı zaten bir kart.
       </>
     ),
     filtreN: (
@@ -116,7 +118,9 @@ ADR-0003&apos;ün katman şeması <code>tamga-ui</code> kutusunun içine
         <strong>and if something in the drawer is set, you can see it</strong>. With a hidden
         filter active the user sees an incomplete list and cannot find out why; that is the only
         real risk of hiding filters, and its one remedy is that every applied filter stands as a
-        chip.
+        chip. The bar sits in its own card; inside <code>ListTemplate</code>&apos;s{" "}
+        <code>filters</code> slot it drops that card and takes the full width · the slot is a card
+        already.
       </>
     ),
     filtreN: (

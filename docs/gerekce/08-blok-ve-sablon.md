@@ -76,6 +76,13 @@ paneli (durum seçici, tarih takvimi, çoklu seçim) hücre sınırında keserdi
 ama yarısı görünmeyen bir kontrol, ve hata vermediği için sebebi z-index'te aranan
 klasik tuzak.
 
+ŞABLONUN İÇİNDE YÜZEYİNİ BIRAKIR. `ListTemplate` filtre alanını zaten bir karta koyuyor
+(`data-filters`); çubuk orada kendi kartını da çizince iç içe iki kart oluyordu, ve alanın
+esnek satırında çubuk içeriği kadar daralıyordu. `[data-filters] > .tamga-filter-bar` kenarı,
+zemini, gölgeyi ve dolguyu düşürüp `flex: 1 1 100%` veriyor. Dolgunun Tailwind'den
+(`p-4`) kit sınıfına taşınmasının sebebi bu kural: yardımcı sınıf katmanı bileşen katmanını
+ezer, `padding: 0` bir `p-4`e işlemezdi. Tek başına çubuk piksel piksel aynı.
+
 ### Tarih aralığı iki sütun kaplıyor, bir sütunu ikiye bölmüyor.
 
 Öncesinde tek bir alan yuvasının içinde `grid-cols-2` açıyordu, yani iki takvim bir

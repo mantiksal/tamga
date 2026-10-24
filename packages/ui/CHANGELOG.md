@@ -5,6 +5,20 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.7.3
+
+> One card around the filters, not two.
+
+### Fixed
+
+- **`FilterBar` inside `ListTemplate` drew a card inside the template's card** and, in the slot's
+  flex row, shrank to its content. The bar's box is now a kit class, `.tamga-filter-bar` (the
+  same 16px padding and 14px gap as before, so a bar on its own is pixel-identical);
+  `[data-filters] > .tamga-filter-bar` drops border, ground, shadow and padding and takes
+  `flex: 1 1 100%`. The padding moved from a Tailwind utility to the class on purpose: the
+  utilities layer comes after the components layer, so `padding: 0` could never have beaten
+  `p-4`.
+
 ## 0.7.2
 
 > The current rail item is drawn whole.

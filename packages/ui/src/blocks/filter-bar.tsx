@@ -315,7 +315,9 @@ export function FilterBar({
     /* FİLTRE ÇUBUĞU KENDİ YÜZEYİNDE, ve `tamga-card-open` ŞART: `tamga-card`ın
        kırpması içindeki her açılır paneli hücre sınırında keserdi.
        Gerekçe: docs/gerekce/08-blok-ve-sablon.md */
-    <div className="tamga-card tamga-card-open flex flex-col gap-3.5 p-4">
+    /* Kutu kit sınıfında: şablonun filtre alanında yüzeyini bırakıp tam
+       genişlik alıyor (bkz. kit.css `.tamga-filter-bar`). */
+    <div className="tamga-card tamga-card-open tamga-filter-bar">
       {/* ESNEK SARMA, SABİT IZGARA DEĞİL: taşmayı yaratan şey sütun sayısı değil
           TABANSIZ esneme, o yüzden çözüm `basis`. Arama iki pay, seçimler birer.
           Gerekçe: docs/gerekce/08-blok-ve-sablon.md */}

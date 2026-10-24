@@ -18,7 +18,10 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   "Clear all" stay visible. With an empty drawer the button is still drawn on narrow screens,
   since it is the only way to the top fields. The switch is a CSS breakpoint, both views are in
   the DOM and one is hidden, so the server's output matches the browser's. The kit writes no
-  word: `labels.filter` is optional and falls back to `allFilters`.
+  word: `labels.filter` is optional and falls back to `allFilters`. The row's parts are kit
+  classes (`.tamga-filter-ara`, `.tamga-filter-alan`), not utilities: a utility's `display` would
+  beat the component layer's `display: none`, as it did in the first cut, measured in Chrome at
+  390px (`pnpm olc:filtre` repeats the measurement).
 - **`FilterBar` options with a value and a label** · `options` and `optionSource` take
   `{ value, label }` pairs beside plain strings. `values` holds the value, the box and the chip
   show the label, `tones` is keyed by the value. Plain `string[]` works as before.

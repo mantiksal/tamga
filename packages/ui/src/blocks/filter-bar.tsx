@@ -355,7 +355,7 @@ export function FilterBar({
   };
   const ustAlanlar = (sinif: string) =>
     top.map((field) => (
-      <div key={field.key} className={`flex flex-col gap-1.5 ${field.kind === "dateRange" ? "sm:col-span-2" : ""}`}>
+      <div key={field.key} className={`tamga-filter-alan ${field.kind === "dateRange" ? "sm:col-span-2" : ""}`}>
         <span className={sinif}>{field.label}</span>
         <FieldControl field={field} values={values} write={write} optionSource={optionSource} locale={locale} labels={labels} />
       </div>
@@ -372,7 +372,10 @@ export function FilterBar({
           TABANSIZ esneme, o yüzden çözüm `basis`. Arama iki pay, seçimler birer.
           Gerekçe: docs/gerekce/08-blok-ve-sablon.md */}
       <div className="tamga-filter-row">
-        <label className="tamga-filter-ara flex min-w-0 shrink grow-[2] basis-75 flex-col gap-1.5">
+        {/* GÖRÜNÜM VE TABAN KİT SINIFINDA, Tailwind'de değil: dar ekranda `display:
+            none` ve `flex-basis: 0` bileşen katmanından geliyor ve yardımcı katman
+            onları ezerdi. Tarayıcıda ölçüldü. */}
+        <label className="tamga-filter-ara">
           <span className="text-small font-bold text-ink-faint">{labels.search}</span>
           {/* `leading` bir boolean: kite sol boşluğu açtırıyor, ikonu çağıran
               çiziyor. Böylece ikon seti kitin değil ürünün kararı kalıyor. */}
@@ -404,11 +407,10 @@ export function FilterBar({
                 Esnek bir kapta satır atlatmanın tek yolu bu: `basis-full` kalan
                 yeri doldurup sonrakini aşağı itiyor, `h-0` ise kendisi için yer
                 kaplamıyor. Bir `<br>` esnek kapta hiçbir şey yapmaz. */}
-            {field.break ? <span aria-hidden className="tamga-filter-genis h-0 basis-full" /> : null}
+            {field.break ? <span aria-hidden className="tamga-filter-genis tamga-filter-kir" /> : null}
           <div
-            className={`tamga-filter-genis flex min-w-0 shrink grow flex-col gap-1.5 ${
-              field.kind === "dateRange" ? "basis-80" : "basis-40 tamga-filter-cap"
-            }`}
+            className={`tamga-filter-genis tamga-filter-alan ${field.kind === "dateRange" ? "" : "tamga-filter-cap"}`}
+            data-range={field.kind === "dateRange" || undefined}
           >
             <span className="text-small font-bold text-ink-faint">{field.label}</span>
             <FieldControl
@@ -510,7 +512,7 @@ export function FilterBar({
         >
           {/* ÜST ALANLAR DAR EKRANDA ÇEKMECENİN İLK, BAŞLIKSIZ GRUBU. */}
           {top.length > 0 && (
-            <div className="tamga-filter-dar flex flex-col gap-3.5 border-b border-dashed border-line py-4.5 last:border-b-0">
+            <div className="tamga-filter-dar tamga-filter-grup border-b border-dashed border-line py-4.5 last:border-b-0">
               <div className="grid gap-3 sm:grid-cols-[repeat(2,minmax(0,1fr))]">{ustAlanlar("text-small text-ink-soft")}</div>
             </div>
           )}

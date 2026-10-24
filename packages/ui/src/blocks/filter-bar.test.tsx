@@ -218,3 +218,30 @@ describe("FilterBar · değer ve etiket ayrı (5)", () => {
     expect(document.querySelector(".tamga-token")?.textContent).toContain("Açık");
   });
 });
+
+/* GÖRÜNÜM VE TABAN KİT SINIFINDA: `tamga-filter-genis`/`-dar` taşıyan bir
+   elemanda Tailwind'in `flex`/`hidden`/`basis-*` sınıfı kalırsa yardımcı
+   katman bileşen katmanını ezer ve `display: none` hiç işlemez (tarayıcıda
+   ölçüldü: 390 px'te üç alan `flex` kaldı). Tarayıcı kapısı: scripts/olc/filtre-dar.mjs */
+describe("FilterBar · dar/geniş sınıfı taşıyan eleman yardımcı görünüm sınıfı taşımaz", () => {
+  const YARDIMCI = /(^|\s)(flex|inline-flex|hidden|block|grid|flex-col|basis-\S+|grow\S*|shrink\S*|min-w-0)(\s|$)/;
+  it("satırda, düğmede ve çekmecede", () => {
+    cubuk({ top: ALANLAR, drawer: [{ title: "Diğer", fields: [ALANLAR[4]!] }], labels: { ...ETIKETLER, filter: "Filtrele" } });
+    fireEvent.click(screen.getByRole("button", { name: /Filtrele/ }));
+    const tasiyanlar = [...document.querySelectorAll(".tamga-filter-genis, .tamga-filter-dar, .tamga-filter-ara")];
+    expect(tasiyanlar.length).toBeGreaterThan(5);
+    for (const el of tasiyanlar) expect(el.className, el.className).not.toMatch(YARDIMCI);
+  });
+  it("kit sınıfları eski ölçüleri taşıyor: arama 2/1/18.75rem, alan 1/1/10rem (aralık 20rem), 6px aralık", () => {
+    const { existsSync, readFileSync } = require("node:fs") as typeof import("node:fs");
+    const css = readFileSync(["src/kit.css", "packages/ui/src/kit.css"].find(existsSync)!, "utf8");
+    const kural = (secici: string) => css.match(new RegExp(secici.replace(/[.*+?^${}()|[\]\\>]/g, "\\$&") + "\\s*\\{([^}]*)\\}"))?.[1] ?? "";
+    /* Kendi kuralı ortak kuralın (`-ara, -alan`) hemen ardında; seçici tek başına aranıyor. */
+    expect(css).toMatch(/\n  \.tamga-filter-ara\s*\{\s*flex:\s*2 1 18\.75rem/);
+    /* Görünüm ve aralık ikisinin ortak kuralında. */
+    expect(css).toMatch(/\.tamga-filter-ara,\s*\.tamga-filter-alan\s*\{[^}]*display:\s*flex[^}]*gap:\s*6px/);
+    expect(css).toMatch(/\n  \.tamga-filter-alan\s*\{\s*flex:\s*1 1 10rem/);
+    expect(kural(".tamga-filter-alan[data-range]")).toMatch(/flex-basis:\s*20rem/);
+    expect(kural(".tamga-filter-grup")).toMatch(/gap:\s*14px/);
+  });
+});

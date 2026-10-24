@@ -1497,10 +1497,43 @@
     background: none;
     box-shadow: none;
   }
+  /* SATIRIN PARÇALARI KİT SINIFINDA. Görünüm ve taban Tailwind'de kalsaydı
+     (`flex`, `basis-75`) yardımcı katman bileşen katmanını ezer, aşağıdaki
+     `display: none` ve `flex-basis: 0` hiç işlemezdi · tarayıcıda ölçüldü.
+     Değerler eski yardımcı sınıfların birebir karşılığı: arama 2 pay, 18.75rem
+     taban; alan 1 pay, 10rem (tarih aralığı 20rem); 6px dikey aralık. */
+  .tamga-filter-ara,
+  .tamga-filter-alan {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+  .tamga-filter-ara {
+    flex: 2 1 18.75rem;
+  }
+  .tamga-filter-alan {
+    flex: 1 1 10rem;
+  }
+  .tamga-filter-alan[data-range] {
+    flex-basis: 20rem;
+  }
+  /* Satırı kıran eleman: tam genişlik, yüksekliksiz. */
+  .tamga-filter-kir {
+    height: 0;
+    flex-basis: 100%;
+  }
+  /* Çekmecedeki grup: sütun, 14px aralık (kenar ve dolgu yardımcı sınıfta kalıyor). */
+  .tamga-filter-grup {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
   /* DAR EKRAN: çubuk arama + "Filtrele · N"a iniyor, üst alanlar çekmecenin
      başlıksız ilk grubu. Seçim CSS kırılımıyla, JS ile ekran ölçerek değil:
      sunucu çıktısı tarayıcıyla uyuşmalı. İki görünüm DOM'da, biri gizli;
-     ikisi de aynı kökte, yani şablonun tek-kart kuralı darda da geçerli. */
+     ikisi de aynı kökte, yani şablonun tek-kart kuralı darda da geçerli.
+     Bu kurallar görünüm kurallarından SONRA: aynı katman, aynı özgüllük. */
   @media (max-width: 39.9375rem) {
     .tamga-filter-genis {
       display: none;
@@ -3926,7 +3959,7 @@
   }
   /* İNCE: tablo hücresine sığan 4px; kenarsız, gölgesiz, düz dolgu, etiket
      satırı yok. Yirmi beş satırda yirmi beş kenarlı çubuk listeyi ağırlaştırıyor.
-     Renk çağıranın tonundan (`--progress-renk`), yoksa vurgu. */
+     Renk çağıranın `tone`undan satır içi `style` ile gelir, yoksa buradaki vurgu. */
   .tamga-progress-sm {
     height: 4px;
     border: 0;

@@ -27,7 +27,13 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   `labels.all` as the first option; keyboard as in `SelectPanel`. The default, `combobox`, is
   today's text box. Applies on top, in the drawer and in the narrow sheet.
 - **`SelectPanel` `look="field"`** · the trigger as a form box (`.tamga-select`), full width,
-  `title` carrying the whole value when set.
+  `title` carrying the whole value when set; the same caret glyph and text colour as `Select`
+  (an empty "All" reads as a value, not a faint placeholder), the same strong edge when set.
+- **`FilterBar` `look="fields"` on a narrow bar** · the sheet is titled
+  `labels.filter ?? labels.allFilters` in both layouts; the search box's visible label stays for
+  screen readers only; the search box keeps at least 7.5rem and the "Filter · N" button drops
+  under it when the bar is too narrow for both; an applied chip is one line, a long value
+  clipped with its whole text in `title`.
 
 ## 0.8.1
 

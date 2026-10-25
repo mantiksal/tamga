@@ -122,6 +122,16 @@ for (const genislik of [390, 1280, "kap210", "izgara"]) {
         /* Kartın YERLEŞİM genişliği: galeri önizlemesi kartı geniş kurup görsel olarak
            küçültüyor; @container yerleşime bakar, bu yüzden geniş kart darda da geniş düzendir. */
         kapGenisligi: kart.offsetWidth,
+        /* 210 px kutu düzeni: arama ≥ 120 px, etiket gizli, uygulanan çip tek satır. */
+        dar210: (() => {
+          const eskiW = bar.style.width; bar.style.width = "210px"; void bar.offsetWidth;
+          const inp = bar.querySelector(".tamga-filter-ara input");
+          const ad = bar.querySelector(".tamga-filter-ara-ad");
+          const tokenlar = [...bar.querySelectorAll(".tamga-token")];
+          const out = { aramaGenislik: inp ? Math.round(r(inp).width) : null, adGorunur: ad ? r(ad).width > 1 && r(ad).height > 1 : null, cipYukseklikleri: tokenlar.map((t) => Math.round(r(t).height)), cipSayisi: tokenlar.length };
+          bar.style.width = eskiW; void bar.offsetWidth;
+          return out;
+        })(),
         /* Dolu çipler ezilmesin: her çipin genişliği içeriğine eşit, sıra kendi içinde kayıyor. */
         doluCipSayisi: cips.querySelectorAll(".tamga-filter-cip[data-set]").length,
         ezilen: [...cips.querySelectorAll(".tamga-filter-cip[data-set]")].filter((c) => c.scrollWidth > c.clientWidth + 1 || [...c.querySelectorAll("button")].some((b) => b.scrollWidth > b.clientWidth + 1)).length,
@@ -148,7 +158,7 @@ if (genis && !genis.hata && kapS && !kapS.hata) {
   const darAd = dar390 ? "390" : "360 px kap";
   if (!dar390) console.log("(390: kutu çubuğunun kartı yerleşimde " + (sonuc[390]?.kapGenisligi ?? "?") + " px, galeri geniş kuruyor; dar ölçüm " + darAd + " sahnesinde)");
   soyle(dar.ustAlanlar.length > 0 && dar.ustAlanlar.every((v) => v === "none"), darAd + ": üst alanlar gizlenmiyor");
-  soyle(dar.aramaTaban === "0px", darAd + ": aramanın tabanı 0 değil (" + dar.aramaTaban + ")");
+  soyle(dar.aramaTaban === "120px", darAd + ": aramanın tabanı 7.5rem değil (" + dar.aramaTaban + ")");
   soyle(dar.dugmeDar !== "none" && dar.dugmeGenis === "none", darAd + ": düğme dar metni göstermiyor");
   soyle(dar.cekmeceDarGrup !== "none" && dar.cekmeceDarGrup !== "yok", darAd + ": çekmecede üst alan grubu yok");
   soyle(genis.ustAlanlar.length > 0 && genis.ustAlanlar.every((v) => v !== "none"), "1280: üst alanlar satırda görünmüyor");
@@ -181,6 +191,12 @@ if (genis && !genis.hata && kapS && !kapS.hata) {
     soyle(kapS.cip, "210 px kap: çip çubuğu bulunamadı");
     if (kapS.cip) {
       darKap("210 px kap (1280 ekranda)", kapS.cip);
+      const d = kapS.cip.dar210;
+      if (d) {
+        soyle(d.aramaGenislik !== null && d.aramaGenislik >= 120, "210 px kutu düzeni: arama kutusu 120 px'in altında (" + d.aramaGenislik + ")");
+        soyle(d.adGorunur === false, "210 px kutu düzeni: aramanın etiketi görünür");
+        soyle(d.cipSayisi > 0 && d.cipYukseklikleri.every((h) => h <= 32), "210 px kutu düzeni: uygulanan çip tek satır değil (" + d.cipYukseklikleri.join("/") + ")");
+      }
       soyle(kapS.cip.doluCipSayisi >= 3, "210 px kap: en az üç dolu çip kurulamadı (" + kapS.cip.doluCipSayisi + ")");
       soyle(kapS.cip.ezilen === 0, "210 px kap: " + kapS.cip.ezilen + " dolu çip eziliyor (genişliği içeriğinden küçük)");
       soyle(kapS.cip.siraKayiyor === true, "210 px kap: çip sırası kaymıyor (scrollWidth ≤ clientWidth)");

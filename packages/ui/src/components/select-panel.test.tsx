@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { SelectPanel } from "./select-panel.js";
+import { Select } from "./primitives.js";
 
 /**
  * SEÇİM PANELİ · tetik sıradan bir düğme, panelde başlık, isteğe bağlı arama,
@@ -121,9 +122,30 @@ describe("SelectPanel · look=field", () => {
     expect(t.getAttribute("title")).toBe("Aras Kargo");
     expect(t).toHaveAttribute("data-set", "true");
   });
-  it("boşken yer tutucu soluk, title yok", () => {
+  it("boşken title yok; 'Tümü' Select'teki gibi mürekkep renginde (soluk sınıf yok)", () => {
     render(<SelectPanel look="field" options={SEC} title="Kargo" placeholder="Tümü" aria-label="Kargo" onChange={vi.fn()} labels={ETIKET} />);
     expect(tetik().getAttribute("title")).toBeNull();
-    expect(tetik().querySelector(".tamga-select-panel-bos")).not.toBeNull();
+    expect(tetik().querySelector(".tamga-select-panel-bos")).toBeNull();
+    expect(tetik().textContent).toBe("Tümü");
+  });
+});
+
+/* KUTU GÖRÜNÜMÜ SELECT'LE BİREBİR: aynı ok bileşeni (Select'in döndürülmüş
+   CaretRight'ı), boş değer Select'teki gibi mürekkep renginde (soluk değil),
+   dolu değerde aynı koyu kenar (`data-set`). */
+describe("SelectPanel · look=field · Select ile aynı dil", () => {
+  it("ok glifi Select'inkiyle aynı; boş değer soluk sınıf taşımıyor", () => {
+    const { container, unmount } = render(<SelectPanel look="field" options={SEC} title="Kargo" placeholder="Tümü" aria-label="Kargo" onChange={vi.fn()} labels={ETIKET} />);
+    const ok = tetik().querySelector("svg")!;
+    expect(ok.getAttribute("class")).toMatch(/rotate-90/);
+    const panelOk = ok.innerHTML;
+    expect(tetik().querySelector(".tamga-select-panel-bos")).toBeNull();
+    expect(tetik().querySelector("span.min-w-0.flex-1.truncate")).not.toBeNull();
+    unmount();
+    const s = render(<Select options={["a"]} placeholder="Seç" aria-label="S" />);
+    const selectOk = s.container.querySelector("button svg")!;
+    expect(selectOk.getAttribute("class")).toMatch(/rotate-90/);
+    expect(panelOk).toBe(selectOk.innerHTML);
+    void container;
   });
 });

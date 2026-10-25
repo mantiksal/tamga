@@ -6,7 +6,7 @@ import { buttonVariants } from "./button.js";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
-import { CaretDown, Check, Search } from "./icons.js";
+import { CaretDown, CaretRight, Check, Search } from "./icons.js";
 import { Input } from "./input.js";
 import type { Tone } from "./tone.js";
 import { toneOf } from "./tone.js";
@@ -193,8 +193,20 @@ export function SelectPanel({
         onClick={() => setOpen((o) => !o)}
       >
         {prefix ? <span className="tamga-select-panel-onek">{prefix}</span> : null}
-        <span className={cn("min-w-0 truncate", ozet ? "" : "tamga-select-panel-bos")}>{ozet ?? placeholder}</span>
-        {caret ? <Icon icon={CaretDown} size="xs" weight="bold" className="shrink-0" /> : null}
+        {/* Kutu görünümü `Select`le aynı dili konuşur: boş değer ("Tümü") mürekkep
+            renginde, ok `Select`in döndürülmüş glifi. Düğme görünümünde yer tutucu soluk. */}
+        {look === "field" ? (
+          <span className="min-w-0 flex-1 truncate">{ozet ?? placeholder}</span>
+        ) : (
+          <span className={cn("min-w-0 truncate", ozet ? "" : "tamga-select-panel-bos")}>{ozet ?? placeholder}</span>
+        )}
+        {caret ? (
+          look === "field" ? (
+            <Icon icon={CaretRight} size="xs" className="shrink-0 rotate-90" />
+          ) : (
+            <Icon icon={CaretDown} size="xs" weight="bold" className="shrink-0" />
+          )
+        ) : null}
       </button>
       {open ? (
         <div className="tamga-overlay tamga-menu tamga-select-panel-kutu">

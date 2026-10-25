@@ -188,7 +188,7 @@ describe("FilterBar · dar ekran (2 · 4)", () => {
   it("geçiş CSS kırılımıyla: dar sınıf genişte, geniş sınıf darda gizli; arama darda tabansız; aynı kök", () => {
     expect(css).toMatch(/@container \(min-width: 40rem\)\s*\{\s*\.tamga-filter-dar\s*\{\s*display:\s*none/);
     expect(css).toMatch(/@container \(max-width: 39\.9375rem\)\s*\{[^@]*\.tamga-filter-genis\s*\{\s*display:\s*none/);
-    expect(css).toMatch(/\.tamga-filter-row > \.tamga-filter-ara\s*\{\s*flex-basis:\s*0/);
+    expect(css).toMatch(/\.tamga-filter-row > \.tamga-filter-ara\s*\{\s*flex:\s*1 1 7\.5rem/);
     cubuk({ top: [ALANLAR[0]!] });
     expect(document.querySelectorAll(".tamga-filter-bar").length).toBe(1);
   });
@@ -428,11 +428,12 @@ describe("FilterBar · look=chips · panel araması", () => {
    aramalı alanın tetiği kutu görünümlü SelectPanel. İlk test varsayılan satırın
    markup'ını kilitliyor: seçenekleri vermeyen projede hiçbir şey değişmiyor. */
 describe("FilterBar · varsayılan satır kilidi", () => {
+  /* 0.9.0: aramanın etiket span'ına `tamga-filter-ara-ad` sınıfı eklendi (geniş düzende kuralı yok, piksel değişmiyor); kilit yenilendi. */
   it("grid ve searchableAs verilmeyince satır birebir eski", () => {
     const { container } = render(<FilterBar values={{ durum: "Açık" }} onChange={() => {}} top={[{ key: "durum", label: "Durum", kind: "select", options: ["Açık", "Kapalı"] }, { key: "sahip", label: "Sahip", kind: "searchable", options: ["Ada"] }]} drawer={[]} labels={ETIKETLER} />);
     /* useId sayaçla gidiyor, dosyadaki öbür testlerden sonra numara kayıyor: kimlikler eşitleniyor. */
     const kimliksiz = (h: string) => h.replace(/_r_[0-9a-z]+_/g, "ID");
-    expect(kimliksiz(container.querySelector(".tamga-filter-row")!.outerHTML)).toBe(kimliksiz("<div class=\"tamga-filter-row\"><label class=\"tamga-filter-ara\"><span class=\"text-small font-bold text-ink-faint\">Ara</span><span class=\"relative flex items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" viewBox=\"0 0 256 256\" class=\"shrink-0 pointer-events-none absolute left-2.5 text-ink-faint\" aria-hidden=\"true\"><path d=\"M192,112a80,80,0,1,1-80-80A80,80,0,0,1,192,112Z\" opacity=\"0.2\"></path><path d=\"M229.66,218.34,179.6,168.28a88.21,88.21,0,1,0-11.32,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z\"></path></svg><input data-slot=\"input\" data-leading=\"true\" class=\"tamga-input w-full\" placeholder=\"Ara\" type=\"search\" value=\"\"></span></label><div class=\"tamga-filter-genis tamga-filter-alan tamga-filter-cap\"><span class=\"text-small font-bold text-ink-faint\">Durum</span><div class=\"relative w-full\"><button type=\"button\" class=\"tamga-select justify-between\" data-set=\"true\" aria-haspopup=\"listbox\" aria-expanded=\"false\" aria-label=\"Durum\"><span class=\"min-w-0 flex-1 truncate\">Açık</span><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" viewBox=\"0 0 256 256\" class=\"shrink-0 shrink-0 rotate-90\"><path d=\"M176,128,96,208V48Z\" opacity=\"0.2\"></path><path d=\"M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z\"></path></svg></button></div></div><div class=\"tamga-filter-genis tamga-filter-alan tamga-filter-cap\"><span class=\"text-small font-bold text-ink-faint\">Sahip</span><div class=\"relative w-full\"><span class=\"relative flex items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" viewBox=\"0 0 256 256\" class=\"shrink-0 pointer-events-none absolute left-3 text-ink-faint\"><path d=\"M192,112a80,80,0,1,1-80-80A80,80,0,0,1,192,112Z\" opacity=\"0.2\"></path><path d=\"M229.66,218.34,179.6,168.28a88.21,88.21,0,1,0-11.32,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z\"></path></svg><input role=\"combobox\" aria-expanded=\"false\" aria-controls=\"_r_1_-list\" aria-autocomplete=\"list\" aria-label=\"Sahip\" placeholder=\"Tümü\" class=\"tamga-input w-full pl-9\" type=\"text\" value=\"\"><span class=\"absolute right-1.5 flex items-center gap-0.5\"><button type=\"button\" class=\"tamga-mini-btn\" data-inset=\"true\" aria-label=\"Sahip seç\" aria-expanded=\"false\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" viewBox=\"0 0 256 256\" class=\"shrink-0\"><path d=\"M208,96l-80,80L48,96Z\" opacity=\"0.2\"></path><path d=\"M215.39,92.94A8,8,0,0,0,208,88H48a8,8,0,0,0-5.66,13.66l80,80a8,8,0,0,0,11.32,0l80-80A8,8,0,0,0,215.39,92.94ZM128,164.69,67.31,104H188.69Z\"></path></svg></button></span></span></div></div><button data-slot=\"button\" class=\"tamga-btn tamga-filter-dar ml-auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" viewBox=\"0 0 256 256\" class=\"shrink-0\"><path d=\"M128,80a24,24,0,1,1-24-24A24,24,0,0,1,128,80Zm40,72a24,24,0,1,0,24,24A24,24,0,0,0,168,152Z\" opacity=\"0.2\"></path><path d=\"M40,88H73a32,32,0,0,0,62,0h81a8,8,0,0,0,0-16H135a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16Zm64-24A16,16,0,1,1,88,80,16,16,0,0,1,104,64ZM216,168H199a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16h97a32,32,0,0,0,62,0h17a8,8,0,0,0,0-16Zm-48,24a16,16,0,1,1,16-16A16,16,0,0,1,168,192Z\"></path></svg><span class=\"tamga-filter-genis\">Tüm filtreler</span><span class=\"tamga-filter-dar\">Tüm filtreler · 1</span></button></div>"));
+    expect(kimliksiz(container.querySelector(".tamga-filter-row")!.outerHTML)).toBe(kimliksiz("<div class=\"tamga-filter-row\"><label class=\"tamga-filter-ara\"><span class=\"tamga-filter-ara-ad text-small font-bold text-ink-faint\">Ara</span><span class=\"relative flex items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" viewBox=\"0 0 256 256\" class=\"shrink-0 pointer-events-none absolute left-2.5 text-ink-faint\" aria-hidden=\"true\"><path d=\"M192,112a80,80,0,1,1-80-80A80,80,0,0,1,192,112Z\" opacity=\"0.2\"></path><path d=\"M229.66,218.34,179.6,168.28a88.21,88.21,0,1,0-11.32,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z\"></path></svg><input data-slot=\"input\" data-leading=\"true\" class=\"tamga-input w-full\" placeholder=\"Ara\" type=\"search\" value=\"\"></span></label><div class=\"tamga-filter-genis tamga-filter-alan tamga-filter-cap\"><span class=\"text-small font-bold text-ink-faint\">Durum</span><div class=\"relative w-full\"><button type=\"button\" class=\"tamga-select justify-between\" data-set=\"true\" aria-haspopup=\"listbox\" aria-expanded=\"false\" aria-label=\"Durum\"><span class=\"min-w-0 flex-1 truncate\">Açık</span><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" viewBox=\"0 0 256 256\" class=\"shrink-0 shrink-0 rotate-90\"><path d=\"M176,128,96,208V48Z\" opacity=\"0.2\"></path><path d=\"M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z\"></path></svg></button></div></div><div class=\"tamga-filter-genis tamga-filter-alan tamga-filter-cap\"><span class=\"text-small font-bold text-ink-faint\">Sahip</span><div class=\"relative w-full\"><span class=\"relative flex items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" viewBox=\"0 0 256 256\" class=\"shrink-0 pointer-events-none absolute left-3 text-ink-faint\"><path d=\"M192,112a80,80,0,1,1-80-80A80,80,0,0,1,192,112Z\" opacity=\"0.2\"></path><path d=\"M229.66,218.34,179.6,168.28a88.21,88.21,0,1,0-11.32,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z\"></path></svg><input role=\"combobox\" aria-expanded=\"false\" aria-controls=\"_r_1_-list\" aria-autocomplete=\"list\" aria-label=\"Sahip\" placeholder=\"Tümü\" class=\"tamga-input w-full pl-9\" type=\"text\" value=\"\"><span class=\"absolute right-1.5 flex items-center gap-0.5\"><button type=\"button\" class=\"tamga-mini-btn\" data-inset=\"true\" aria-label=\"Sahip seç\" aria-expanded=\"false\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" viewBox=\"0 0 256 256\" class=\"shrink-0\"><path d=\"M208,96l-80,80L48,96Z\" opacity=\"0.2\"></path><path d=\"M215.39,92.94A8,8,0,0,0,208,88H48a8,8,0,0,0-5.66,13.66l80,80a8,8,0,0,0,11.32,0l80-80A8,8,0,0,0,215.39,92.94ZM128,164.69,67.31,104H188.69Z\"></path></svg></button></span></span></div></div><button data-slot=\"button\" class=\"tamga-btn tamga-filter-dar ml-auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" viewBox=\"0 0 256 256\" class=\"shrink-0\"><path d=\"M128,80a24,24,0,1,1-24-24A24,24,0,0,1,128,80Zm40,72a24,24,0,1,0,24,24A24,24,0,0,0,168,152Z\" opacity=\"0.2\"></path><path d=\"M40,88H73a32,32,0,0,0,62,0h81a8,8,0,0,0,0-16H135a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16Zm64-24A16,16,0,1,1,88,80,16,16,0,0,1,104,64ZM216,168H199a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16h97a32,32,0,0,0,62,0h17a8,8,0,0,0,0-16Zm-48,24a16,16,0,1,1,16-16A16,16,0,0,1,168,192Z\"></path></svg><span class=\"tamga-filter-genis\">Tüm filtreler</span><span class=\"tamga-filter-dar\">Tüm filtreler · 1</span></button></div>"));
   });
 });
 
@@ -506,5 +507,34 @@ describe("FilterBar · searchableAs (0.9.0)", () => {
     expect(ikinci.className).toMatch(/tamga-select\b/);
     fireEvent.click(ikinci);
     expect(screen.getAllByRole("searchbox").find((k) => k.closest(".tamga-select-panel-kutu"))!.getAttribute("placeholder")).toBe("Kişi ara");
+  });
+});
+
+/* 0.9.0 · etiketli düzende gerçek sayfada görülen üç şey: dar panelin başlığı,
+   darda aramanın görünür etiketi, uygulanan çiplerin tek satır kalması. */
+describe("FilterBar · fields · dar ekran (0.9.0)", () => {
+  const css = (() => {
+    const { existsSync, readFileSync } = require("node:fs") as typeof import("node:fs");
+    return readFileSync(["src/kit.css", "packages/ui/src/kit.css"].find(existsSync)!, "utf8");
+  })();
+  it("dar panelin başlığı labels.filter ?? allFilters, etiketli düzende de", () => {
+    cubuk({ top: [ALANLAR[0]!], labels: { ...ETIKETLER, filter: "Filtrele" } });
+    fireEvent.click(screen.getByRole("button", { name: /Tüm filtreler/ }));
+    expect(screen.getByRole("dialog", { name: "Filtrele" })).toBeTruthy();
+  });
+  it("aramanın etiketi kit sınıfı taşıyor; darda ekran okuyucuya kalıyor", () => {
+    cubuk({ top: [ALANLAR[0]!] });
+    const etiket = document.querySelector(".tamga-filter-ara > .tamga-filter-ara-ad")!;
+    expect(etiket.textContent).toBe("Ara");
+    const dar = css.match(/@container \(max-width: 39\.9375rem\)\s*\{([\s\S]*?)\n  \}/)?.[1] ?? "";
+    expect(dar).toMatch(/\.tamga-filter-ara-ad\s*\{[^}]*width:\s*1px/);
+  });
+  it("uygulanan çip tek satır; uzun değer kesilir, tamamı title'da", () => {
+    cubuk({ top: [ALANLAR[0]!], values: { durum: "Açık" } });
+    const deger = document.querySelector(".tamga-token .tamga-token-deger")!;
+    expect(deger.textContent).toBe("Açık");
+    expect(deger.getAttribute("title")).toBe("Açık");
+    expect(css).toMatch(/\.tamga-filter-bar \.tamga-token\s*\{[^}]*white-space:\s*nowrap/);
+    expect(css).toMatch(/\.tamga-token-deger\s*\{[^}]*text-overflow:\s*ellipsis/);
   });
 });

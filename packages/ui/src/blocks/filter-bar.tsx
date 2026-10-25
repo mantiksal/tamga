@@ -583,7 +583,8 @@ export function FilterBar({
             none` ve `flex-basis: 0` bileşen katmanından geliyor ve yardımcı katman
             onları ezerdi. Tarayıcıda ölçüldü. */}
         <label className="tamga-filter-ara">
-          <span className="text-small font-bold text-ink-faint">{labels.search}</span>
+          {/* Darda etiket ekran okuyucuya kalıyor (`tamga-filter-ara-ad`): ikon ve yer tutucu amacı söylüyor. */}
+          <span className="tamga-filter-ara-ad text-small font-bold text-ink-faint">{labels.search}</span>
           {/* `leading` bir boolean: kite sol boşluğu açtırıyor, ikonu çağıran
               çiziyor. Böylece ikon seti kitin değil ürünün kararı kalıyor. */}
           {aramaKutusu}
@@ -643,7 +644,8 @@ export function FilterBar({
           {active.map(([key, value]) => (
             <span key={key} className="tamga-token">
               <span className="font-normal text-ink-faint">{labelFor(key)}:</span>
-              {valueText(key, value)}
+              {/* Tek satır; kaba sığmayan uzun değer … ile kesilir, tamamı title'da. */}
+              <span className="tamga-token-deger" title={valueText(key, value)}>{valueText(key, value)}</span>
               {/* Kitin `MiniButton`ı DEĞİL: o kendi kenarını ve tabanını
                   taşıyor, yani kenarlı bir çipin içinde ikinci bir nesne
                   oluyordu. Kaldırma karesi çipin bir parçası, ayrı bir kutu
@@ -667,7 +669,7 @@ export function FilterBar({
       <Sheet
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        title={cipler ? (labels.filter ?? labels.allFilters) : labels.allFilters}
+        title={labels.filter ?? labels.allFilters}
         closeLabel={labels.calendar.clear}
         footer={
           <>

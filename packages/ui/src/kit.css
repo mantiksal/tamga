@@ -1563,6 +1563,17 @@
   .tamga-filter-cip-sira {
     display: contents;
   }
+  /* UYGULANAN ÇİP TEK SATIR: dar kapta uzun değer çipi iki satıra kırıyordu.
+     Değer kesilir, tamamı title'da. */
+  .tamga-filter-bar .tamga-token {
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  .tamga-token-deger {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .tamga-filter-cip-temizle {
     white-space: nowrap;
     font-size: var(--text-small);
@@ -1655,14 +1666,25 @@
     .tamga-filter-genis {
       display: none;
     }
+    /* Arama en az 7.5rem (120 px): çok dar bir kapta (210 px) "Filtrele · N"
+       düğmesi alt satıra iner, arama satırı alır; telefonda (390) ikisi yan yana. */
     .tamga-filter-row > .tamga-filter-ara {
-      flex-basis: 0;
+      flex: 1 1 7.5rem;
     }
     /* Çip düzeni darda: arama ve düğme ilk satırda, dolu çipler altında
        yatay kayan bir sırada, boş çipler gizli (hepsi çekmecede). */
     .tamga-filter-cips > .tamga-filter-ara-sabit {
       flex: 1 1 0;
       min-width: 0;
+    }
+    /* Kutu düzeninde de aramanın etiketi darda yalnız ekran okuyucuya. */
+    .tamga-filter-ara-ad {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
     }
     /* "Filtrele" düğmesi hep görünür: küçülmez, arama küçülür. */
     .tamga-filter-cips > .tamga-btn,

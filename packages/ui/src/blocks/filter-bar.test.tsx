@@ -174,9 +174,16 @@ describe("FilterBar · dar ekran (2 · 4)", () => {
     expect(ilk.querySelector(".tamga-select")).not.toBeNull();
     expect(form.children[1]!.querySelector("p")?.textContent).toBe("Diğer");
   });
+  it("dar düzen kabın genişliğine bağlı: çubuk bir container, esnek atalar min-width 0", () => {
+    expect(css).toMatch(/\.tamga-filter-bar\s*\{[^}]*container-type:\s*inline-size/);
+    expect(css).toMatch(/\.tamga-filter-bar\s*\{[^}]*min-width:\s*0/);
+    expect(css).toMatch(/\.tamga-filter-cips\s*\{[^}]*min-width:\s*0/);
+    expect(css).toMatch(/\.tamga-filter-cip\s*\{[^}]*min-width:\s*0/);
+    expect(css).toMatch(/\.tamga-filter-cips > \.tamga-btn,\s*\.tamga-filter-row > \.tamga-btn\s*\{\s*flex-shrink:\s*0/);
+  });
   it("geçiş CSS kırılımıyla: dar sınıf genişte, geniş sınıf darda gizli; arama darda tabansız; aynı kök", () => {
-    expect(css).toMatch(/@media \(min-width: 40rem\)\s*\{\s*\.tamga-filter-dar\s*\{\s*display:\s*none/);
-    expect(css).toMatch(/@media \(max-width: 39\.9375rem\)\s*\{[^@]*\.tamga-filter-genis\s*\{\s*display:\s*none/);
+    expect(css).toMatch(/@container \(min-width: 40rem\)\s*\{\s*\.tamga-filter-dar\s*\{\s*display:\s*none/);
+    expect(css).toMatch(/@container \(max-width: 39\.9375rem\)\s*\{[^@]*\.tamga-filter-genis\s*\{\s*display:\s*none/);
     expect(css).toMatch(/\.tamga-filter-row > \.tamga-filter-ara\s*\{\s*flex-basis:\s*0/);
     cubuk({ top: [ALANLAR[0]!] });
     expect(document.querySelectorAll(".tamga-filter-bar").length).toBe(1);
@@ -322,8 +329,8 @@ describe("FilterBar · look=chips", () => {
   });
   it("CSS: arama 17.5rem sabit; darda boş çip gizli, dolu çipler yatay kayıyor", () => {
     expect(css).toMatch(/\.tamga-filter-ara-sabit\s*\{[^}]*flex:\s*0 0 17\.5rem/);
-    expect(css).toMatch(/@media \(max-width: 39\.9375rem\)\s*\{[^@]*\.tamga-filter-cips \.tamga-filter-cip:not\(\[data-set\]\)\s*\{\s*display:\s*none/);
-    expect(css).toMatch(/@media \(max-width: 39\.9375rem\)\s*\{[^@]*\.tamga-filter-cip-sira\s*\{[^}]*overflow-x:\s*auto/);
+    expect(css).toMatch(/@container \(max-width: 39\.9375rem\)\s*\{[^@]*\.tamga-filter-cips \.tamga-filter-cip:not\(\[data-set\]\)\s*\{\s*display:\s*none/);
+    expect(css).toMatch(/@container \(max-width: 39\.9375rem\)\s*\{[^@]*\.tamga-filter-cip-sira\s*\{[^}]*overflow-x:\s*auto/);
   });
 });
 
@@ -379,7 +386,7 @@ describe("FilterBar · look=chips · 0.8.1", () => {
     expect(tetikler).toEqual(["Sağlıklı", "Tümü"]);
   });
   it("5 · darda çip sırası küçülebiliyor: min-width 0, kartın içinde", () => {
-    const dar = css.match(/@media \(max-width: 39\.9375rem\)\s*\{([\s\S]*?)\n  \}/)?.[1] ?? "";
+    const dar = css.match(/@container \(max-width: 39\.9375rem\)\s*\{([\s\S]*?)\n  \}/)?.[1] ?? "";
     expect(dar).toMatch(/\.tamga-filter-cip-sira\s*\{[^}]*min-width:\s*0/);
     expect(dar).toMatch(/\.tamga-filter-cip-sira\s*\{[^}]*max-width:\s*100%/);
   });

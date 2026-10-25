@@ -19,6 +19,14 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   panels show only the value; the field's name is already above each. On a narrow screen the
   scrolling row of set chips and "Clear all" stay inside the card. All of it in kit classes;
   `pnpm olc:filtre` measures each point at 1280 and 390.
+- **The narrow layout keys off the bar's own width, not the screen's.** With the app's sidebar
+  open on a phone the card is 210px wide while the viewport is 390; a viewport media query
+  could not see that, so the fixed search box and the "Filter · N" button overflowed the card.
+  `.tamga-filter-bar` is now an inline-size container and the narrow/wide rules are
+  `@container` queries; every flex ancestor down to the chip has `min-width: 0`, the search
+  shrinks (`flex: 1 1 0`), the button never does (`flex-shrink: 0`), the set-chip row scrolls
+  inside the card. `pnpm olc:filtre` also measures a 210px card on a 1280px screen. Applies to
+  `look="fields"` too.
 
 ## 0.8.0
 

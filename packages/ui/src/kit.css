@@ -1486,6 +1486,11 @@
     flex-direction: column;
     gap: 14px;
     padding: 16px;
+    /* DAR DÜZEN KABIN GENİŞLİĞİNE BAĞLI, ekranın değil: telefonda sol menü
+       açıkken kart 210 piksel kalıyor ve ekran ölçüsü bunu bilemiyor. Çubuk
+       kendi satır içi ölçüsünün kabı; dar/geniş kuralları ona bakıyor. */
+    container-type: inline-size;
+    min-width: 0;
   }
   /* ŞABLONUN FİLTRE ALANI ZATEN BİR KART: içindeki çubuk ikinci bir kart
      çizmiyor ve sarmalayıcının esnek satırında tam genişlik alıyor. */
@@ -1565,6 +1570,7 @@
   .tamga-filter-cip {
     display: inline-flex;
     align-items: center;
+    min-width: 0;
     max-width: 100%;
   }
   /* DOLU ÇİP TEK NESNE: kenar ve gölge çipin, içindeki tetik ve ✕ kenarsız.
@@ -1628,7 +1634,7 @@
      sunucu çıktısı tarayıcıyla uyuşmalı. İki görünüm DOM'da, biri gizli;
      ikisi de aynı kökte, yani şablonun tek-kart kuralı darda da geçerli.
      Bu kurallar görünüm kurallarından SONRA: aynı katman, aynı özgüllük. */
-  @media (max-width: 39.9375rem) {
+  @container (max-width: 39.9375rem) {
     .tamga-filter-genis {
       display: none;
     }
@@ -1639,6 +1645,12 @@
        yatay kayan bir sırada, boş çipler gizli (hepsi çekmecede). */
     .tamga-filter-cips > .tamga-filter-ara-sabit {
       flex: 1 1 0;
+      min-width: 0;
+    }
+    /* "Filtrele" düğmesi hep görünür: küçülmez, arama küçülür. */
+    .tamga-filter-cips > .tamga-btn,
+    .tamga-filter-row > .tamga-btn {
+      flex-shrink: 0;
     }
     .tamga-filter-cips .tamga-filter-cip:not([data-set]) {
       display: none;
@@ -1659,7 +1671,7 @@
       display: none;
     }
   }
-  @media (min-width: 40rem) {
+  @container (min-width: 40rem) {
     .tamga-filter-dar {
       display: none;
     }
@@ -4185,9 +4197,11 @@
   .tamga-select-panel {
     position: relative;
     display: inline-flex;
+    min-width: 0;
     max-width: 100%;
   }
   .tamga-select-panel-tetik {
+    min-width: 0;
     max-width: 100%;
   }
   .tamga-select-panel-onek {

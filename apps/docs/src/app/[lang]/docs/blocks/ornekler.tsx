@@ -310,6 +310,31 @@ const S = {
 
 /* ---------------------------------------------------------------- liste -- */
 
+function FiltreIzgaraOrnegi({ lang }: { lang: Dil }) {
+  const s = S[lang];
+  const [values, setValues] = useState<FilterValues>({ durum: s.durumlar[0]! });
+  return (
+    <FilterBar
+      grid
+      searchableAs="panel"
+      values={values}
+      onChange={setValues}
+      searchKey="ara"
+      locale={s.locale}
+      top={[
+        { key: "durum", label: s.durum, kind: "select", options: [...s.durumlar] },
+        { key: "oncelik", label: s.oncelik, kind: "select", options: [...s.oncelikler] },
+        { key: "sahip", label: s.sahip, kind: "searchable", options: [...s.kisiler] },
+        { key: "kanal", label: s.kanal, kind: "select", options: [...s.kanallar] },
+        { key: "etiket", label: s.etiketler, kind: "multi", options: [...s.etiketSecenek] },
+        { key: "kod", label: s.kayitKodu, kind: "text" },
+      ]}
+      drawer={[]}
+      labels={s.filtre}
+    />
+  );
+}
+
 function FiltreCipOrnegi({ lang }: { lang: Dil }) {
   const s = S[lang];
   const [values, setValues] = useState<FilterValues>({ durum: s.durumlar[0]! });
@@ -815,6 +840,26 @@ const OGELER: GaleriOgesi[] = [
   drawer={[{ title: "Kayıt", fields: [...] }]}
   fileSearchKey="dosya"
   labels={{ search: "Ara", all: "Tümü", ... }}
+/>`,
+  },
+  {
+    key: "filter-bar-grid",
+    grup: G.liste,
+    tur: "paket",
+    ad: { tr: "FilterBar · ızgara", en: "FilterBar · grid" },
+    aciklama: {
+      tr: "grid: kabın genişliğine göre tek ya da eşit iki satır, hiçbir alan uzamıyor. searchableAs=\"panel\": aramalı alan kutu görünümlü SelectPanel.",
+      en: "grid: one or two equal lines by the bar's own width, no field stretches. searchableAs=\"panel\": the searchable field as a box-shaped SelectPanel.",
+    },
+    ornek: (lang) => <FiltreIzgaraOrnegi lang={lang} />,
+    kod: `<FilterBar
+  grid
+  searchableAs="panel"
+  values={values}
+  onChange={setValues}
+  top={[/* altı alan */]}
+  drawer={[]}
+  labels={{ ... }}
 />`,
   },
   {

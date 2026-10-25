@@ -5,6 +5,30 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.9.0
+
+> An equal grid for the filter row, and a box-shaped panel for the searchable field. Both opt-in; a bar that gives neither renders as before, locked by test.
+
+### Added
+
+- **`FilterBar` `grid`** (`look="fields"`) · a CSS grid decided by the bar's own width, not the
+  screen's. Wide: one line, a fixed 16rem search box and equal columns for the top fields,
+  chosen when every field can have about 9rem (the threshold per field count is written as
+  `@container` rules for 1 to 8 fields, a date range counting as two; a drawer button or
+  `extra` adds a tail column). Narrower: two equal lines, the search spanning two columns,
+  `ceil((fields + 2) / 2)` columns. Below the narrow threshold the 0.8.1 behaviour. No field
+  grows past the others any more (six fields had one stretching alone to 320px on the second
+  line). A long value is clipped in its box and kept whole in `title`; `Select` gains a
+  `title` prop for it.
+- **`FilterBar` `searchableAs="panel"`** · a `searchable` field is drawn as a `SelectPanel` in
+  the new `look="field"`: a box-shaped button the size and edge of the inputs beside it,
+  showing the value or `labels.all` with a caret; the panel is titled `panelTitle ?? label`,
+  starts with a search box (`searchPlaceholder ?? labels.searchIn(label) ?? label`) and
+  `labels.all` as the first option; keyboard as in `SelectPanel`. The default, `combobox`, is
+  today's text box. Applies on top, in the drawer and in the narrow sheet.
+- **`SelectPanel` `look="field"`** · the trigger as a form box (`.tamga-select`), full width,
+  `title` carrying the whole value when set.
+
 ## 0.8.1
 
 > Five things the chip layout showed on a real page.

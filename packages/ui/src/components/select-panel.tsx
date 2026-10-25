@@ -56,6 +56,13 @@ type Ortak = {
   variant?: "secondary" | "soft" | "ghost";
   /** The trigger's size, from `Button`. TR: Tetiğin boyu, `Button`dan. */
   size?: "base" | "sm";
+  /**
+   * `button` an ordinary button (default). `field` a form box like `Select`: full width,
+   * the same height and edge as the inputs beside it, for a labelled filter row. TR: `button`
+   * sıradan bir düğme (varsayılan). `field` `Select` gibi bir form kutusu: tam genişlik,
+   * yanındaki kutularla aynı boy ve kenar, etiketli bir filtre satırı için.
+   */
+  look?: "button" | "field";
   disabled?: boolean;
   labels: {
     /** Shown when the search matches nothing. TR: Arama hiçbir şeyle eşleşmeyince. */
@@ -88,6 +95,7 @@ export function SelectPanel({
   caret = true,
   variant = "secondary",
   size = "base",
+  look = "button",
   disabled = false,
   labels,
   className,
@@ -168,11 +176,14 @@ export function SelectPanel({
   };
 
   return (
-    <div {...dataProps(rest)} ref={kutu} className={cn("tamga-select-panel", className)}>
+    <div {...dataProps(rest)} ref={kutu} className={cn("tamga-select-panel", look === "field" && "tamga-select-panel-alan", className)}>
+      {/* Kutu görünümünde tetik `Select`in sınıfını giyiyor: aynı boy, aynı kenar;
+          uzun değer kesilir, tamamı title'da. */}
       <button
         ref={tetik}
         type="button"
-        className={cn(buttonVariants({ variant, size }), "tamga-select-panel-tetik")}
+        className={cn(look === "field" ? "tamga-select" : buttonVariants({ variant, size }), "tamga-select-panel-tetik")}
+        title={look === "field" && ozet ? ozet : undefined}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={open ? `${id}-liste` : undefined}

@@ -111,3 +111,19 @@ describe("SelectPanel · çoklu", () => {
     expect(tetik().textContent).toContain("Kargo seç");
   });
 });
+
+describe("SelectPanel · look=field", () => {
+  it("tetik kutu görünümlü (.tamga-select), düğme değil; değer varsa title", () => {
+    render(<SelectPanel look="field" options={SEC} value="aras" title="Kargo" placeholder="Tümü" aria-label="Kargo" onChange={vi.fn()} labels={ETIKET} />);
+    const t = tetik();
+    expect(t.className).toMatch(/tamga-select\b/);
+    expect(t.className).not.toMatch(/tamga-btn/);
+    expect(t.getAttribute("title")).toBe("Aras Kargo");
+    expect(t).toHaveAttribute("data-set", "true");
+  });
+  it("boşken yer tutucu soluk, title yok", () => {
+    render(<SelectPanel look="field" options={SEC} title="Kargo" placeholder="Tümü" aria-label="Kargo" onChange={vi.fn()} labels={ETIKET} />);
+    expect(tetik().getAttribute("title")).toBeNull();
+    expect(tetik().querySelector(".tamga-select-panel-bos")).not.toBeNull();
+  });
+});

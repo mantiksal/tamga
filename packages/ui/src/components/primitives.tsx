@@ -390,6 +390,7 @@ export function Select({
   loadingRows = 4,
   disabled = false,
   "aria-label": ariaLabel,
+  title,
   className,
   ...rest
 }: {
@@ -476,6 +477,8 @@ export function Select({
   "aria-label"?: string;
   /** Locks the trigger; the list cannot open. TR: Tetiği kilitler; liste açılmaz. */
   disabled?: boolean;
+  /** The trigger's tooltip: the full text when the shown value is clipped. TR: Tetiğin ipucu: görünen değer kesildiğinde tam metin. */
+  title?: string;
   /** Genişlik ve konum çağıranın. Varsayılan `w-56`; `w-full` verildiğinde
    *  tailwind-merge onu ezer, yani kontrol kabına uyar. */
   className?: string;
@@ -522,6 +525,7 @@ export function Select({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={ariaLabel}
+        title={title}
         disabled={disabled || undefined}
         onClick={() => setOpen((o) => !o)}
       >

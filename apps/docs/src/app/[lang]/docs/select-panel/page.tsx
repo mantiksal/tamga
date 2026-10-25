@@ -45,7 +45,9 @@ const T = {
         <code>variant</code> (<code>secondary</code>, <code>soft</code>, <code>ghost</code>) ve boyu{" "}
         <code>size</code> (<code>base</code>, <code>sm</code>) <Xref to="button">Button</Xref>&apos;dan;
         <code>prefix</code> değerin önüne &quot;Durum:&quot; koyar, <code>caret</code> oku kapatır ·
-        filtre çipi ikisini birden kullanıyor.
+        filtre çipi ikisini birden kullanıyor. <code>look</code> tetiğin biçimi: <code>button</code>{" "}
+        sıradan düğme, <code>field</code> <Xref to="select">Select</Xref> gibi tam genişlikte bir form
+        kutusu; etiketli bir filtre satırında öbür kutularla aynı boy.
       </>
     ),
     related: "İlgili",
@@ -90,7 +92,9 @@ const T = {
         (<code>secondary</code>, <code>soft</code>, <code>ghost</code>) and its size{" "}
         <code>size</code> (<code>base</code>, <code>sm</code>), from <Xref to="button">Button</Xref>;{" "}
         <code>prefix</code> puts &quot;Status:&quot; before the value and <code>caret</code> drops the
-        arrow · the filter chip uses both.
+        arrow · the filter chip uses both. <code>look</code> is the trigger&apos;s shape:{" "}
+        <code>button</code> an ordinary button, <code>field</code> a full-width form box like{" "}
+        <Xref to="select">Select</Xref>, the size of the boxes beside it in a labelled filter row.
       </>
     ),
     related: "Related",

@@ -12,7 +12,7 @@ const sonuc = {};
 /* Üçüncü sahne: 1280 piksel görünümde çip çubuğu 210 piksellik bir kaba sokuluyor ·
    telefonda sol menü açıkken kartın kaldığı genişlik. Dar düzen ekrana değil kaba
    bağlı olmalı; galeri önizlemesi kartı geniş tuttuğu için bu taşma orada görünmüyordu. */
-for (const genislik of [390, 1280, "kap210"]) {
+for (const genislik of [390, 1280, "kap210", "izgara"]) {
   const port = 9700 + Math.floor(Math.random() * 200);
   const proc = spawn(CH, ["--headless=new", "--disable-gpu", `--remote-debugging-port=${port}`, `--user-data-dir=/tmp/tamga-olc-${port}`, `--window-size=${genislik},900`, "about:blank"], { stdio: "ignore" });
   let list = null;
@@ -27,7 +27,7 @@ for (const genislik of [390, 1280, "kap210"]) {
     if (r.result?.exceptionDetails) throw new Error("sayfada hata: " + (r.result.exceptionDetails.exception?.description ?? r.result.exceptionDetails.text));
     return r.result?.result?.value;
   };
-  const gorunum = genislik === "kap210" ? 1280 : genislik;
+  const gorunum = typeof genislik === "string" ? 1280 : genislik;
   await gonder("Emulation.setDeviceMetricsOverride", { width: gorunum, height: 900, deviceScaleFactor: 1, mobile: gorunum < 640 });
   await gonder("Page.navigate", { url });
   await new Promise((r) => setTimeout(r, 20000));
@@ -49,6 +49,28 @@ for (const genislik of [390, 1280, "kap210"]) {
     daralt(document.querySelector(".tamga-filter-row")?.closest(".tamga-filter-bar"), "360px");
     daralt(document.querySelector(".tamga-filter-cips")?.closest(".tamga-filter-bar"), "210px");
   })()`);
+  if (genislik === "izgara") {
+    /* Izgara sahnesi: 6 alanlı grid çubuğu 1260 px kapta tek satır, 1000 px kapta eşit iki satır;
+       arama dışında hiçbir alan öbürlerinden geniş değil. */
+    sonuc.izgara = JSON.parse(await js(`(() => {
+      const satir = document.querySelector(".tamga-filter-izgara"); if (!satir) return JSON.stringify(null);
+      const bar = satir.closest(".tamga-filter-bar");
+      for (let e = bar; e; e = e.parentElement) { if (getComputedStyle(e).transform !== "none") e.style.transform = "none"; }
+      const olc = (w) => {
+        bar.style.width = w + "px"; bar.style.boxSizing = "border-box";
+        void bar.offsetWidth;
+        const r = (el) => el.getBoundingClientRect();
+        const ara = satir.querySelector(".tamga-filter-ara");
+        const alanlar = [...satir.querySelectorAll(":scope > .tamga-filter-alan")];
+        const genislikler = alanlar.map((a) => Math.round(r(a).width));
+        const ustler = [...new Set([ara, ...alanlar].map((a) => Math.round(r(a).top)))];
+        return { kap: w, display: getComputedStyle(satir).display, satirSayisi: ustler.length, satirGenislik: Math.round(r(satir).width), aramaGenislik: Math.round(r(ara).width), alanGenislikleri: genislikler, fark: Math.max(...genislikler) - Math.min(...genislikler) };
+      };
+      return JSON.stringify({ genis: olc(1260), dar: olc(1000) });
+    })()`));
+    ws.close(); proc.kill();
+    continue;
+  }
   sonuc[genislik] = JSON.parse(await js(`(async () => {
     const uyku = (ms) => new Promise((r) => setTimeout(r, ms));
     /* Kutu düzeninin çubuğu ve çip düzeninin çubuğu ayrı ayrı bulunuyor. */
@@ -164,6 +186,20 @@ if (genis && !genis.hata && kapS && !kapS.hata) {
       soyle(kapS.cip.siraKayiyor === true, "210 px kap: çip sırası kaymıyor (scrollWidth ≤ clientWidth)");
     }
   }
+}
+const iz = sonuc.izgara;
+if (!iz) console.log("(ızgara düzeni sayfada yok, ölçülmedi)");
+else {
+  soyle(iz.genis.display === "grid" && iz.dar.display === "grid", "ızgara: grid değil");
+  soyle(iz.genis.satirSayisi === 1, "ızgara 1260 px: tek satır değil (" + iz.genis.satirSayisi + " satır)");
+  soyle(Math.abs(iz.genis.aramaGenislik - 256) <= 1, "ızgara 1260 px: arama 16rem değil (" + iz.genis.aramaGenislik + ")");
+  soyle(iz.genis.fark <= 1, "ızgara 1260 px: alanlar eşit değil (" + iz.genis.alanGenislikleri.join("/") + ")");
+  /* Alanlar satırı dolduruyor: arama + alanlar + aralıklar = satır genişliği (hücrenin yarısına inen tavan yok). */
+  const dolu = iz.genis.aramaGenislik + iz.genis.alanGenislikleri.reduce((a, b) => a + b, 0) + 12 * iz.genis.alanGenislikleri.length;
+  soyle(Math.abs(dolu - iz.genis.satirGenislik) <= 4, "ızgara 1260 px: alanlar satırı doldurmuyor (" + dolu + " / " + iz.genis.satirGenislik + ")");
+  soyle(iz.dar.satirSayisi === 2, "ızgara 1000 px: iki satır değil (" + iz.dar.satirSayisi + ")");
+  soyle(iz.dar.fark <= 1, "ızgara 1000 px: alanlar eşit değil (" + iz.dar.alanGenislikleri.join("/") + ")");
+  soyle(Math.abs(iz.dar.aramaGenislik - (2 * iz.dar.alanGenislikleri[0] + 12)) <= 4, "ızgara 1000 px: arama iki sütun değil (" + iz.dar.aramaGenislik + ")");
 }
 console.log(hata ? "✗ Dar ekran geçişi ölçümü başarısız." : "✓ Kutu düzeni dar/geniş; çip düzeni 1280'de ve 210 px kapta doğru: dar düzen kaba bağlı, taşma yok.");
 process.exit(hata);

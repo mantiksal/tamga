@@ -49,7 +49,12 @@ const T = {
         kutular, varsayılan) ya da <code>chips</code>: sabit bir arama kutusu ve her alan için adı ve
         değeri hep birlikte okunan bir çip-düğme, boşken &quot;Durum: Tümü&quot;, doluyken &quot;Durum:
         Kritik&quot; ve kendi kaldırması; çip ilk seçeneği &quot;Tümü&quot; olan bir{" "}
-        <code>SelectPanel</code> açar. Ayrı bir uygulanan-filtreler satırı yok: çip özetin kendisi.
+        <code>SelectPanel</code> açar. Ayrı bir uygulanan-filtreler satırı yok: çip özetin kendisi.{" "}
+        <code>grid</code> (yalnız <code>fields</code>) alanları kabın genişliğine göre eşit sütunlu bir
+        ızgaraya koyar: geniş kapta tek satır (sabit arama + eşit alanlar), darında aramanın iki
+        sütun kapladığı eşit iki satır; hiçbir alan öbürlerinden uzamaz. <code>searchableAs</code>{" "}
+        aramalı alanın çizimi: <code>combobox</code> (varsayılan, büyüteçli metin kutusu) ya da{" "}
+        <code>panel</code> (kutu görünümlü <code>SelectPanel</code>, ilk seçeneği &quot;Tümü&quot;).
       </>
     ),
     filtreN: (
@@ -142,7 +147,13 @@ ADR-0003&apos;ün katman şeması <code>tamga-ui</code> kutusunun içine
         default) or <code>chips</code>: a fixed search box and one chip-button per field that always
         reads name and value together, &quot;Status: All&quot; empty, &quot;Status: Critical&quot; with its
         own remove when set; the chip opens a <code>SelectPanel</code> whose first option is
-        &quot;All&quot;. No separate applied-filters row: the chip is the summary.
+        &quot;All&quot;. No separate applied-filters row: the chip is the summary. <code>grid</code>{" "}
+        (<code>fields</code> only) lays the fields on an equal-column grid decided by the bar&apos;s own
+        width: one line (fixed search + equal fields) when wide, two equal lines with the search
+        spanning two columns when narrower; no field grows past the others.{" "}
+        <code>searchableAs</code> is how a searchable field is drawn: <code>combobox</code> (default,
+        the text box with a magnifier) or <code>panel</code> (a box-shaped <code>SelectPanel</code>,
+        &quot;All&quot; first).
       </>
     ),
     filtreN: (

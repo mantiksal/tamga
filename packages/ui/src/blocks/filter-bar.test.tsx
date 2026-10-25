@@ -421,3 +421,90 @@ describe("FilterBar · look=chips · panel araması", () => {
     expect(document.querySelector('.tamga-select-panel-kutu [placeholder="Ad ya da adres ara"]')).toBeNull();
   });
 });
+
+
+/* 0.9.0 · İKİ İSTEĞE BAĞLI SEÇENEK, varsayılan birebir aynı: `grid` eşit sütunlu
+   ızgara (kabın genişliğine göre tek ya da iki satır), `searchableAs="panel"`
+   aramalı alanın tetiği kutu görünümlü SelectPanel. İlk test varsayılan satırın
+   markup'ını kilitliyor: seçenekleri vermeyen projede hiçbir şey değişmiyor. */
+describe("FilterBar · varsayılan satır kilidi", () => {
+  it("grid ve searchableAs verilmeyince satır birebir eski", () => {
+    const { container } = render(<FilterBar values={{ durum: "Açık" }} onChange={() => {}} top={[{ key: "durum", label: "Durum", kind: "select", options: ["Açık", "Kapalı"] }, { key: "sahip", label: "Sahip", kind: "searchable", options: ["Ada"] }]} drawer={[]} labels={ETIKETLER} />);
+    /* useId sayaçla gidiyor, dosyadaki öbür testlerden sonra numara kayıyor: kimlikler eşitleniyor. */
+    const kimliksiz = (h: string) => h.replace(/_r_[0-9a-z]+_/g, "ID");
+    expect(kimliksiz(container.querySelector(".tamga-filter-row")!.outerHTML)).toBe(kimliksiz("<div class=\"tamga-filter-row\"><label class=\"tamga-filter-ara\"><span class=\"text-small font-bold text-ink-faint\">Ara</span><span class=\"relative flex items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" viewBox=\"0 0 256 256\" class=\"shrink-0 pointer-events-none absolute left-2.5 text-ink-faint\" aria-hidden=\"true\"><path d=\"M192,112a80,80,0,1,1-80-80A80,80,0,0,1,192,112Z\" opacity=\"0.2\"></path><path d=\"M229.66,218.34,179.6,168.28a88.21,88.21,0,1,0-11.32,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z\"></path></svg><input data-slot=\"input\" data-leading=\"true\" class=\"tamga-input w-full\" placeholder=\"Ara\" type=\"search\" value=\"\"></span></label><div class=\"tamga-filter-genis tamga-filter-alan tamga-filter-cap\"><span class=\"text-small font-bold text-ink-faint\">Durum</span><div class=\"relative w-full\"><button type=\"button\" class=\"tamga-select justify-between\" data-set=\"true\" aria-haspopup=\"listbox\" aria-expanded=\"false\" aria-label=\"Durum\"><span class=\"min-w-0 flex-1 truncate\">Açık</span><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" viewBox=\"0 0 256 256\" class=\"shrink-0 shrink-0 rotate-90\"><path d=\"M176,128,96,208V48Z\" opacity=\"0.2\"></path><path d=\"M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z\"></path></svg></button></div></div><div class=\"tamga-filter-genis tamga-filter-alan tamga-filter-cap\"><span class=\"text-small font-bold text-ink-faint\">Sahip</span><div class=\"relative w-full\"><span class=\"relative flex items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" viewBox=\"0 0 256 256\" class=\"shrink-0 pointer-events-none absolute left-3 text-ink-faint\"><path d=\"M192,112a80,80,0,1,1-80-80A80,80,0,0,1,192,112Z\" opacity=\"0.2\"></path><path d=\"M229.66,218.34,179.6,168.28a88.21,88.21,0,1,0-11.32,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z\"></path></svg><input role=\"combobox\" aria-expanded=\"false\" aria-controls=\"_r_1_-list\" aria-autocomplete=\"list\" aria-label=\"Sahip\" placeholder=\"Tümü\" class=\"tamga-input w-full pl-9\" type=\"text\" value=\"\"><span class=\"absolute right-1.5 flex items-center gap-0.5\"><button type=\"button\" class=\"tamga-mini-btn\" data-inset=\"true\" aria-label=\"Sahip seç\" aria-expanded=\"false\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" viewBox=\"0 0 256 256\" class=\"shrink-0\"><path d=\"M208,96l-80,80L48,96Z\" opacity=\"0.2\"></path><path d=\"M215.39,92.94A8,8,0,0,0,208,88H48a8,8,0,0,0-5.66,13.66l80,80a8,8,0,0,0,11.32,0l80-80A8,8,0,0,0,215.39,92.94ZM128,164.69,67.31,104H188.69Z\"></path></svg></button></span></span></div></div><button data-slot=\"button\" class=\"tamga-btn tamga-filter-dar ml-auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" fill=\"currentColor\" viewBox=\"0 0 256 256\" class=\"shrink-0\"><path d=\"M128,80a24,24,0,1,1-24-24A24,24,0,0,1,128,80Zm40,72a24,24,0,1,0,24,24A24,24,0,0,0,168,152Z\" opacity=\"0.2\"></path><path d=\"M40,88H73a32,32,0,0,0,62,0h81a8,8,0,0,0,0-16H135a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16Zm64-24A16,16,0,1,1,88,80,16,16,0,0,1,104,64ZM216,168H199a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16h97a32,32,0,0,0,62,0h17a8,8,0,0,0,0-16Zm-48,24a16,16,0,1,1,16-16A16,16,0,0,1,168,192Z\"></path></svg><span class=\"tamga-filter-genis\">Tüm filtreler</span><span class=\"tamga-filter-dar\">Tüm filtreler · 1</span></button></div>"));
+  });
+});
+
+describe("FilterBar · grid (0.9.0)", () => {
+  const ALTI: FilterField[] = [
+    { key: "durum", label: "Durum", kind: "select", options: ["Açık"] },
+    { key: "oncelik", label: "Öncelik", kind: "select", options: ["Düşük"] },
+    { key: "sahip", label: "Sahip", kind: "searchable", options: ["Ada"] },
+    { key: "kanal", label: "Kanal", kind: "select", options: ["Web"] },
+    { key: "etiket", label: "Etiket", kind: "multi", options: ["x"] },
+    { key: "kod", label: "Kod", kind: "text" },
+  ];
+  const css = (() => {
+    const { existsSync, readFileSync } = require("node:fs") as typeof import("node:fs");
+    return readFileSync(["src/kit.css", "packages/ui/src/kit.css"].find(existsSync)!, "utf8");
+  })();
+  it("satır ızgara sınıfı ve alan sayısını taşıyor; iki satırlık sütun sayısı ceil((N+2)/2)", () => {
+    cubuk({ grid: true, top: ALTI });
+    const satir = document.querySelector(".tamga-filter-row") as HTMLElement;
+    expect(satir.classList.contains("tamga-filter-izgara")).toBe(true);
+    expect(satir.getAttribute("data-alan")).toBe("6");
+    expect(satir.style.getPropertyValue("--filter-sutun")).toBe("4");
+    expect(satir.hasAttribute("data-kuyruk")).toBe(false);
+    expect(satir.className).not.toMatch(/(^|\s)(grid|flex|hidden)(\s|$)/);
+  });
+  it("tarih aralığı iki birim; çekmece ya da extra varsa kuyruk sütunu", () => {
+    cubuk({ grid: true, top: [ALTI[0]!, { key: "tarih", label: "Tarih", kind: "dateRange" }], drawer: [{ title: "D", fields: [ALTI[5]!] }] });
+    const satir = document.querySelector(".tamga-filter-row") as HTMLElement;
+    expect(satir.getAttribute("data-alan")).toBe("3");
+    expect(satir.style.getPropertyValue("--filter-sutun")).toBe("3");
+    expect(satir.hasAttribute("data-kuyruk")).toBe(true);
+  });
+  it("CSS: geniş kapta ızgara, arama iki sütun; 6 alan için tek satır eşiği 1204px, kuyrukla 1360px; cap kalkıyor", () => {
+    const genis = css.match(/@container \(min-width: 40rem\)\s*\{([\s\S]*?)\n  \}/g)!.join("\n");
+    expect(genis).toMatch(/\.tamga-filter-row\.tamga-filter-izgara\s*\{[^}]*display:\s*grid/);
+    expect(genis).toMatch(/\.tamga-filter-row\.tamga-filter-izgara\s*\{[^}]*grid-template-columns:\s*repeat\(var\(--filter-sutun\), minmax\(0, 1fr\)\)/);
+    expect(genis).toMatch(/\.tamga-filter-izgara > \.tamga-filter-ara\s*\{[^}]*grid-column:\s*span 2/);
+    expect(genis).toMatch(/\.tamga-filter-row\.tamga-filter-izgara > \.tamga-filter-cap\s*\{[^}]*max-width:\s*none/);
+    expect(css).toMatch(/@container \(min-width: 1204px\)\s*\{\s*\.tamga-filter-row\.tamga-filter-izgara\[data-alan="6"\]:not\(\[data-kuyruk\]\)\s*\{\s*grid-template-columns:\s*16rem repeat\(6, minmax\(0, 1fr\)\)/);
+    expect(css).toMatch(/@container \(min-width: 1360px\)\s*\{\s*\.tamga-filter-row\.tamga-filter-izgara\[data-alan="6"\]\[data-kuyruk\]\s*\{\s*grid-template-columns:\s*16rem repeat\(6, minmax\(0, 1fr\)\) auto/);
+  });
+  it("uzun değer kutuda kesilir, tam metin title'da", () => {
+    cubuk({ grid: true, top: [ALTI[0]!], values: { durum: "Açık" } });
+    expect(screen.getByRole("button", { name: "Durum" }).getAttribute("title")).toBe("Açık");
+  });
+});
+
+describe("FilterBar · searchableAs (0.9.0)", () => {
+  const ALAN: FilterField = { key: "sahip", label: "Sahip", kind: "searchable", panelTitle: "Sahip seçin", options: ["Ada", "Baran"] };
+  it("varsayılan combobox: metin kutusu", () => {
+    cubuk({ top: [ALAN] });
+    expect(screen.getByRole("combobox", { name: "Sahip" }).tagName).toBe("INPUT");
+    expect(document.querySelector(".tamga-select-panel")).toBeNull();
+  });
+  it("panel: kutu görünümlü SelectPanel; adı alanın adı; başlık, arama metni, ilk seçenek Tümü; üstte ve çekmecede", () => {
+    const onChange = cubuk({ searchableAs: "panel", top: [ALAN], drawer: [{ title: "D", fields: [{ ...ALAN, key: "sahip2", label: "Sahip 2", panelTitle: undefined, searchPlaceholder: "Kişi ara" }] }], labels: { ...ETIKETLER, searchIn: (l: string) => `${l} ara` } });
+    const tetik = screen.getByRole("button", { name: "Sahip" });
+    expect(tetik.className).toMatch(/tamga-select\b/);
+    expect(tetik.className).not.toMatch(/tamga-btn/);
+    expect(tetik.textContent).toBe("Tümü");
+    expect(tetik.querySelector("svg")).not.toBeNull();
+    fireEvent.click(tetik);
+    expect(screen.getByText("Sahip seçin")).toBeTruthy();
+    expect(screen.getAllByRole("searchbox").find((k) => k.closest(".tamga-select-panel-kutu"))!.getAttribute("placeholder")).toBe("Sahip ara");
+    expect(screen.getAllByRole("option")[0]!.textContent).toBe("Tümü");
+    fireEvent.click(screen.getByRole("option", { name: "Baran" }));
+    expect(onChange).toHaveBeenCalledWith({ sahip: "Baran" });
+    fireEvent.click(screen.getByRole("button", { name: /Tüm filtreler/ }));
+    /* Çekmecede üst alanın dar kopyası da var; ikinci alan adıyla bulunuyor. */
+    const ikinci = screen.getAllByRole("button", { name: "Sahip 2" })[0]!;
+    expect(ikinci.className).toMatch(/tamga-select\b/);
+    fireEvent.click(ikinci);
+    expect(screen.getAllByRole("searchbox").find((k) => k.closest(".tamga-select-panel-kutu"))!.getAttribute("placeholder")).toBe("Kişi ara");
+  });
+});

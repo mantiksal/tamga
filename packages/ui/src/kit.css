@@ -1619,6 +1619,19 @@
   .tamga-filter-cip-x:hover {
     background: var(--color-shell);
   }
+  /* KUTU GÖRÜNÜMÜ (`look="field"`): tetik `Select`in kutusu, tam genişlik. */
+  .tamga-select-panel-alan {
+    display: flex;
+    width: 100%;
+  }
+  .tamga-select-panel-alan > .tamga-select-panel-tetik {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .tamga-select-panel-alan > .tamga-select-panel-tetik > span:not(.tamga-select-panel-onek) {
+    flex: 1;
+    text-align: start;
+  }
   /* Çekmecede ve formda panel tam genişlik: tetik kutu gibi durur. */
   .tamga-select-panel-tam,
   .tamga-select-panel-tam > .tamga-select-panel-tetik {
@@ -1684,6 +1697,176 @@
       display: none;
     }
   }
+  /* EŞİT IZGARA (`grid`): kabın genişliğine göre tek ya da iki satır. İki satırda
+     sütun sayısı JS'den (`--filter-sutun` = ceil((alan + 2) / 2)), arama iki sütun;
+     tek satır eşiği alan sayısına göre aşağıdaki kurallarda (16rem arama + alan
+     başına 9rem + aralıklar; kuyruk sütunu varsa +9rem). Dar eşiğin altında
+     satır esnek kalıyor, 0.8.1 davranışı. */
+  @container (min-width: 40rem) {
+    /* İki sınıf: `.tamga-filter-row { display: flex }` bu bloktan sonra geliyor
+       ve tek sınıfla aynı özgüllükte; ızgara ancak böyle kazanıyor. */
+    .tamga-filter-row.tamga-filter-izgara {
+      display: grid;
+      align-items: end;
+      grid-template-columns: repeat(var(--filter-sutun), minmax(0, 1fr));
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-kuyruk] {
+      grid-template-columns: repeat(var(--filter-sutun), minmax(0, 1fr)) auto;
+    }
+    .tamga-filter-izgara > .tamga-filter-ara {
+      grid-column: span 2;
+      flex: none;
+    }
+    .tamga-filter-izgara > .tamga-filter-alan {
+      flex: none;
+    }
+    .tamga-filter-izgara > .tamga-filter-alan[data-range] {
+      grid-column: span 2;
+    }
+    /* Tavan kalkıyor: `.tamga-filter-cap`in yüzde tavanı ızgara hücresine göre
+       çözülüp alanı hücrenin yarısına indiriyordu; medya kuralı sonra geldiği için
+       üç sınıf. */
+    .tamga-filter-row.tamga-filter-izgara > .tamga-filter-cap {
+      max-width: none;
+    }
+    .tamga-filter-izgara > .tamga-filter-kir {
+      display: none;
+    }
+    .tamga-filter-izgara > .tamga-btn {
+      grid-column: -2 / -1;
+      grid-row: 1;
+      justify-self: end;
+    }
+  }
+  @container (min-width: 424px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="1"]:not([data-kuyruk]) {
+      grid-template-columns: 16rem repeat(1, minmax(0, 1fr));
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="1"]:not([data-kuyruk]) > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+  @container (min-width: 580px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="1"][data-kuyruk] {
+      grid-template-columns: 16rem repeat(1, minmax(0, 1fr)) auto;
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="1"][data-kuyruk] > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+  @container (min-width: 580px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="2"]:not([data-kuyruk]) {
+      grid-template-columns: 16rem repeat(2, minmax(0, 1fr));
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="2"]:not([data-kuyruk]) > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+  @container (min-width: 736px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="2"][data-kuyruk] {
+      grid-template-columns: 16rem repeat(2, minmax(0, 1fr)) auto;
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="2"][data-kuyruk] > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+  @container (min-width: 736px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="3"]:not([data-kuyruk]) {
+      grid-template-columns: 16rem repeat(3, minmax(0, 1fr));
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="3"]:not([data-kuyruk]) > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+  @container (min-width: 892px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="3"][data-kuyruk] {
+      grid-template-columns: 16rem repeat(3, minmax(0, 1fr)) auto;
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="3"][data-kuyruk] > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+  @container (min-width: 892px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="4"]:not([data-kuyruk]) {
+      grid-template-columns: 16rem repeat(4, minmax(0, 1fr));
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="4"]:not([data-kuyruk]) > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+  @container (min-width: 1048px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="4"][data-kuyruk] {
+      grid-template-columns: 16rem repeat(4, minmax(0, 1fr)) auto;
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="4"][data-kuyruk] > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+  @container (min-width: 1048px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="5"]:not([data-kuyruk]) {
+      grid-template-columns: 16rem repeat(5, minmax(0, 1fr));
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="5"]:not([data-kuyruk]) > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+  @container (min-width: 1204px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="5"][data-kuyruk] {
+      grid-template-columns: 16rem repeat(5, minmax(0, 1fr)) auto;
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="5"][data-kuyruk] > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+  @container (min-width: 1204px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="6"]:not([data-kuyruk]) {
+      grid-template-columns: 16rem repeat(6, minmax(0, 1fr));
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="6"]:not([data-kuyruk]) > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+  @container (min-width: 1360px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="6"][data-kuyruk] {
+      grid-template-columns: 16rem repeat(6, minmax(0, 1fr)) auto;
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="6"][data-kuyruk] > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+  @container (min-width: 1360px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="7"]:not([data-kuyruk]) {
+      grid-template-columns: 16rem repeat(7, minmax(0, 1fr));
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="7"]:not([data-kuyruk]) > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+  @container (min-width: 1516px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="7"][data-kuyruk] {
+      grid-template-columns: 16rem repeat(7, minmax(0, 1fr)) auto;
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="7"][data-kuyruk] > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+  @container (min-width: 1516px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="8"]:not([data-kuyruk]) {
+      grid-template-columns: 16rem repeat(8, minmax(0, 1fr));
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="8"]:not([data-kuyruk]) > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+  @container (min-width: 1672px) {
+    .tamga-filter-row.tamga-filter-izgara[data-alan="8"][data-kuyruk] {
+      grid-template-columns: 16rem repeat(8, minmax(0, 1fr)) auto;
+    }
+    .tamga-filter-row.tamga-filter-izgara[data-alan="8"][data-kuyruk] > .tamga-filter-ara {
+      grid-column: auto;
+    }
+  }
+
   /* Filtre satırı: tavan yarım satır, yoksa sona tek başına düşen alan bütün
      genişliğe yayılıyor. Tavan boşluktan TÜRETİLİYOR · iki bağımsız sayı olarak
      yazılsalar satırın boşluğu ilk değiştiğinde sessizce kayarlar.

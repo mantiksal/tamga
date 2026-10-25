@@ -160,6 +160,8 @@ function FieldControl({
   locale,
   labels,
   panel = false,
+  kutuPanel = false,
+  baslik = false,
 }: {
   field: FilterField;
   values: FilterValues;
@@ -169,10 +171,17 @@ function FieldControl({
   labels: FilterBarLabels;
   /** Çip düzeninde seçim alanları panel: tam genişlikte, boşken "Tümü". */
   panel?: boolean;
+  /** `searchableAs="panel"`: aramalı alan kutu görünümlü SelectPanel. */
+  kutuPanel?: boolean;
+  /** Izgarada uzun değerin tamamı title'da. */
+  baslik?: boolean;
 }) {
   const options = secenekler(field, optionSource);
   if (panel && (field.kind === "select" || field.kind === "searchable" || field.kind === "multi")) {
     return <PanelAlani field={field} values={values} write={write} optionSource={optionSource} labels={labels} />;
+  }
+  if (kutuPanel && field.kind === "searchable") {
+    return <PanelAlani field={field} values={values} write={write} optionSource={optionSource} labels={labels} kutu />;
   }
 
   /* HER KONTROLÜN ADI VAR: alanın adı bir <span>, kontrole bağlı değil; ekran
@@ -237,10 +246,12 @@ function FieldControl({
   }
 
   if (field.kind === "select") {
+    const gorunen = values[field.key] ? secenekler(field, optionSource).find((o) => o.value === values[field.key])?.label ?? values[field.key] : undefined;
     return (
       <Select
         className="w-full"
         aria-label={field.label}
+        title={baslik ? gorunen : undefined}
         icon={field.icon}
         options={[
           labels.all,
@@ -281,6 +292,7 @@ function PanelAlani({
   optionSource,
   labels,
   cip = false,
+  kutu = false,
 }: {
   field: FilterField;
   values: FilterValues;
@@ -288,6 +300,8 @@ function PanelAlani({
   optionSource: Record<string, readonly (string | FilterOption)[]>;
   labels: FilterBarLabels;
   cip?: boolean;
+  /** Kutu görünümü (`look="field"`): etiketli satırdaki öbür kutularla aynı boy. */
+  kutu?: boolean;
 }) {
   const options = secenekler(field, optionSource).map((o) => ({ ...o, tone: field.tones?.[o.value] }));
   const ortak = {
@@ -300,7 +314,8 @@ function PanelAlani({
     /* Panelin araması kendi metnini taşır; çubuğun arama metni ("Ad ya da adres ara") değil. */
     labels: { noMatch: labels.noMatch, search: field.searchPlaceholder ?? labels.searchIn?.(field.label) ?? field.label, clear: labels.clear },
     size: cip ? ("sm" as const) : ("base" as const),
-    className: cip ? undefined : "tamga-select-panel-tam",
+    look: kutu ? ("field" as const) : ("button" as const),
+    className: cip || kutu ? undefined : "tamga-select-panel-tam",
   };
   if (field.kind === "multi") {
     const selected = (values[field.key] ?? "").split(",").filter(Boolean);
@@ -395,6 +410,32 @@ export type FilterBarProps = {
    * uygulanan-filtreler satırı yok: çip özetin kendisi. Metin ve tarih aralığı kutu kalır.
    */
   look?: "fields" | "chips";
+  /**
+   * `fields` only. Off (default), the flex row of today: a field that does not fit drops to the
+   * next line and stretches. On, a grid decided by the bar's own width: one line with a fixed
+   * 16rem search and equal columns when every field can have ~9rem, else two equal lines with
+   * the search spanning two columns (columns = ceil((fields + 2) / 2)); below the narrow
+   * threshold the 0.8.1 behaviour. No field ever grows past the others. A long value is
+   * clipped in its box and kept whole in `title`. TR: Yalnız `fields`. Kapalıyken (varsayılan)
+   * bugünkü esnek satır: sığmayan alan alt satıra düşüp uzuyor. Açıkken kabın genişliğine göre
+   * bir ızgara: her alana ~9rem düşüyorsa sabit 16rem arama + eşit sütunlu tek satır, yoksa
+   * aramanın iki sütun kapladığı eşit iki satır (sütun = ceil((alan + 2) / 2)); dar eşiğin
+   * altında 0.8.1 davranışı. Hiçbir alan öbürlerinden uzamıyor. Uzun değer kutuda kesilir, tamamı
+   * `title`da.
+   */
+  grid?: boolean;
+  /**
+   * What a `searchable` field is drawn as. `combobox` (default) the text box with a magnifier.
+   * `panel` a `SelectPanel` in the `field` look: an ordinary box-shaped button that shows the
+   * value or `labels.all`, a panel titled `panelTitle ?? label` with a search box
+   * (`searchPlaceholder ?? labels.searchIn(label) ?? label`) and `labels.all` first; on top, in
+   * the drawer and in the narrow sheet alike. TR: `searchable` alanın çizimi. `combobox`
+   * (varsayılan) büyüteçli metin kutusu. `panel` `field` görünümünde bir `SelectPanel`: değeri ya
+   * da `labels.all`ı gösteren kutu biçimli sıradan bir düğme, başlığı `panelTitle ?? label`,
+   * arama kutulu (`searchPlaceholder ?? labels.searchIn(label) ?? label`), ilk seçeneği
+   * `labels.all`; üstte, çekmecede ve dar ekran panelinde aynı.
+   */
+  searchableAs?: "combobox" | "panel";
   labels: FilterBarLabels;
 };
 
@@ -411,9 +452,16 @@ export function FilterBar({
   extra,
   locale = "en-GB",
   look = "fields",
+  grid = false,
+  searchableAs = "combobox",
   labels,
 }: FilterBarProps) {
   const cipler = look === "chips";
+  const panelli = searchableAs === "panel";
+  /* Izgara: tarih aralığı iki birim; iki satırlık düzende sütun = ceil((birim + 2) / 2);
+     çekmece düğmesi ya da ek kontrol varsa sondaki "kuyruk" sütunu. */
+  const birim = top.reduce((n, f) => n + (f.kind === "dateRange" ? 2 : 1), 0);
+  const sutun = Math.ceil((birim + 2) / 2);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const formId = useId();
 
@@ -458,7 +506,7 @@ export function FilterBar({
     top.map((field) => (
       <div key={field.key} className={`tamga-filter-alan ${field.kind === "dateRange" ? "sm:col-span-2" : ""}`}>
         <span className={sinif}>{field.label}</span>
-        <FieldControl field={field} values={values} write={write} optionSource={optionSource} locale={locale} labels={labels} panel={cipler} />
+        <FieldControl field={field} values={values} write={write} optionSource={optionSource} locale={locale} labels={labels} panel={cipler} kutuPanel={panelli} />
       </div>
     ));
   const aramaKutusu = (
@@ -525,7 +573,12 @@ export function FilterBar({
           {extra}
         </div>
       ) : (
-      <div className="tamga-filter-row">
+      <div
+        className={grid ? "tamga-filter-row tamga-filter-izgara" : "tamga-filter-row"}
+        data-alan={grid ? birim : undefined}
+        data-kuyruk={grid && (drawer.length > 0 || extra) ? "true" : undefined}
+        style={grid ? ({ "--filter-sutun": sutun } as React.CSSProperties) : undefined}
+      >
         {/* GÖRÜNÜM VE TABAN KİT SINIFINDA, Tailwind'de değil: dar ekranda `display:
             none` ve `flex-basis: 0` bileşen katmanından geliyor ve yardımcı katman
             onları ezerdi. Tarayıcıda ölçüldü. */}
@@ -559,6 +612,8 @@ export function FilterBar({
               optionSource={optionSource}
               locale={locale}
               labels={labels}
+              kutuPanel={panelli}
+              baslik={grid}
             />
           </div>
           </Fragment>
@@ -672,6 +727,7 @@ export function FilterBar({
                       locale={locale}
                       labels={labels}
                       panel={cipler}
+                      kutuPanel={panelli}
                     />
                   </div>
                 ))}

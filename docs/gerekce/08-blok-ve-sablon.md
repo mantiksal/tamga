@@ -93,6 +93,18 @@ Baymard'ın mobil filtre bulguları: tam ekran panel, açık bir "Uygula", liste
 yoksa sunucunun çıktısı tarayıcınınkiyle uyuşmaz. Düğmenin sözcüğü kitin değil: `labels.filter`,
 yoksa `allFilters`. İki görünüm aynı kökte, yani şablonun tek-kart kuralı darda da geçerli.
 
+### Çip düzeni: ad ve değer hep birlikte.
+
+`look="chips"`: solda sabit genişlikte arama (büyümez), ardından her üst alan için bir çip-düğme.
+Çip HER ZAMAN alanın adını ve değerini birlikte gösteriyor: boşken "Durum: Tümü ▾" (ad normal,
+"Tümü" soluk), doluyken "Durum: Kritik ✕" (yumuşak vurgu; ✕ ayrı bir düğme, çipin kalanı paneli
+açar). Kullanıcı testinde yalnız "Durum ▾" yazan boş çipten filtrenin durumu okunmadı, insanlar
+"Tümü"yü aradı; değer adsız yazılınca iki kutuda geçen "Kritik" karıştı. Her çipin paneli
+`SelectPanel`, ilk seçeneği "Tümü". Ayrı bir "uygulanan filtreler" satırı yok: çipin kendisi özet
+(Baymard'ın istediği özet böyle sağlanıyor). Metin ve tarih aralığı çip olamaz, kutuları kalıyor.
+Darda 0.7.3 davranışı: arama + "Filtrele · N", Sheet'te bütün alanlar (onlar da panel, boşken
+"Tümü"), dolu çipler yatay kayan bir sırada görünür. Çekmecenin "+ Filtre" çipi sonraya kaldı.
+
 ### Kutunun adı alanın adı.
 
 Alanın adı bir `<span>` idi, kontrole bağlı değildi; ekran okuyucu beş kutuyu da "Tümü" diye

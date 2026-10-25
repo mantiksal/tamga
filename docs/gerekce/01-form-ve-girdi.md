@@ -420,6 +420,18 @@ kutusunun tıklanabilir alanı zaten bütün satır.
 Tablonun küçük kutusu (`.tamga-check-sm`) kuralın dışında: o zaten hiç kalkmıyor, çünkü bir sütunda
 yirmi beş yükselmiş kutu listeyi düğme ızgarasına çeviriyor.
 
+## `select-panel.tsx`
+
+### Seçim paneli · tetik bir düğme.
+
+`Combobox`un tetiği bir metin kutusu. Filtrede ve formda insan oraya yazı yazacağını sanıyor;
+bir seçim yapıldığı anlaşılmıyor. Paneli bir düğme açıyor (GitHub Primer'ın SelectPanel'i):
+üstte başlık, isteğe bağlı arama (açılınca odak orada, yazdıkça liste süzülür), seçenekler ve
+seçili olanın yanında onay. `allLabel` ile "Tümü" listenin İÇİNDE bir seçenek, ararken de başta:
+geri dönüş yolu gidiş yoluyla aynı yerde · `FilterBar`ın "Hepsi listenin içinde" kararının aynısı,
+GOV.UK/DWP'nin tek seçimli filtre için "Any" önerisi de bu. Klavyeyle kapanınca odak tetiğe döner.
+Çoklu seçimde tetik özet gösterir ("Atlas +2") ve panel seçimde açık kalır; altında "Temizle".
+
 ## `appearance.tsx`
 
 ### ImageField · iki yol, tek alan.

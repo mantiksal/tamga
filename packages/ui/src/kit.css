@@ -1529,6 +1529,67 @@
     flex-direction: column;
     gap: 14px;
   }
+  /* ÇİP DÜZENİ: tek satır; arama sabit 17.5rem (büyümez), her alan bir
+     çip-düğme, çipin yanında ayrı kaldırma karesi. Çip sırası genişte
+     `contents`: çipler aramanın yanında sarıyor; darda kayan bir satır. */
+  .tamga-filter-cips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 8px;
+  }
+  .tamga-filter-ara-sabit {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    max-width: 100%;
+    flex: 0 0 17.5rem;
+  }
+  .tamga-filter-cip-sira {
+    display: contents;
+  }
+  .tamga-filter-cip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+  }
+  .tamga-filter-cip-x {
+    display: grid;
+    place-items: center;
+    width: calc(var(--control) - 8px);
+    height: calc(var(--control) - 8px);
+    flex-shrink: 0;
+    border: 1.5px solid var(--color-edge-strong);
+    border-radius: var(--radius-ctl);
+    background: var(--color-accent-soft);
+    color: var(--color-accent-soft-ink);
+    box-shadow: 3px 3px 0 var(--color-edge-strong);
+    cursor: pointer;
+  }
+  .tamga-filter-cip-x:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--color-edge-strong);
+  }
+  .tamga-filter-cip-x:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 var(--color-edge-strong);
+  }
+  /* Çekmecede ve formda panel tam genişlik: tetik kutu gibi durur. */
+  .tamga-select-panel-tam,
+  .tamga-select-panel-tam > .tamga-select-panel-tetik {
+    display: flex;
+    width: 100%;
+  }
+  .tamga-select-panel-tam > .tamga-select-panel-tetik {
+    justify-content: flex-start;
+  }
+  .tamga-select-panel-tam > .tamga-select-panel-tetik > .tamga-select-panel-bos,
+  .tamga-select-panel-tam > .tamga-select-panel-tetik > span:not(.tamga-select-panel-onek) {
+    flex: 1;
+    text-align: start;
+  }
   /* DAR EKRAN: çubuk arama + "Filtrele · N"a iniyor, üst alanlar çekmecenin
      başlıksız ilk grubu. Seçim CSS kırılımıyla, JS ile ekran ölçerek değil:
      sunucu çıktısı tarayıcıyla uyuşmalı. İki görünüm DOM'da, biri gizli;
@@ -1540,6 +1601,26 @@
     }
     .tamga-filter-row > .tamga-filter-ara {
       flex-basis: 0;
+    }
+    /* Çip düzeni darda: arama ve düğme ilk satırda, dolu çipler altında
+       yatay kayan bir sırada, boş çipler gizli (hepsi çekmecede). */
+    .tamga-filter-cips > .tamga-filter-ara-sabit {
+      flex: 1 1 0;
+    }
+    .tamga-filter-cips .tamga-filter-cip:not([data-set]) {
+      display: none;
+    }
+    .tamga-filter-cip-sira {
+      display: flex;
+      order: 2;
+      flex: 1 1 100%;
+      flex-wrap: nowrap;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tamga-filter-cip-sira:empty {
+      display: none;
     }
   }
   @media (min-width: 40rem) {
@@ -4063,6 +4144,60 @@
   .tamga-menu {
     padding: 5px;
   }
+  /* SEÇİM PANELİ: tetik bir düğme; panel düğmenin altında, tetik kadar değil
+     içeriği kadar geniş (en az 15rem). Başlık, arama, liste, altlık. */
+  .tamga-select-panel {
+    position: relative;
+    display: inline-flex;
+    max-width: 100%;
+  }
+  .tamga-select-panel-tetik {
+    max-width: 100%;
+  }
+  .tamga-select-panel-onek {
+    font-weight: var(--weight-body);
+  }
+  .tamga-select-panel-bos {
+    color: var(--color-ink-faint);
+    font-weight: var(--weight-body);
+  }
+  .tamga-select-panel-kutu {
+    position: absolute;
+    left: 0;
+    top: var(--overlay-below);
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 15rem;
+    max-width: 22rem;
+  }
+  .tamga-select-panel-arama {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 2px 5px 6px;
+  }
+  .tamga-select-panel-liste {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 18rem;
+    overflow-y: auto;
+  }
+  .tamga-select-panel-yok {
+    display: block;
+    padding: 8px 10px;
+    font-size: var(--text-small);
+    color: var(--color-ink-faint);
+  }
+  .tamga-select-panel-alt {
+    display: flex;
+    justify-content: flex-end;
+    padding: 6px 10px 4px;
+    border-top: 1px dashed var(--color-line);
+    font-size: var(--text-small);
+  }
 
   .tamga-option {
     display: flex;
@@ -4519,6 +4654,17 @@
   .tamga-table thead th button {
     text-transform: inherit;
     letter-spacing: inherit;
+  }
+  /* BAŞLIK SATIRI KARTIN KÖŞESİNİ İZLİYOR. Açık kart (`tamga-card-open`)
+     içeriğini kırpmıyor, yani başlığın kare zemini yuvarlak köşenin üstüne
+     biniyor ve köşedeki kenar siliniyordu. Torun seçici: tablo `ScrollX` ya da
+     bir kaydırma sarmalayıcısının içinde de olabilir. Kartın ilk içeriği
+     tablo olduğunda doğru; üstünde bir şerit varsa köşeyi şerit taşır. */
+  .tamga-card .tamga-table thead th:first-child {
+    border-start-start-radius: calc(var(--radius-card) - 1px);
+  }
+  .tamga-card .tamga-table thead th:last-child {
+    border-start-end-radius: calc(var(--radius-card) - 1px);
   }
   /* SATIR AYRACI KESİKLİ, ve bu bir süs değil bir ağırlık kararı. Düz çizgi bir
      BÖLME: iki şeyin ayrı olduğunu söylüyor. Bir tablonun satırları ayrı değil,

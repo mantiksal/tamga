@@ -245,3 +245,83 @@ describe("FilterBar · dar/geniş sınıfı taşıyan eleman yardımcı görün�
     expect(kural(".tamga-filter-grup")).toMatch(/gap:\s*14px/);
   });
 });
+
+/* ÇİP DÜZENİ (`look="chips"`): arama sabit genişlikte, her üst alan bir çip-düğme
+   ("Durum: Tümü ▾" / "Durum: Kritik ✕"), paneli SelectPanel ve ilk seçeneği
+   "Tümü". Ayrı bir "uygulanan filtreler" satırı yok: çipin kendisi özet. */
+describe("FilterBar · look=chips", () => {
+  const CIP: FilterField[] = [
+    { key: "state", label: "Durum", kind: "select", options: [{ value: "ok", label: "Sağlam" }, { value: "critical", label: "Kritik" }], tones: { critical: "danger" } },
+    { key: "musteri", label: "Müşteri", kind: "searchable", panelTitle: "Müşteri seçin", options: ["Alfa", "Beta"] },
+    { key: "etiket", label: "Etiket", kind: "multi", options: [{ value: "x", label: "Bir" }, { value: "y", label: "İki" }] },
+  ];
+  const cips = (props: Partial<Parameters<typeof FilterBar>[0]> = {}) =>
+    cubuk({ look: "chips", top: CIP, labels: { ...ETIKETLER, filter: "Filtrele" }, ...props });
+  const css = (() => {
+    const { existsSync, readFileSync } = require("node:fs") as typeof import("node:fs");
+    return readFileSync(["src/kit.css", "packages/ui/src/kit.css"].find(existsSync)!, "utf8");
+  })();
+
+  it("satır çip satırı: arama sabit, alan kutusu yok, uygulanan çip satırı yok", () => {
+    cips({ values: { state: "critical" } });
+    expect(document.querySelector(".tamga-filter-row")).toBeNull();
+    expect(document.querySelector(".tamga-filter-cips .tamga-filter-ara-sabit input[type=search]")).not.toBeNull();
+    expect(document.querySelector(".tamga-filter-cips .tamga-select")).toBeNull();
+    expect(document.querySelector(".tamga-token")).toBeNull();
+  });
+  it("boş çip: 'Durum: Tümü' + ok, kenarlı küçük; dolu çip: 'Durum: Kritik' yumuşak, oksuz, ayrı ✕ kaldırıyor", () => {
+    const onChange = cips({ values: { state: "critical" } });
+    const durum = screen.getByRole("button", { name: "Durum" });
+    expect(durum.textContent).toBe("Durum:Kritik");
+    expect(durum.className).toMatch(/tamga-btn-soft/);
+    expect(durum.className).toMatch(/tamga-btn-sm/);
+    expect(durum.querySelector("svg")).toBeNull();
+    const musteri = screen.getByRole("button", { name: "Müşteri" });
+    expect(musteri.textContent).toBe("Müşteri:Tümü");
+    expect(musteri.className).not.toMatch(/tamga-btn-soft/);
+    expect(musteri.querySelector("svg")).not.toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Durum filtresini kaldır" }));
+    expect(onChange).toHaveBeenCalledWith({});
+    expect(screen.queryByRole("button", { name: "Müşteri filtresini kaldır" })).toBeNull();
+  });
+  it("çipin paneli: başlık panelTitle ya da ad; ilk seçenek Tümü; aranabilir alanda arama; seçim değeri yazıyor", () => {
+    const onChange = cips();
+    fireEvent.click(screen.getByRole("button", { name: "Müşteri" }));
+    expect(screen.getByText("Müşteri seçin")).toBeTruthy();
+    /* Çubuğun araması + panelin araması: iki arama kutusu. */
+    expect(screen.getAllByRole("searchbox").length).toBe(2);
+    expect(screen.getAllByRole("option")[0]!.textContent).toBe("Tümü");
+    fireEvent.click(screen.getByRole("option", { name: "Beta" }));
+    expect(onChange).toHaveBeenCalledWith({ musteri: "Beta" });
+    fireEvent.click(screen.getByRole("button", { name: "Durum" }));
+    expect(screen.getByRole("listbox", { name: "Durum" })).toBeTruthy();
+    expect(screen.getByRole("option", { name: "Kritik" }).querySelector(".tamga-mark")).not.toBeNull();
+  });
+  it("çoklu alan: panel çoklu, çip özet 'Bir +1'", () => {
+    cips({ values: { etiket: "x,y" } });
+    expect(screen.getByRole("button", { name: "Etiket" }).textContent).toBe("Etiket:Bir +1");
+    fireEvent.click(screen.getByRole("button", { name: "Etiket" }));
+    expect(screen.getByRole("listbox")).toHaveAttribute("aria-multiselectable", "true");
+  });
+  it("en az bir filtre doluysa çiplerin sonunda 'Hepsini temizle'; yalnız arama doluysa yok", () => {
+    cips({ values: { q: "x" } });
+    expect(screen.queryByRole("button", { name: "Hepsini temizle" })).toBeNull();
+    const onChange = cips({ values: { state: "ok" } });
+    fireEvent.click(screen.getAllByRole("button", { name: "Hepsini temizle" })[0]!);
+    expect(onChange).toHaveBeenCalledWith({});
+  });
+  it("çekmecede (dar) alanlar SelectPanel, boşken Tümü; başlık labels.filter", () => {
+    cips({ drawer: [{ title: "Diğer", fields: [{ key: "oncelik", label: "Öncelik", kind: "select", options: ["Düşük"] }] }] });
+    fireEvent.click(screen.getByRole("button", { name: /Tüm filtreler/ }));
+    const form = document.querySelector("form")!;
+    expect(form.querySelectorAll(".tamga-select-panel").length).toBe(4);
+    expect(form.querySelector(".tamga-select")).toBeNull();
+    expect(screen.getByRole("button", { name: "Öncelik" }).textContent).toBe("Öncelik:Tümü");
+    expect(screen.getByRole("dialog", { name: "Filtrele" })).toBeTruthy();
+  });
+  it("CSS: arama 17.5rem sabit; darda boş çip gizli, dolu çipler yatay kayıyor", () => {
+    expect(css).toMatch(/\.tamga-filter-ara-sabit\s*\{[^}]*flex:\s*0 0 17\.5rem/);
+    expect(css).toMatch(/@media \(max-width: 39\.9375rem\)\s*\{[^@]*\.tamga-filter-cips \.tamga-filter-cip:not\(\[data-set\]\)\s*\{\s*display:\s*none/);
+    expect(css).toMatch(/@media \(max-width: 39\.9375rem\)\s*\{[^@]*\.tamga-filter-cip-sira\s*\{[^}]*overflow-x:\s*auto/);
+  });
+});

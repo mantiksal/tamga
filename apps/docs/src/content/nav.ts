@@ -296,6 +296,7 @@ const PAGES: DocPage[] = [
   c("section-head", "Section head", "Başlık, meta, sağdaki eylem", "Title, meta, the action at the right"),
   c("segmented", "Segmented", "Akranlar arası seçim", "A choice among peers"),
   c("select", "Select", "Sabit ve kısa bir küme", "A fixed, short set"),
+  c("select-panel", "Select panel", "Düğmeden açılan seçim paneli", "A choice panel opened from a button"),
   c("selection-bar", "Selection bar", "Seçili satırlarla ne yapılır", "What to do with the selected rows"),
   c("separator", "Separator", "Gruplama; dekorasyon değil", "Grouping; not decoration"),
   c("sheet", "Sheet", "Yandan girer, bilgi verir", "It enters from the side and informs"),

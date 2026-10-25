@@ -30,6 +30,7 @@ export {
   MiniButton,
 } from "./components/button.js";
 export { Input, InputGroup, inputVariants, type InputProps, Textarea, type TextareaProps } from "./components/input.js";
+export { SelectPanel, type SelectPanelOption, type SelectPanelProps } from "./components/select-panel.js";
 
 /* --- seçim kontrolleri -------------------------------------------------- */
 export { Checkbox } from "./components/checkbox.js";

@@ -37,7 +37,15 @@ for (const genislik of [390, 1280]) {
     const form = document.querySelector(".tamga-filter-bar form, [role=dialog] form");
     const darGrup = form?.querySelector(".tamga-filter-dar");
     const darGrupGorunum = darGrup ? d(darGrup) : "yok";
-    return JSON.stringify({ ustAlanlar: genis, aramaTaban: ara, dugmeDar: darMetin, dugmeGenis: genisMetin, cekmeceDarGrup: darGrupGorunum });
+    /* Çip düzeni (look="chips"): boş çipler darda gizli, dolu çip sırası yatay kayıyor. */
+    const cips = document.querySelector(".tamga-filter-cips");
+    const cip = cips && {
+      bosCip: [...cips.querySelectorAll(".tamga-filter-cip:not([data-set])")].map(d),
+      doluCip: [...cips.querySelectorAll(".tamga-filter-cip[data-set]")].map(d),
+      sira: getComputedStyle(cips.querySelector(".tamga-filter-cip-sira")).overflowX,
+      aramaTaban: getComputedStyle(cips.querySelector(".tamga-filter-ara-sabit")).flexBasis,
+    };
+    return JSON.stringify({ ustAlanlar: genis, aramaTaban: ara, dugmeDar: darMetin, dugmeGenis: genisMetin, cekmeceDarGrup: darGrupGorunum, cip });
   })()`));
   ws.close(); proc.kill();
 }
@@ -54,6 +62,12 @@ if (dar && genis && !dar.hata && !genis.hata) {
   soyle(genis.ustAlanlar.length > 0 && genis.ustAlanlar.every((v) => v !== "none"), "1280: üst alanlar satırda görünmüyor");
   soyle(genis.dugmeDar === "none" && genis.dugmeGenis !== "none", "1280: düğme geniş metni göstermiyor");
   soyle(genis.cekmeceDarGrup === "none", "1280: üst alanlar çekmecede de görünüyor (iki kez)");
+  if (dar.cip && genis.cip) {
+    soyle(dar.cip.bosCip.length > 0 && dar.cip.bosCip.every((v) => v === "none"), "390 çipler: boş çipler gizlenmiyor");
+    soyle(dar.cip.doluCip.every((v) => v !== "none") && dar.cip.sira === "auto", "390 çipler: dolu çipler kayan sırada değil");
+    soyle(dar.cip.aramaTaban === "0px", "390 çipler: arama tabanı 0 değil (" + dar.cip.aramaTaban + ")");
+    soyle(genis.cip.bosCip.every((v) => v !== "none") && genis.cip.aramaTaban === "280px", "1280 çipler: boş çipler görünmüyor ya da arama 280px değil");
+  } else console.log("(çip düzeni sayfada yok, ölçülmedi)");
 }
-console.log(hata ? "✗ Dar ekran geçişi ölçümü başarısız." : "✓ Dar ekranda arama + Filtrele, genişte alanlar satırda; çekmecede çift alan yok.");
+console.log(hata ? "✗ Dar ekran geçişi ölçümü başarısız." : "✓ Dar ekranda arama + Filtrele, genişte alanlar satırda; çekmecede çift alan yok; çip düzeni iki genişlikte de doğru.");
 process.exit(hata);

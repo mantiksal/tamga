@@ -67,7 +67,9 @@ export function SortHeader({
             className={cn("text-accent", direction === "asc" && "rotate-180")}
           />
         ) : (
-          <Icon icon={Sort} size="xs" className="text-ink-faint" />
+          /* `regular`, varsayılan `duotone` değil: o ağırlıkta Phosphor aşağı okun
+             arkasına %20 dolu bir dikdörtgen koyuyor · "gri kare" oydu. */
+          <Icon icon={Sort} size="xs" weight="regular" className="text-ink-faint" />
         )}
       </button>
     </th>

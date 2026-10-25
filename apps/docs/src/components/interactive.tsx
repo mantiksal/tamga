@@ -58,6 +58,7 @@ import {
   Tag, ColorSwatches,
   ColorMark,
   ImageField, LogoTile,
+  SelectPanel,
 } from "tamga-ui";
 import { Archive, Bell, Copy, CurrencyDollar, Delete, Download, Edit, Filter, More, Print, Refresh, Settings, Truck } from "tamga-ui/icons";
 import { Demo, type DemoLabels } from "@/components/demo";
@@ -1360,6 +1361,7 @@ const N = {
     imgUploading: "Yükleniyor…", imgRemoving: "Kaldırılıyor…", imgUploaded: "Yüklendi", imgRemoved: "Kaldırıldı",
     imgConfirm: "Gönder", imgCancel: "Vazgeç", imgFail: "Sunucu hatasını taklit et", imgFailText: "Sunucu 500 döndü; dosya yerinde, yeniden dene.",
     imgLocked: "Logo yalnız Pro planda değiştirilebilir.", imgLock: "Kilitli göster",
+    spSecin: "Kargo seçin", spAra: "Kargo ara", spYok: "Eşleşen yok", spTemizle: "Temizle", spKargolar: "Kargolar", spTumu: "Tümü",
     tagCustomer: "Müşteri", tagCampaign: "Kampanya", tagWhite: "Beyaz", tagBlack: "Siyah", suggest: "Öneri",
     tagUrgent: "Acil", tagBrick: "Kiremit", tagGreen: "Yeşil", tagBlue: "Mavi", tagPurple: "Mor",
     a11y: "Erişilebilirlik", a11yPath: "· /fiyatlar", lastRun: "Son ölçüm 3 gün önce, sayılmadı: sayfa 500 döndü.",
@@ -1451,6 +1453,7 @@ const N = {
     imgUploading: "Uploading…", imgRemoving: "Removing…", imgUploaded: "Uploaded", imgRemoved: "Removed",
     imgConfirm: "Send", imgCancel: "Cancel", imgFail: "Simulate a server error", imgFailText: "The server returned 500; the file stays, try again.",
     imgLocked: "The logo can only be changed on the Pro plan.", imgLock: "Show locked",
+    spSecin: "Choose a carrier", spAra: "Search carriers", spYok: "No match", spTemizle: "Clear", spKargolar: "Carriers", spTumu: "All",
     tagCustomer: "Customer", tagCampaign: "Campaign", tagWhite: "White", tagBlack: "Black", suggest: "Suggestion",
     tagUrgent: "Urgent", tagBrick: "Brick", tagGreen: "Green", tagBlue: "Blue", tagPurple: "Purple",
     a11y: "Accessibility", a11yPath: "· /pricing", lastRun: "Last run 3 days ago, not counted: the page returned 500.",
@@ -1667,6 +1670,45 @@ export function ImageUploadDemo({ lang }: L) {
         <Switch label={n.imgFail} on={hata} onChange={setHata} />
         <Switch label={n.imgLock} on={kilit} onChange={setKilit} />
       </div>
+    </div>
+  );
+}
+
+/* SEÇİM PANELİ: solda tek seçim, "Tümü" ve arama ile; sağda çoklu seçim. */
+export function SelectPanelDemo({ lang }: L) {
+  const n = N[lang];
+  const [tek, setTek] = useState("");
+  const [coklu, setCoklu] = useState<string[]>([n.kargo1, n.kargo2]);
+  const secenekler = [
+    { value: n.kargo1, label: n.kargo1, hint: n.sure1 },
+    { value: n.kargo2, label: n.kargo2, hint: n.sure2 },
+    { value: n.kargo3, label: n.kargo3, hint: n.sure3 },
+    { value: n.kargo4, label: n.kargo4, hint: n.sure4 },
+  ];
+  return (
+    <div className="flex flex-wrap gap-4">
+      <SelectPanel
+        options={secenekler}
+        value={tek}
+        onChange={setTek}
+        allLabel={n.spTumu}
+        searchable
+        prefix={`${n.kargoFirmasi}:`}
+        title={n.spSecin}
+        placeholder={n.spTumu}
+        aria-label={n.kargoFirmasi}
+        labels={{ noMatch: n.spYok, search: n.spAra }}
+      />
+      <SelectPanel
+        multiple
+        options={secenekler}
+        value={coklu}
+        onChange={setCoklu}
+        title={n.spKargolar}
+        placeholder={n.kargoSec}
+        aria-label={n.spKargolar}
+        labels={{ noMatch: n.spYok, clear: n.spTemizle }}
+      />
     </div>
   );
 }

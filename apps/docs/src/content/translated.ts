@@ -87,6 +87,7 @@ export const TRANSLATED: readonly string[] = [
   "section-head",
   "segmented",
   "select",
+  "select-panel",
   "selection-bar",
   "separator",
   "sheet",

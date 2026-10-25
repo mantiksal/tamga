@@ -11,6 +11,7 @@ import type { IconGlyph } from "../components/icons.js";
 import type { Tone } from "../components/tone.js";
 import { Input } from "../components/input.js";
 import { Select, Sheet } from "../components/primitives.js";
+import { SelectPanel } from "../components/select-panel.js";
 
 /**
  * FİLTRE ÇUBUĞU · birkaç alan üstte, gerisi çekmecede, VE çekmecede bir şey
@@ -68,6 +69,11 @@ export type FilterField = {
    * · ve bunu yalnız çağıran biliyor. Verilirse kırılma her genişlikte duruyor.
    */
   break?: boolean;
+  /**
+   * `look="chips"` only: the line at the top of the chip's panel, "Choose a customer"; absent,
+   * the label. TR: Yalnız `look="chips"`: çipin panelinin başlığı, "Müşteri seçin"; yoksa ad.
+   */
+  panelTitle?: string;
   /**
    * A glyph before the value, naming what this filter is about. TR: Değerin
    * önünde, bu filtrenin neyle ilgili olduğunu söyleyen glif.
@@ -140,6 +146,7 @@ function FieldControl({
   optionSource,
   locale,
   labels,
+  panel = false,
 }: {
   field: FilterField;
   values: FilterValues;
@@ -147,8 +154,13 @@ function FieldControl({
   optionSource: Record<string, readonly (string | FilterOption)[]>;
   locale: string;
   labels: FilterBarLabels;
+  /** Çip düzeninde seçim alanları panel: tam genişlikte, boşken "Tümü". */
+  panel?: boolean;
 }) {
   const options = secenekler(field, optionSource);
+  if (panel && (field.kind === "select" || field.kind === "searchable" || field.kind === "multi")) {
+    return <PanelAlani field={field} values={values} write={write} optionSource={optionSource} labels={labels} />;
+  }
 
   /* HER KONTROLÜN ADI VAR: alanın adı bir <span>, kontrole bağlı değil; ekran
      okuyucu beş kutuyu da "Tümü" diye okuyordu. */
@@ -244,6 +256,66 @@ function FieldControl({
   );
 }
 
+/**
+ * ÇİP-DÜĞME VE PANEL: tetik "Durum: Tümü ▾" ya da "Durum: Kritik"; paneli
+ * `SelectPanel`, ilk seçeneği "Tümü" (geri dönüş yolu gidiş yoluyla aynı yerde).
+ * Çipte boşken kenarlı küçük, doluyken yumuşak ve oksuz; ✕ ayrı düğme.
+ */
+function PanelAlani({
+  field,
+  values,
+  write,
+  optionSource,
+  labels,
+  cip = false,
+}: {
+  field: FilterField;
+  values: FilterValues;
+  write: (key: string, value: string) => void;
+  optionSource: Record<string, readonly (string | FilterOption)[]>;
+  labels: FilterBarLabels;
+  cip?: boolean;
+}) {
+  const options = secenekler(field, optionSource).map((o) => ({ ...o, tone: field.tones?.[o.value] }));
+  const ortak = {
+    title: field.panelTitle ?? field.label,
+    "aria-label": field.label,
+    prefix: `${field.label}:`,
+    placeholder: labels.all,
+    searchable: field.kind === "searchable",
+    labels: { noMatch: labels.noMatch, search: labels.search, clear: labels.clear },
+    size: cip ? ("sm" as const) : ("base" as const),
+    className: cip ? undefined : "tamga-select-panel-tam",
+  };
+  if (field.kind === "multi") {
+    const selected = (values[field.key] ?? "").split(",").filter(Boolean);
+    const dolu = selected.length > 0;
+    return (
+      <SelectPanel
+        multiple
+        {...ortak}
+        options={options}
+        value={selected}
+        onChange={(n) => write(field.key, n.join(","))}
+        variant={cip && dolu ? "soft" : "secondary"}
+        caret={!(cip && dolu)}
+      />
+    );
+  }
+  const v = values[field.key] ?? "";
+  return (
+    <SelectPanel
+      {...ortak}
+      allLabel={labels.all}
+      options={options}
+      value={v}
+      onChange={(n) => write(field.key, n)}
+      variant={cip && v ? "soft" : "secondary"}
+      caret={!(cip && v)}
+    />
+  );
+}
+
 /** Seçenekler tek biçimde: düz dizgi, değeri de adı da kendisi olan bir çift. */
 function secenekler(field: FilterField, optionSource: Record<string, readonly (string | FilterOption)[]>): FilterOption[] {
   const ham = field.options?.length ? field.options : (optionSource[field.key] ?? []);
@@ -296,6 +368,18 @@ export type FilterBarProps = {
   extra?: ReactNode;
   /** For `DatePicker`'s calendar: "tr-TR", "en-GB". TR: `DatePicker`ın takvimi için: "tr-TR", "en-GB". */
   locale?: string;
+  /**
+   * `fields` the boxes with a label above each (today's layout). `chips` one line: a fixed
+   * search box, then a chip-button per top field that always reads name and value together,
+   * "Status: All" empty and "Status: Critical" set, with its own remove; each chip opens a
+   * `SelectPanel` whose first option is "All". No separate applied-filters row: the chip is the
+   * summary. Text and date-range fields keep their boxes. TR: `fields` her birinin üstünde adı
+   * olan kutular (bugünkü düzen). `chips` tek satır: sabit arama kutusu, sonra her üst alan için
+   * adı ve değeri hep birlikte okunan bir çip-düğme, boşken "Durum: Tümü", doluyken "Durum:
+   * Kritik" ve kendi kaldırması; her çip ilk seçeneği "Tümü" olan bir `SelectPanel` açar. Ayrı bir
+   * uygulanan-filtreler satırı yok: çip özetin kendisi. Metin ve tarih aralığı kutu kalır.
+   */
+  look?: "fields" | "chips";
   labels: FilterBarLabels;
 };
 
@@ -311,8 +395,10 @@ export function FilterBar({
   fileAccept,
   extra,
   locale = "en-GB",
+  look = "fields",
   labels,
 }: FilterBarProps) {
+  const cipler = look === "chips";
   const [drawerOpen, setDrawerOpen] = useState(false);
   const formId = useId();
 
@@ -357,9 +443,25 @@ export function FilterBar({
     top.map((field) => (
       <div key={field.key} className={`tamga-filter-alan ${field.kind === "dateRange" ? "sm:col-span-2" : ""}`}>
         <span className={sinif}>{field.label}</span>
-        <FieldControl field={field} values={values} write={write} optionSource={optionSource} locale={locale} labels={labels} />
+        <FieldControl field={field} values={values} write={write} optionSource={optionSource} locale={locale} labels={labels} panel={cipler} />
       </div>
     ));
+  const aramaKutusu = (
+    <span className="relative flex items-center">
+      <Icon icon={Search} size="xs" aria-hidden className="pointer-events-none absolute left-2.5 text-ink-faint" />
+      <Input type="search" full leading placeholder={labels.search} value={values[searchKey] ?? ""} onChange={(e) => write(searchKey, e.target.value)} />
+    </span>
+  );
+  const cekmeceDugmesi = (drawer.length > 0 || top.length > 0) && (
+    <Button className={drawer.length > 0 ? "ml-auto" : "tamga-filter-dar ml-auto"} onClick={() => setDrawerOpen(true)}>
+      <Icon icon={Customize} size="xs" />
+      <span className="tamga-filter-genis">
+        {labels.allFilters}
+        {hiddenActive > 0 && <span className="tamga-count ml-1 tabular-nums">{hiddenActive}</span>}
+      </span>
+      <span className="tamga-filter-dar">{darMetin}</span>
+    </Button>
+  );
 
   return (
     /* FİLTRE ÇUBUĞU KENDİ YÜZEYİNDE, ve `tamga-card-open` ŞART: `tamga-card`ın
@@ -371,6 +473,41 @@ export function FilterBar({
       {/* ESNEK SARMA, SABİT IZGARA DEĞİL: taşmayı yaratan şey sütun sayısı değil
           TABANSIZ esneme, o yüzden çözüm `basis`. Arama iki pay, seçimler birer.
           Gerekçe: docs/gerekce/08-blok-ve-sablon.md */}
+      {cipler ? (
+        <div className="tamga-filter-cips">
+          <label className="tamga-filter-ara-sabit">
+            <span className="text-small font-bold text-ink-faint">{labels.search}</span>
+            {aramaKutusu}
+          </label>
+          <span className="tamga-filter-cip-sira">
+            {top.map((field) =>
+              field.kind === "select" || field.kind === "searchable" || field.kind === "multi" ? (
+                <span key={field.key} className="tamga-filter-cip" data-set={values[field.key] ? "true" : undefined}>
+                  <PanelAlani field={field} values={values} write={write} optionSource={optionSource} labels={labels} cip />
+                  {values[field.key] ? (
+                    <button type="button" className="tamga-filter-cip-x" aria-label={labels.remove(field.label)} onClick={() => write(field.key, "")}>
+                      <Icon icon={Close} size="xs" />
+                    </button>
+                  ) : null}
+                </span>
+              ) : (
+                /* Metin ve tarih aralığı çip olamaz: kutuları kalıyor. */
+                <div key={field.key} className="tamga-filter-genis tamga-filter-alan" data-range={field.kind === "dateRange" || undefined}>
+                  <span className="text-small font-bold text-ink-faint">{field.label}</span>
+                  <FieldControl field={field} values={values} write={write} optionSource={optionSource} locale={locale} labels={labels} />
+                </div>
+              ),
+            )}
+            {darAktif > 0 ? (
+              <Button variant="link" size="sm" onClick={() => onChange({})}>
+                {labels.clearAll}
+              </Button>
+            ) : null}
+          </span>
+          {cekmeceDugmesi}
+          {extra}
+        </div>
+      ) : (
       <div className="tamga-filter-row">
         {/* GÖRÜNÜM VE TABAN KİT SINIFINDA, Tailwind'de değil: dar ekranda `display:
             none` ve `flex-basis: 0` bileşen katmanından geliyor ve yardımcı katman
@@ -379,22 +516,7 @@ export function FilterBar({
           <span className="text-small font-bold text-ink-faint">{labels.search}</span>
           {/* `leading` bir boolean: kite sol boşluğu açtırıyor, ikonu çağıran
               çiziyor. Böylece ikon seti kitin değil ürünün kararı kalıyor. */}
-          <span className="relative flex items-center">
-            <Icon
-              icon={Search}
-              size="xs"
-              aria-hidden
-              className="pointer-events-none absolute left-2.5 text-ink-faint"
-            />
-            <Input
-              type="search"
-              full
-              leading
-              placeholder={labels.search}
-              value={values[searchKey] ?? ""}
-              onChange={(e) => write(searchKey, e.target.value)}
-            />
-          </span>
+          {aramaKutusu}
         </label>
 
         {top.map((field) => (
@@ -434,31 +556,17 @@ export function FilterBar({
         {/* ÇEKMECE BOŞSA DÜĞME DE YOK: bir alanı kalmayan "Tüm filtreler" boş bir panel
             açıyor, ve açan kişi aradığı filtrenin kaybolduğunu sanıyor. */}
         {/* DAR EKRANDA ÜST ALANLARIN TEK YOLU BU DÜĞME: çekmece boşken de
-            çiziliyor, ama yalnız dar görünümde (`tamga-filter-dar`). */}
-        {(drawer.length > 0 || top.length > 0) && (
-        <Button className={drawer.length > 0 ? "ml-auto" : "tamga-filter-dar ml-auto"} onClick={() => setDrawerOpen(true)}>
-          <Icon icon={Customize} size="xs" />
-          <span className="tamga-filter-genis">
-            {labels.allFilters}
-            {hiddenActive > 0 && (
-              /* Sayaç kitin `tamga-count`u, elle çizilmiş bir daire değil: aynı
-                 rozet `Badge`de de geçiyor ve ikisinin ayrı çizilmesi, işaret
-                 ailesi değiştiğinde yalnız birinin değişmesi demekti. */
-              <span className="tamga-count ml-1 tabular-nums">
-                {hiddenActive}
-              </span>
-            )}
-          </span>
-          <span className="tamga-filter-dar">{darMetin}</span>
-        </Button>
-        )}
+            çiziliyor, ama yalnız dar görünümde (`tamga-filter-dar`). Sayaç kitin
+            `tamga-count`u: aynı rozet `Badge`de de geçiyor. */}
+        {cekmeceDugmesi}
 
         {extra}
       </div>
+      )}
 
-      {/* Uygulanan filtreler. Çekmecede olan da burada görünür; gizli kalan
-          hiçbir filtre yok. */}
-      {active.length > 0 && (
+      {/* Uygulanan filtreler (kutu düzeni). Çekmecede olan da burada görünür;
+          gizli kalan hiçbir filtre yok. Çip düzeninde çipin kendisi özet. */}
+      {!cipler && active.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           {active.map(([key, value]) => (
             <span key={key} className="tamga-token">
@@ -487,7 +595,7 @@ export function FilterBar({
       <Sheet
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        title={labels.allFilters}
+        title={cipler ? (labels.filter ?? labels.allFilters) : labels.allFilters}
         closeLabel={labels.calendar.clear}
         footer={
           <>
@@ -546,6 +654,7 @@ export function FilterBar({
                       optionSource={optionSource}
                       locale={locale}
                       labels={labels}
+                      panel={cipler}
                     />
                   </div>
                 ))}

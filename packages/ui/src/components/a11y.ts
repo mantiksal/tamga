@@ -138,6 +138,10 @@ export function useListKeys({
       const list = items();
       if (list.length === 0) return;
       const i = list.indexOf(document.activeElement as HTMLElement);
+      /* Bir yazı kutusunun içindeyken (panelin araması) Space, Home ve End
+         metnin; yalnız oklar listeye iner. */
+      const yazida = (e.target as HTMLElement | null)?.tagName === "INPUT";
+      if (yazida && (e.key === " " || e.key === "Home" || e.key === "End")) return;
 
       switch (e.key) {
         case "ArrowDown":

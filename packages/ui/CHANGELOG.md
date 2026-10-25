@@ -5,6 +5,45 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.8.0
+
+> A choice panel opened from a button, and a filter bar made of chips.
+
+### Added
+
+- **`SelectPanel`** · a choice panel opened from an ordinary button, like GitHub Primer's: the
+  trigger shows the chosen value or the placeholder with a caret (`aria-haspopup="listbox"`,
+  `aria-expanded`, the given `aria-label`); the panel has a `title`, an optional search box
+  (`searchable`: focus lands there on open, the list filters as you type, `labels.noMatch` when
+  nothing matches, the down arrow enters the list), the options with a check beside the chosen
+  one and an optional tone square. `allLabel` adds a first "All" option worth the empty value,
+  checked when the value is empty, kept at the top while searching. Arrows move, Enter chooses,
+  Esc closes and focus returns to the trigger. `multiple` takes an array, shows a summary like
+  "Atlas Lojistik +2" and keeps the panel open, with `labels.clear` under the list. `prefix`
+  ("Status:"), `caret`, `variant` and `size` shape the trigger for a filter chip. `Combobox`'s
+  trigger is a text box and people expected to type into it.
+- **`FilterBar` `look="chips"`** · one line: a fixed search box (17.5rem), then a chip-button
+  per top field that always reads name and value together: "Status: All" empty (outlined,
+  small, the value faint), "Status: Critical" set (soft) with its own remove button named
+  `labels.remove(label)`. Each chip opens a `SelectPanel` whose first option is `labels.all`;
+  `searchable` fields search in the panel; `panelTitle` names the panel, else the label.
+  `labels.clearAll` closes the row once a filter is set. No separate applied-filters row: the
+  chip is the summary. Text and date-range fields keep their boxes. On a narrow screen the
+  0.7.3 behaviour holds: search and "Filter · N", the sheet with every field (as panels,
+  "All" when empty, titled `labels.filter`), and the set chips in a horizontally scrolling row.
+  `fields` is the default and unchanged. The drawer's "+ Filter" chip is left for later.
+
+### Fixed
+
+- **`SortHeader`'s unsorted glyph carried a grey square**: `Icon` defaults to `duotone`, and
+  Phosphor's two-way arrow puts a 20% filled rectangle behind the down arrow in that weight.
+  The glyph is drawn `regular`.
+- **A table's header row inside an open card painted over the card's rounded corners**
+  (`ListTemplate`'s list card is `tamga-card-open`, so nothing is clipped): the first and last
+  header cells now take the card's corner radius. The selector is a descendant one, so a
+  `ScrollX` or scroll wrapper around the table is fine; it assumes the table is the card's first
+  content.
+
 ## 0.7.3
 
 > What the first real consumer found: the filter bar's names, its phone layout, its option values, a thin progress bar, one card instead of two.

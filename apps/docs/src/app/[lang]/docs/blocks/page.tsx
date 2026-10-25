@@ -45,7 +45,11 @@ const T = {
         <code>allFilters</code>); üst alanlar çekmecenin başlıksız ilk grubu olur, çipler görünür
         kalır. Geçiş CSS kırılımıyla, JS ekran ölçmüyor. Seçenekler düz dizgi ya da{" "}
         <code>{"{ value, label }"}</code> çifti: değer saklanır, ad gösterilir; <code>tones</code> değere
-        göre anahtarlanır.
+        göre anahtarlanır. <code>look</code> düzeni seçer: <code>fields</code> (üstünde adı olan
+        kutular, varsayılan) ya da <code>chips</code>: sabit bir arama kutusu ve her alan için adı ve
+        değeri hep birlikte okunan bir çip-düğme, boşken &quot;Durum: Tümü&quot;, doluyken &quot;Durum:
+        Kritik&quot; ve kendi kaldırması; çip ilk seçeneği &quot;Tümü&quot; olan bir{" "}
+        <code>SelectPanel</code> açar. Ayrı bir uygulanan-filtreler satırı yok: çip özetin kendisi.
       </>
     ),
     filtreN: (
@@ -133,7 +137,12 @@ ADR-0003&apos;ün katman şeması <code>tamga-ui</code> kutusunun içine
         beside it (<code>labels.filter</code>, else <code>allFilters</code>); the top fields become
         the drawer&apos;s first, untitled group and the chips stay visible. The switch is a CSS
         breakpoint, no JS measuring. Options are plain strings or <code>{"{ value, label }"}</code>{" "}
-        pairs: the value is stored, the label shown; <code>tones</code> is keyed by value.
+        pairs: the value is stored, the label shown; <code>tones</code> is keyed by value.{" "}
+        <code>look</code> picks the layout: <code>fields</code> (boxes with a label above, the
+        default) or <code>chips</code>: a fixed search box and one chip-button per field that always
+        reads name and value together, &quot;Status: All&quot; empty, &quot;Status: Critical&quot; with its
+        own remove when set; the chip opens a <code>SelectPanel</code> whose first option is
+        &quot;All&quot;. No separate applied-filters row: the chip is the summary.
       </>
     ),
     filtreN: (

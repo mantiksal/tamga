@@ -310,6 +310,27 @@ const S = {
 
 /* ---------------------------------------------------------------- liste -- */
 
+function FiltreCipOrnegi({ lang }: { lang: Dil }) {
+  const s = S[lang];
+  const [values, setValues] = useState<FilterValues>({ durum: s.durumlar[0]! });
+  return (
+    <FilterBar
+      look="chips"
+      values={values}
+      onChange={setValues}
+      searchKey="ara"
+      locale={s.locale}
+      top={[
+        { key: "durum", label: s.durum, kind: "select", options: [...s.durumlar] },
+        { key: "oncelik", label: s.oncelik, kind: "select", options: [...s.oncelikler] },
+        { key: "sahip", label: s.sahip, kind: "searchable", options: [...s.kisiler] },
+      ]}
+      drawer={[]}
+      labels={s.filtre}
+    />
+  );
+}
+
 function FiltreOrnegi({ lang }: { lang: Dil }) {
   const s = S[lang];
   const [values, setValues] = useState<FilterValues>({ durum: s.durumlar[0] });
@@ -794,6 +815,25 @@ const OGELER: GaleriOgesi[] = [
   drawer={[{ title: "Kayıt", fields: [...] }]}
   fileSearchKey="dosya"
   labels={{ search: "Ara", all: "Tümü", ... }}
+/>`,
+  },
+  {
+    key: "filter-bar-chips",
+    grup: G.liste,
+    tur: "paket",
+    ad: { tr: "FilterBar · çipler", en: "FilterBar · chips" },
+    aciklama: {
+      tr: "Tek satır: sabit arama, her alan bir çip-düğme. Boşken \"Durum: Tümü\", doluyken \"Durum: Açık ✕\"; paneli SelectPanel.",
+      en: "One line: a fixed search box, one chip-button per field. \"Status: All\" empty, \"Status: Open ✕\" set; the panel is a SelectPanel.",
+    },
+    ornek: (lang) => <FiltreCipOrnegi lang={lang} />,
+    kod: `<FilterBar
+  look="chips"
+  values={values}
+  onChange={setValues}
+  top={[{ key: "durum", label: "Durum", kind: "select", options: [...] }]}
+  drawer={[]}
+  labels={{ search: "Ara", all: "Tümü", filter: "Filtrele", ... }}
 />`,
   },
   {

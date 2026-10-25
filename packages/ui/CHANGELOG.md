@@ -25,7 +25,9 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   `.tamga-filter-bar` is now an inline-size container and the narrow/wide rules are
   `@container` queries; every flex ancestor down to the chip has `min-width: 0`, the search
   shrinks (`flex: 1 1 0`), the button never does (`flex-shrink: 0`), the set-chip row scrolls
-  inside the card. `pnpm olc:filtre` also measures a 210px card on a 1280px screen. Applies to
+  inside the card, and the chips in it never shrink (`flex-shrink: 0`, one line of text): with
+  three filters set they were squashed to 24px and the row did not scroll. `pnpm olc:filtre`
+  also measures a 210px card on a 1280px screen, with three set chips. Applies to
   `look="fields"` too.
 
 ## 0.8.0

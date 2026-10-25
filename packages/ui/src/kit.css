@@ -1567,11 +1567,15 @@
     white-space: nowrap;
     font-size: var(--text-small);
   }
+  /* ÇİP KÜÇÜLMEZ: `min-width: 0` sırada ve atalarında, çipin kendisinde değil ·
+     kayan sırada çipler 24 piksele eziliyor, metinler üst üste biniyordu.
+     Metin tek satır; uzun bir ad tetiğin içinde kırpılır. */
   .tamga-filter-cip {
     display: inline-flex;
     align-items: center;
-    min-width: 0;
+    flex-shrink: 0;
     max-width: 100%;
+    white-space: nowrap;
   }
   /* DOLU ÇİP TEK NESNE: kenar ve gölge çipin, içindeki tetik ve ✕ kenarsız.
      İki kenarlı düğme yan yana iki nesne gibi okunuyordu. ✕ `tamga-token-x`
@@ -1669,6 +1673,10 @@
     }
     .tamga-filter-cip-sira:empty {
       display: none;
+    }
+    .tamga-filter-cip-sira > .tamga-filter-cip,
+    .tamga-filter-cip-sira > .tamga-filter-cip-temizle {
+      flex: 0 0 auto;
     }
   }
   @container (min-width: 40rem) {

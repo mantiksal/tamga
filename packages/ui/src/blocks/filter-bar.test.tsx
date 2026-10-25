@@ -178,7 +178,11 @@ describe("FilterBar · dar ekran (2 · 4)", () => {
     expect(css).toMatch(/\.tamga-filter-bar\s*\{[^}]*container-type:\s*inline-size/);
     expect(css).toMatch(/\.tamga-filter-bar\s*\{[^}]*min-width:\s*0/);
     expect(css).toMatch(/\.tamga-filter-cips\s*\{[^}]*min-width:\s*0/);
-    expect(css).toMatch(/\.tamga-filter-cip\s*\{[^}]*min-width:\s*0/);
+    /* Çipin kendisi küçülmez: min-width 0 sırada ve atalarında kalıyor. */
+    expect(css).toMatch(/\.tamga-filter-cip\s*\{[^}]*flex-shrink:\s*0/);
+    expect(css).toMatch(/\.tamga-filter-cip\s*\{[^}]*white-space:\s*nowrap/);
+    expect(css).not.toMatch(/\.tamga-filter-cip\s*\{[^}]*min-width:\s*0/);
+    expect(css).toMatch(/\.tamga-filter-cip-sira > \.tamga-filter-cip,\s*\.tamga-filter-cip-sira > \.tamga-filter-cip-temizle\s*\{\s*flex:\s*0 0 auto/);
     expect(css).toMatch(/\.tamga-filter-cips > \.tamga-btn,\s*\.tamga-filter-row > \.tamga-btn\s*\{\s*flex-shrink:\s*0/);
   });
   it("geçiş CSS kırılımıyla: dar sınıf genişte, geniş sınıf darda gizli; arama darda tabansız; aynı kök", () => {

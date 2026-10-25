@@ -31,6 +31,19 @@ for (const genislik of [390, 1280, "kap210"]) {
   await gonder("Emulation.setDeviceMetricsOverride", { width: gorunum, height: 900, deviceScaleFactor: 1, mobile: gorunum < 640 });
   await gonder("Page.navigate", { url });
   await new Promise((r) => setTimeout(r, 20000));
+  /* Kap sahnesinde önce üç filtre dolduruluyor (her çipin panelinden ilk gerçek seçenek),
+     sonra kart daraltılıyor: ezilen çip ancak dolu çiplerle görünür. */
+  if (genislik === "kap210") await js(`(async () => {
+    const uyku = (ms) => new Promise((r) => setTimeout(r, ms));
+    const cips = document.querySelector(".tamga-filter-cips");
+    for (let i = 0; i < 6; i++) {
+      const bos = cips?.querySelector(".tamga-filter-cip:not([data-set]) button");
+      if (!bos) break;
+      bos.click(); await uyku(120);
+      const secenek = [...document.querySelectorAll('[role="option"]')].find((o) => o.getAttribute("aria-selected") !== "true");
+      secenek?.click(); await uyku(120);
+    }
+  })()`);
   if (genislik === "kap210") await js(`(() => {
     const daralt = (bar, w) => { if (!bar) return; for (let e = bar; e; e = e.parentElement) { if (getComputedStyle(e).transform !== "none") e.style.transform = "none"; } bar.style.width = w; bar.style.boxSizing = "border-box"; };
     daralt(document.querySelector(".tamga-filter-row")?.closest(".tamga-filter-bar"), "360px");
@@ -87,6 +100,10 @@ for (const genislik of [390, 1280, "kap210"]) {
         /* Kartın YERLEŞİM genişliği: galeri önizlemesi kartı geniş kurup görsel olarak
            küçültüyor; @container yerleşime bakar, bu yüzden geniş kart darda da geniş düzendir. */
         kapGenisligi: kart.offsetWidth,
+        /* Dolu çipler ezilmesin: her çipin genişliği içeriğine eşit, sıra kendi içinde kayıyor. */
+        doluCipSayisi: cips.querySelectorAll(".tamga-filter-cip[data-set]").length,
+        ezilen: [...cips.querySelectorAll(".tamga-filter-cip[data-set]")].filter((c) => c.scrollWidth > c.clientWidth + 1 || [...c.querySelectorAll("button")].some((b) => b.scrollWidth > b.clientWidth + 1)).length,
+        siraKayiyor: sira ? sira.scrollWidth > sira.clientWidth : null,
         ayrinti: (() => { const dugme = [...cips.querySelectorAll("button")].find((b) => b.querySelector(".tamga-filter-dar")); return { siraDisplay: sira && d(sira), dugmeDisplay: dugme && d(dugme), dugmeSag: dugme && Math.round(r(dugme).right), kartSag: Math.round(r(kart).right), kapTuru: getComputedStyle(kart).containerType, kartW: Math.round(r(kart).width) }; })(),
         dugmeIcinde: (() => { const dugme = [...cips.querySelectorAll("button")].find((b) => b.querySelector(".tamga-filter-dar")); const icSag = r(kart).right - parseFloat(getComputedStyle(kart).paddingRight) * (r(kart).width / kart.offsetWidth); return dugme ? r(dugme).right <= icSag + 0.5 && d(dugme) !== "none" : null; })(),
         araIcinde: (() => { const icSag = r(kart).right - parseFloat(getComputedStyle(kart).paddingRight) * (r(kart).width / kart.offsetWidth); return r(ara).right <= icSag + 0.5; })(),
@@ -125,7 +142,7 @@ if (genis && !genis.hata && kapS && !kapS.hata) {
     soyle(c.tasma === null || c.tasma <= 0.5, ad + ": çip sırası kartın sağından taşıyor (" + c.tasma + "px)");
   };
   const darKap = (ad, c) => {
-    soyle(c.bosCip.length > 0 && c.bosCip.every((v) => v === "none"), ad + ": boş çipler gizlenmiyor");
+    if (c.bosCip.length > 0) soyle(c.bosCip.every((v) => v === "none"), ad + ": boş çipler gizlenmiyor");
     soyle(c.doluCip.every((v) => v !== "none") && c.sira === "auto", ad + ": dolu çipler kayan sırada değil");
     soyle(c.aramaTaban === "0px", ad + ": arama tabanı 0 değil (" + c.aramaTaban + ")");
     soyle(c.araIcinde, ad + ": arama kutusu kartın sağından taşıyor");
@@ -140,7 +157,12 @@ if (genis && !genis.hata && kapS && !kapS.hata) {
     const cip390 = sonuc[390]?.cip && sonuc[390].cip.kapGenisligi < 640 ? sonuc[390].cip : null;
     if (cip390) darKap("390 çipler", cip390);
     soyle(kapS.cip, "210 px kap: çip çubuğu bulunamadı");
-    if (kapS.cip) darKap("210 px kap (1280 ekranda)", kapS.cip);
+    if (kapS.cip) {
+      darKap("210 px kap (1280 ekranda)", kapS.cip);
+      soyle(kapS.cip.doluCipSayisi >= 3, "210 px kap: en az üç dolu çip kurulamadı (" + kapS.cip.doluCipSayisi + ")");
+      soyle(kapS.cip.ezilen === 0, "210 px kap: " + kapS.cip.ezilen + " dolu çip eziliyor (genişliği içeriğinden küçük)");
+      soyle(kapS.cip.siraKayiyor === true, "210 px kap: çip sırası kaymıyor (scrollWidth ≤ clientWidth)");
+    }
   }
 }
 console.log(hata ? "✗ Dar ekran geçişi ölçümü başarısız." : "✓ Kutu düzeni dar/geniş; çip düzeni 1280'de ve 210 px kapta doğru: dar düzen kaba bağlı, taşma yok.");

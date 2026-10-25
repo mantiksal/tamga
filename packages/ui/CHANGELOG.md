@@ -5,6 +5,21 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.8.1
+
+> Five things the chip layout showed on a real page.
+
+### Fixed
+
+- **`FilterBar` `look="chips"`** · the search box's visible label is gone (it stays for screen
+  readers), the box is the chips' size and sits on their line, centred with them. "Clear all"
+  is a plain link at the end of the chip row, on the same line. A set chip is one object: the
+  edge and shadow belong to the chip, the trigger inside and the remove square carry none, the
+  remove stays a separate button named `labels.remove(label)`. In the narrow-screen sheet the
+  panels show only the value; the field's name is already above each. On a narrow screen the
+  scrolling row of set chips and "Clear all" stay inside the card. All of it in kit classes;
+  `pnpm olc:filtre` measures each point at 1280 and 390.
+
 ## 0.8.0
 
 > A choice panel opened from a button, and a filter bar made of chips.

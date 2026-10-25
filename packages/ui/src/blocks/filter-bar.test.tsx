@@ -316,12 +316,71 @@ describe("FilterBar · look=chips", () => {
     const form = document.querySelector("form")!;
     expect(form.querySelectorAll(".tamga-select-panel").length).toBe(4);
     expect(form.querySelector(".tamga-select")).toBeNull();
-    expect(screen.getByRole("button", { name: "Öncelik" }).textContent).toBe("Öncelik:Tümü");
+    /* Panelde alanın adı zaten üstte; tetikte önek yok (0.8.1). */
+    expect(screen.getByRole("button", { name: "Öncelik" }).textContent).toBe("Tümü");
     expect(screen.getByRole("dialog", { name: "Filtrele" })).toBeTruthy();
   });
   it("CSS: arama 17.5rem sabit; darda boş çip gizli, dolu çipler yatay kayıyor", () => {
     expect(css).toMatch(/\.tamga-filter-ara-sabit\s*\{[^}]*flex:\s*0 0 17\.5rem/);
     expect(css).toMatch(/@media \(max-width: 39\.9375rem\)\s*\{[^@]*\.tamga-filter-cips \.tamga-filter-cip:not\(\[data-set\]\)\s*\{\s*display:\s*none/);
     expect(css).toMatch(/@media \(max-width: 39\.9375rem\)\s*\{[^@]*\.tamga-filter-cip-sira\s*\{[^}]*overflow-x:\s*auto/);
+  });
+});
+
+/* 0.8.1 · ilk tüketicinin gerçek sayfasında görülen beş şey: aramanın görünür
+   etiketi, "Hepsini temizle"nin satırı, dolu çipin tek nesne olması, panelde
+   çifte ad, darda taşma. Görünümler kit sınıfında; tarayıcı ölçümü olc:filtre. */
+describe("FilterBar · look=chips · 0.8.1", () => {
+  const CIP: FilterField[] = [
+    { key: "state", label: "Durum", kind: "select", options: [{ value: "ok", label: "Sağlıklı" }] },
+    { key: "oncelik", label: "Öncelik", kind: "select", options: ["Düşük"] },
+  ];
+  const css = (() => {
+    const { existsSync, readFileSync } = require("node:fs") as typeof import("node:fs");
+    return readFileSync(["src/kit.css", "packages/ui/src/kit.css"].find(existsSync)!, "utf8");
+  })();
+  const kural = (secici: string) => css.match(new RegExp(secici.replace(/[.*+?^${}()|[\]\\>]/g, "\\$&") + "\\s*\\{([^}]*)\\}"))?.[1] ?? "";
+  const cips = (props: Partial<Parameters<typeof FilterBar>[0]> = {}) =>
+    cubuk({ look: "chips", top: CIP, labels: { ...ETIKETLER, filter: "Filtrele" }, ...props });
+
+  it("1 · aramanın etiketi ekran okuyucuda, gözde değil; kutu çiplerle aynı boy (sm)", () => {
+    cips();
+    const etiket = document.querySelector(".tamga-filter-ara-sabit .tamga-filter-ara-etiket")!;
+    expect(etiket).not.toBeNull();
+    expect(etiket.textContent).toBe("Ara");
+    expect(kural(".tamga-filter-ara-etiket")).toMatch(/width:\s*1px/);
+    expect(document.querySelector(".tamga-filter-ara-sabit input")!.className).toMatch(/tamga-input-sm/);
+    expect(kural(".tamga-filter-cips")).toMatch(/align-items:\s*center/);
+  });
+  it("2 · Hepsini temizle çip sırasının içinde düz bir bağlantı", () => {
+    cips({ values: { state: "ok" } });
+    const temizle = screen.getByRole("button", { name: "Hepsini temizle" });
+    expect(temizle.className).toMatch(/tamga-filter-cip-temizle/);
+    expect(temizle.className).not.toMatch(/tamga-btn/);
+    expect(temizle.closest(".tamga-filter-cip-sira")).not.toBeNull();
+  });
+  it("3 · dolu çip tek nesne: kenar ve gölge çipte, tetik ve ✕ kenarsız; ✕ ayrı düğme ve adlı", () => {
+    cips({ values: { state: "ok" } });
+    const cip = document.querySelector(".tamga-filter-cip[data-set]")!;
+    expect(cip.querySelector("button.tamga-filter-cip-x")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Durum filtresini kaldır" })).toBeTruthy();
+    expect(kural(".tamga-filter-cip[data-set]")).toMatch(/border:\s*1\.5px solid var\(--color-edge-strong\)/);
+    expect(kural(".tamga-filter-cip[data-set]")).toMatch(/box-shadow:\s*3px 3px 0/);
+    expect(kural(".tamga-filter-cip[data-set] > .tamga-select-panel > .tamga-select-panel-tetik")).toMatch(/border:\s*0/);
+    expect(kural(".tamga-filter-cip[data-set] > .tamga-select-panel > .tamga-select-panel-tetik")).toMatch(/box-shadow:\s*none/);
+    expect(kural(".tamga-filter-cip-x")).toMatch(/border:\s*0/);
+    expect(kural(".tamga-filter-cip-x")).toMatch(/box-shadow:\s*none/);
+  });
+  it("4 · dar ekran panelinde önek yok: yalnız değer", () => {
+    cips({ values: { state: "ok" } });
+    fireEvent.click(screen.getByRole("button", { name: /Tüm filtreler/ }));
+    const form = document.querySelector("form")!;
+    const tetikler = [...form.querySelectorAll(".tamga-select-panel-tetik")].map((b) => b.textContent);
+    expect(tetikler).toEqual(["Sağlıklı", "Tümü"]);
+  });
+  it("5 · darda çip sırası küçülebiliyor: min-width 0, kartın içinde", () => {
+    const dar = css.match(/@media \(max-width: 39\.9375rem\)\s*\{([\s\S]*?)\n  \}/)?.[1] ?? "";
+    expect(dar).toMatch(/\.tamga-filter-cip-sira\s*\{[^}]*min-width:\s*0/);
+    expect(dar).toMatch(/\.tamga-filter-cip-sira\s*\{[^}]*max-width:\s*100%/);
   });
 });

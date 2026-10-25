@@ -39,12 +39,37 @@ for (const genislik of [390, 1280]) {
     const darGrupGorunum = darGrup ? d(darGrup) : "yok";
     /* Çip düzeni (look="chips"): boş çipler darda gizli, dolu çip sırası yatay kayıyor. */
     const cips = document.querySelector(".tamga-filter-cips");
-    const cip = cips && {
-      bosCip: [...cips.querySelectorAll(".tamga-filter-cip:not([data-set])")].map(d),
-      doluCip: [...cips.querySelectorAll(".tamga-filter-cip[data-set]")].map(d),
-      sira: getComputedStyle(cips.querySelector(".tamga-filter-cip-sira")).overflowX,
-      aramaTaban: getComputedStyle(cips.querySelector(".tamga-filter-ara-sabit")).flexBasis,
-    };
+    const r = (el) => el.getBoundingClientRect();
+    const cip = cips && (() => {
+      const ara = cips.querySelector(".tamga-filter-ara-sabit");
+      const araKutu = ara.querySelector("input");
+      const etiket = ara.querySelector("span, .tamga-filter-ara-etiket");
+      const ilkCip = cips.querySelector(".tamga-filter-cip button");
+      const dolu = cips.querySelector(".tamga-filter-cip[data-set]");
+      const x = dolu && dolu.querySelector(".tamga-filter-cip-x");
+      const temizle = [...cips.querySelectorAll("button")].find((b) => b.textContent.trim() === "Hepsini temizle" || b.textContent.trim() === "Clear all");
+      const kart = cips.closest(".tamga-filter-bar");
+      const sira = cips.querySelector(".tamga-filter-cip-sira");
+      return {
+        bosCip: [...cips.querySelectorAll(".tamga-filter-cip:not([data-set])")].map(d),
+        doluCip: [...cips.querySelectorAll(".tamga-filter-cip[data-set]")].map(d),
+        sira: getComputedStyle(sira).overflowX,
+        aramaTaban: getComputedStyle(ara).flexBasis,
+        /* 0.8.1 */
+        etiketGorunur: !!etiket && r(etiket).height > 1 && r(etiket).width > 1,
+        aramaYukseklik: Math.round(r(araKutu).height),
+        cipYukseklik: ilkCip ? Math.round(r(ilkCip).height) : null,
+        hizaFarki: ilkCip ? +Math.abs(r(araKutu).bottom - r(ilkCip).bottom).toFixed(1) : null,
+        temizleAyniSatir: temizle && ilkCip ? Math.abs(r(temizle).top + r(temizle).height / 2 - (r(ilkCip).top + r(ilkCip).height / 2)) < 4 : null,
+        xKenar: x ? getComputedStyle(x).borderStyle + "/" + getComputedStyle(x).boxShadow : null,
+        /* ✕ çipin kendi kenarının içinde: çip kutusu (border) ✕'i kapsıyor. */
+        xIcinde: x && dolu ? r(x).right <= r(dolu).right + 0.5 && r(x).left >= r(dolu).left - 0.5 : null,
+        /* Önizleme ölçekli olabilir: dolgu, kartın görünen/yerleşim genişliği oranıyla ölçekleniyor. */
+        tasma: kart && sira ? +(r(sira).right - (r(kart).right - parseFloat(getComputedStyle(kart).paddingRight) * (r(kart).width / kart.offsetWidth))).toFixed(1) : null,
+        rects: kart && sira ? { kart: [r(kart).left, r(kart).right].map(Math.round), pad: getComputedStyle(kart).paddingRight, cips: [r(cips).left, r(cips).right].map(Math.round), sira: [r(sira).left, r(sira).right].map(Math.round), siraW: Math.round(r(sira).width), cipsW: Math.round(r(cips).width) } : null,
+        kaydirmaTasma: sira ? sira.scrollWidth > sira.clientWidth : null,
+      };
+    })();
     return JSON.stringify({ ustAlanlar: genis, aramaTaban: ara, dugmeDar: darMetin, dugmeGenis: genisMetin, cekmeceDarGrup: darGrupGorunum, cip });
   })()`));
   ws.close(); proc.kill();
@@ -67,6 +92,16 @@ if (dar && genis && !dar.hata && !genis.hata) {
     soyle(dar.cip.doluCip.every((v) => v !== "none") && dar.cip.sira === "auto", "390 çipler: dolu çipler kayan sırada değil");
     soyle(dar.cip.aramaTaban === "0px", "390 çipler: arama tabanı 0 değil (" + dar.cip.aramaTaban + ")");
     soyle(genis.cip.bosCip.every((v) => v !== "none") && genis.cip.aramaTaban === "280px", "1280 çipler: boş çipler görünmüyor ya da arama 280px değil");
+    for (const [g, c] of [[1280, genis.cip], [390, dar.cip]]) {
+      soyle(!c.etiketGorunur, g + " çipler: aramanın görünür etiketi gizli değil");
+      soyle(c.cipYukseklik === null || c.aramaYukseklik === c.cipYukseklik, g + " çipler: arama ile çip yükseklikleri farklı (" + c.aramaYukseklik + "/" + c.cipYukseklik + ")");
+      /* Hiza yalnız genişte: darda dolu çipler bilerek ikinci satırda. */
+      soyle(g === 390 || c.hizaFarki === null || c.hizaFarki <= 1, g + " çipler: arama ile ilk çip aynı hizada değil (" + c.hizaFarki + "px)");
+      soyle(c.xKenar === null || (c.xKenar.startsWith("none") && c.xKenar.endsWith("none")), g + " çipler: ✕ kendi kenarını/gölgesini taşıyor (" + c.xKenar + ")");
+      soyle(c.xIcinde !== false, g + " çipler: ✕ çipin kenarının içinde değil");
+      soyle(c.tasma === null || c.tasma <= 0.5, g + " çipler: çip sırası kartın sağından taşıyor (" + c.tasma + "px)");
+    }
+    soyle(genis.cip.temizleAyniSatir !== false, "1280 çipler: Hepsini temizle çiplerle aynı satırda değil");
   } else console.log("(çip düzeni sayfada yok, ölçülmedi)");
 }
 console.log(hata ? "✗ Dar ekran geçişi ölçümü başarısız." : "✓ Dar ekranda arama + Filtrele, genişte alanlar satırda; çekmecede çift alan yok; çip düzeni iki genişlikte de doğru.");

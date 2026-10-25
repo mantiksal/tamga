@@ -280,7 +280,8 @@ function PanelAlani({
   const ortak = {
     title: field.panelTitle ?? field.label,
     "aria-label": field.label,
-    prefix: `${field.label}:`,
+    /* Çipte ad önek ("Durum:"); çekmece panelinde ad zaten üstte, önek yok. */
+    prefix: cip ? `${field.label}:` : undefined,
     placeholder: labels.all,
     searchable: field.kind === "searchable",
     labels: { noMatch: labels.noMatch, search: labels.search, clear: labels.clear },
@@ -449,7 +450,7 @@ export function FilterBar({
   const aramaKutusu = (
     <span className="relative flex items-center">
       <Icon icon={Search} size="xs" aria-hidden className="pointer-events-none absolute left-2.5 text-ink-faint" />
-      <Input type="search" full leading placeholder={labels.search} value={values[searchKey] ?? ""} onChange={(e) => write(searchKey, e.target.value)} />
+      <Input type="search" full leading size={cipler ? "sm" : "md"} placeholder={labels.search} value={values[searchKey] ?? ""} onChange={(e) => write(searchKey, e.target.value)} />
     </span>
   );
   const cekmeceDugmesi = (drawer.length > 0 || top.length > 0) && (
@@ -475,8 +476,10 @@ export function FilterBar({
           Gerekçe: docs/gerekce/08-blok-ve-sablon.md */}
       {cipler ? (
         <div className="tamga-filter-cips">
+          {/* Etiket ekran okuyucuda, gözde değil: ikon ve yer tutucu amacı söylüyor,
+              kutu çiplerle aynı satırda ve aynı boyda (sm). */}
           <label className="tamga-filter-ara-sabit">
-            <span className="text-small font-bold text-ink-faint">{labels.search}</span>
+            <span className="tamga-filter-ara-etiket">{labels.search}</span>
             {aramaKutusu}
           </label>
           <span className="tamga-filter-cip-sira">
@@ -499,9 +502,9 @@ export function FilterBar({
               ),
             )}
             {darAktif > 0 ? (
-              <Button variant="link" size="sm" onClick={() => onChange({})}>
+              <button type="button" className="tamga-link tamga-filter-cip-temizle" onClick={() => onChange({})}>
                 {labels.clearAll}
-              </Button>
+              </button>
             ) : null}
           </span>
           {cekmeceDugmesi}

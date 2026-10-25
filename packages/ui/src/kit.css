@@ -1535,46 +1535,79 @@
   .tamga-filter-cips {
     display: flex;
     flex-wrap: wrap;
-    align-items: flex-end;
+    align-items: center;
     gap: 8px;
+    min-width: 0;
   }
   .tamga-filter-ara-sabit {
     display: flex;
     flex-direction: column;
-    gap: 6px;
     min-width: 0;
     max-width: 100%;
     flex: 0 0 17.5rem;
   }
+  /* Aramanın etiketi yalnız ekran okuyucuya: ikon ve yer tutucu amacı söylüyor. */
+  .tamga-filter-ara-etiket {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
   .tamga-filter-cip-sira {
     display: contents;
+  }
+  .tamga-filter-cip-temizle {
+    white-space: nowrap;
+    font-size: var(--text-small);
   }
   .tamga-filter-cip {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
     max-width: 100%;
   }
-  .tamga-filter-cip-x {
-    display: grid;
-    place-items: center;
-    width: calc(var(--control) - 8px);
-    height: calc(var(--control) - 8px);
-    flex-shrink: 0;
+  /* DOLU ÇİP TEK NESNE: kenar ve gölge çipin, içindeki tetik ve ✕ kenarsız.
+     İki kenarlı düğme yan yana iki nesne gibi okunuyordu. ✕ `tamga-token-x`
+     gibi: küçük kare, kendi kenarı yok, ayrı ve adlı bir düğme. */
+  .tamga-filter-cip[data-set] {
+    gap: 2px;
+    padding-right: 6px;
     border: 1.5px solid var(--color-edge-strong);
     border-radius: var(--radius-ctl);
     background: var(--color-accent-soft);
     color: var(--color-accent-soft-ink);
     box-shadow: 3px 3px 0 var(--color-edge-strong);
+  }
+  .tamga-filter-cip[data-set] > .tamga-select-panel > .tamga-select-panel-tetik {
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    padding-right: 4px;
+  }
+  .tamga-filter-cip[data-set] > .tamga-select-panel > .tamga-select-panel-tetik:not(:disabled):hover,
+  .tamga-filter-cip[data-set] > .tamga-select-panel > .tamga-select-panel-tetik:not(:disabled):active {
+    transform: none;
+    box-shadow: none;
+    background: transparent;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .tamga-filter-cip-x {
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: var(--mark-dot-radius);
+    background: transparent;
+    color: var(--color-accent-soft-ink);
+    box-shadow: none;
     cursor: pointer;
   }
   .tamga-filter-cip-x:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0 var(--color-edge-strong);
-  }
-  .tamga-filter-cip-x:active {
-    transform: translate(3px, 3px);
-    box-shadow: 0 0 0 var(--color-edge-strong);
+    background: var(--color-shell);
   }
   /* Çekmecede ve formda panel tam genişlik: tetik kutu gibi durur. */
   .tamga-select-panel-tam,
@@ -1614,6 +1647,9 @@
       display: flex;
       order: 2;
       flex: 1 1 100%;
+      min-width: 0;
+      max-width: 100%;
+      align-items: center;
       flex-wrap: nowrap;
       gap: 8px;
       overflow-x: auto;

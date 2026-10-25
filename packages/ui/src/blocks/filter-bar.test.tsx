@@ -395,3 +395,29 @@ describe("FilterBar · look=chips · 0.8.1", () => {
     expect(dar).toMatch(/\.tamga-filter-cip-sira\s*\{[^}]*max-width:\s*100%/);
   });
 });
+
+/* PANELİN ARAMASI KENDİ METNİNİ TAŞIR: ana arama kutusunun yer tutucusu ("Ad ya
+   da adres ara") aranabilir alanın panelinde çıkıyordu. Sıra: alanın
+   searchPlaceholder'ı, yoksa labels.searchIn(label), o da yoksa alanın adı. */
+describe("FilterBar · look=chips · panel araması", () => {
+  const ALAN: FilterField = { key: "etiket", label: "Etiket", kind: "searchable", options: ["a", "b"] };
+  const ac = (props: Partial<Parameters<typeof FilterBar>[0]> = {}) => {
+    cubuk({ look: "chips", top: [ALAN], labels: { ...ETIKETLER, search: "Ad ya da adres ara" }, ...props });
+    fireEvent.click(screen.getByRole("button", { name: "Etiket" }));
+    return screen.getAllByRole("searchbox").find((k) => k.closest(".tamga-select-panel-kutu"))!;
+  };
+  it("searchPlaceholder verilirse o", () => {
+    const kutu = ac({ top: [{ ...ALAN, searchPlaceholder: "Etiket ara" }] });
+    expect(kutu.getAttribute("placeholder")).toBe("Etiket ara");
+    expect(kutu.getAttribute("aria-label")).toBe("Etiket ara");
+  });
+  it("yoksa labels.searchIn(label)", () => {
+    const kutu = ac({ labels: { ...ETIKETLER, search: "Ad ya da adres ara", searchIn: (l: string) => `${l} içinde ara` } });
+    expect(kutu.getAttribute("placeholder")).toBe("Etiket içinde ara");
+  });
+  it("o da yoksa alanın adı; ana aramanın metni hiçbir panelde yok", () => {
+    const kutu = ac();
+    expect(kutu.getAttribute("placeholder")).toBe("Etiket");
+    expect(document.querySelector('.tamga-select-panel-kutu [placeholder="Ad ya da adres ara"]')).toBeNull();
+  });
+});

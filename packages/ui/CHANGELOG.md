@@ -29,6 +29,9 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   three filters set they were squashed to 24px and the row did not scroll. `pnpm olc:filtre`
   also measures a 210px card on a 1280px screen, with three set chips. Applies to
   `look="fields"` too.
+- **A chip panel's search box showed the bar's own search text** ("Search by name or
+  address" inside the Tags panel). It now reads the field's `searchPlaceholder`, else
+  `labels.searchIn(label)`, else the field's label.
 
 ## 0.8.0
 

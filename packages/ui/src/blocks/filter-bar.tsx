@@ -75,6 +75,13 @@ export type FilterField = {
    */
   panelTitle?: string;
   /**
+   * `look="chips"`, `searchable` only: the panel's search box text, "Search tags". Absent,
+   * `labels.searchIn(label)`, else the label itself; never the bar's own search text. TR: Yalnız
+   * `look="chips"` ve `searchable`: panelin arama kutusunun metni, "Etiket ara". Yoksa
+   * `labels.searchIn(label)`, o da yoksa alanın adı; asla çubuğun kendi arama metni.
+   */
+  searchPlaceholder?: string;
+  /**
    * A glyph before the value, naming what this filter is about. TR: Değerin
    * önünde, bu filtrenin neyle ilgili olduğunu söyleyen glif.
    *
@@ -132,6 +139,12 @@ export type FilterBarLabels = {
   open: (label: string) => string;
   /** Like "Remove the <filter> filter". TR: "<filtre> filtresini kaldır". */
   remove: (label: string) => string;
+  /**
+   * Like "Search in <field>"; the chip panel's search box when the field gives no
+   * `searchPlaceholder`. TR: "<alan> içinde ara" gibi; alan `searchPlaceholder` vermezse çip
+   * panelinin arama kutusu.
+   */
+  searchIn?: (label: string) => string;
   rangeStart: string;
   rangeEnd: string;
   calendar: { previousMonth: string; nextMonth: string; open: string; clear: string };
@@ -284,7 +297,8 @@ function PanelAlani({
     prefix: cip ? `${field.label}:` : undefined,
     placeholder: labels.all,
     searchable: field.kind === "searchable",
-    labels: { noMatch: labels.noMatch, search: labels.search, clear: labels.clear },
+    /* Panelin araması kendi metnini taşır; çubuğun arama metni ("Ad ya da adres ara") değil. */
+    labels: { noMatch: labels.noMatch, search: field.searchPlaceholder ?? labels.searchIn?.(field.label) ?? field.label, clear: labels.clear },
     size: cip ? ("sm" as const) : ("base" as const),
     className: cip ? undefined : "tamga-select-panel-tam",
   };

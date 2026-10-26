@@ -35,7 +35,10 @@ const sonuc = JSON.parse(await js(`(() => {
     const kapat = a.querySelector(".tamga-alert-kapat"); const eylem = a.querySelector(".tamga-alert-eylem");
     out.push({ baslik: p.textContent.slice(0, 22), rows: a.dataset.rows, karo: +(orta(r(tile)) - orta(satir)).toFixed(1), kapat: kapat ? +(orta(r(kapat)) - orta(satir)).toFixed(1) : null, eylem: eylem ? +(orta(r(eylem)) - orta(satir)).toFixed(1) : null, yukseklik: Math.round(r(a).height) });
   }
-  const ilk = document.querySelector('[data-rows="single"]'); const b = ilk ? ilk.closest(".tamga-demo, section")?.getBoundingClientRect() ?? ilk.getBoundingClientRect() : null;
+  const ilk = document.querySelector('[data-rows="single"]');
+  const kap = ilk ? ilk.parentElement : null;
+  if (kap) kap.scrollIntoView({ block: "start" });
+  const b = kap ? kap.getBoundingClientRect() : null;
   return JSON.stringify({ uyarilar: out, kutu: b && { x: b.x + window.scrollX, y: b.y + window.scrollY, w: b.width, h: Math.min(b.height, 520) } });
 })()`));
 if (klasor && sonuc.kutu) {

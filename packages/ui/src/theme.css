@@ -420,8 +420,9 @@
      a sentence is too dark to register as a dot. Two jobs, two values.
      TR: METNİN DEĞİL, İŞARETİN rengi. Bir nokta birkaç pikselde taşımak zorunda
      ve bunu yapan renk cümle olarak okunamayacak kadar açık; cümle olarak
-     okunan renk de nokta olarak fark edilmeyecek kadar koyu. İki iş, iki değer. */
-  --color-resolved-mark: #3e9a5c;
+     okunan renk de nokta olarak fark edilmeyecek kadar koyu. İki iş, iki değer.
+     Bir tık koyu (#3e9a5c → #35884f): karonun beyaz glifi 4.4:1 ile okunsun. */
+  --color-resolved-mark: #35884f;
   /* Something happened and it is worth knowing, but nobody has to act. The tone
      the other three leave uncovered: not broken, not heading there, not solved.
      Blue because it is the one hue with no urgency attached to it anywhere in

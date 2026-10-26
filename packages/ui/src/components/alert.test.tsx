@@ -26,3 +26,12 @@ describe("Alert · satır sayısı ve hiza", () => {
     expect(css).toMatch(/\.tamga-alert\[data-rows="multi"\] > \.tamga-alert-kapat\s*\{\s*margin-top:\s*calc\(\(1lh - 30px\) \/ 2\)/);
   });
 });
+
+/* BAŞARI KAROSU: koyu yeşil üstünde lacivert glif görünmüyordu (4.7:1 sayıca
+   geçiyor, gözle geçmiyor). Glif beyaz, yeşil bir tık koyu (#35884f, 4.4:1). */
+describe("Alert · başarı karosunun glifi", () => {
+  it("positive tonunun işaret mürekkebi beyaz (inverse-ink)", async () => {
+    const { tones } = await import("./tone.js");
+    expect(tones.positive.markInk).toBe("var(--color-inverse-ink)");
+  });
+});

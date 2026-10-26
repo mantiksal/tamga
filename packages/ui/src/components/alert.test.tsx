@@ -5,26 +5,33 @@ import { Alert } from "./primitives.js";
 import { Button } from "./button.js";
 import { Icon } from "./icon.js";
 
-/* TEK SATIRLI UYARI: başlık tek başına gelince karo, eylem ve kapatma düğmesi
-   başlıkla ortalanır (`data-rows="single"`). Gövdeliyse (`multi`) hepsi başlığın
-   İLK satırına hizalanır; bugün karo 4 px, kapatma 5 px aşağıdaydı. */
-describe("Alert · satır sayısı ve hiza", () => {
+/* KARO BAŞLIĞIN İLK SATIRININ ORTASINDA, satır sayısından ve gövdeden bağımsız:
+   kutu üstten hizalı, başlık kendi `1lh`ini 28 piksele göre aşağı alıyor. Tek
+   satırda `center` üç satırlık başlıkta karoyu bloğun ortasına kaçırıyordu
+   (390px'te ilk satır karodan 22 px yukarıda, üründe ölçüldü). */
+describe("Alert · hiza satır sayısından bağımsız", () => {
   const css = readFileSync(["src/kit.css", "packages/ui/src/kit.css"].find(existsSync)!, "utf8");
-  it("gövdesiz uyarı single, gövdeli multi; eylem ve kapatma kit sınıfı taşıyor", () => {
+  it("başlık, eylem ve kapatma kit sınıfı taşıyor; satır sayısı niteliği yok", () => {
     const a = render(<Alert state="info" title="Hazır" action={<Button size="sm">Aç</Button>} dismissLabel="Kapat" onDismiss={vi.fn()} />);
     const kutu = a.container.querySelector(".tamga-alert")!;
-    expect(kutu.getAttribute("data-rows")).toBe("single");
+    expect(kutu.getAttribute("data-rows")).toBeNull();
+    expect(kutu.getAttribute("data-body")).toBeNull();
+    expect(kutu.querySelector("p")!.className).toMatch(/tamga-alert-baslik/);
     expect(kutu.querySelector(".tamga-alert-eylem")).not.toBeNull();
     expect(screen.getByRole("button", { name: "Kapat" }).className).toMatch(/tamga-alert-kapat/);
     a.unmount();
     const b = render(<Alert state="info" title="Hazır">Gövde</Alert>);
-    expect(b.container.querySelector(".tamga-alert")!.getAttribute("data-rows")).toBe("multi");
+    expect(b.container.querySelector(".tamga-alert")!.getAttribute("data-body")).toBe("true");
   });
-  it("CSS: single ortalı; multi'de karo, eylem ve kapatma ilk satıra", () => {
-    expect(css).toMatch(/\.tamga-alert\[data-rows="single"\]\s*\{\s*align-items:\s*center/);
-    expect(css).toMatch(/\.tamga-alert\[data-rows="multi"\] > \.tamga-alert-tile\s*\{\s*margin-top:\s*calc\(\(1lh - 28px\) \/ 2\)/);
-    expect(css).toMatch(/\.tamga-alert\[data-rows="multi"\] > \.tamga-alert-eylem\s*\{\s*margin-top:\s*calc\(\(1lh - 32px\) \/ 2\)/);
-    expect(css).toMatch(/\.tamga-alert\[data-rows="multi"\] > \.tamga-alert-kapat\s*\{\s*margin-top:\s*calc\(\(1lh - 30px\) \/ 2\)/);
+  it("CSS: kutu üstten; başlık (28px - 1lh)/2; eylem -2, kapatma -1", () => {
+    expect(css).toMatch(/\.tamga-alert\s*\{[^}]*align-items:\s*flex-start/);
+    expect(css).not.toMatch(/data-rows/);
+    expect(css).toMatch(/\.tamga-alert-baslik\s*\{\s*margin-top:\s*calc\(\(28px - 1lh\) \/ 2\)/);
+    /* Boşluksuz bir adres kutudan taşıyordu: başlık her yerden kırılabilir. */
+    expect(css).toMatch(/\.tamga-alert-baslik\s*\{[^}]*overflow-wrap:\s*anywhere/);
+    expect(css).toMatch(/\.tamga-alert\[data-body\] > \.tamga-alert-tile\s*\{\s*margin-top:\s*2px/);
+    expect(css).toMatch(/\.tamga-alert-eylem\s*\{\s*margin-top:\s*-2px/);
+    expect(css).toMatch(/\.tamga-alert-kapat\s*\{\s*margin-top:\s*-1px/);
   });
 });
 

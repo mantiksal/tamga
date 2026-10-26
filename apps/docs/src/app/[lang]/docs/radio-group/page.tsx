@@ -1,3 +1,4 @@
+import { RadioGroup } from "tamga-ui";
 import { LookDemo, RadioDemo } from "@/components/interactive";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
@@ -72,6 +73,36 @@ const T = {
         tablosunda herkese gösterilen bir yalan olurdu.
       </>
     ),
+    notH: "Açıklama, hata ve görünür başlık",
+    notP: (
+      <>
+        Grup hata metnini <strong>kendisi taşıyor</strong>: <code>description</code> seçeneklerin
+        altındaki sessiz satır, <code>error</code> kritik renkte ve uyarı glifli hata satırı;{" "}
+        <Xref to="field">Field</Xref>&apos;ın satırıyla aynı çizim, çünkü aynı iç bileşen. Hata
+        varken açıklama gizlenir. Kök <code>role=&quot;radiogroup&quot;</code> elemanı{" "}
+        <code>aria-describedby</code> ile satıra bağlanır ve hata varken{" "}
+        <code>aria-invalid</code> taşır. <code>errorPrefix</code> yalnız ekran okuyucunun duyduğu
+        önek (&laquo;Hata:&raquo;); sözcüğü çağıran kendi dilinde yazar. <code>showLabel</code>{" "}
+        <code>label</code>&apos;ı görünür bir başlık yapar: Field etiketiyle aynı boy, kalınlık ve
+        8px aralık, <code>aria-labelledby</code> ile bağlı. Varsayılan kapalı; mevcut kullanımlar
+        değişmez.
+      </>
+    ),
+    notN: (
+      <>
+        <strong>Neden grubun içinde.</strong> RadioGroup Field&apos;ın içine giremiyor (bir
+        <code>label</code> bir gruba değil tek bir kontrole bağlanır), ve altına kitle aynı
+        görünen bir hata satırı yazmanın yolu yoktu: ürünler Field&apos;ın satırını elle
+        kopyalıyordu. GOV.UK, Polaris, Spectrum ve Primer&apos;da hata metnini grubun kendisi
+        alıyor, çiziyor ve ekran okuyucu bağlantısını kuruyor.
+      </>
+    ),
+    kargo: "Kargo",
+    kargoAlt: "Teslimat süresi yönteme göre değişir.",
+    kargoHata: "Birini seçmelisin.",
+    hataOnek: "Hata:",
+    std: "Standart", stdAlt: "2-4 iş günü",
+    exp: "Ekspres", expAlt: "Ertesi gün",
     roles: (
       <>
         Grup <code>role=&quot;radiogroup&quot;</code>, satırlar <code>role=&quot;radio&quot;</code>.
@@ -136,6 +167,37 @@ const T = {
         one shell would be a lie told to everyone in the props table.
       </>
     ),
+    notH: "Description, error and a visible heading",
+    notP: (
+      <>
+        The group <strong>carries its own error text</strong>: <code>description</code> is the
+        quiet line under the options, <code>error</code> the critical-coloured line with a warning
+        glyph; the same drawing as <Xref to="field">Field</Xref>&apos;s line, because it is the
+        same inner component. While an error shows, the description is hidden. The root{" "}
+        <code>role=&quot;radiogroup&quot;</code> element is wired to the line with{" "}
+        <code>aria-describedby</code> and carries <code>aria-invalid</code> while there is an
+        error. <code>errorPrefix</code> is a prefix only screen readers hear
+        (&ldquo;Error:&rdquo;); the caller writes the word in its own language.{" "}
+        <code>showLabel</code> turns <code>label</code> into a visible heading: Field&apos;s label
+        size, weight and 8px gap, wired with <code>aria-labelledby</code>. Off by default; existing
+        uses do not change.
+      </>
+    ),
+    notN: (
+      <>
+        <strong>Why inside the group.</strong> RadioGroup cannot sit inside Field (a{" "}
+        <code>label</code> binds to one control, not to a group), and there was no way to write a
+        kit-looking error line under it: products copied Field&apos;s line by hand. In GOV.UK,
+        Polaris, Spectrum and Primer the group itself takes the error text, draws it and wires it
+        for screen readers.
+      </>
+    ),
+    kargo: "Shipping",
+    kargoAlt: "Delivery time depends on the method.",
+    kargoHata: "Pick one.",
+    hataOnek: "Error:",
+    std: "Standard", stdAlt: "2-4 business days",
+    exp: "Express", expAlt: "Next day",
     roles: (
       <>
         The group is <code>role=&quot;radiogroup&quot;</code>, the rows are{" "}
@@ -191,6 +253,45 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <Note>{t.lookN}</Note>
       <P>{t.lookIkinci}</P>
       <P>{t.kanca}</P>
+
+      <H2>{t.notH}</H2>
+      <P>{t.notP}</P>
+      <Demo labels={dict.demo} align="start" grid={false} code={`<RadioGroup label="${t.kargo}" showLabel description="${t.kargoAlt}" … />
+<RadioGroup label="${t.kargo}" showLabel error="${t.kargoHata}" errorPrefix="${t.hataOnek}" … />
+<RadioGroup look="card" label="${t.kargo}" error="${t.kargoHata}" errorPrefix="${t.hataOnek}" … />`}>
+        <div className="flex w-full flex-wrap items-start gap-8" data-not-ornek>
+          <RadioGroup
+            label={t.kargo}
+            showLabel
+            description={t.kargoAlt}
+            value="std"
+            className="w-60 max-w-full"
+            options={[{ value: "std", label: t.std }, { value: "exp", label: t.exp }]}
+          />
+          <RadioGroup
+            label={t.kargo}
+            showLabel
+            error={t.kargoHata}
+            errorPrefix={t.hataOnek}
+            value="std"
+            className="w-60 max-w-full"
+            options={[{ value: "std", label: t.std }, { value: "exp", label: t.exp }]}
+          />
+          <RadioGroup
+            look="card"
+            label={t.kargo}
+            error={t.kargoHata}
+            errorPrefix={t.hataOnek}
+            value="std"
+            className="w-70 max-w-full"
+            options={[
+              { value: "std", label: <><span className="text-body block font-semibold">{t.std}</span><span className="text-caption text-ink-faint block">{t.stdAlt}</span></> },
+              { value: "exp", label: <><span className="text-body block font-semibold">{t.exp}</span><span className="text-caption text-ink-faint block">{t.expAlt}</span></> },
+            ]}
+          />
+        </div>
+      </Demo>
+      <Note>{t.notN}</Note>
 
       <H2>{t.rules}</H2>
       <Note>{t.roles}</Note>

@@ -2512,6 +2512,11 @@
     background: var(--color-accent-soft);
     color: var(--color-accent-soft-ink);
   }
+  /* FOTOĞRAF KAROSUNUN ZEMİNİ KABUK: vurgu rengi baş harflerin zemini, bir
+     resmin arkasında yalnız şeffaf köşelerden sızıp onu boyalı gösteriyordu. */
+  img.tamga-avatar {
+    background: var(--color-shell);
+  }
 
   /* BOŞ BÖLÜMÜN KARTI KESİK KENARLI: dolu hâlinde aynı yerde kesiksiz bir kart
      duruyor · ikisi aynı kutu, biri henüz dolmamış.
@@ -2967,6 +2972,27 @@
     border-color: var(--color-critical);
     background: var(--color-critical-bg);
     box-shadow: 3px 3px 0 var(--color-critical);
+  }
+  /* HATALI SEÇİCİ HATALI GİRDİYLE AYNI KENARI GİYİYOR: Field `aria-invalid`i
+     tetiğe bağlıyor, kenar onu okuyor. */
+  .tamga-select[aria-invalid="true"], .tamga-select[aria-invalid="true"]:hover:not(:disabled) {
+    border-color: var(--color-critical);
+    background: var(--color-critical-bg);
+    box-shadow: 3px 3px 0 var(--color-critical);
+  }
+  /* TEK HATA SATIRI · Field, RadioGroup ve Checkbox'ın altındaki aynı çizim:
+     glif + metin, küçük boy, etiket ağırlığı. Rengi bileşen tondan veriyor. */
+  .tamga-field-hata {
+    align-items: center;
+    display: flex;
+    font-size: var(--text-small);
+    font-weight: var(--weight-label);
+    gap: 6px;
+  }
+  /* ONAY KUTUSUNUN NOTU: ızgaranın ikinci sütununda, yani etiketle hizalı;
+     düğmenin içinde olduğu için ağırlığı ve rengi kendisi taşıyor. */
+  .tamga-check-not {
+    font-weight: var(--weight-body);
   }
   /* ODAK BİR BASAMAK BÜYÜDÜ (2 → 3), ama RENGİ TEK KALDI: Yasa 1 · D, kenar ile
      offset aynı nesnenin iki yüzü. Renk `accent-line`, çünkü odak halkasının işi
@@ -3893,13 +3919,12 @@
     padding: 8px 12px;
   }
 
-  /* TAKVİM GÜNÜ · 36x36 kare, ve üç hâli var: bugün ÇERÇEVEli, seçili DOLU,
-     ötekiler düz. Seçili gün basılmış görünüyor (2px sert offset) çünkü
-     seçilmiş bir tarih tıklanmış bir tuştur.
+  /* TAKVİM GÜNÜ · 36x36 kare, ve üç hâli var: bugün kalın ve altı çizili,
+     seçili DOLU, ötekiler düz. Seçili gün basılmış görünüyor (2px sert offset)
+     çünkü seçilmiş bir tarih tıklanmış bir tuştur.
      Gerekçe: docs/gerekce/01-form-ve-girdi.md */
   .tamga-gun {
     align-items: center;
-    border: 1.5px solid transparent;
     border-radius: var(--radius-ctl);
     color: var(--color-ink);
     cursor: pointer;
@@ -3910,8 +3935,16 @@
     justify-content: center;
     width: 36px;
   }
-  .tamga-gun:hover:not(:disabled) {
+  /* SEÇİLİ GÜN HOVER'DA DOLGUSUNU KORUYOR: yıkama dolguyu ezince beyaz rakam
+     soluk zeminde kayboluyordu. */
+  .tamga-gun:hover:not(:disabled):not([data-selected="true"]) {
     background: var(--color-hover);
+  }
+  /* TAKVİM KUTUSU: sığmıyorsa tetiğin sağ kenarına hizalanır (çekmecede
+     sağdan taşıp yarısı görünmüyordu). Bileşen ölçüp `data-align` yazıyor. */
+  .tamga-takvim-kutu[data-align="end"] {
+    left: auto;
+    right: 0;
   }
   /* KAPALI GÜN: soluk mürekkep, imleç "olmaz" diyor, zemin almıyor · aralık
      dışı bir gün bir hedef değil, bir bilgi. */
@@ -3919,8 +3952,27 @@
     color: var(--color-ink-faint);
     cursor: not-allowed;
   }
-  .tamga-gun[data-today] {
-    border-color: var(--color-edge-strong);
+  /* BUGÜN: kalın, vurgu renkli rakam ve altında 2px vurgu çizgisi (Primer'ın
+     tarih seçicisi gibi). Boş bir çerçeve seçili günle yarışıyordu. Seçiliyken
+     çizgi dolgunun mürekkebine dönüyor; kapalı günde işaret yok. */
+  .tamga-gun[data-today]:not(:disabled) {
+    color: var(--color-accent-line);
+    font-weight: var(--weight-strong);
+    position: relative;
+  }
+  .tamga-gun[data-today]:not(:disabled)::after {
+    background: var(--color-accent);
+    border-radius: 1px;
+    bottom: 5px;
+    content: "";
+    height: 2px;
+    left: 50%;
+    margin-left: -8px;
+    position: absolute;
+    width: 16px;
+  }
+  .tamga-gun[data-today][data-selected="true"]::after {
+    background: var(--color-accent-ink);
   }
   .tamga-gun[data-active="true"] {
     background: var(--color-accent-bg);
@@ -3931,35 +3983,42 @@
     color: var(--color-accent-ink);
   }
 
-  /* KIRINTI YOLU · ara öğeler düz metin, son öğe bir KUTU.
+  /* KIRINTI YOLU · ETİKET SATIRI: yol tablo başlığının sesinde (büyük harf,
+     aralıklı, soluk), ayraç küçük bir kare, bulunduğun sayfa mürekkep ve gövde
+     boyu. Kutulu son öğe panelde sayfa başlığıyla yarışıyordu.
      Gerekçe: docs/gerekce/05-yuzey-ve-kabuk.md */
   .tamga-crumb {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
-    font-size: var(--text-body);
-    font-weight: var(--weight-label);
-    gap: 8px;
+    gap: 10px;
     list-style: none;
     margin: 0;
     padding: 0;
   }
   .tamga-crumb-link {
-    border-radius: var(--radius-chip);
     color: var(--color-ink-faint);
-    padding: 2px 4px;
+    font-size: var(--text-caption);
+    font-weight: var(--weight-strong);
+    letter-spacing: 0.06em;
     text-decoration: none;
+    text-transform: uppercase;
   }
   .tamga-crumb-link:hover {
     color: var(--color-ink);
-    text-decoration: underline;
+  }
+  .tamga-crumb-ayrac {
+    background: var(--color-edge-strong);
+    border-radius: 1px;
+    flex: none;
+    height: 5px;
+    opacity: 0.5;
+    width: 5px;
   }
   .tamga-crumb-son {
-    background: var(--color-hover);
-    border: 1px solid var(--color-edge);
-    border-radius: var(--radius-chip);
     color: var(--color-ink);
-    padding: 2px 8px;
+    font-size: var(--text-body);
+    font-weight: var(--weight-strong);
   }
 
   /* Lejant karesi: 14px, 1px koyu kenar · dilimin kendi kenarıyla aynı dil. */
@@ -4431,6 +4490,12 @@
   .tamga-menu {
     padding: 5px;
   }
+  /* SEÇİM LİSTESİ EN ÇOK 256px (Primer Overlay "small"), fazlası kaydırır:
+     24 saatlik bir liste sayfanın dibine kadar iniyordu. */
+  .tamga-select-liste {
+    max-height: 256px;
+    overflow-y: auto;
+  }
   /* SEÇİM PANELİ: tetik bir düğme; panel düğmenin altında, tetik kadar değil
      içeriği kadar geniş (en az 15rem). Başlık, arama, liste, altlık. */
   .tamga-select-panel {
@@ -4592,21 +4657,25 @@
   .tamga-alert-kapat {
     flex: none;
   }
-  /* TEK SATIRLI UYARI ORTALI: karo, eylem ve kapatma başlıkla aynı eksende ·
-     `flex-start` tek satırda karoyu 4 px aşağı bırakıyordu. */
-  .tamga-alert[data-rows="single"] {
-    align-items: center;
+  /* KARO BAŞLIĞIN İLK SATIRININ ORTASINDA, başlık kaç satır olursa olsun ve
+     gövde olsa da olmasa da: kutu üstten hizalı, BAŞLIK kendi satır yüksekliğini
+     karonun 28 pikseline göre aşağı alıyor (`1lh` başlığın kendi değeri). Tek
+     satırda `center`, üç satırlık bir başlıkta karoyu bloğun ortasına kaçırıyordu.
+     Eylem (sm, 32) ve kapatma (30) karodan uzun; merkezleri 14'e çekiliyor. */
+  .tamga-alert-baslik {
+    margin-top: calc((28px - 1lh) / 2);
+    overflow-wrap: anywhere;
   }
-  /* ÇOK SATIRLI: karo (28), eylem düğmesi (sm, 32) ve kapatma (30) başlığın İLK
-     satırının ortasına; satır yüksekliğinden kendi boyları düşülerek. */
-  .tamga-alert[data-rows="multi"] > .tamga-alert-tile {
-    margin-top: calc((1lh - 28px) / 2);
+  /* GÖVDELİ UYARIDA KARO 2 PX AŞAĞIDA: geometrik merkez başlıkla aynı, ama iki
+     satırlık bir bloğun yanında göz karoyu yüksek okuyor (Berika, 2026-10-26). */
+  .tamga-alert[data-body] > .tamga-alert-tile {
+    margin-top: 2px;
   }
-  .tamga-alert[data-rows="multi"] > .tamga-alert-eylem {
-    margin-top: calc((1lh - 32px) / 2);
+  .tamga-alert-eylem {
+    margin-top: -2px;
   }
-  .tamga-alert[data-rows="multi"] > .tamga-alert-kapat {
-    margin-top: calc((1lh - 30px) / 2);
+  .tamga-alert-kapat {
+    margin-top: -1px;
   }
 
   /* the live mark — neutral by rule: running is not a deviation */

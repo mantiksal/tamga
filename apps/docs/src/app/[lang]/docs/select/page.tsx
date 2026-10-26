@@ -1,3 +1,4 @@
+import { Field, Select } from "tamga-ui";
 import { SelectDemo } from "@/components/interactive";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
@@ -36,6 +37,18 @@ const T = {
         kullanır, böylece açık menü sayfanın geri kalanıyla aynı dili konuşur.
       </>
     ),
+    hataH: "Field içinde hata",
+    hataP: (
+      <>
+        <Xref to="field">Field</Xref> hata satırını çocuğuna <code>aria-describedby</code> ve{" "}
+        <code>aria-invalid</code> ile bağlıyor; Select ikisini de tetik düğmesine geçirir, kenar
+        hatalı girdiyle aynı kritik rengi giyer. Eskiden ikisi yutuluyordu ve hata metni seçiciye
+        hiç bağlanmıyordu.
+      </>
+    ),
+    kargo: "Kargo",
+    kargoHata: "Bir kargo seç.",
+    kargoSec: "Kargo seç",
     rules: "Kurallar",
     ph: (
       <>
@@ -65,6 +78,18 @@ const T = {
         behaviour, so an open menu speaks the same language as the rest of the page.
       </>
     ),
+    hataH: "An error inside Field",
+    hataP: (
+      <>
+        <Xref to="field">Field</Xref> wires its error line to the child with{" "}
+        <code>aria-describedby</code> and <code>aria-invalid</code>; Select passes both to the
+        trigger button and its edge wears the same critical colour as a failing input. Both used to
+        be swallowed, so the error text never reached the select.
+      </>
+    ),
+    kargo: "Carrier",
+    kargoHata: "Pick a carrier.",
+    kargoSec: "Pick a carrier",
     rules: "Rules",
     ph: (
       <>
@@ -106,6 +131,24 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
   placeholder="Durum seç"
 />`}>
         <SelectDemo lang={lang} />
+      </Demo>
+
+      <H2>{t.hataH}</H2>
+      <P>{t.hataP}</P>
+      <Demo labels={dict.demo} align="start" code={`<Field label="${t.kargo}" htmlFor="kargo">
+  <Select options={[…]} placeholder="${t.kargoSec}" className="w-full" />
+</Field>
+<Field label="${t.kargo}" error="${t.kargoHata}" htmlFor="kargo2">
+  <Select options={[…]} placeholder="${t.kargoSec}" className="w-full" />
+</Field>`}>
+        <div className="grid w-full gap-7 sm:grid-cols-2" data-not-ornek>
+          <Field label={t.kargo} htmlFor="kargo">
+            <Select options={["Atlas", "Aras", "MNG"]} placeholder={t.kargoSec} className="w-full" />
+          </Field>
+          <Field label={t.kargo} error={t.kargoHata} htmlFor="kargo2">
+            <Select options={["Atlas", "Aras", "MNG"]} placeholder={t.kargoSec} className="w-full" />
+          </Field>
+        </div>
       </Demo>
 
       <H2>{t.rules}</H2>

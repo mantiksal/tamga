@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { useDismiss } from "./a11y.js";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
@@ -35,6 +35,28 @@ export type DateTimeISO = string;
 export type DateRange = { from?: DateISO; to?: DateISO };
 
 /* ── Dilim: duvar saati ↔ an. Hepsi Intl üzerinden; tarayıcının dilimi hiç okunmuyor. ── */
+
+/* TAKVİM KUTUSU · tetiğin altında, solundan başlar; kırpan kabın (çekmece,
+   kaydırılan panel) ya da pencerenin sağından taşıyorsa tetiğin sağına hizalanır.
+   Çekmecede sağdan taşıp yarısı görünmüyordu. */
+function TakvimKutusu({ children }: { children: ReactNode }) {
+  const kutu = useRef<HTMLDivElement>(null);
+  const [hiza, setHiza] = useState<"start" | "end">("start");
+  useLayoutEffect(() => {
+    const el = kutu.current;
+    if (!el) return;
+    let kap: HTMLElement | null = el.parentElement;
+    while (kap && kap !== document.body && getComputedStyle(kap).overflowX === "visible") kap = kap.parentElement;
+    const sag = kap && kap !== document.body ? kap.getBoundingClientRect().right : window.innerWidth;
+    const b = el.getBoundingClientRect();
+    setHiza(b.right > sag - 8 && b.left - (b.right - sag) >= 0 ? "end" : "start");
+  }, []);
+  return (
+    <div ref={kutu} data-align={hiza} className="tamga-overlay tamga-takvim-kutu absolute z-30 mt-2 p-3" onClick={(e) => e.stopPropagation()}>
+      {children}
+    </div>
+  );
+}
 
 /** Bir duvar saati: yıl, sıfır tabanlı ay, gün, saat, dakika. Dilimsiz. */
 export type Duvar = { y: number; m: number; d: number; h: number; mi: number };
@@ -531,7 +553,7 @@ export function DatePicker({
         /* Takvimin tıklaması sayfaya sızmıyor: `<label>` ile sarılmış bir alanda
            takvimin boşluğuna tıklama input'a yönlendiriliyor, takvim kendi
            kendine kapanıyordu. */
-        <div className="tamga-overlay absolute z-30 mt-2 p-3" onClick={(e) => e.stopPropagation()}>
+        <TakvimKutusu>
           <Calendar
             locale={locale}
             timeZone={timeZone}
@@ -541,7 +563,7 @@ export function DatePicker({
             labels={labels}
             onSelect={(d) => { onChange?.(d); setOpen(false); }}
           />
-        </div>
+        </TakvimKutusu>
       ) : null}
     </div>
   );
@@ -761,7 +783,7 @@ export function DateTimePicker({
         onClear={() => onChange?.(undefined)}
       />
       {open ? (
-        <div className="tamga-overlay absolute z-30 mt-2 p-3" onClick={(e) => e.stopPropagation()}>
+        <TakvimKutusu>
           <Calendar
             locale={locale}
             timeZone={tz}
@@ -800,7 +822,7 @@ export function DateTimePicker({
               />
             ) : null}
           </div>
-        </div>
+        </TakvimKutusu>
       ) : null}
     </div>
   );

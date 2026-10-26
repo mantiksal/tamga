@@ -135,12 +135,23 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
   const dict = await getDictionary(lang);
   const p = findPage("avatar-stack")!;
   const t = T[lang];
+  /* İlk üçü fotoğraflı, dördüncüsü baş harfli: yığın ikisini yan yana taşıyor. */
+  const fotograflilar = t.ekip.map((name, i) => (i < 3 ? { name, src: `/avatar-${i + 1}.png` } : name));
   return (
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
       <Demo
         labels={dict.demo}
-        code={`<AvatarStack names={${JSON.stringify(t.ekip)}} extra={8} size={38} />
+        code={`<AvatarStack
+  names={[
+    { name: "${t.ekip[0]}", src: "/avatar-1.png" },
+    { name: "${t.ekip[1]}", src: "/avatar-2.png" },
+    { name: "${t.ekip[2]}", src: "/avatar-3.png" },
+    "${t.ekip[3]}",
+  ]}
+  extra={8}
+  size={38}
+/>
 
 <span className="flex items-center gap-2.5">
   <AvatarStack names={${JSON.stringify(t.ekip.slice(0, 3))}} size={26} />
@@ -148,7 +159,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 </span>`}
       >
         <div className="flex flex-col gap-6">
-          <AvatarStack names={t.ekip} extra={8} size={38} />
+          <AvatarStack names={fotograflilar} extra={8} size={38} />
           <span className="text-body text-ink-faint flex items-center gap-2.5">
             <AvatarStack names={t.ekip.slice(0, 3)} size={26} />
             <span>

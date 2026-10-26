@@ -38,7 +38,6 @@ const T = {
       </>
     ),
     withImage: "Görselle",
-    foto: "foto",
     durumH: "Köşedeki durum",
     durumP: (
       <>
@@ -101,7 +100,6 @@ const T = {
       </>
     ),
     withImage: "With an image",
-    foto: "photo",
     durumH: "The mark in the corner",
     durumP: (
       <>
@@ -171,23 +169,13 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 <Avatar name="${t.kisi}" size={32} letters={1} />
 <Avatar name="${t.kisi}" size={40} letters={1} />
 <Avatar name="Mert Aksoy" size={56} look="soft" />
+<Avatar name="Ada Korkmaz" src="/avatar-4.png" size={56} />
 <Avatar name="Zeynep Kaya" size={40} look="soft" status="info" />`}>
         <Avatar name={t.kisi} size={24} letters={1} />
         <Avatar name={t.kisi} size={32} letters={1} />
         <Avatar name={t.kisi} size={40} letters={1} />
         <Avatar name="Mert Aksoy" size={56} look="soft" />
-        <span
-          className="tamga-avatar docs-gorsel inline-flex items-center justify-center font-mono text-ink-faint"
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: "var(--radius-card)",
-            boxShadow: "4px 4px 0 var(--color-edge-strong)",
-            fontSize: 10,
-          }}
-        >
-          {t.foto}
-        </span>
+        <Avatar name="Ada Korkmaz" src="/avatar-4.png" size={56} />
         <Avatar name="Zeynep Kaya" size={40} look="soft" status="info" />
         <span className="flex items-center gap-2.5">
           <Avatar name={t.kisi} size={40} letters={1} />
@@ -205,9 +193,14 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <P>{t.durumP}</P>
 
       <H2>{t.withImage}</H2>
-      <Demo labels={dict.demo} code={`<Avatar name="Tamga" src="/tamga-mark-light.svg" size={40} />`}>
-        <Avatar name="Tamga" src="/tamga-mark-light.svg" size={40} />
-        <Avatar name="Tamga" src="/tamga-mark-light.svg" size={56} />
+      <Demo labels={dict.demo} code={`<Avatar name="Baran Demir" src="/avatar-1.png" size={24} />
+<Avatar name="Baran Demir" src="/avatar-1.png" size={40} />
+<Avatar name="Ceyda Arslan" src="/avatar-2.png" size={56} />
+<Avatar name="Deniz Kaya" src="/avatar-5.png" size={40} status="positive" />`}>
+        <Avatar name="Baran Demir" src="/avatar-1.png" size={24} />
+        <Avatar name="Baran Demir" src="/avatar-1.png" size={40} />
+        <Avatar name="Ceyda Arslan" src="/avatar-2.png" size={56} />
+        <Avatar name="Deniz Kaya" src="/avatar-5.png" size={40} status="positive" />
       </Demo>
 
       <H2>{t.hesapH}</H2>

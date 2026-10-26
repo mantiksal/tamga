@@ -13,6 +13,7 @@ import { dataProps } from "../lib/data-props.js";
 import { useFocusTrap, useListKeys } from "./a11y.js";
 import { useLiveClaim } from "./live-scope.js";
 import { Button, MiniButton } from "./button.js";
+import { FieldNote, noteId, type NoteProps } from "./field-note.js";
 
 export { Spinner } from "./spinner.js";
 
@@ -182,9 +183,7 @@ export function Alert({
     <div
       {...dataProps(rest)}
       className="tamga-alert"
-      /* TEK SATIR / ÇOK SATIR: gövdesiz uyarıda karo, eylem ve kapatma başlıkla
-         ortalanır; gövdeliyse başlığın ilk satırına hizalanır (kit.css). */
-      data-rows={children ? "multi" : "single"}
+      data-body={children ? "true" : undefined}
       style={state === "neutral" ? undefined : { background: h.bg }}
       role="status"
     >
@@ -199,7 +198,7 @@ export function Alert({
         <Icon icon={icon ?? TON_GLIFI[state]} size="sm" weight="fill" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-body font-medium text-ink">{title}</p>
+        <p className="tamga-alert-baslik text-body font-medium text-ink">{title}</p>
         {/* GÖVDE BİR `div`, `p` DEĞİL: bir uyarının gövdesi çoğu zaman bir LİSTE, ve
             `<p>` içindeki `<ul>` geçersiz HTML · tarayıcı listeyi paragrafın dışına
             çıkarıyor ve hidrasyon patlıyor.
@@ -245,10 +244,11 @@ export function Breadcrumb({
         {items.map((item, i) => {
           const last = i === items.length - 1;
           return (
-            <li key={item.label} className="flex items-center gap-2">
-              {/* SON ÖĞE BİR KUTU, ve bağlantı değil: bulunduğun sayfaya link
-                  vermek gezinmeyi değil kafa karışıklığını üretiyor. Kutu o
-                  farkı gözle de söylüyor · ötekiler düz metin, bu durak. */}
+            <li key={item.label} className="flex items-center gap-2.5">
+              {/* SON ÖĞE MÜREKKEP VE GÖVDE BOYU, bağlantı değil: bulunduğun
+                  sayfaya link vermek gezinmeyi değil kafa karışıklığını
+                  üretiyor. Yol tablo başlığının sesinde (büyük harf, soluk),
+                  durak sayfanın sesinde · fark kutusuz okunuyor. */}
               {last ? (
                 <span aria-current="page" className="tamga-crumb-son">
                   {item.label}
@@ -258,9 +258,7 @@ export function Breadcrumb({
                   {item.label}
                 </a>
               )}
-              {last ? null : (
-                <Icon icon={CaretRight} size="xs" weight="bold" className="text-ink-faint" />
-              )}
+              {last ? null : <span aria-hidden className="tamga-crumb-ayrac" />}
             </li>
           );
         })}
@@ -273,6 +271,7 @@ export function Field({
   label,
   description,
   error,
+  errorPrefix,
   required = false,
   note,
   info,
@@ -280,10 +279,8 @@ export function Field({
   children,
   htmlFor,
   ...rest
-}: {
+}: NoteProps & {
   label: string;
-  description?: string;
-  error?: string;
   /**
    * Draws the red asterisk beside the label. A glyph rather than a word, because the word is a
    * translation and the kit makes none. TR: Etiketin yanına kırmızı yıldızı çiziyor. Sözcük
@@ -323,7 +320,7 @@ export function Field({
      child is cloned; an existing `aria-describedby` is kept and this one appended.
      Gerekçe: docs/09-testler-ve-degismezler.md */
   const kok = useId();
-  const notId = error ? `${kok}-error` : description ? `${kok}-description` : undefined;
+  const notId = noteId(kok, error, description);
   const kontrol =
     notId && isValidElement<{ "aria-describedby"?: string; "aria-invalid"?: boolean }>(children)
       ? cloneElement(children, {
@@ -363,22 +360,7 @@ export function Field({
           {count.value} / {count.max}
         </span>
       ) : null}
-      {error ? (
-        /* HATA SATIRI BİR GLİF TAŞIYOR: renk tek başına bir işaret değil ·
-           kırmızıyı görmeyen biri için satır sıradan bir yardım metni kalıyor. */
-        <p
-          id={notId}
-          className="flex items-center gap-1.5 text-small font-medium"
-          style={{ color: toneOf("danger").fg }}
-        >
-          <Icon icon={Warning} size="xs" weight="fill" />
-          {error}
-        </p>
-      ) : description ? (
-        <p id={notId} className="text-small text-ink-faint">
-          {description}
-        </p>
-      ) : null}
+      <FieldNote id={notId} error={error} description={description} errorPrefix={errorPrefix} />
     </div>
   );
 }
@@ -395,6 +377,8 @@ export function Select({
   loadingRows = 4,
   disabled = false,
   "aria-label": ariaLabel,
+  "aria-describedby": ariaDescribedby,
+  "aria-invalid": ariaInvalid,
   title,
   className,
   ...rest
@@ -480,6 +464,14 @@ export function Select({
    * hiçbir şey duymuyordu.
    */
   "aria-label"?: string;
+  /**
+   * What `Field` wires for its error or description; both land on the trigger button. They
+   * used to be swallowed, so a field's error never reached the select. TR: `Field`in hata ya da
+   * açıklama için bağladıkları; ikisi de tetik düğmesine iniyor. Eskiden yutuluyordu, alanın
+   * hatası seçiciye hiç ulaşmıyordu.
+   */
+  "aria-describedby"?: string;
+  "aria-invalid"?: boolean;
   /** Locks the trigger; the list cannot open. TR: Tetiği kilitler; liste açılmaz. */
   disabled?: boolean;
   /** The trigger's tooltip: the full text when the shown value is clipped. TR: Tetiğin ipucu: görünen değer kesildiğinde tam metin. */
@@ -506,6 +498,11 @@ export function Select({
 
   useEffect(() => {
     if (!open) return;
+    /* Seçili satır listenin ortasına; YALNIZ liste kaydırılıyor. `scrollIntoView`
+       sayfayı da kaydırıyordu ve takvim ekranın üstüne fırlıyordu. */
+    const l = list.current;
+    const secili = l?.querySelector('[data-selected="true"]') as HTMLElement | null;
+    if (l && secili) l.scrollTop = secili.offsetTop - (l.clientHeight - secili.offsetHeight) / 2;
     const away = (e: MouseEvent) => {
       if (box.current && !box.current.contains(e.target as Node)) setOpen(false);
     };
@@ -530,6 +527,8 @@ export function Select({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={ariaLabel}
+        aria-describedby={ariaDescribedby}
+        aria-invalid={ariaInvalid || undefined}
         title={title}
         disabled={disabled || undefined}
         onClick={() => setOpen((o) => !o)}
@@ -553,7 +552,7 @@ export function Select({
         <div
           ref={list}
           role="listbox"
-          className="tamga-overlay tamga-menu absolute left-0 top-[var(--overlay-below)] z-40 flex w-full flex-col gap-0.5 overflow-hidden"
+          className="tamga-overlay tamga-menu tamga-select-liste absolute left-0 top-[var(--overlay-below)] z-40 flex w-full flex-col gap-0.5"
           aria-busy={loading || undefined}
         >
           {loading && <SkeletonOptions rows={loadingRows} />}

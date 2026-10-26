@@ -73,12 +73,42 @@ export function Avatar({
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
-  /* KÖŞE ÖLÇÜYLE BÜYÜYOR (4 · 5 · 7 · 8): 24 pikselde 8'lik bir köşe kareyi
-     daire yapıyor, 56'da 4'lük bir köşe onu keskin bırakıyor. */
-  const kose = size <= 28 ? "var(--radius-chip)" : size <= 36 ? "calc(var(--radius) - 1px)" : size <= 44 ? "var(--radius-btn)" : "var(--radius-card)";
+  return <Karo name={name} size={size} src={src} bare={bare} look={look} letters={letters} status={status} taban {...rest} />;
+}
+
+/* KÖŞE ÖLÇÜYLE BÜYÜYOR (4 · 5 · 7 · 8): 24 pikselde 8'lik bir köşe kareyi
+   daire yapıyor, 56'da 4'lük bir köşe onu keskin bırakıyor. */
+function koseOf(size: number) {
+  return size <= 28 ? "var(--radius-chip)" : size <= 36 ? "calc(var(--radius) - 1px)" : size <= 44 ? "var(--radius-btn)" : "var(--radius-card)";
+}
+
+/* Karonun kendisi. `taban` yığında kapalı: üst üste binen karolarda her
+   karonun kendi tabanı yığını katmanlı gösteriyordu. */
+function Karo({
+  name,
+  size = 32,
+  src,
+  bare = false,
+  look = "solid",
+  letters = 2,
+  status,
+  taban: tabanli,
+  ...rest
+}: {
+  name: string;
+  size?: number;
+  src?: string;
+  bare?: boolean;
+  look?: "solid" | "soft";
+  letters?: 1 | 2;
+  status?: Tone;
+  taban: boolean;
+  [k: `data-${string}`]: unknown;
+}) {
+  const kose = koseOf(size);
   /* TABAN YALNIZ BÜYÜKLERDE: 24 piksellik bir karo bir satırın içinde duruyor
      ve orada bir taban, satırı kalabalıklaştırıyor. */
-  const taban = size >= 56 ? "4px 4px 0 var(--color-edge-strong)" : size >= 40 ? "3px 3px 0 var(--color-edge-strong)" : undefined;
+  const taban = !tabanli ? undefined : size >= 56 ? "4px 4px 0 var(--color-edge-strong)" : size >= 40 ? "3px 3px 0 var(--color-edge-strong)" : undefined;
 
   const box = {
     width: size,
@@ -96,7 +126,7 @@ export function Avatar({
     const mark = Math.max(8, Math.round(size * 0.3));
     return (
       <span {...dataProps(rest)} className="relative inline-flex shrink-0">
-        <Avatar name={name} size={size} src={src} bare={bare} look={look} letters={letters} />
+        <Karo name={name} size={size} src={src} bare={bare} look={look} letters={letters} taban={tabanli} />
         <span
           className="absolute rounded-[var(--radius-mark)]"
           style={{
@@ -162,7 +192,11 @@ export function AvatarStack({
   surface = "var(--color-shell)",
   ...rest
 }: {
-  names: string[];
+  /**
+   * The people: a name, or `{ name, src }` for one with a photo. TR: Kişiler: bir ad, ya da
+   * fotoğrafı olan için `{ name, src }`.
+   */
+  names: readonly (string | { name: string; src?: string })[];
   extra?: number;
   size?: number;
   /**
@@ -173,38 +207,34 @@ export function AvatarStack({
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
-  const overlap = Math.round(size / 4);
-  const ring = { boxShadow: `0 0 0 2px ${surface}` };
+  /* ÖRTÜŞME SEKİZDE BİR: dörtte bir, yüzün yarısını kapatıyordu. Halka
+     karonun kendi köşesini alıyor; küçük köşeli bir halka karonun arkasında
+     ikinci bir katman gibi görünüyordu. */
+  const overlap = Math.round(size / 8);
+  const ring = { boxShadow: `0 0 0 2px ${surface}`, borderRadius: koseOf(size) };
   /* Karoların kendi baş harfleri `aria-hidden` — üst üste binmiş harfler ekran
      okuyucuda anlamsız bir dizi olurdu. Adlar bir kez, düz metin olarak
      veriliyor: "Berika Sultan, Deniz Kara ve 7 kişi daha". */
-  const spoken = [...names, extra ? `+${extra}` : null].filter(Boolean).join(", ");
+  const kisiler = names.map((n) => (typeof n === "string" ? { name: n } : n));
+  const spoken = [...kisiler.map((k) => k.name), extra ? `+${extra}` : null].filter(Boolean).join(", ");
   return (
     <div {...dataProps(rest)} className="flex items-center" role="img" aria-label={spoken}>
-      {names.map((n, i) => (
+      {kisiler.map((k, i) => (
         <span
-          key={n + i}
-          className="rounded-[var(--radius-mark)]"
+          key={k.name + i}
+          className="inline-flex"
           style={{ marginLeft: i === 0 ? 0 : -overlap, ...ring }}
         >
-          <Avatar name={n} size={size} letters={1} />
+          <Karo name={k.name} src={k.src} size={size} letters={1} taban={false} />
         </span>
       ))}
       {extra ? (
-        /* ARTAKALAN KARO YÜKSELİYOR, ötekiler yükselmiyor: yığının sonunda
-           duran ve bir SAYI taşıyan bu karo bir kişi değil bir özet · tabanı
-           onu yüzlerin dizisinden ayırıyor. */
+        /* ARTAKALAN KARO ÖTEKİLERLE AYNI KABUKTA: aynı köşe, aynı halka, taban
+           yok. Bir SAYI taşıyan bu karo bir özet; onu ayıran zemini ve yazısı,
+           bir taban değil · taban yığını katmanlı gösteriyordu. */
         <span
-          className="inline-flex items-center justify-center rounded-[var(--radius-mark)] border-[1.5px] border-edge-strong bg-shell font-mono text-caption font-bold text-ink"
-          style={{
-            width: size,
-            height: size,
-            marginLeft: -overlap,
-            /* Taban komşularıyla AYNI renkte: avatar karoları `--color-edge-strong`
-               ile yükseliyor, özet karosu soluk bir gölgeyle onların arasında
-               başka bir malzemeden yapılmış gibi duruyordu. */
-            boxShadow: `0 0 0 2px ${surface}, 3px 3px 0 var(--color-edge-strong)`,
-          }}
+          className="inline-flex items-center justify-center border-[1.5px] border-edge-strong bg-shell font-mono text-caption font-bold text-ink"
+          style={{ width: size, height: size, marginLeft: -overlap, ...ring }}
         >
           +{extra}
         </span>

@@ -1,8 +1,9 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
+import { FieldNote, noteId, type NoteProps } from "./field-note.js";
 import { Icon } from "./icon.js";
 import { Check, Minus } from "./icons.js";
 
@@ -18,11 +19,14 @@ export function Checkbox({
   checked,
   indeterminate = false,
   onChange,
+  description,
+  error,
+  errorPrefix,
   disabled = false,
   className,
   compact = false,
   ...rest
-}: {
+}: NoteProps & {
   /**
    * The visible label. The kit does not translate; the caller passes ready text. TR: Görünen
    * etiket. Kit çeviri yapmaz; hazır metni çağıran geçer.
@@ -57,16 +61,29 @@ export function Checkbox({
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
+  const kok = useId();
+  const notId = noteId(kok, error, description);
+  /* NOT DÜĞMENİN İÇİNDE, ETİKETİN ALTINDA: iki sütunlu ızgara notu etiketin
+     sütununa oturtuyor, girinti kutunun boyunu kendiliğinden izliyor. Ad
+     `aria-labelledby` ile yalnız etiketten, not `aria-describedby` ile ayrı. */
   return (
     <button
-{...dataProps(rest)}
+      {...dataProps(rest)}
       type="button"
       role="checkbox"
       aria-checked={indeterminate ? "mixed" : checked}
       aria-disabled={disabled || undefined}
+      aria-labelledby={notId ? `${kok}-label` : undefined}
+      aria-describedby={notId}
+      aria-invalid={error ? true : undefined}
       disabled={disabled}
       onClick={() => !disabled && onChange?.(!checked)}
-      className={cn("flex items-center gap-2 text-left text-body", disabled && "text-ink-faint", className)}
+      className={cn(
+        notId ? "grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-1.5" : "flex items-center gap-2",
+        "text-left text-body",
+        disabled && "text-ink-faint",
+        className,
+      )}
     >
       <span
         className={cn("tamga-check", compact && "tamga-check-sm")}
@@ -81,7 +98,10 @@ export function Checkbox({
           <Icon icon={Check} size="xs" weight="bold" />
         ) : null}
       </span>
-      {label}
+      {notId ? <span id={`${kok}-label`}>{label}</span> : label}
+      {notId ? (
+        <FieldNote as="span" className="tamga-check-not col-start-2" id={notId} error={error} description={description} errorPrefix={errorPrefix} />
+      ) : null}
     </button>
   );
 }

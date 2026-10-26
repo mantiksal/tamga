@@ -5,18 +5,64 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
-## 0.10.2
+## 0.11.0
 
-> A one-line alert is centred; a longer one lines up with its first line.
+> Group controls carry their own error line; the breadcrumb is a label line.
+
+### Added
+
+- **`RadioGroup` and `Checkbox` take `description`, `error` and `errorPrefix`.** The line
+  under the options (or under the box and its label) is the same drawing as `Field`'s: one
+  inner component, no copies. The root `role="radiogroup"` element (or the checkbox button)
+  gets `aria-describedby` pointing at the line and `aria-invalid="true"` while there is an
+  error; the description is hidden while the error shows. `errorPrefix` is an invisible word
+  before the error ("Error:") that only screen readers hear; the caller writes it, the kit
+  does not translate. `Field` takes `errorPrefix` too. Reason: neither control can sit inside
+  `Field`, and products were copying its error line by hand.
+- **`RadioGroup` `showLabel`** draws `label` as a visible heading above the options, in
+  `Field`'s label size, weight and 8px gap, wired with `aria-labelledby`. Off by default.
+- **`Select` passes `aria-describedby` and `aria-invalid` to its trigger**, so `Field`'s error
+  actually reaches it; an invalid trigger wears the same critical edge, wash and offset as an
+  invalid input. Both attributes used to be swallowed.
+- **`AvatarStack` `names` accepts `{ name, src }`** for a person with a photo, beside plain
+  names.
+
+### Changed
+
+- **Calendar's "today" is no longer an empty frame.** It competed with the selected day's
+  fill. Following Primer's date picker (primer/react #1582), today is a bold accent-coloured
+  number with a 2px accent bar under it; when today is the selected day the bar turns to the
+  fill's ink. A disabled today carries no mark.
+- **`Select` lists are at most 256px tall and scroll** (Primer's Overlay "small"); on open the
+  list itself is scrolled so the selected option sits in its middle. Only the list moves, not
+  the page. A 24-hour list used to run to the bottom of the page.
+- **Calendar hover no longer washes out the selected day**; the fill stays under the pointer.
+- **The calendar box aligns to the trigger's right edge when it would overflow** its clipping
+  container or the window (`data-align="end"`); inside a drawer half of it used to be cut off.
+- **`AvatarStack` is one layer.** The overlap is an eighth of the size, not a quarter (a
+  quarter hid half a face); the separating ring takes the tile's own corner radius (a smaller
+  radius read as a second layer behind the tile); tiles in a stack carry no base; the "+N"
+  tile is the same shell as its neighbours, with no base of its own. A photo `Avatar` sits on
+  the shell colour, not the accent: the accent is the ground for initials, and behind a
+  picture it only leaked through the transparent corners.
+- **`Breadcrumb` is a label line.** The trail is in the table header's voice (uppercase
+  caption, letter-spaced, faint; ink on hover), stops are separated by a 5px square, and the
+  current page is ink at body size with no box. The chip-and-box version competed with the
+  page title in a panel. Markup is unchanged apart from the separator (a span instead of a
+  caret glyph).
 
 ### Fixed
 
-- **`Alert` tile, action and dismiss sat 4 to 5px below the title.** The box aligned its parts
-  to the top, so a title-only alert looked off-centre and a two-line one had the tile hanging
-  under the first line. Without a body (`data-rows="single"`) everything is centred on the
-  title; with a body (`multi`) the tile, the `size="sm"` action and the dismiss button sit on
-  the first line's centre. Measured on the docs page for both (`pnpm olc:uyari`); the docs now
-  show one-line alerts too.
+- **`Alert` tile, action and dismiss sit on the title's first line**, whatever the row
+  count and with or without a body. They used to sit 4 to 5px below a one-line title, and an
+  intermediate fix centred a title-only alert as a block, which put the tile 22px under the
+  first line of a three-line title at 390px. Now the box is top-aligned and the title itself
+  takes `margin-top: calc((28px - 1lh) / 2)` from its own line height; the `size="sm"` action
+  and the dismiss button are pulled up 2px and 1px to the same centre. With a body the tile
+  sits 2px lower than the geometric centre: beside a two-line block the eye reads it as
+  high. Measured at 1280px and
+  390px, including a title that wraps to three lines (`pnpm olc:uyari`). The title also
+  breaks anywhere now: an address with no spaces used to run out of the box.
 - **`Accordion` open card no longer turns its edge black or grows a shadow**; the open
   section is told by the washed head and the caret. In `look="list"` a row is a row again: no
   edge, no corner, no shadow of its own, a single line between neighbours. The card rules had

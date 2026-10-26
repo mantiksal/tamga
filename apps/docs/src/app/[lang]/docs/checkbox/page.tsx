@@ -1,3 +1,4 @@
+import { Checkbox } from "tamga-ui";
 import { CheckboxDemo } from "@/components/interactive";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
@@ -36,6 +37,21 @@ const T = {
         &quot;bu seçildi&quot; demiyor, &quot;bu değer açık&quot; diyor.
       </>
     ),
+    notH: "Açıklama ve hata",
+    notP: (
+      <>
+        <code>description</code> kutu ile etiketin altındaki sessiz satır, <code>error</code>{" "}
+        kritik renkte ve uyarı glifli hata satırı; <Xref to="field">Field</Xref>&apos;ın satırıyla
+        aynı çizim. Metin etiketle hizalı (kutu + aralık kadar girintili); kutu{" "}
+        <code>aria-describedby</code> ile satıra bağlanır ve hata varken <code>aria-invalid</code>{" "}
+        taşır. <code>errorPrefix</code> yalnız ekran okuyucunun duyduğu önek. Checkbox Field&apos;ın
+        içine giremiyordu; bir sözleşme onayı hatasını ürünler elle çiziyordu.
+      </>
+    ),
+    sozlesme: "Sözleşmeyi okudum",
+    sozlesmeAlt: "Satış koşulları ve iade politikası.",
+    sozlesmeHata: "Devam etmek için onayla.",
+    hataOnek: "Hata:",
     rules: "Kurallar",
     role: (
       <>
@@ -63,6 +79,22 @@ const T = {
         the fill does not say &quot;this is selected&quot;, it says &quot;this value is on&quot;.
       </>
     ),
+    notH: "Description and error",
+    notP: (
+      <>
+        <code>description</code> is the quiet line under the box and its label, <code>error</code>{" "}
+        the critical-coloured line with a warning glyph; the same drawing as{" "}
+        <Xref to="field">Field</Xref>&apos;s line. The text lines up with the label (indented by the
+        box plus the gap); the box is wired to the line with <code>aria-describedby</code> and
+        carries <code>aria-invalid</code> while there is an error. <code>errorPrefix</code> is a
+        prefix only screen readers hear. Checkbox could not sit inside Field; products drew a
+        terms-consent error by hand.
+      </>
+    ),
+    sozlesme: "I have read the terms",
+    sozlesmeAlt: "Sales conditions and the return policy.",
+    sozlesmeHata: "Tick this to continue.",
+    hataOnek: "Error:",
     rules: "Rules",
     role: (
       <>
@@ -98,6 +130,16 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 <Checkbox label="…" checked={false} disabled />
 <Checkbox compact label="…" checked={c} onChange={setC} />`}>
         <CheckboxDemo lang={lang} />
+      </Demo>
+
+      <H2>{t.notH}</H2>
+      <P>{t.notP}</P>
+      <Demo labels={dict.demo} align="start" code={`<Checkbox label="${t.sozlesme}" description="${t.sozlesmeAlt}" checked={a} onChange={setA} />
+<Checkbox label="${t.sozlesme}" error="${t.sozlesmeHata}" errorPrefix="${t.hataOnek}" checked={false} onChange={setB} />`}>
+        <div className="flex flex-col gap-5" data-not-ornek>
+          <Checkbox label={t.sozlesme} description={t.sozlesmeAlt} checked />
+          <Checkbox label={t.sozlesme} error={t.sozlesmeHata} errorPrefix={t.hataOnek} checked={false} />
+        </div>
       </Demo>
 
       <H2>{t.rules}</H2>

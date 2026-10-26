@@ -38,6 +38,14 @@ const T = {
         gezinmeyi değil kafa karışıklığını üretir.
       </>
     ),
+    sesP: (
+      <>
+        Yol <strong>tablo başlığının sesinde</strong>: büyük harf, aralıklı, soluk; duraklar arasında
+        küçük bir kare. Bulunduğun sayfa mürekkep renginde ve gövde boyunda, kutusuz. Çipli ve kutulu
+        hâli bir panelde sayfa başlığıyla yarışıyordu; bu satır başlığın üstünde sessiz durur ve
+        yine de nerede olduğunu söyler.
+      </>
+    ),
     rules: "Kurallar",
     label: (
       <>
@@ -61,6 +69,14 @@ const T = {
       <>
         The last item takes no <code>href</code>: you are already there, and linking to the page
         you are on produces confusion, not navigation.
+      </>
+    ),
+    sesP: (
+      <>
+        The trail speaks in <strong>the table header&apos;s voice</strong>: uppercase, spaced, faint,
+        with a small square between stops. The page you are on is in ink, at body size, with no
+        box. The chip-and-box version competed with the page title in a panel; this line sits
+        quietly above the title and still says where you are.
       </>
     ),
     rules: "Rules",
@@ -106,6 +122,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
           ]}
         />
       </Demo>
+      <P>{t.sesP}</P>
       <P>{t.lastItem}</P>
 
       <H2>{t.rules}</H2>

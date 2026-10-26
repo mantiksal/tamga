@@ -14,7 +14,7 @@ export function YiginOrnek({
   ekle,
   cikar,
 }: {
-  kisiler: string[];
+  kisiler: readonly (string | { name: string; src?: string })[];
   ekle: string;
   cikar: string;
 }) {

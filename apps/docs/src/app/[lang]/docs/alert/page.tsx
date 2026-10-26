@@ -99,6 +99,7 @@ const T = {
     tekSertifika: "Sertifika 3 gün içinde doluyor",
     tekYenile: "Yenile",
     tekBildirim: "Bildirim ayarları güncellendi",
+    tekUzun: "Bu adresi izleyeceğiz: https://example.com/magaza/ayarlar/bildirimler",
     related: "İlgili",
     rel: (
       <>
@@ -178,6 +179,7 @@ const T = {
     tekSertifika: "The certificate expires in 3 days",
     tekYenile: "Renew",
     tekBildirim: "Notification settings updated",
+    tekUzun: "We will watch this address: https://example.com/store/settings/notifications",
     related: "Related",
     rel: (
       <>
@@ -252,14 +254,15 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 <Alert state="info" title="${t.tekYedek}" />
 <Alert state="caution" title="${t.tekSinir}" />
 <Alert state="danger" title="${t.tekSertifika}" action={<Button size="sm">${t.tekYenile}</Button>} />
-<Alert state="info" title="${t.tekBildirim}" dismissLabel="${t.kapat}" onDismiss={…} />`}
+<Alert state="info" title="${t.tekBildirim}" dismissLabel="${t.kapat}" onDismiss={…} />
+<Alert state="info" title="${t.tekUzun}" dismissLabel="${t.kapat}" onDismiss={…} />`}
       >
         <div className="flex w-full flex-col items-start gap-4">
           <Alert state="positive" title={t.tekKaydedildi} />
           <Alert state="info" title={t.tekYedek} />
           <Alert state="caution" title={t.tekSinir} />
           <Alert state="danger" title={t.tekSertifika} action={<Button size="sm">{t.tekYenile}</Button>} />
-          <UyariOrnegi kapat={t.kapat} geriGetir={t.geriGetir} uyarilar={[{ state: "info", title: t.tekBildirim }]} />
+          <UyariOrnegi kapat={t.kapat} geriGetir={t.geriGetir} uyarilar={[{ state: "info", title: t.tekBildirim }, { state: "info", title: t.tekUzun }]} />
         </div>
       </Demo>
 

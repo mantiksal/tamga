@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * TARAYICI ÖLÇÜMÜ · Alert'te karo, eylem ve kapatma başlıkla hizalı mı. Tek
- * satırlı uyarıda başlıkla ortalı, gövdeli uyarıda başlığın ilk satırının
- * ortasında; ikisinde de fark en çok 1 px. Doğrudan Chrome (CDP); elle:
- * `pnpm olc:uyari [klasör]` (klasör verilirse ekran görüntüsü oraya).
+ * TARAYICI ÖLÇÜMÜ · Alert'te karo, eylem ve kapatma başlığın İLK satırının
+ * ortasında mı: gövdesiz, gövdeli (karo bilerek 2 px aşağıda), ve 390px'te çok
+ * satıra inen bir başlıkta; fark en çok 1 px. Doğrudan Chrome (CDP); elle: `pnpm olc:uyari [klasör]`
+ * (klasör verilirse ekran görüntüsü oraya).
  */
 const CH = process.env.CHROME ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const { spawn } = await import("node:child_process");
@@ -23,40 +23,48 @@ const js = async (e) => {
   if (r.result?.exceptionDetails) throw new Error("sayfada hata: " + (r.result.exceptionDetails.exception?.description ?? r.result.exceptionDetails.text));
   return r.result?.result?.value;
 };
-await gonder("Emulation.setDeviceMetricsOverride", { width: 1280, height: 900, deviceScaleFactor: 2, mobile: false });
-await gonder("Page.navigate", { url: "http://localhost:6070/tr/docs/alert" });
-for (let i = 0; i < 30; i++) { await new Promise((r) => setTimeout(r, 2000)); if (await js(`document.querySelectorAll('.tamga-alert').length >= 3`)) break; }
-const sonuc = JSON.parse(await js(`(() => {
-  const r = (el) => el.getBoundingClientRect(); const orta = (b) => b.top + b.height / 2;
-  const out = [];
-  for (const a of document.querySelectorAll(".tamga-alert")) {
-    const tile = a.querySelector(".tamga-alert-tile"); const p = a.querySelector("p");
-    const rg = document.createRange(); rg.selectNodeContents(p); const satir = rg.getClientRects()[0];
-    const kapat = a.querySelector(".tamga-alert-kapat"); const eylem = a.querySelector(".tamga-alert-eylem");
-    out.push({ baslik: p.textContent.slice(0, 22), rows: a.dataset.rows, karo: +(orta(r(tile)) - orta(satir)).toFixed(1), kapat: kapat ? +(orta(r(kapat)) - orta(satir)).toFixed(1) : null, eylem: eylem ? +(orta(r(eylem)) - orta(satir)).toFixed(1) : null, yukseklik: Math.round(r(a).height) });
-  }
-  const ilk = document.querySelector('[data-rows="single"]');
-  const kap = ilk ? ilk.parentElement : null;
-  if (kap) kap.scrollIntoView({ block: "start" });
-  const b = kap ? kap.getBoundingClientRect() : null;
-  return JSON.stringify({ uyarilar: out, kutu: b && { x: b.x + window.scrollX, y: b.y + window.scrollY, w: b.width, h: Math.min(b.height, 520) } });
-})()`));
-if (klasor && sonuc.kutu) {
-  const k = sonuc.kutu;
+const olc = async (genislik) => {
+  await gonder("Emulation.setDeviceMetricsOverride", { width: genislik, height: 900, deviceScaleFactor: 2, mobile: false });
+  await gonder("Page.navigate", { url: "http://localhost:6070/tr/docs/alert" });
+  for (let i = 0; i < 30; i++) { await new Promise((r) => setTimeout(r, 2000)); if (await js(`document.querySelectorAll('.tamga-alert').length >= 3`)) break; }
+  return JSON.parse(await js(`(() => {
+    const r = (el) => el.getBoundingClientRect(); const orta = (b) => b.top + b.height / 2;
+    const out = [];
+    for (const a of document.querySelectorAll(".tamga-alert")) {
+      const tile = a.querySelector(".tamga-alert-tile"); const p = a.querySelector(".tamga-alert-baslik");
+      const rg = document.createRange(); rg.selectNodeContents(p); const satirlar = rg.getClientRects(); const satir = satirlar[0];
+      const kapat = a.querySelector(".tamga-alert-kapat"); const eylem = a.querySelector(".tamga-alert-eylem");
+      out.push({ baslik: p.textContent.slice(0, 22), govde: p.nextElementSibling ? "gövdeli" : "gövdesiz", satir: Math.round(r(p).height / satir.height), karo: +(orta(r(tile)) - orta(satir)).toFixed(1), kapat: kapat ? +(orta(r(kapat)) - orta(satir)).toFixed(1) : null, eylem: eylem ? +(orta(r(eylem)) - orta(satir)).toFixed(1) : null });
+    }
+    const uzun = [...document.querySelectorAll(".tamga-alert-baslik")].sort((a, b) => b.textContent.length - a.textContent.length)[0];
+    const kap = uzun.closest(".tamga-alert").parentElement;
+    kap.scrollIntoView({ block: "start" });
+    const b = kap.getBoundingClientRect();
+    return JSON.stringify({ uyarilar: out, kutu: { x: b.x + window.scrollX, y: b.y + window.scrollY, w: b.width, h: Math.min(b.height, 640) } });
+  })()`));
+};
+const genis = await olc(1280);
+const dar = await olc(390);
+if (klasor) {
+  const k = dar.kutu;
   const shot = await gonder("Page.captureScreenshot", { format: "png", clip: { x: Math.max(0, k.x - 4), y: Math.max(0, k.y - 4), width: k.w + 8, height: k.h + 8, scale: 2 } });
-  writeFileSync(`${klasor}/uyari-tek-satir.png`, Buffer.from(shot.result.data, "base64"));
+  writeFileSync(`${klasor}/uyari-390.png`, Buffer.from(shot.result.data, "base64"));
 }
 ws.close(); proc.kill();
 let hata = 0;
 const soyle = (k, m) => { if (!k) { console.log("✗ " + m); hata = 1; } };
-soyle(sonuc.uyarilar.some((u) => u.rows === "single"), "sayfada tek satırlı uyarı yok");
-soyle(sonuc.uyarilar.some((u) => u.rows === "multi"), "sayfada gövdeli uyarı yok");
-for (const u of sonuc.uyarilar) {
-  const ad = (u.rows ?? "?") + " " + u.baslik;
-  soyle(Math.abs(u.karo) <= 1, ad + ": karo başlıkla hizalı değil (" + u.karo + ")");
-  soyle(u.kapat === null || Math.abs(u.kapat) <= 1, ad + ": kapatma başlıkla hizalı değil (" + u.kapat + ")");
-  soyle(u.eylem === null || Math.abs(u.eylem) <= 1, ad + ": eylem başlıkla hizalı değil (" + u.eylem + ")");
+const hepsi = [...genis.uyarilar.map((u) => ({ ...u, en: 1280 })), ...dar.uyarilar.map((u) => ({ ...u, en: 390 }))];
+soyle(hepsi.some((u) => u.govde === "gövdesiz" && u.satir === 1), "sayfada tek satırlı uyarı yok");
+soyle(hepsi.some((u) => u.govde === "gövdeli"), "sayfada gövdeli uyarı yok");
+soyle(hepsi.some((u) => u.en === 390 && u.satir >= 2), "390px'te çok satıra inen başlık yok");
+for (const u of hepsi) {
+  const ad = u.en + "px " + u.govde + " " + u.satir + " satır · " + u.baslik;
+  /* Gövdeli uyarıda karo bilerek 2 px aşağıda: iki satırlık bloğun yanında göz onu yüksek okuyor. */
+  const beklenen = u.govde === "gövdeli" ? 2 : 0;
+  soyle(Math.abs(u.karo - beklenen) <= 1, ad + ": karo ilk satırla hizalı değil (" + u.karo + ", beklenen " + beklenen + ")");
+  soyle(u.kapat === null || Math.abs(u.kapat) <= 1, ad + ": kapatma ilk satırla hizalı değil (" + u.kapat + ")");
+  soyle(u.eylem === null || Math.abs(u.eylem) <= 1, ad + ": eylem ilk satırla hizalı değil (" + u.eylem + ")");
 }
-console.log(JSON.stringify(sonuc.uyarilar));
-console.log(hata ? "✗ Uyarı hizası ölçümü başarısız." : "✓ Karo, eylem ve kapatma başlıkla hizalı; tek satırlı ve gövdeli (" + sonuc.uyarilar.length + " uyarı).");
+console.log(JSON.stringify(hepsi));
+console.log(hata ? "✗ Uyarı hizası ölçümü başarısız." : "✓ Karo, eylem ve kapatma başlığın ilk satırında; gövdesiz, gövdeli ve 390px'te çok satırlı (" + hepsi.length + " ölçüm).");
 process.exit(hata);

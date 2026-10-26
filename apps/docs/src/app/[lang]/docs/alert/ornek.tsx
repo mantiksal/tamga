@@ -15,7 +15,8 @@ export function UyariOrnegi({
   kapat,
   geriGetir,
 }: {
-  uyarilar: { state: Tone; title: string; body: string }[];
+  /* `body` isteğe bağlı: tek satırlı (yalnız başlıklı) uyarı da kapatılabiliyor. */
+  uyarilar: { state: Tone; title: string; body?: string }[];
   kapat: string;
   geriGetir: string;
 }) {
@@ -32,7 +33,7 @@ export function UyariOrnegi({
             dismissLabel={kapat}
             onDismiss={() => setAcik((a) => a.filter((x) => x !== i))}
           >
-            {u.body}
+            {u.body ?? null}
           </Alert>
         ) : null,
       )}

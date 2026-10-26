@@ -182,6 +182,9 @@ export function Alert({
     <div
       {...dataProps(rest)}
       className="tamga-alert"
+      /* TEK SATIR / ÇOK SATIR: gövdesiz uyarıda karo, eylem ve kapatma başlıkla
+         ortalanır; gövdeliyse başlığın ilk satırına hizalanır (kit.css). */
+      data-rows={children ? "multi" : "single"}
       style={state === "neutral" ? undefined : { background: h.bg }}
       role="status"
     >
@@ -205,13 +208,13 @@ export function Alert({
           <div className="mt-1 text-small leading-relaxed text-ink-soft">{children}</div>
         ) : null}
       </div>
-      {action ? <div className="shrink-0">{action}</div> : null}
+      {action ? <div className="tamga-alert-eylem">{action}</div> : null}
       {onDismiss ? (
         /* KAPATMA HAYALET: yıkanmış bir kutunun içinde ikinci bir kenarlı
            nesne, mesajın kendisiyle yarışıyor. */
         <button
           type="button"
-          className="tamga-icon-btn tamga-icon-btn-sm tamga-icon-btn-ghost shrink-0"
+          className="tamga-icon-btn tamga-icon-btn-sm tamga-icon-btn-ghost tamga-alert-kapat"
           aria-label={dismissLabel}
           onClick={onDismiss}
         >

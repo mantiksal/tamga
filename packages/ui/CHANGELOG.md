@@ -5,6 +5,19 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.10.2
+
+> A one-line alert is centred; a longer one lines up with its first line.
+
+### Fixed
+
+- **`Alert` tile, action and dismiss sat 4 to 5px below the title.** The box aligned its parts
+  to the top, so a title-only alert looked off-centre and a two-line one had the tile hanging
+  under the first line. Without a body (`data-rows="single"`) everything is centred on the
+  title; with a body (`multi`) the tile, the `size="sm"` action and the dismiss button sit on
+  the first line's centre. Measured on the docs page for both (`pnpm olc:uyari`); the docs now
+  show one-line alerts too.
+
 ## 0.10.1
 
 > The field label is the input's size.

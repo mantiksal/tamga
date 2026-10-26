@@ -85,6 +85,20 @@ const T = {
         durur.
       </>
     ),
+    tekH: "Tek satır da olur",
+    tekP: (
+      <>
+        Gövde zorunlu değil: yalnız başlıklı bir uyarı tek satır. O zaman karo, eylem ve kapatma
+        düğmesi başlıkla <strong>ortalanır</strong>; gövdeli uyarıda ise başlığın ilk satırına
+        hizalanırlar. İkisi de aynı bileşen, karar gövdenin olup olmamasından geliyor.
+      </>
+    ),
+    tekKaydedildi: "Değişiklikler kaydedildi",
+    tekYedek: "Yedekleme bu gece 03:00'te çalışacak",
+    tekSinir: "Günlük istek sınırına yaklaştın",
+    tekSertifika: "Sertifika 3 gün içinde doluyor",
+    tekYenile: "Yenile",
+    tekBildirim: "Bildirim ayarları güncellendi",
     related: "İlgili",
     rel: (
       <>
@@ -149,6 +163,21 @@ const T = {
         long as the state lasts.
       </>
     ),
+    tekH: "One line is fine too",
+    tekP: (
+      <>
+        The body is optional: a title-only alert is one line. Then the tile, the action and the
+        dismiss button are <strong>centred</strong> on the title; with a body they line up with
+        the title&apos;s first line. Same component, the decision comes from whether there is a
+        body.
+      </>
+    ),
+    tekKaydedildi: "Changes saved",
+    tekYedek: "The backup runs tonight at 03:00",
+    tekSinir: "You are close to the daily request limit",
+    tekSertifika: "The certificate expires in 3 days",
+    tekYenile: "Renew",
+    tekBildirim: "Notification settings updated",
     related: "Related",
     rel: (
       <>
@@ -213,6 +242,26 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       </Demo>
       <P>{t.dortTon}</P>
       <P>{t.karoMurekkebi}</P>
+
+      <H2>{t.tekH}</H2>
+      <P>{t.tekP}</P>
+      <Demo
+        labels={dict.demo}
+        align="start"
+        code={`<Alert state="positive" title="${t.tekKaydedildi}" />
+<Alert state="info" title="${t.tekYedek}" />
+<Alert state="caution" title="${t.tekSinir}" />
+<Alert state="danger" title="${t.tekSertifika}" action={<Button size="sm">${t.tekYenile}</Button>} />
+<Alert state="info" title="${t.tekBildirim}" dismissLabel="${t.kapat}" onDismiss={…} />`}
+      >
+        <div className="flex w-full flex-col items-start gap-4">
+          <Alert state="positive" title={t.tekKaydedildi} />
+          <Alert state="info" title={t.tekYedek} />
+          <Alert state="caution" title={t.tekSinir} />
+          <Alert state="danger" title={t.tekSertifika} action={<Button size="sm">{t.tekYenile}</Button>} />
+          <UyariOrnegi kapat={t.kapat} geriGetir={t.geriGetir} uyarilar={[{ state: "info", title: t.tekBildirim }]} />
+        </div>
+      </Demo>
 
       <H2>{t.rules}</H2>
       <Note>{t.notToast}</Note>

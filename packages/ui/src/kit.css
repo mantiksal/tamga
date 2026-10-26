@@ -4581,6 +4581,26 @@
     border: 1px solid var(--color-edge-strong);
     border-radius: calc(var(--radius) - 1px);
   }
+  .tamga-alert-eylem,
+  .tamga-alert-kapat {
+    flex: none;
+  }
+  /* TEK SATIRLI UYARI ORTALI: karo, eylem ve kapatma başlıkla aynı eksende ·
+     `flex-start` tek satırda karoyu 4 px aşağı bırakıyordu. */
+  .tamga-alert[data-rows="single"] {
+    align-items: center;
+  }
+  /* ÇOK SATIRLI: karo (28), eylem düğmesi (sm, 32) ve kapatma (30) başlığın İLK
+     satırının ortasına; satır yüksekliğinden kendi boyları düşülerek. */
+  .tamga-alert[data-rows="multi"] > .tamga-alert-tile {
+    margin-top: calc((1lh - 28px) / 2);
+  }
+  .tamga-alert[data-rows="multi"] > .tamga-alert-eylem {
+    margin-top: calc((1lh - 32px) / 2);
+  }
+  .tamga-alert[data-rows="multi"] > .tamga-alert-kapat {
+    margin-top: calc((1lh - 30px) / 2);
+  }
 
   /* the live mark — neutral by rule: running is not a deviation */
   /* The live mark. It is a member of the mark family — the component wears

@@ -114,3 +114,11 @@ describe("Seçenek işareti ve seçili kart (kit.css)", () => {
     expect(k).not.toMatch(/accent-soft/);
   });
 });
+
+describe("Seçenek kartı dolgusu", () => {
+  it("dikey 12, yatay 16", () => {
+    const { existsSync, readFileSync } = require("node:fs") as typeof import("node:fs");
+    const css = readFileSync(["src/kit.css", "packages/ui/src/kit.css"].find(existsSync)!, "utf8");
+    expect(css.match(/\.tamga-choice-card\s*\{([^}]*)\}/)?.[1]).toMatch(/padding:\s*12px 16px/);
+  });
+});

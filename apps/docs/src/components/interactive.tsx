@@ -712,6 +712,7 @@ export function LookDemo({ lang }: L) {
   const d = D[lang];
   const n = N[lang];
   const [v, setV] = useState("magaza");
+  const [tek, setTek] = useState("hizli");
   const [kim, setKim] = useState("vip");
   /* Tasarımın kendi ikilisi: solda fiyatlı kart seçenekleri, sağda düz liste ·
      kart tipi tam da "seçenekler arasında açıklama ya da fiyat farkı olduğunda"
@@ -741,6 +742,16 @@ export function LookDemo({ lang }: L) {
             </span>
           ),
         }))}
+      />
+      {/* TEK SATIRLI KART: açıklaması ve fiyatı olmayan seçenek · işaret tek
+          satırın ortasında durmalı, bu örnek onun için. */}
+      <RadioGroup
+        look="card"
+        label={n.teslimat}
+        value={tek}
+        onChange={setTek}
+        className="w-60 max-w-full"
+        options={kargolar.map((o) => ({ value: o.value, label: o.ad }))}
       />
       <RadioGroup
         label={n.kimeGorunsun}

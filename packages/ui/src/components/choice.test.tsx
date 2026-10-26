@@ -105,7 +105,7 @@ describe("Seçenek işareti ve seçili kart (kit.css)", () => {
   });
   it("seçili kartın zemini yıkama (accent-bg), mürekkep sayfanın mürekkebi", () => {
     const k = css.match(/\.tamga-choice-card\[aria-checked="true"\]\s*\{([^}]*)\}/g)!.join("\n");
-    expect(k).toMatch(/background:\s*var\(--color-accent-bg\)/);
+    expect(k).toMatch(/background:\s*color-mix\(in oklab, var\(--color-accent-bg\) 60%, var\(--color-shell\)\)/);
     expect(k).not.toMatch(/accent-soft/);
   });
 });

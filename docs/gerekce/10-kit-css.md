@@ -577,8 +577,8 @@ değiştiriyordu. İkincisi markadan markaya kayması: açık bir markada `accen
 Yükseklik 3px: kart bir düğme değil bir SEÇİM, düğmenin 4px'inden bir basamak altta
 duruyor.
 
-Seçili kartın yıkaması `--color-accent-bg`, seçili menü satırınınkiyle aynı, mürekkep
-sayfanın mürekkebi. Bir süre `--color-accent-soft` idi (doygun açık mavi, kendi mürekkebiyle):
+Seçili kartın yıkaması `--color-accent-bg`nin kabukla karışımı (yüzde altmış), seçili menü
+satırınınkinden bir tık açık, mürekkep sayfanın mürekkebi. Bir süre `--color-accent-soft` idi (doygun açık mavi, kendi mürekkebiyle):
 seçili kart yanındaki iki kartın arasında bir düğme gibi ağırlaşıyordu; kenar ve yükselme
 seçimi zaten söylüyor, yıkama yalnız destek. İşaretin üst boşluğu da düzeltildi: `1lh`ten
 işaretin kendi boyu (radyo 20, onay kutusu 22) düşülüyor; tek bir 18 px formülü işareti her

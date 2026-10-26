@@ -3639,7 +3639,8 @@
      doygun mavi seçili kartı bir düğme gibi ağırlaştırıyordu (gözle görüldü).
      Kenar ve yükselme yerinde duruyor: yıkama onların yerine değil YANINA. */
   .tamga-choice-card[aria-checked="true"] {
-    background: var(--color-accent-bg);
+    /* Bir tık açık: menü yıkamasının yüzde altmışı, gerisi kabuk · gözle seçildi. */
+    background: color-mix(in oklab, var(--color-accent-bg) 60%, var(--color-shell));
   }
   /* Seçili olan yerinde duruyor; seçili OLMAYANA basmak onu bir kademe
      indiriyor. Basılabilir olan o çünkü: seçili bir seçeneğe basmak hiçbir

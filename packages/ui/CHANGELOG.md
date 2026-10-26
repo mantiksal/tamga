@@ -29,7 +29,7 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 - **`RadioGroup` mark and selected card** · the mark's top offset is computed from its own size
   (radio 20px, checkbox 22px) instead of a single 18px, so it sits centred on the first line
   and a single-line option no longer looks a pixel or two low. The selected card's wash is
-  `--color-accent-bg` (the selected menu row's) with the page ink; `--color-accent-soft` made
+  a lighter mix of `--color-accent-bg` (the selected menu row's) and the shell, with the page ink; `--color-accent-soft` made
   the chosen card read as a heavy button beside its neighbours.
 - **`SelectPanel` `look="field"`** · the trigger as a form box (`.tamga-select`), full width,
   `title` carrying the whole value when set; the same caret glyph and text colour as `Select`

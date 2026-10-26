@@ -63,6 +63,18 @@ const T = {
     pasif: "Pasif",
     buyuk: "Büyük",
     bekleniyor: "Yükleniyor",
+    kaydediliyor: "Kaydediliyor",
+    kaydet: "Kaydet",
+    hesaplaniyor: "Hesaplanıyor",
+    hesapla: "Hesapla",
+    busyLookP: (
+      <>
+        Spinner&apos;ın biçimi düğme başına seçilir: <code>busyLook</code> varsayılan{" "}
+        <code>bars</code> (bugünkü çubuklar) ya da <Xref to="spinner">Spinner</Xref>&apos;ın{" "}
+        <code>dots</code>, <code>pixels</code>, <code>ring</code>, <code>square</code>&apos;ı. Uygulama
+        geneli bir ayar yok; görünüm kullanıldığı yerde söylenir. Aşağıda noktalar ve pikseller.
+      </>
+    ),
     ikinciSatir: (
       <>
         İkon <strong>eylemin yönünü</strong> söylüyor: ekleme solda (<code>+</code> sözcükten
@@ -142,6 +154,18 @@ const T = {
     pasif: "Disabled",
     buyuk: "Large",
     bekleniyor: "Loading",
+    kaydediliyor: "Saving",
+    kaydet: "Save",
+    hesaplaniyor: "Calculating",
+    hesapla: "Calculate",
+    busyLookP: (
+      <>
+        The spinner&apos;s shape is chosen per button: <code>busyLook</code> is <code>bars</code>{" "}
+        by default (today&apos;s) or <Xref to="spinner">Spinner</Xref>&apos;s <code>dots</code>,{" "}
+        <code>pixels</code>, <code>ring</code>, <code>square</code>. No app-wide setting; the look is
+        said where the button is used. Below, dots and pixels.
+      </>
+    ),
     ikinciSatir: (
       <>
         The glyph says <strong>which way the action goes</strong>: adding sits on the left (a{" "}
@@ -251,6 +275,17 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <P>{t.yumusak}</P>
 
       <ButtonPlayground labels={dict.demo} label={t.save} />
+
+      <P>{t.busyLookP}</P>
+      <Demo labels={dict.demo} code={`<Button variant="primary" busy busyLook="dots" busyLabel="${t.kaydediliyor}">${t.kaydet}</Button>
+<Button busy busyLook="pixels" busyLabel="${t.hesaplaniyor}">${t.hesapla}</Button>`}>
+        <Button variant="primary" busy busyLook="dots" busyLabel={t.kaydediliyor}>
+          {t.kaydet}
+        </Button>
+        <Button busy busyLook="pixels" busyLabel={t.hesaplaniyor}>
+          {t.hesapla}
+        </Button>
+      </Demo>
 
       <H2>{t.quietH}</H2>
       <P>{t.quietP}</P>

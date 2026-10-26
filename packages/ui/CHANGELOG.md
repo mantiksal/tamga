@@ -11,6 +11,8 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ### Added
 
+- **`Button` `busyLook`** · the spinner's shape while busy, per button: `bars` (default,
+  unchanged) or `Spinner`'s `dots`, `pixels`, `ring`, `square`. No app-wide setting.
 - **`FilterBar` `grid`** (`look="fields"`) · a CSS grid decided by the bar's own width, not the
   screen's. Wide: one line, a fixed 16rem search box and equal columns for the top fields,
   chosen when every field can have about 9rem (the threshold per field count is written as

@@ -72,6 +72,14 @@ export type ButtonProps = React.ComponentProps<"button"> &
      * ama okunur); adsız bir düğme olmuyor.
      */
     busyLabel?: string;
+    /**
+     * The spinner's shape while `busy`: `bars` (default, today's) or `Spinner`'s `dots`,
+     * `pixels`, `ring`, `square`. Chosen where the button is used; there is no app-wide
+     * setting. TR: `busy` sürerken spinner'ın biçimi: `bars` (varsayılan, bugünkü) ya da
+     * `Spinner`ın `dots`, `pixels`, `ring`, `square`ı. Düğmenin kullanıldığı yerde seçilir;
+     * uygulama geneli bir ayar yok.
+     */
+    busyLook?: "bars" | "dots" | "pixels" | "ring" | "square";
   };
 
 export function Button({
@@ -81,6 +89,7 @@ export function Button({
   full,
   busy = false,
   busyLabel,
+  busyLook = "bars",
   children,
   disabled,
   ...props
@@ -98,7 +107,7 @@ export function Button({
     >
       {busy ? (
         <>
-          <Spinner size={16} label={busyLabel ?? ""} />
+          <Spinner size={16} look={busyLook} label={busyLabel ?? ""} />
           {/* ADSIZ DÜĞME OLMAZ: `busyLabel` yoksa metin sr-only olarak ağaçta
               kalıyor; `invisible` olanı okuyucu görmüyor. */}
           {busyLabel ? null : <span className="sr-only">{children}</span>}

@@ -31,3 +31,24 @@ describe("Button · busy (kit.css)", () => {
     expect(k).toMatch(/margin:\s*auto/);
   });
 });
+
+/* SPINNER GÖRÜNÜMÜ DÜĞME BAŞINA: `busyLook` verilmezse bugünkü çubuklar (bars);
+   verilirse Spinner'ın o biçimi. Uygulama geneli ayar yok, görünüm kullanıldığı yerde. */
+describe("Button · busyLook", () => {
+  it("varsayılan bars: kök inline-flex çubuklar, bugünkü markup", () => {
+    const { container } = render(<Button busy busyLabel="Bekle">Kaydet</Button>);
+    const sp = container.querySelector('[role="status"]')!;
+    expect(sp.className).toBe("inline-flex items-end justify-between");
+    expect(sp.querySelectorAll(".tamga-spin-part").length).toBe(3);
+  });
+  it("dots ve pixels: ilgili spinner biçimi", () => {
+    const a = render(<Button busy busyLook="dots" busyLabel="Bekle">Kaydet</Button>);
+    expect(a.container.querySelector('[role="status"]')!.className).toBe("tamga-spin-dots");
+    a.unmount();
+    const b = render(<Button busy busyLook="pixels" busyLabel="Bekle">Kaydet</Button>);
+    expect(b.container.querySelector('[role="status"]')!.className).toBe("tamga-spin-pixels");
+    b.unmount();
+    const c = render(<Button busyLook="ring">Kaydet</Button>);
+    expect(c.container.querySelector("button")!.hasAttribute("busylook")).toBe(false);
+  });
+});

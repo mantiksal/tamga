@@ -17,3 +17,17 @@ describe("Button · busy", () => {
     expect(screen.queryByRole("button", { name: "Kaydet" })).toBeNull();
   });
 });
+
+/* MEŞGUL DÜĞMEDE SPINNER ORTADA: `position: absolute` tek başına spinner'ı statik
+   yerinde (solda) bırakıyordu. Dört yandan sıfırlanıp ortalanıyor; görünmez etiket
+   genişliği korumaya devam ediyor. Tarayıcı ölçümü: scripts/olc/dugme-mesgul.mjs */
+describe("Button · busy (kit.css)", () => {
+  it("spinner düğmenin tam ortasında konumlanıyor", () => {
+    const { existsSync, readFileSync } = require("node:fs") as typeof import("node:fs");
+    const css = readFileSync(["src/kit.css", "packages/ui/src/kit.css"].find(existsSync)!, "utf8");
+    const k = css.match(/\.tamga-btn\[data-busy\] > \[role="status"\]\s*\{([^}]*)\}/)?.[1] ?? "";
+    expect(k).toMatch(/position:\s*absolute/);
+    expect(k).toMatch(/inset:\s*0/);
+    expect(k).toMatch(/margin:\s*auto/);
+  });
+});

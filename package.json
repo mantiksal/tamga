@@ -32,6 +32,7 @@
     "check:olcu-hizasi": "node scripts/check-olcu-hizasi.mjs",
     "olc:ray": "node scripts/olc/ray-kirpma.mjs",
     "olc:filtre": "node scripts/olc/filtre-dar.mjs",
+    "olc:dugme": "node scripts/olc/dugme-mesgul.mjs",
     "check:data-props": "node scripts/check-data-props.mjs",
     "check:item-hooks": "node scripts/check-item-hooks.mjs"
   },

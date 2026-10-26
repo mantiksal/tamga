@@ -26,6 +26,11 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   starts with a search box (`searchPlaceholder ?? labels.searchIn(label) ?? label`) and
   `labels.all` as the first option; keyboard as in `SelectPanel`. The default, `combobox`, is
   today's text box. Applies on top, in the drawer and in the narrow sheet.
+- **`Button` busy spinner sits in the exact centre** of the button in every browser: it was an
+  absolutely positioned child with no offsets, so its place depended on the browser's
+  static-position rule for flex children. `inset: 0; margin: auto` now centres it; the invisible
+  label still keeps the width. Measured for sm/base/lg and primary/soft/ghost/danger
+  (`pnpm olc:dugme`).
 - **`RadioGroup` mark and selected card** · the mark's top offset is computed from its own size
   (radio 20px, checkbox 22px) instead of a single 18px, so it sits centred on the first line
   and a single-line option no longer looks a pixel or two low. The selected card's wash is

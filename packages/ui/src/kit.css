@@ -897,8 +897,14 @@
     box-shadow: 4px 4px 0 var(--color-edge-strong);
     cursor: progress;
   }
+  /* SPINNER TAM ORTADA, statik konuma güvenmeden: mutlak konumlu çocuğun esnek
+     kapta ortalanması tarayıcının statik-konum kuralına bağlıydı. Spinner'ın boyu
+     kendi stilinde; dört yandan sıfır + otomatik kenar boşluğu onu ortaya oturtur.
+     Görünmez etiket akışta kalıyor, düğme genişliğini koruyor. */
   .tamga-btn[data-busy] > [role="status"] {
     position: absolute;
+    inset: 0;
+    margin: auto;
   }
   .tamga-btn[data-busy] {
     position: relative;

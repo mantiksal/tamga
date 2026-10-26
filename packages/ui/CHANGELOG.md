@@ -5,6 +5,20 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.10.1
+
+> The field label is the input's size.
+
+### Changed
+
+- **`Field` label 13px to 14.5px** (`text-body`, still bold), and the gap between label and
+  control 6px to 8px; the gap between the control and the help or error line stays 6px: the
+  help belongs to the box, the label is the field's heading. The quiet note at the right of the
+  label line stays `text-caption`. Reason (2026-10-26): with more space between fields the
+  13px label read too small beside the 14.5px input text. The same size and gap on
+  `FilterBar`'s field labels (top row and sheet). Measured at 390px and 1280px: the label stays
+  on one line, the info glyph and the note sit on its baseline (`pnpm olc:alan`).
+
 ## 0.10.0
 
 > The busy spinner picks its shape and sits in the centre; the radio mark stays put when chosen.

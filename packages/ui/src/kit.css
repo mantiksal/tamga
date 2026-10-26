@@ -1515,13 +1515,13 @@
   /* SATIRIN PARÇALARI KİT SINIFINDA. Görünüm ve taban Tailwind'de kalsaydı
      (`flex`, `basis-75`) yardımcı katman bileşen katmanını ezer, aşağıdaki
      `display: none` ve `flex-basis: 0` hiç işlemezdi · tarayıcıda ölçüldü.
-     Değerler eski yardımcı sınıfların birebir karşılığı: arama 2 pay, 18.75rem
-     taban; alan 1 pay, 10rem (tarih aralığı 20rem); 6px dikey aralık. */
+     Değerler eski yardımcı sınıfların karşılığı: arama 2 pay, 18.75rem taban;
+     alan 1 pay, 10rem (tarih aralığı 20rem); etiketle kutu arası 8px (`Field` ile aynı). */
   .tamga-filter-ara,
   .tamga-filter-alan {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     min-width: 0;
   }
   .tamga-filter-ara {

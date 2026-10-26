@@ -558,7 +558,7 @@ export function FilterBar({
               ) : (
                 /* Metin ve tarih aralığı çip olamaz: kutuları kalıyor. */
                 <div key={field.key} className="tamga-filter-genis tamga-filter-alan" data-range={field.kind === "dateRange" || undefined}>
-                  <span className="text-small font-bold text-ink-faint">{field.label}</span>
+                  <span className="text-body font-bold text-ink-faint">{field.label}</span>
                   <FieldControl field={field} values={values} write={write} optionSource={optionSource} locale={locale} labels={labels} />
                 </div>
               ),
@@ -584,7 +584,7 @@ export function FilterBar({
             onları ezerdi. Tarayıcıda ölçüldü. */}
         <label className="tamga-filter-ara">
           {/* Darda etiket ekran okuyucuya kalıyor (`tamga-filter-ara-ad`): ikon ve yer tutucu amacı söylüyor. */}
-          <span className="tamga-filter-ara-ad text-small font-bold text-ink-faint">{labels.search}</span>
+          <span className="tamga-filter-ara-ad text-body font-bold text-ink-faint">{labels.search}</span>
           {/* `leading` bir boolean: kite sol boşluğu açtırıyor, ikonu çağıran
               çiziyor. Böylece ikon seti kitin değil ürünün kararı kalıyor. */}
           {aramaKutusu}
@@ -605,7 +605,7 @@ export function FilterBar({
             className={`tamga-filter-genis tamga-filter-alan ${field.kind === "dateRange" ? "" : "tamga-filter-cap"}`}
             data-range={field.kind === "dateRange" || undefined}
           >
-            <span className="text-small font-bold text-ink-faint">{field.label}</span>
+            <span className="text-body font-bold text-ink-faint">{field.label}</span>
             <FieldControl
               field={field}
               values={values}
@@ -695,7 +695,7 @@ export function FilterBar({
           {/* ÜST ALANLAR DAR EKRANDA ÇEKMECENİN İLK, BAŞLIKSIZ GRUBU. */}
           {top.length > 0 && (
             <div className="tamga-filter-dar tamga-filter-grup border-b border-dashed border-line py-4.5 last:border-b-0">
-              <div className="grid gap-3 sm:grid-cols-[repeat(2,minmax(0,1fr))]">{ustAlanlar("text-small text-ink-soft")}</div>
+              <div className="grid gap-3 sm:grid-cols-[repeat(2,minmax(0,1fr))]">{ustAlanlar("text-body text-ink-soft")}</div>
             </div>
           )}
           {drawer.map((group) => (
@@ -720,7 +720,7 @@ export function FilterBar({
                     key={field.key}
                     className={`flex flex-col gap-1.5 ${field.kind === "dateRange" ? "sm:col-span-2" : ""}`}
                   >
-                    <span className="text-small text-ink-soft">{field.label}</span>
+                    <span className="text-body text-ink-soft">{field.label}</span>
                     <FieldControl
                       field={field}
                       values={values}

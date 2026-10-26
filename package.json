@@ -33,6 +33,7 @@
     "olc:ray": "node scripts/olc/ray-kirpma.mjs",
     "olc:filtre": "node scripts/olc/filtre-dar.mjs",
     "olc:dugme": "node scripts/olc/dugme-mesgul.mjs",
+    "olc:alan": "node scripts/olc/alan-etiket.mjs",
     "check:data-props": "node scripts/check-data-props.mjs",
     "check:item-hooks": "node scripts/check-item-hooks.mjs"
   },

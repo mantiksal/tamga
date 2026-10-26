@@ -335,9 +335,11 @@ export function Field({
     <div {...dataProps(rest)} className="flex flex-col gap-1.5">
       {/* ETİKET SATIRI İKİ UÇLU: solda ad ve zorunluluk, sağda sessiz not.
           Notu etiketin ARDINA koymak, uzun bir etikette onu satırın ortasında
-          bırakıyor ve göz onu etiketin parçası sanıyor. */}
-      <span className="flex items-baseline gap-2">
-        <label htmlFor={htmlFor} className="text-small font-bold text-ink">
+          bırakıyor ve göz onu etiketin parçası sanıyor. ETİKET GİRİŞLE AYNI BOYDA
+          (14,5 px) ve kontrolden 8 px uzakta (`gap` 6 + `mb` 2): etiket alanın
+          başlığı, alttaki yardım metni kutuya ait, o 6 px kalıyor. */}
+      <span className="mb-0.5 flex items-baseline gap-2">
+        <label htmlFor={htmlFor} className="text-body font-bold text-ink">
           {label}
           {required ? (
             <span aria-hidden className="ml-1" style={{ color: toneOf("danger").fg }}>

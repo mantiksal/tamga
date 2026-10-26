@@ -18,9 +18,9 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   the first line's centre. Measured on the docs page for both (`pnpm olc:uyari`); the docs now
   show one-line alerts too.
 - **The success tile's glyph read as black**: the positive tone's mark ink was the inverse
-  navy. A new token, `--color-resolved-mark-ink` (#16325c, one step lighter, 3.6:1 on the green
-  mark, the same in both themes), carries the glyph; the mark colour and the filled check-circle
-  glyph are unchanged.
+  navy. A new token, `--color-resolved-mark-ink` (#f0f7f2, a pale mint lighter than the green
+  it sits on, 3.2:1 on the mark, the same in both themes), carries the glyph; the mark colour
+  and the filled check-circle glyph are unchanged.
 
 ## 0.10.1
 

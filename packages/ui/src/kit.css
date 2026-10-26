@@ -198,7 +198,7 @@
      bir yıkamanın ya da kâğıdın üstünde duruyor, ve iki temada da o zeminlerden
      yeterince ayrılıyor. Metin dönüyor çünkü o okunmak zorunda. */
   --color-resolved-mark: #3e9a5c;
-  --color-resolved-mark-ink: #16325c;
+  --color-resolved-mark-ink: #f0f7f2;
   /* Worth knowing, nobody has to act. Pushed toward cyan rather than the brand's
      navy: the dark ground is already blue, and a navy info would sink into it
      exactly the way the warm statuses above are kept warm to avoid. */

@@ -47,7 +47,7 @@ export const tones: Record<Tone, ToneStyle> = {
   positive: {
     fg: "var(--color-resolved)",
     mark: "var(--color-resolved-mark)",
-    /* Lacivertten bir tık açık: yeşil karo üstünde `--color-inverse` siyah okunuyordu. */
+    /* Yeşilden açık, soluk nane: yeşil karo üstünde lacivert siyah okunuyordu. */
     markInk: "var(--color-resolved-mark-ink)",
     bg: "var(--color-resolved-bg)",
     inverse: "var(--color-resolved-inverse)",

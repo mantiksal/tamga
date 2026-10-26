@@ -30,7 +30,7 @@ describe("Alert · satır sayısı ve hiza", () => {
 
 /* BAŞARI KAROSU: lacivert glif (`--color-inverse`) yeşil karoda siyah okunuyordu;
    beyaz disk de onayı yutuyordu (denendi, beğenilmedi). Eski görünüm kalıyor:
-   dolu daire, glif lacivertten bir tık açık (`--color-resolved-mark-ink`, 3.6:1). */
+   dolu daire, glif yeşilden açık soluk nane (`--color-resolved-mark-ink`, 3.2:1). */
 describe("Alert · başarı karosunun glifi", () => {
   it("positive tonunun işaret mürekkebi resolved-mark-ink; glif dolu CheckCircle", async () => {
     const { tones } = await import("./tone.js");

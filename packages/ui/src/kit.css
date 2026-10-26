@@ -3576,9 +3576,17 @@
    *
    * Gerekçe: docs/gerekce/10-kit-css.md
    */
+  /* İŞARET İLK SATIRIN ORTASINDA: üst boşluk satır yüksekliğinden işaretin KENDİ
+     boyu düşülerek · 18 px'lik tek formül radyoyu (20) ve onay kutusunu (22) her
+     satırda 1-2 px aşağı itiyordu; tek satırlı seçenekte göz bunu görüyor. */
   .tamga-choice-mark {
     align-self: flex-start;
-    margin-top: calc((1lh - 18px) / 2);
+  }
+  .tamga-radio.tamga-choice-mark {
+    margin-top: calc((1lh - 20px) / 2);
+  }
+  .tamga-check.tamga-choice-mark {
+    margin-top: calc((1lh - 22px) / 2);
   }
 
   /*
@@ -3626,14 +3634,12 @@
     box-shadow: 3px 3px 0 var(--color-edge-strong);
   }
 
-  /* SEÇİLİ KART YIKAMA DA ALIYOR. Yukarıdaki not "vurgu rengiyle değil" diyor ve
-     o ölçüm `--color-accent-line` içindi: açık bir markada `edge` ile neredeyse
-     aynı renge düşüyordu. `--color-accent-soft` başka bir token · iki temada
-     sabit, kendi mürekkebi var, ve tasarım seçili kartı onunla dolduruyor.
+  /* SEÇİLİ KART YIKAMA DA ALIYOR, ve yıkama `--color-accent-bg`: seçili menü
+     satırının zemini, sayfanın mürekkebiyle. Bir süre `--color-accent-soft`tu;
+     doygun mavi seçili kartı bir düğme gibi ağırlaştırıyordu (gözle görüldü).
      Kenar ve yükselme yerinde duruyor: yıkama onların yerine değil YANINA. */
   .tamga-choice-card[aria-checked="true"] {
-    background: var(--color-accent-soft);
-    color: var(--color-accent-soft-ink);
+    background: var(--color-accent-bg);
   }
   /* Seçili olan yerinde duruyor; seçili OLMAYANA basmak onu bir kademe
      indiriyor. Basılabilir olan o çünkü: seçili bir seçeneğe basmak hiçbir

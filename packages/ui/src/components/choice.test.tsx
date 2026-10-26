@@ -90,3 +90,22 @@ describe("PasswordInput · invalid", () => {
     expect(screen.getByLabelText("Parola").className).toContain("tamga-input");
   });
 });
+
+/* TEK SATIRDA İŞARET METİNLE ORTALI. `tamga-choice-mark`ın üst boşluğu 18 px'e
+   göre hesaplanıyordu; radyo 20 px, onay kutusu 22 px. Fark her satırda işareti
+   1-2 px aşağı itiyordu. Seçili kartın zemini de `accent-soft`tan `accent-bg`ye:
+   doygun mavi seçili kartı düğme gibi ağırlaştırıyordu. */
+describe("Seçenek işareti ve seçili kart (kit.css)", () => {
+  const { existsSync, readFileSync } = require("node:fs") as typeof import("node:fs");
+  const css = readFileSync(["src/kit.css", "packages/ui/src/kit.css"].find(existsSync)!, "utf8");
+  it("işaretin üst boşluğu kendi boyuna göre: radyo 20px, onay kutusu 22px", () => {
+    expect(css).toMatch(/\.tamga-radio\.tamga-choice-mark\s*\{\s*margin-top:\s*calc\(\(1lh - 20px\) \/ 2\)/);
+    expect(css).toMatch(/\.tamga-check\.tamga-choice-mark\s*\{\s*margin-top:\s*calc\(\(1lh - 22px\) \/ 2\)/);
+    expect(css).not.toMatch(/\.tamga-choice-mark\s*\{[^}]*18px/);
+  });
+  it("seçili kartın zemini yıkama (accent-bg), mürekkep sayfanın mürekkebi", () => {
+    const k = css.match(/\.tamga-choice-card\[aria-checked="true"\]\s*\{([^}]*)\}/g)!.join("\n");
+    expect(k).toMatch(/background:\s*var\(--color-accent-bg\)/);
+    expect(k).not.toMatch(/accent-soft/);
+  });
+});

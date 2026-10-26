@@ -2420,7 +2420,7 @@
   }
 
   .tamga-accordion-cards .tamga-collapsible-body {
-    padding: 0 14px 14px;
+    padding: 14px;
   }
 
   .tamga-accordion-cards .tamga-collapsible-body[data-indent] {
@@ -2459,8 +2459,10 @@
     background: var(--color-hover);
   }
 
+  /* GÖVDE DÖRT YANDAN 14: üstte sıfırdı ve yıkanmış başlığın hemen dibine
+     yapışıyordu; alttaki boşluk kadar üstte de var. */
   .tamga-collapsible-body {
-    padding: 0 14px 14px;
+    padding: 14px;
     font-size: var(--text-body);
     line-height: 1.55;
     color: var(--color-ink-soft);
@@ -2469,7 +2471,7 @@
   /* NOT ŞERİDİ: kapalıyken de görünen sessiz satır, başlıkla gövde arasında ·
      gövdeyle aynı sol hizada, ondan küçük ve soluk. */
   .tamga-collapsible-note {
-    padding: 0 14px 12px;
+    padding: 12px 14px 0;
     font-size: var(--text-small);
     line-height: 1.5;
     color: var(--color-ink-faint);

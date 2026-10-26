@@ -121,6 +121,11 @@ describe("Accordion · açık hâl ve liste görünümü", () => {
       expect(k === undefined || !/edge-strong|box-shadow:\s*[0-9]/.test(k), secici).toBe(true);
     }
   });
+  it("CSS: gövde dört yandan 14 px, not üstten 12", () => {
+    expect(css).toMatch(/\.tamga-collapsible-body\s*\{\s*padding:\s*14px;/);
+    expect(css).toMatch(/\.tamga-accordion-cards \.tamga-collapsible-body\s*\{\s*padding:\s*14px;/);
+    expect(css).toMatch(/\.tamga-collapsible-note\s*\{\s*padding:\s*12px 14px 0;/);
+  });
   it("CSS: listede satırlar kenarsız, çizgiyle ayrılıyor", () => {
     const k = css.match(/\.tamga-accordion-list > \.tamga-collapsible\s*\{([^}]*)\}/)?.[1] ?? "";
     expect(k).toMatch(/border:\s*0/);

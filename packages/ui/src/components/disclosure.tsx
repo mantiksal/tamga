@@ -171,7 +171,7 @@ export function Accordion({
   return (
     <div
       {...dataProps(rest)}
-      className={cn(look === "cards" ? "tamga-accordion-cards" : "tamga-surface overflow-hidden", className)}
+      className={cn(look === "cards" ? "tamga-accordion-cards" : "tamga-surface tamga-accordion-list overflow-hidden", className)}
     >
       {children}
     </div>

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { Collapsible } from "./disclosure.js";
+import { Collapsible, Accordion } from "./disclosure.js";
 
 /**
  * AÇIK DURUM DIŞARIDAN OKUNABİLİR. Bir kontrol listesi satırı açılınca ağdan
@@ -100,5 +100,32 @@ describe("Collapsible · kontrollü", () => {
     const id = b.getAttribute("aria-describedby");
     expect(id).toBeTruthy();
     expect(document.getElementById(id!)?.textContent).toBe("Son ölçüm 3 gün önce");
+  });
+});
+
+/* AÇIK BÖLÜM KENARINI KOYULTMUYOR, GÖLGE ALMIYOR: siyah kenar + 3px taban ucuz
+   duruyordu (2026-10-26). Açık olanı başlığın yıkaması söylüyor. Liste görünümü
+   (`look="list"`) satırlardan oluşur: satırın kendi kenarı, köşesi, gölgesi yok;
+   komşusundan tek çizgiyle ayrılır · kart kuralları listeye sızıyordu, satırlar
+   bitişik kartlar gibi görünüyordu. */
+describe("Accordion · açık hâl ve liste görünümü", () => {
+  const { existsSync, readFileSync } = require("node:fs") as typeof import("node:fs");
+  const css = readFileSync(["src/kit.css", "packages/ui/src/kit.css"].find(existsSync)!, "utf8");
+  it("liste görünümü kendi sınıfını taşıyor", () => {
+    const { container } = render(<Accordion look="list"><Collapsible title="A">a</Collapsible></Accordion>);
+    expect(container.firstElementChild!.classList.contains("tamga-accordion-list")).toBe(true);
+  });
+  it("CSS: açık kart ve açık bölüm siyah kenar ve gölge almıyor", () => {
+    for (const secici of ['.tamga-collapsible[data-open]', '.tamga-accordion-cards > .tamga-collapsible[data-open]']) {
+      const k = css.match(new RegExp(secici.replace(/[.*+?^${}()|[\]\\>]/g, "\\$&") + "\\s*\\{([^}]*)\\}"))?.[1];
+      expect(k === undefined || !/edge-strong|box-shadow:\s*[0-9]/.test(k), secici).toBe(true);
+    }
+  });
+  it("CSS: listede satırlar kenarsız, çizgiyle ayrılıyor", () => {
+    const k = css.match(/\.tamga-accordion-list > \.tamga-collapsible\s*\{([^}]*)\}/)?.[1] ?? "";
+    expect(k).toMatch(/border:\s*0/);
+    expect(k).toMatch(/border-radius:\s*0/);
+    expect(k).toMatch(/box-shadow:\s*none/);
+    expect(css).toMatch(/\.tamga-accordion-list > \.tamga-collapsible \+ \.tamga-collapsible\s*\{\s*border-top:\s*1px solid var\(--color-line\)/);
   });
 });

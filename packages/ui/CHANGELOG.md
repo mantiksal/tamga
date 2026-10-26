@@ -17,6 +17,10 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   title; with a body (`multi`) the tile, the `size="sm"` action and the dismiss button sit on
   the first line's centre. Measured on the docs page for both (`pnpm olc:uyari`); the docs now
   show one-line alerts too.
+- **`Accordion` open card no longer turns its edge black or grows a shadow**; the open
+  section is told by the washed head and the caret. In `look="list"` a row is a row again: no
+  edge, no corner, no shadow of its own, a single line between neighbours. The card rules had
+  leaked into the list and the rows looked like touching cards.
 - **`RadioGroup` card is a step shorter**: vertical padding 16px to 12px (horizontal stays 16),
   a one-line card goes from 54px to 46px.
 - **The success tile's glyph read as black**: the positive tone's mark ink was the inverse

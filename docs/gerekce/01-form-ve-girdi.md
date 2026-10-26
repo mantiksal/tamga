@@ -291,15 +291,18 @@ ama seçilebilir kalıyorlar; süzme bir görünürlük işi, bir kilit değil.
 
 ### Açılır bölümün iki kılığı, ve kılığı kabın vermesi.
 
-Tasarım ikisini birden çiziyor. `Collapsible` tek başına (ya da bir kartın
-içinde) bir SATIR: kendi kenarı yok, komşusundan tek bir kuralla ayrılıyor.
-`Accordion`un içindeyse bir KART: açık olan 3px taban kazanıyor ve başlığı
-yıkanıyor.
+Tasarım ikisini birden çiziyor. `Accordion look="list"` içinde `Collapsible` bir
+SATIR: kendi kenarı, köşesi, gölgesi yok, komşusundan tek bir çizgiyle ayrılıyor
+(`.tamga-accordion-list`). `look="cards"` içinde ya da tek başına bir KART: kenarlı,
+köşeli, kendi zemininde.
 
 SEBEP ÖLÇÜLDÜ: tek yüzeyin içinde çizgiyle ayrılmış satırlarda hangisinin açık
 olduğu yalnız OKUN YÖNÜNDEN okunuyordu · üç bölümlü bir listede göz her
-seferinde okları taramak zorunda kalıyordu. Açık bölüm taban kazanınca uzaktan
-görünüyor.
+seferinde okları taramak zorunda kalıyordu. Açık bölümün başlığı yıkanınca
+(`--color-hover`) uzaktan görünüyor. Bir süre açık kart ayrıca kenarını
+koyultup 3px taban alıyordu; siyah kenar ve gölge göze ucuz geldi (2026-10-26),
+kaldırıldı. Liste görünümünde kart kuralları satıra sızıyordu ve satırlar
+bitişik kartlar gibi görünüyordu; bu da aynı gün düzeltildi.
 
 KILIĞI KAP VERİYOR (`Accordion look`), her bölüme bir prop koymak yerine: aynı
 kararı her çağrı yerinde tekrar almak, bir listede iki farklı kılık çıkma yolu

@@ -905,6 +905,10 @@
     position: absolute;
     inset: 0;
     margin: auto;
+    /* Kutu içeriği kadar: noktaların kökü kendi genişliğini taşımıyor, `inset`
+       onu düğme boyunca geriyordu ve noktalar solda çiziliyordu (ölçüldü). */
+    width: fit-content;
+    height: fit-content;
   }
   .tamga-btn[data-busy] {
     position: relative;
@@ -3745,9 +3749,11 @@
     transform: translate(2px, 2px);
     box-shadow: 0 0 0 var(--color-accent-shadow);
   }
+  /* İŞARETLİ RADYO YERİNDE KALIR: 2px'lik "basılı" kayması tek satırlı kartta
+     işareti yazının 2px altına indiriyordu. Basılı hâli gölgenin düşmesi ve
+     dolgu söylüyor; konum iki hâlde de aynı. */
   .tamga-radio[data-checked="true"] {
     border-color: var(--color-accent);
-    transform: translate(2px, 2px);
     box-shadow: 0 0 0 var(--color-accent);
   }
   .tamga-radio[data-checked="true"]::before {

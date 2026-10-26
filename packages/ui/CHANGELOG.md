@@ -5,14 +5,35 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.10.0
+
+> The busy spinner picks its shape and sits in the centre; the radio mark stays put when chosen.
+
+### Added
+
+- **`Button` `busyLook`** · the spinner's shape while busy, per button: `bars` (default,
+  unchanged) or `Spinner`'s `dots`, `pixels`, `ring`, `square`. No app-wide setting.
+
+### Fixed
+
+- **`Button` busy spinner sits in the exact centre** of the button in every browser: it was an
+  absolutely positioned child with no offsets, so its place depended on the browser's
+  static-position rule for flex children. `inset: 0; margin: auto; width: fit-content; height: fit-content` now centres the spinner's own box, whatever its look; the invisible
+  label still keeps the width. Measured for sm/base/lg and primary/soft/ghost/danger
+  (`pnpm olc:dugme`). The five looks are measured, by their painted parts.
+- **`RadioGroup` mark and selected card** · the mark's top offset is computed from its own size
+  (radio 20px, checkbox 22px) instead of a single 18px, so it sits centred on the first line
+  and a single-line option no longer looks a pixel or two low. The selected card's wash is
+  a lighter mix of `--color-accent-bg` (the selected menu row's) and the shell, with the page ink; `--color-accent-soft` made
+  the chosen card read as a heavy button beside its neighbours. The checked radio no longer shifts 2px down and right: the pressed-in look is
+  carried by the dropped shadow alone, so the mark stays centred on its line in both states.
+
 ## 0.9.0
 
 > An equal grid for the filter row, and a box-shaped panel for the searchable field. Both opt-in; a bar that gives neither renders as before, locked by test.
 
 ### Added
 
-- **`Button` `busyLook`** · the spinner's shape while busy, per button: `bars` (default,
-  unchanged) or `Spinner`'s `dots`, `pixels`, `ring`, `square`. No app-wide setting.
 - **`FilterBar` `grid`** (`look="fields"`) · a CSS grid decided by the bar's own width, not the
   screen's. Wide: one line, a fixed 16rem search box and equal columns for the top fields,
   chosen when every field can have about 9rem (the threshold per field count is written as
@@ -28,16 +49,6 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   starts with a search box (`searchPlaceholder ?? labels.searchIn(label) ?? label`) and
   `labels.all` as the first option; keyboard as in `SelectPanel`. The default, `combobox`, is
   today's text box. Applies on top, in the drawer and in the narrow sheet.
-- **`Button` busy spinner sits in the exact centre** of the button in every browser: it was an
-  absolutely positioned child with no offsets, so its place depended on the browser's
-  static-position rule for flex children. `inset: 0; margin: auto` now centres it; the invisible
-  label still keeps the width. Measured for sm/base/lg and primary/soft/ghost/danger
-  (`pnpm olc:dugme`).
-- **`RadioGroup` mark and selected card** · the mark's top offset is computed from its own size
-  (radio 20px, checkbox 22px) instead of a single 18px, so it sits centred on the first line
-  and a single-line option no longer looks a pixel or two low. The selected card's wash is
-  a lighter mix of `--color-accent-bg` (the selected menu row's) and the shell, with the page ink; `--color-accent-soft` made
-  the chosen card read as a heavy button beside its neighbours.
 - **`SelectPanel` `look="field"`** · the trigger as a form box (`.tamga-select`), full width,
   `title` carrying the whole value when set; the same caret glyph and text colour as `Select`
   (an empty "All" reads as a value, not a faint placeholder), the same strong edge when set.

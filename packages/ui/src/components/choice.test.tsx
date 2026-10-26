@@ -103,6 +103,11 @@ describe("Seçenek işareti ve seçili kart (kit.css)", () => {
     expect(css).toMatch(/\.tamga-check\.tamga-choice-mark\s*\{\s*margin-top:\s*calc\(\(1lh - 22px\) \/ 2\)/);
     expect(css).not.toMatch(/\.tamga-choice-mark\s*\{[^}]*18px/);
   });
+  it("işaretli radyo yerinden oynamıyor: translate yok", () => {
+    const k = css.match(/\.tamga-radio\[data-checked="true"\]\s*\{([^}]*)\}/)?.[1] ?? "";
+    expect(k).not.toMatch(/transform/);
+    expect(k).toMatch(/box-shadow:\s*0 0 0/);
+  });
   it("seçili kartın zemini yıkama (accent-bg), mürekkep sayfanın mürekkebi", () => {
     const k = css.match(/\.tamga-choice-card\[aria-checked="true"\]\s*\{([^}]*)\}/g)!.join("\n");
     expect(k).toMatch(/background:\s*color-mix\(in oklab, var\(--color-accent-bg\) 60%, var\(--color-shell\)\)/);

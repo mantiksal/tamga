@@ -29,6 +29,9 @@ describe("Button · busy (kit.css)", () => {
     expect(k).toMatch(/position:\s*absolute/);
     expect(k).toMatch(/inset:\s*0/);
     expect(k).toMatch(/margin:\s*auto/);
+    /* Kök kendi boyunda: noktaların kökü genişlik taşımıyor, inset onu geriyordu. */
+    expect(k).toMatch(/width:\s*fit-content/);
+    expect(k).toMatch(/height:\s*fit-content/);
   });
 });
 

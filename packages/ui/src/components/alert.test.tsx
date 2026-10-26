@@ -4,7 +4,6 @@ import { existsSync, readFileSync } from "node:fs";
 import { Alert } from "./primitives.js";
 import { Button } from "./button.js";
 import { Icon } from "./icon.js";
-import { Check } from "./icons.js";
 
 /* TEK SATIRLI UYARI: başlık tek başına gelince karo, eylem ve kapatma düğmesi
    başlıkla ortalanır (`data-rows="single"`). Gövdeliyse (`multi`) hepsi başlığın
@@ -29,22 +28,16 @@ describe("Alert · satır sayısı ve hiza", () => {
   });
 });
 
-/* BAŞARI KAROSU: koyu yeşil üstünde lacivert glif görünmüyordu (4.7:1 sayıca
-   geçiyor, gözle geçmiyor). Glif beyaz, yeşil bir tık koyu (#35884f, 4.4:1). */
+/* BAŞARI KAROSU: lacivert glif (`--color-inverse`) yeşil karoda siyah okunuyordu;
+   beyaz disk de onayı yutuyordu (denendi, beğenilmedi). Eski görünüm kalıyor:
+   dolu daire, glif lacivertten bir tık açık (`--color-resolved-mark-ink`, 3.6:1). */
 describe("Alert · başarı karosunun glifi", () => {
-  it("positive tonunun işaret mürekkebi beyaz (inverse-ink)", async () => {
+  it("positive tonunun işaret mürekkebi resolved-mark-ink; glif dolu CheckCircle", async () => {
     const { tones } = await import("./tone.js");
-    expect(tones.positive.markInk).toBe("var(--color-inverse-ink)");
-  });
-});
-
-/* BAŞARI GLİFİ DÜZ ONAY İŞARETİ: dolu `CheckCircle` beyaz bir disk, işaret
-   diskten oyulmuş yeşil; disk baskın geliyor ve onay görünmüyordu. Kalın `Check`
-   beyaz, karo yeşil. Öbür tonlar dolu daire/üçgenle kalıyor. */
-describe("Alert · başarı glifi", () => {
-  it("positive uyarının glifi kalın Check", () => {
+    expect(tones.positive.markInk).toBe("var(--color-resolved-mark-ink)");
+    const { Success } = await import("./icons.js");
     const a = render(<Alert state="positive" title="Kaydedildi" />);
-    const b = render(<Icon icon={Check} size="sm" weight="bold" />);
+    const b = render(<Icon icon={Success} size="sm" weight="fill" />);
     expect(a.container.querySelector(".tamga-alert-tile svg")!.innerHTML).toBe(b.container.querySelector("svg")!.innerHTML);
   });
 });

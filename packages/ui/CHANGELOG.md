@@ -17,12 +17,10 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   title; with a body (`multi`) the tile, the `size="sm"` action and the dismiss button sit on
   the first line's centre. Measured on the docs page for both (`pnpm olc:uyari`); the docs now
   show one-line alerts too.
-- **The success tile's glyph was unreadable**: navy on the green mark (4.7:1 on paper, not to
-  the eye). The positive tone's mark ink is white, and `--color-resolved-mark` is one step
-  deeper (#3e9a5c to #35884f, both themes) so the white check reads at 4.4:1; the dot and the
-  chip square use the same token and get the deeper green. The glyph itself is a bold plain
-  `Check`, not the filled `CheckCircle`: the filled circle was a white disc with the check cut
-  out of it, and the disc won.
+- **The success tile's glyph read as black**: the positive tone's mark ink was the inverse
+  navy. A new token, `--color-resolved-mark-ink` (#16325c, one step lighter, 3.6:1 on the green
+  mark, the same in both themes), carries the glyph; the mark colour and the filled check-circle
+  glyph are unchanged.
 
 ## 0.10.1
 

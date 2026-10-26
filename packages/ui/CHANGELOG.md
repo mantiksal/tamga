@@ -20,7 +20,9 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 - **The success tile's glyph was unreadable**: navy on the green mark (4.7:1 on paper, not to
   the eye). The positive tone's mark ink is white, and `--color-resolved-mark` is one step
   deeper (#3e9a5c to #35884f, both themes) so the white check reads at 4.4:1; the dot and the
-  chip square use the same token and get the deeper green.
+  chip square use the same token and get the deeper green. The glyph itself is a bold plain
+  `Check`, not the filled `CheckCircle`: the filled circle was a white disc with the check cut
+  out of it, and the disc won.
 
 ## 0.10.1
 

@@ -131,10 +131,12 @@ export function Beacon({
 /* Tonun glifi · dört geri bildirim işareti, tonun kendisinden türüyor.
    Çağıran ayrıca vermek zorunda değil: aynı ton her ekranda aynı glifi
    taşımalı, yoksa "uyarı" bir sayfada üçgen, ötekinde ünlem oluyor. */
+/* Başarı düz `Check`, `CheckCircle` değil: dolu daire beyaz bir disk olup onayı
+   yutuyordu. Öbür tonların dolu daire/üçgeni karoda okunuyor. */
 const TON_GLIFI: Record<Tone, IconGlyph> = {
   neutral: Info,
   info: Info,
-  positive: Success,
+  positive: Check,
   caution: Warning,
   elevated: Warning,
   danger: Failure,
@@ -196,7 +198,7 @@ export function Alert({
         className="tamga-alert-tile"
         style={{ background: h.mark, color: h.markInk }}
       >
-        <Icon icon={icon ?? TON_GLIFI[state]} size="sm" weight="fill" />
+        <Icon icon={icon ?? TON_GLIFI[state]} size="sm" weight={!icon && state === "positive" ? "bold" : "fill"} />
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-body font-medium text-ink">{title}</p>

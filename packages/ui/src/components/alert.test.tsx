@@ -3,6 +3,8 @@ import { render, screen } from "@testing-library/react";
 import { existsSync, readFileSync } from "node:fs";
 import { Alert } from "./primitives.js";
 import { Button } from "./button.js";
+import { Icon } from "./icon.js";
+import { Check } from "./icons.js";
 
 /* TEK SATIRLI UYARI: başlık tek başına gelince karo, eylem ve kapatma düğmesi
    başlıkla ortalanır (`data-rows="single"`). Gövdeliyse (`multi`) hepsi başlığın
@@ -33,5 +35,16 @@ describe("Alert · başarı karosunun glifi", () => {
   it("positive tonunun işaret mürekkebi beyaz (inverse-ink)", async () => {
     const { tones } = await import("./tone.js");
     expect(tones.positive.markInk).toBe("var(--color-inverse-ink)");
+  });
+});
+
+/* BAŞARI GLİFİ DÜZ ONAY İŞARETİ: dolu `CheckCircle` beyaz bir disk, işaret
+   diskten oyulmuş yeşil; disk baskın geliyor ve onay görünmüyordu. Kalın `Check`
+   beyaz, karo yeşil. Öbür tonlar dolu daire/üçgenle kalıyor. */
+describe("Alert · başarı glifi", () => {
+  it("positive uyarının glifi kalın Check", () => {
+    const a = render(<Alert state="positive" title="Kaydedildi" />);
+    const b = render(<Icon icon={Check} size="sm" weight="bold" />);
+    expect(a.container.querySelector(".tamga-alert-tile svg")!.innerHTML).toBe(b.container.querySelector("svg")!.innerHTML);
   });
 });

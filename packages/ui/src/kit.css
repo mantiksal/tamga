@@ -4663,8 +4663,17 @@
      satırda `center`, üç satırlık bir başlıkta karoyu bloğun ortasına kaçırıyordu.
      Eylem (sm, 32) ve kapatma (30) karodan uzun; merkezleri 14'e çekiliyor. */
   .tamga-alert-baslik {
+    font-size: var(--text-body);
+    font-weight: var(--weight-body);
     margin-top: calc((28px - 1lh) / 2);
     overflow-wrap: anywhere;
+  }
+  .tamga-alert-govde {
+    font-size: var(--text-small);
+  }
+  .tamga-alert-metin {
+    flex: 1;
+    min-width: 0;
   }
   /* GÖVDELİ UYARIDA KARO 2 PX AŞAĞIDA: geometrik merkez başlıkla aynı, ama iki
      satırlık bir bloğun yanında göz karoyu yüksek okuyor (Berika, 2026-10-26). */
@@ -4676,6 +4685,51 @@
   }
   .tamga-alert-kapat {
     margin-top: -1px;
+  }
+  /* SAYFA DÜZEYİNDE DURUM KUTUSU (`look="banner"`): bir nesnenin sayfasının
+     en üstünde tek cümle · "erişilemiyor", "çalışıyor", "bakımda". Kartın koyu
+     kenarı ve sert gölgesi, 44px karo, gösterim yüzüyle başlık, gövde boyunda
+     metin. Hizalar aynı kuralla: başlık 1lh'ını 44'e göre alıyor, eylem (32)
+     ve kapatma (30) 44'ün ortasına. */
+  .tamga-alert[data-look="banner"] {
+    border: 1.5px solid var(--color-edge-strong);
+    border-radius: var(--radius-card);
+    box-shadow: 4px 4px 0 var(--color-edge-strong);
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 18px 20px;
+  }
+  /* DAR EKRANDA EYLEM ALTA İNİYOR: metin sütunu 12rem'in altına inmiyor, eylem
+     sığmazsa ikinci satıra, sağa yaslı. 390px'te başlık beş harflik bir sütunda
+     hece hece kırılıyordu. */
+  .tamga-alert[data-look="banner"] > .tamga-alert-metin {
+    flex: 1 1 9rem;
+    min-width: 9rem;
+  }
+  .tamga-alert[data-look="banner"] > .tamga-alert-metin + .tamga-alert-eylem,
+  .tamga-alert[data-look="banner"] > .tamga-alert-metin + .tamga-alert-kapat {
+    margin-left: auto;
+  }
+  .tamga-alert[data-look="banner"] > .tamga-alert-tile {
+    border-radius: var(--radius-btn);
+    height: 44px;
+    width: 44px;
+  }
+  .tamga-alert[data-look="banner"] .tamga-alert-baslik {
+    font-family: var(--font-display);
+    font-size: var(--text-display-sm);
+    font-weight: var(--weight-display);
+    line-height: 1.2;
+    margin-top: calc((44px - 1lh) / 2);
+  }
+  .tamga-alert[data-look="banner"] .tamga-alert-govde {
+    font-size: var(--text-body);
+  }
+  .tamga-alert[data-look="banner"] > .tamga-alert-eylem {
+    margin-top: 6px;
+  }
+  .tamga-alert[data-look="banner"] > .tamga-alert-kapat {
+    margin-top: 7px;
   }
 
   /* the live mark — neutral by rule: running is not a deviation */

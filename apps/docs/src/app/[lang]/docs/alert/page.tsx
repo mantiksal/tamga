@@ -99,6 +99,23 @@ const T = {
     tekSertifika: "Sertifika 3 gün içinde doluyor",
     tekYenile: "Yenile",
     tekBildirim: "Bildirim ayarları güncellendi",
+    bannerH: "Sayfa düzeyinde durum kutusu",
+    bannerP: (
+      <>
+        <code>look</code> iki görünüm: <strong>inline</strong> (varsayılan) sayfanın içindeki sessiz
+        kutu; <strong>banner</strong> bir nesnenin sayfasının en üstündeki tek cümlelik durum kutusu:
+        &laquo;mağaza erişilemiyor&raquo;, &laquo;çalışıyor&raquo;, &laquo;bakımda&raquo;. Kartın
+        koyu kenarı ve sert gölgesi, 44px karo, gösterim yüzüyle başlık, gövde boyunda metin. Satır
+        içi uyarı o yerde küçük ve kenarsız kalıyordu. Altı ton aynı kutuda; eylem ve kapatma
+        karonun ortasına hizalı.
+      </>
+    ),
+    bNotr: "Bakım penceresi planlandı", bNotrAlt: "Pazartesi 03:00'te 20 dakika kapalı kalacak.", bNotrEylem: "Takvimi gör",
+    bBilgi: "Yeni sürüm hazır", bBilgiAlt: "Mağaza şablonunun 4.2 sürümü bu gece uygulanacak.",
+    bOlumlu: "Mağaza çalışıyor", bOlumluAlt: "Son 24 saatte kesinti yok; ortalama yanıt 180 ms.",
+    bUyari: "Sertifika 3 gün içinde doluyor", bUyariAlt: "Yenilenmezse ziyaretçiler güvenlik uyarısı görecek.", bUyariEylem: "Yenile",
+    bYuksek: "Yanıt süresi yükseldi", bYuksekAlt: "Son bir saatte ortalama 2,4 saniye; eşik 1 saniye.",
+    bTehlike: "Mağaza şu an erişilemiyor", bTehlikeAlt: "Son kontrol 2 dakika önce; sunucu yanıt vermedi.", bTehlikeEylem: "Yeniden dene",
     tekUzun: "Bu adresi izleyeceğiz: https://example.com/magaza/ayarlar/bildirimler",
     related: "İlgili",
     rel: (
@@ -179,6 +196,23 @@ const T = {
     tekSertifika: "The certificate expires in 3 days",
     tekYenile: "Renew",
     tekBildirim: "Notification settings updated",
+    bannerH: "The page-level status box",
+    bannerP: (
+      <>
+        <code>look</code> has two looks: <strong>inline</strong> (the default) is the quiet box
+        inside a page; <strong>banner</strong> is the one-sentence status box at the top of an
+        object&apos;s page: &ldquo;the store is down&rdquo;, &ldquo;running&rdquo;, &ldquo;in
+        maintenance&rdquo;. The card&apos;s strong edge and hard shadow, a 44px tile, a display-face
+        title, body copy at body size. The inline alert looked small and edgeless in that spot. All
+        six tones in the same box; the action and the dismiss sit on the tile&apos;s centre.
+      </>
+    ),
+    bNotr: "Maintenance window scheduled", bNotrAlt: "Closed for 20 minutes on Monday at 03:00.", bNotrEylem: "See the calendar",
+    bBilgi: "A new version is ready", bBilgiAlt: "Store template 4.2 rolls out tonight.",
+    bOlumlu: "The store is running", bOlumluAlt: "No outage in the last 24 hours; average response 180 ms.",
+    bUyari: "The certificate expires in 3 days", bUyariAlt: "Unless renewed, visitors will see a security warning.", bUyariEylem: "Renew",
+    bYuksek: "Response time is up", bYuksekAlt: "2.4 seconds on average over the last hour; the threshold is 1 second.",
+    bTehlike: "The store is unreachable right now", bTehlikeAlt: "Last check 2 minutes ago; the server did not answer.", bTehlikeEylem: "Try again",
     tekUzun: "We will watch this address: https://example.com/store/settings/notifications",
     related: "Related",
     rel: (
@@ -244,6 +278,42 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       </Demo>
       <P>{t.dortTon}</P>
       <P>{t.karoMurekkebi}</P>
+
+      <H2>{t.bannerH}</H2>
+      <P>{t.bannerP}</P>
+      <Demo
+        labels={dict.demo}
+        align="start"
+        code={`<Alert look="banner" state="danger" title="${t.bTehlike}" action={<Button size="sm">${t.bTehlikeEylem}</Button>}>
+  ${t.bTehlikeAlt}
+</Alert>
+<Alert look="banner" state="positive" title="${t.bOlumlu}">
+  ${t.bOlumluAlt}
+</Alert>
+<Alert look="banner" state="caution" title="${t.bUyari}" action={…}>…</Alert>
+<Alert look="banner" state="elevated" title="${t.bYuksek}">…</Alert>
+<Alert look="banner" state="info" title="${t.bBilgi}" dismissLabel="${t.kapat}" onDismiss={…}>…</Alert>
+<Alert look="banner" state="neutral" title="${t.bNotr}" action={…}>…</Alert>`}
+      >
+        <div className="flex w-full flex-col gap-6" data-banner-ornek>
+          <Alert look="banner" state="danger" title={t.bTehlike} action={<Button size="sm">{t.bTehlikeEylem}</Button>}>
+            {t.bTehlikeAlt}
+          </Alert>
+          <Alert look="banner" state="positive" title={t.bOlumlu}>
+            {t.bOlumluAlt}
+          </Alert>
+          <Alert look="banner" state="caution" title={t.bUyari} action={<Button size="sm">{t.bUyariEylem}</Button>}>
+            {t.bUyariAlt}
+          </Alert>
+          <Alert look="banner" state="elevated" title={t.bYuksek}>
+            {t.bYuksekAlt}
+          </Alert>
+          <UyariOrnegi kapat={t.kapat} geriGetir={t.geriGetir} look="banner" uyarilar={[{ state: "info", title: t.bBilgi, body: t.bBilgiAlt }]} />
+          <Alert look="banner" state="neutral" title={t.bNotr} action={<Button size="sm">{t.bNotrEylem}</Button>}>
+            {t.bNotrAlt}
+          </Alert>
+        </div>
+      </Demo>
 
       <H2>{t.tekH}</H2>
       <P>{t.tekP}</P>

@@ -99,3 +99,15 @@ describe("DetailTemplate · durumlar", () => {
     expect(screen.getByText("sekme gövdesi")).toBeInTheDocument();
   });
 });
+
+/* BAŞLIK PAGEBAND İLE AYNI: `h1`, gösterim yüzü, 24px, extrabold; alt başlık
+   gövde boyu. Liste sayfasında büyük, detayda küçük bir `h2` kalıyordu. */
+describe("DetailTemplate · başlık PageBand ile aynı", () => {
+  it("h1, PageBand'in yüzü; uzun başlık kırılabilir; alt başlık text-body", () => {
+    renderDetail("overview", { subtitle: "Yönetici" });
+    const h1 = screen.getByRole("heading", { level: 1, name: "bir-kayit" });
+    for (const sinif of ["font-display", "text-display-sm", "font-extrabold", "leading-tight", "break-words"]) expect(h1.className).toContain(sinif);
+    expect(document.querySelector("h2")).toBeNull();
+    expect(screen.getByText("Yönetici").className).toMatch(/text-body/);
+  });
+});

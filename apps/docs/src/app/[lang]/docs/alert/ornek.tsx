@@ -14,7 +14,9 @@ export function UyariOrnegi({
   uyarilar,
   kapat,
   geriGetir,
+  look,
 }: {
+  look?: "inline" | "banner";
   /* `body` isteğe bağlı: tek satırlı (yalnız başlıklı) uyarı da kapatılabiliyor. */
   uyarilar: { state: Tone; title: string; body?: string }[];
   kapat: string;
@@ -29,6 +31,7 @@ export function UyariOrnegi({
           <Alert
             key={u.title}
             state={u.state}
+            look={look}
             title={u.title}
             dismissLabel={kapat}
             onDismiss={() => setAcik((a) => a.filter((x) => x !== i))}

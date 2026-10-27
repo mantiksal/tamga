@@ -77,10 +77,16 @@ export function DetailTemplate({
   return (
     <div className="flex min-h-0 flex-col" data-detail-state={state}>
       <div className="tamga-gutter flex flex-wrap items-start gap-4 pt-4">
-        <div className="min-w-0">
-          <Breadcrumb label={labels.breadcrumb} items={breadcrumb} />
-          <h2 className="mt-2 text-title font-semibold text-ink">{title}</h2>
-          {subtitle ? <p className="text-small text-ink-faint">{subtitle}</p> : null}
+        {/* BAŞLIK `PageBand`İN BAŞLIĞI: aynı `h1`, aynı yüz, aynı aralıklar (iz
+            6px üstte, alt başlık 6px altta). Liste sayfasında büyük ve kalın,
+            detaya girince küçük ve ince bir `h2` kalıyordu; detay sayfasının
+            `h1`i de yoktu. */}
+        <div className="min-w-0 flex-1 basis-65">
+          <div className="mb-1.5">
+            <Breadcrumb label={labels.breadcrumb} items={breadcrumb} />
+          </div>
+          <h1 className="font-display text-display-sm leading-tight font-extrabold break-words text-ink">{title}</h1>
+          {subtitle ? <p className="mt-1.5 text-body text-ink-soft">{subtitle}</p> : null}
         </div>
         {actions ? <div className="ml-auto flex flex-wrap items-center gap-2">{actions}</div> : null}
       </div>

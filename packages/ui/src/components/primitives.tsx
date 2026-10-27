@@ -143,6 +143,7 @@ const TON_GLIFI: Record<Tone, IconGlyph> = {
 
 export function Alert({
   state = "caution",
+  look = "inline",
   title,
   icon,
   children,
@@ -152,6 +153,15 @@ export function Alert({
   ...rest
 }: {
   state?: Tone;
+  /**
+   * `inline` (default) the quiet box inside a page. `banner` the page-level status box at the
+   * top of an object's page ("the store is down", "running", "in maintenance"): the card's
+   * strong edge and hard shadow, a 44px tile, a display-face title, body copy at body size.
+   * TR: `inline` (varsayılan) sayfanın içindeki sessiz kutu. `banner` bir nesnenin sayfasının
+   * en üstündeki sayfa düzeyinde durum kutusu ("mağaza erişilemiyor", "çalışıyor", "bakımda"):
+   * kartın koyu kenarı ve sert gölgesi, 44px karo, gösterim yüzüyle başlık, gövde boyunda metin.
+   */
+  look?: "inline" | "banner";
   title: string;
   /**
    * Called when the reader dismisses it. Given, a close control appears at the end of the row.
@@ -183,6 +193,7 @@ export function Alert({
     <div
       {...dataProps(rest)}
       className="tamga-alert"
+      data-look={look === "banner" ? "banner" : undefined}
       data-body={children ? "true" : undefined}
       style={state === "neutral" ? undefined : { background: h.bg }}
       role="status"
@@ -195,16 +206,16 @@ export function Alert({
         className="tamga-alert-tile"
         style={{ background: h.mark, color: h.markInk }}
       >
-        <Icon icon={icon ?? TON_GLIFI[state]} size="sm" weight="fill" />
+        <Icon icon={icon ?? TON_GLIFI[state]} size={look === "banner" ? "md" : "sm"} weight="fill" />
       </span>
-      <div className="min-w-0 flex-1">
-        <p className="tamga-alert-baslik text-body font-medium text-ink">{title}</p>
+      <div className="tamga-alert-metin">
+        <p className="tamga-alert-baslik text-ink">{title}</p>
         {/* GÖVDE BİR `div`, `p` DEĞİL: bir uyarının gövdesi çoğu zaman bir LİSTE, ve
             `<p>` içindeki `<ul>` geçersiz HTML · tarayıcı listeyi paragrafın dışına
             çıkarıyor ve hidrasyon patlıyor.
             Gerekçe: docs/gerekce/01-form-ve-girdi.md */}
         {children ? (
-          <div className="mt-1 text-small leading-relaxed text-ink-soft">{children}</div>
+          <div className="tamga-alert-govde mt-1 leading-relaxed text-ink-soft">{children}</div>
         ) : null}
       </div>
       {action ? <div className="tamga-alert-eylem">{action}</div> : null}

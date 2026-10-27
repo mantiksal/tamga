@@ -26,7 +26,7 @@ describe("Alert · hiza satır sayısından bağımsız", () => {
   it("CSS: kutu üstten; başlık (28px - 1lh)/2; eylem -2, kapatma -1", () => {
     expect(css).toMatch(/\.tamga-alert\s*\{[^}]*align-items:\s*flex-start/);
     expect(css).not.toMatch(/data-rows/);
-    expect(css).toMatch(/\.tamga-alert-baslik\s*\{\s*margin-top:\s*calc\(\(28px - 1lh\) \/ 2\)/);
+    expect(css).toMatch(/\.tamga-alert-baslik\s*\{[^}]*margin-top:\s*calc\(\(28px - 1lh\) \/ 2\)/);
     /* Boşluksuz bir adres kutudan taşıyordu: başlık her yerden kırılabilir. */
     expect(css).toMatch(/\.tamga-alert-baslik\s*\{[^}]*overflow-wrap:\s*anywhere/);
     expect(css).toMatch(/\.tamga-alert\[data-body\] > \.tamga-alert-tile\s*\{\s*margin-top:\s*2px/);
@@ -46,5 +46,37 @@ describe("Alert · başarı karosunun glifi", () => {
     const a = render(<Alert state="positive" title="Kaydedildi" />);
     const b = render(<Icon icon={Success} size="sm" weight="fill" />);
     expect(a.container.querySelector(".tamga-alert-tile svg")!.innerHTML).toBe(b.container.querySelector("svg")!.innerHTML);
+  });
+});
+
+/* SAYFA DÜZEYİNDE DURUM KUTUSU: bir nesnenin sayfasının en üstünde tek cümle.
+   Satır içi uyarı orada küçük ve kenarsız kalıyordu. Varsayılan görünüm
+   DEĞİŞMİYOR: `look` verilmeyince `data-look` yok. */
+describe("Alert · look=banner", () => {
+  const css = readFileSync(["src/kit.css", "packages/ui/src/kit.css"].find(existsSync)!, "utf8");
+  it("varsayılanda data-look yok, glif sm; banner'da data-look ve glif md", () => {
+    const a = render(<Alert state="danger" title="Erişilemiyor" />);
+    expect(a.container.querySelector(".tamga-alert")!.getAttribute("data-look")).toBeNull();
+    expect(a.container.querySelector(".tamga-alert-tile svg")!.getAttribute("width")).toBe("16");
+    a.unmount();
+    const b = render(<Alert look="banner" state="danger" title="Erişilemiyor">Son kontrol 2 dakika önce.</Alert>);
+    expect(b.container.querySelector(".tamga-alert")!.getAttribute("data-look")).toBe("banner");
+    expect(b.container.querySelector(".tamga-alert-tile svg")!.getAttribute("width")).toBe("20");
+    expect(b.container.querySelector(".tamga-alert-govde")).not.toBeNull();
+  });
+  it("CSS: koyu kenar 1.5px, 4px sert gölge, 44px karo, gösterim yüzü başlık, gövde text-body; satır içi boyları kit sınıfında", () => {
+    expect(css).toMatch(/\.tamga-alert\[data-look="banner"\]\s*\{[^}]*border:\s*1\.5px solid var\(--color-edge-strong\)/);
+    expect(css).toMatch(/\.tamga-alert\[data-look="banner"\]\s*\{[^}]*box-shadow:\s*4px 4px 0 var\(--color-edge-strong\)/);
+    expect(css).toMatch(/\.tamga-alert\[data-look="banner"\] > \.tamga-alert-tile\s*\{[^}]*height:\s*44px/);
+    const baslik = css.match(/\.tamga-alert\[data-look="banner"\] \.tamga-alert-baslik\s*\{([^}]*)\}/)![1]!;
+    expect(baslik).toMatch(/font-family:\s*var\(--font-display\)/);
+    expect(baslik).toMatch(/font-size:\s*var\(--text-display-sm\)/);
+    expect(baslik).toMatch(/margin-top:\s*calc\(\(44px - 1lh\) \/ 2\)/);
+    expect(css).toMatch(/\.tamga-alert\[data-look="banner"\] \.tamga-alert-govde\s*\{[^}]*font-size:\s*var\(--text-body\)/);
+    expect(css).toMatch(/\.tamga-alert-baslik\s*\{[^}]*font-size:\s*var\(--text-body\)/);
+    expect(css).toMatch(/\.tamga-alert-govde\s*\{[^}]*font-size:\s*var\(--text-small\)/);
+    /* Dar ekranda eylem alta: metin sütunu en az 12rem, kutu sarıyor. */
+    expect(css).toMatch(/\.tamga-alert\[data-look="banner"\]\s*\{[^}]*flex-wrap:\s*wrap/);
+    expect(css).toMatch(/\.tamga-alert\[data-look="banner"\] > \.tamga-alert-metin\s*\{[^}]*min-width:\s*9rem/);
   });
 });

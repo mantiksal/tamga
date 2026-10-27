@@ -5,6 +5,30 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.12.0
+
+> The detail page's title is the page title; the alert has a page-level look.
+
+### Added
+
+- **`Alert` `look="banner"`** · the page-level status box at the top of an object's page
+  ("the store is down", "running", "in maintenance"): the card's 1.5px strong edge and
+  4px hard shadow, a 44px tile with the `md` glyph, a display-face title (`--text-display-sm`,
+  extrabold), body copy at `--text-body`, 18/20px padding. The action and the dismiss sit on
+  the tile's centre. At 390px the action drops under the text (the text column keeps at least
+  9rem) instead of squeezing the title into a five-letter column. `inline` stays the default and is unchanged: without `look` the markup
+  and the CSS are what they were. Shown in six tones on the docs page.
+
+### Changed
+
+- **`DetailTemplate` draws its title as `PageBand` does**: an `h1` in the display face
+  (`--text-display-sm`, extrabold), the breadcrumb 6px above, the subtitle 6px below at body
+  size in the soft ink. It was an `h2` at `--text-title` semibold with a small faint subtitle,
+  so a list page's title was big and bold and an object's name small and thin; a detail page
+  had no `h1` at all. This enlarges every detail title in every product using the template,
+  on purpose: they all carried the same inconsistency. A long title (a hostname) breaks
+  inside the box at 390px.
+
 ## 0.11.0
 
 > Group controls carry their own error line; the breadcrumb is a label line.

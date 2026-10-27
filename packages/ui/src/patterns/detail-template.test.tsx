@@ -111,3 +111,24 @@ describe("DetailTemplate · başlık PageBand ile aynı", () => {
     expect(screen.getByText("Yönetici").className).toMatch(/text-body/);
   });
 });
+
+/* DURUM SATIRI ÜRÜNÜN. Şablon yalnız yerini tutuyor: kimlik satırının altında, sekmelerden önce,
+   ve verilmezse hiç çizilmiyor (boş bir 8px kalmasın). */
+describe("DetailTemplate · status", () => {
+  it("kimlik satırının altında, sekmelerden önce çiziliyor", () => {
+    const { container } = renderDetail("overview", {
+      subtitle: "web · ornek.com",
+      status: <span data-urun-satiri>Çalışıyor</span>,
+    });
+    const satir = container.querySelector("[data-detail-status]")!;
+    expect(satir.querySelector("[data-urun-satiri]")).not.toBeNull();
+    const kimlik = screen.getByText("web · ornek.com");
+    expect(kimlik.compareDocumentPosition(satir) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const nav = container.querySelector("nav[aria-label='Bölüm gezinmesi']")!;
+    expect(satir.compareDocumentPosition(nav) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+  it("verilmezse yer tutmuyor", () => {
+    const { container } = renderDetail();
+    expect(container.querySelector("[data-detail-status]")).toBeNull();
+  });
+});

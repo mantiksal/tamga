@@ -7,9 +7,15 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ## 0.13.0
 
-> The tooltip can carry a sentence, stays on the screen, and opens on a tap.
+> The tooltip can carry a sentence, stays on the screen, and opens on a tap; a detail page
+> can say its object's state under the title.
 
 ### Added
+
+- **`DetailTemplate` `status`** · a place under the identity line, before the tabs, for the
+  object's state right now ("running", "shipped", "overdue"). The template keeps only the
+  place and the 8px above it; what goes in is the product's (a `StatusChip`, a short line, a
+  link). It stands on every tab, because the header does. Without it nothing is drawn.
 
 - **`Tooltip` `wrap`** · breaks a sentence into lines at 288px (the Popover's width) instead
   of one line across the screen. Off by default: a tooltip is still a one-line label.

@@ -35,6 +35,16 @@ export type DetailTemplateProps = {
   title: string;
   /** Under the title: the object's identity line. TR: Başlığın altı: nesnenin kimlik satırı. */
   subtitle?: string;
+  /**
+   * Under the identity line: the object's state right now ("running", "shipped", "overdue"). The
+   * template keeps only its place and the 8px above it; what goes in is the product's (a
+   * `StatusChip`, a short line, a link), so a redesign of the line never touches the kit. On every
+   * tab, because the header is. TR: Kimlik satırının altı: nesnenin şu anki hâli ("çalışıyor",
+   * "kargoda", "gecikti"). Şablon yalnız yerini ve üstündeki 8px'i tutar; içi ürünündür (bir
+   * `StatusChip`, kısa bir satır, bir bağlantı), yani satırın yeniden tasarımı kite dokunmaz. Her
+   * sekmede, çünkü başlık her sekmede.
+   */
+  status?: ReactNode;
   actions?: ReactNode;
 
   /**
@@ -65,6 +75,7 @@ export function DetailTemplate({
   breadcrumb,
   title,
   subtitle,
+  status,
   actions,
   tabs,
   activeTab,
@@ -87,6 +98,8 @@ export function DetailTemplate({
           </div>
           <h1 className="font-display text-display-sm leading-tight font-extrabold break-words text-ink">{title}</h1>
           {subtitle ? <p className="mt-1.5 text-body text-ink-soft">{subtitle}</p> : null}
+          {/* `div`, not `p`: the product puts a chip, a link or a whole line in here. */}
+          {status ? <div className="mt-2" data-detail-status>{status}</div> : null}
         </div>
         {actions ? <div className="ml-auto flex flex-wrap items-center gap-2">{actions}</div> : null}
       </div>

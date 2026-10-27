@@ -51,11 +51,30 @@ const T = {
     ),
     extra: (
       <>
-        Tooltip <strong>ek bilgi</strong> taşır, gerekli bilgi değil. Dokunmatik bir ekranda hover
-        yoktur; bir tooltip&apos;te saklanan zorunlu bilgi telefonda hiç görünmez.
+        Tooltip <strong>ek bilgi</strong> taşır, gerekli bilgi değil. Telefonda dokununca açılıyor,
+        ama kimse dokunmak zorunda olduğunu bilmiyor: zorunlu bilgi sayfada yazılı durmalı.
       </>
     ),
-    open: "Hover ve odakla açılır; asla tıklama gerektirmez.",
+    open: (
+      <>
+        Masaüstünde üstüne gelince ve odakla açılır. Dokunmatik ekranda <strong>dokununca</strong>{" "}
+        açılır, başka yere dokununca kapanır: telefonda üstüne gelmek yok, ve iOS Safari dokunulan
+        düğmeye odak da vermiyor.
+      </>
+    ),
+    sentence: "Cümle · wrap",
+    sentenceWhy: (
+      <>
+        Tooltip bir etikettir ve tek satırdır. Açıklama gerçekten bir cümleyse (bir durumun neden
+        öyle okunduğu) <code>wrap</code> onu <strong>288px</strong>&apos;te, Popover&apos;ın
+        genişliğinde satır kırdırır; tek satır olarak ekranı boydan boya geçmez. Kabarcık ekranın
+        kenarına yakınsa 16px pay kalacak kadar içeri kayar, ok tetikleyiciyi göstermeye devam
+        eder.
+      </>
+    ),
+    sentenceLabel:
+      "Şimdiye kadar yaptığımız ölçümlerde acil bir sorun görmedik. Ölçümler henüz tamamlanmadı; tamamlandıkça durum güncellenir.",
+    sentenceTrigger: "Eksik ölçüm var",
     gecikme: (
       <>
         Fare <strong>400ms bekliyor</strong> (<code>delay</code>), klavye odağı{" "}
@@ -107,11 +126,31 @@ const T = {
     ),
     extra: (
       <>
-        A tooltip carries <strong>extra</strong> information, never required information. There is
-        no hover on a touch screen; anything mandatory hidden in a tooltip is invisible on a phone.
+        A tooltip carries <strong>extra</strong> information, never required information. On a phone
+        it opens on a tap, but nobody knows they have to tap: anything mandatory belongs written on
+        the page.
       </>
     ),
-    open: "It opens on hover and on focus; it never requires a click.",
+    open: (
+      <>
+        On a desktop it opens on hover and on focus. On a touch screen it opens on a{" "}
+        <strong>tap</strong> and closes on a tap elsewhere: a phone has no hover, and iOS Safari
+        does not even focus a tapped button.
+      </>
+    ),
+    sentence: "A sentence · wrap",
+    sentenceWhy: (
+      <>
+        A tooltip is a label, and a label is one line. When the explanation really is a sentence
+        (why a status reads as it does), <code>wrap</code> breaks it into lines at{" "}
+        <strong>288px</strong>, the Popover&apos;s width, instead of running it across the screen.
+        Near the screen&apos;s edge the bubble slides in until 16px is left, and the arrow keeps
+        pointing at the trigger.
+      </>
+    ),
+    sentenceLabel:
+      "We found nothing urgent in the measurements made so far. Measuring is not finished yet; the status updates as the rest comes in.",
+    sentenceTrigger: "Missing measurements",
     gecikme: (
       <>
         The pointer <strong>waits 400ms</strong> (<code>delay</code>), keyboard focus{" "}
@@ -180,6 +219,16 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       </Demo>
       <P>{t.arrow}</P>
       <P>{t.open}</P>
+
+      <H2>{t.sentence}</H2>
+      <P>{t.sentenceWhy}</P>
+      <Demo labels={dict.demo} code={`<Tooltip wrap label="…">…</Tooltip>`}>
+        <div className="flex justify-center py-6">
+          <Tooltip wrap label={t.sentenceLabel}>
+            <Button>{t.sentenceTrigger}</Button>
+          </Tooltip>
+        </div>
+      </Demo>
 
       <H2>{t.rules}</H2>
       <P>{t.gecikme}</P>

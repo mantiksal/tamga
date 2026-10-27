@@ -1,6 +1,6 @@
 "use client";
 
-import { cloneElement, isValidElement, useCallback, useEffect, useId, useRef, useState } from "react";
+import { cloneElement, isValidElement, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { Tone } from "./tone.js";
 import { toneOf } from "./tone.js";
 import { Icon } from "./icon.js";
@@ -328,6 +328,7 @@ export function Tooltip({
   placement = "bottom",
   delay = 400,
   bind = true,
+  wrap = false,
   children,
   ...rest
 }: {
@@ -351,12 +352,25 @@ export function Tooltip({
    * ekran okuyucu metni iki kez okuyor · bir kez ad, bir kez açıklama olarak.
    */
   bind?: boolean;
+  /**
+   * Lets a sentence break into lines at 288px (the Popover's width) instead of running as one
+   * line across the screen. A tooltip is a label; turn this on only when the explanation
+   * really is a sentence (why a status reads as it does). TR: Bir cümlenin tek satır olarak
+   * ekranı boydan boya geçmesi yerine 288px'te (Popover'ın genişliği) satır kırmasını sağlar.
+   * İpucu bir etikettir; yalnız açıklama gerçekten bir cümleyse aç (bir durumun neden öyle
+   * okunduğu gibi).
+   */
+  wrap?: boolean;
   children: React.ReactNode;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
   const sarmal = useRef<HTMLSpanElement>(null);
+  const kabarcik = useRef<HTMLSpanElement>(null);
   const [konum, setKonum] = useState<{ left: number; top: number } | null>(null);
+  /* Kabarcığın görüntü alanına sığmak için yatayda kaydığı mesafe; ok kaymıyor,
+     tetikleyiciyi göstermeye devam ediyor. */
+  const [kayma, setKayma] = useState(0);
   const id = useId();
   const bekleyen = useRef<number | null>(null);
 
@@ -402,6 +416,24 @@ export function Tooltip({
     if (bekleyen.current !== null) clearTimeout(bekleyen.current);
   }, []);
 
+  /* EKRANA SIĞ. Ortalanan kabarcık, kenara yakın bir tetikleyicide görüntü
+     alanından taşıyordu (390px'te 288px'lik bir cümle). Açılınca ölçülüyor ve
+     kenara 16px kalacak kadar içeri itiliyor. */
+  useLayoutEffect(() => {
+    const el = kabarcik.current;
+    if (!konum || !el || placement === "left" || placement === "right") {
+      setKayma(0);
+      return;
+    }
+    const r = el.getBoundingClientRect();
+    const pay = 16;
+    const solaTasma = pay - (r.left - kayma);
+    const sagaTasma = r.right - kayma - (document.documentElement.clientWidth - pay);
+    setKayma(solaTasma > 0 ? solaTasma : sagaTasma > 0 ? -sagaTasma : 0);
+    // kayma ölçümün sonucu, girdisi değil: onu izlemek döngü kurar.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [konum, placement]);
+
   /* Kaydırma ya da yeniden boyutlanma ipucunun altından tetikleyiciyi çekiyor;
      o an kapanması, yanlış yerde durmasından iyi. */
   useEffect(() => {
@@ -410,15 +442,33 @@ export function Tooltip({
        biri için bir engel · ve odak tetikleyicide kaldığı için başka çıkışı
        yok. */
     const esc = (e: KeyboardEvent) => e.key === "Escape" && kapat();
+    /* Dokunmatikte fare çekilmiyor: kabarcık başka yere dokununca kapanıyor. */
+    const disari = (e: PointerEvent) => {
+      if (!sarmal.current?.contains(e.target as Node)) kapat();
+    };
     window.addEventListener("scroll", kapat, true);
     window.addEventListener("resize", kapat);
     document.addEventListener("keydown", esc);
+    document.addEventListener("pointerdown", disari);
     return () => {
       window.removeEventListener("scroll", kapat, true);
       window.removeEventListener("resize", kapat);
       document.removeEventListener("keydown", esc);
+      document.removeEventListener("pointerdown", disari);
     };
   }, [konum, kapat]);
+
+  /* DOKUNMA AÇIYOR. Telefonda "üstüne gelmek" yok: iOS Safari dokunulan
+     düğmeye odak da vermiyor, ve dokunuşun sonundaki `pointerleave` kabarcığı
+     açılmadan kapatıyordu. Dokunuş aç/kapa, fareninkiler dokunuşta yok sayılıyor. */
+  const dokunus = useCallback(
+    (e: React.PointerEvent) => {
+      if (e.pointerType !== "touch") return;
+      if (konum) kapat();
+      else olc();
+    },
+    [konum, kapat, olc],
+  );
 
   const kaydirma = {
     top: "translate(-50%, -100%)",
@@ -432,8 +482,9 @@ export function Tooltip({
 {...dataProps(rest)}
       ref={sarmal}
       className="relative inline-flex"
-      onPointerEnter={gecikmeliAc}
-      onPointerLeave={kapat}
+      onPointerEnter={(e) => e.pointerType !== "touch" && gecikmeliAc()}
+      onPointerLeave={(e) => e.pointerType !== "touch" && kapat()}
+      onPointerDown={dokunus}
       onFocusCapture={olc}
       onBlurCapture={kapat}
     >
@@ -454,12 +505,19 @@ export function Tooltip({
         : children}
       {konum && (
         <span
+          ref={kabarcik}
           aria-hidden
-          className="pointer-events-none fixed z-40 whitespace-nowrap px-2 py-1 text-small"
+          className={cn(
+            "pointer-events-none fixed z-40 px-2 py-1 text-small",
+            wrap ? "whitespace-normal leading-relaxed" : "whitespace-nowrap",
+          )}
           style={{
-            left: konum.left,
+            left: konum.left + kayma,
             top: konum.top,
             transform: kaydirma[placement],
+            /* 288px Popover'ın genişliği; dar ekranda iki yanda 16px kalıyor. */
+            maxWidth: wrap ? "min(18rem, calc(100vw - 2rem))" : undefined,
+            width: wrap ? "max-content" : undefined,
             background: "var(--color-ink)",
             color: "var(--color-page)",
             /* KENDİ KENARI VAR. Kenarsız koyu bir kutu, koyu temada sayfadan
@@ -473,7 +531,11 @@ export function Tooltip({
           <span
             aria-hidden
             className="absolute block"
-            style={{ background: "var(--color-ink)", ...arrows[placement] }}
+            style={{
+              background: "var(--color-ink)",
+              ...arrows[placement],
+              ...(kayma ? { marginLeft: -6 - kayma } : null),
+            }}
           />
         </span>
       )}

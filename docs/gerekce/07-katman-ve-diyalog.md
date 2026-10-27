@@ -212,3 +212,21 @@ kullanıcının sonradan açtığı menü odağı yine alıyor. React'in StrictM
 efekti iki kez koşturması da bunu bozmuyor, ikinci koşuda bayrak hâlâ duruyor.
 `a11y.test.tsx` iki yönü de tutuyor: açık doğan menü odağı çalmıyor, kullanıcının
 açtığı menü alıyor.
+
+### İpucu cümle de taşıyabiliyor · `wrap`.
+
+İpucu bir etiket ve tek satır (`whitespace-nowrap`). Ölçülen hata: bir ürün,
+bir durumun NEDEN öyle okunduğunu anlatan iki cümlelik açıklamayı ipucuna
+koyunca kabarcık tek satır olarak ekranı boydan boya geçti. Popover'a geçince
+de tablonun `overflow`u onu kırptı (yukarıdaki tuzak) ve tıklama istedi.
+
+`wrap` cümleyi 288px'te, Popover'ın genişliğinde kırıyor. Varsayılan kapalı:
+etiket hâlâ tek satır.
+
+EKRANA SIĞ. Ortalanan kabarcık, kenara yakın bir tetikleyicide görüntü
+alanından taşıyordu. Açılınca ölçülüyor ve kenara 16px kalacak kadar içeri
+itiliyor; ok kaymıyor, tetikleyiciyi göstermeye devam ediyor.
+
+DOKUNMA AÇIYOR. Telefonda üstüne gelmek yok, iOS Safari dokunulan düğmeye
+odak da vermiyor, ve dokunuşun sonundaki `pointerleave` kabarcığı açılmadan
+kapatıyordu. Dokunuş aç/kapa; başka yere dokununca kapanıyor.

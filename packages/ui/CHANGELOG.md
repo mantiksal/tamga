@@ -5,6 +5,23 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.13.0
+
+> The tooltip can carry a sentence, stays on the screen, and opens on a tap.
+
+### Added
+
+- **`Tooltip` `wrap`** · breaks a sentence into lines at 288px (the Popover's width) instead
+  of one line across the screen. Off by default: a tooltip is still a one-line label.
+
+### Fixed
+
+- **`Tooltip` stays inside the viewport.** Near the screen's edge the bubble slides in until
+  16px is left; the arrow keeps pointing at the trigger.
+- **`Tooltip` opens on a tap.** On a touch screen a tap opens it and a tap elsewhere closes
+  it. Before, the `pointerleave` at the end of a tap closed it before it opened, and iOS
+  Safari does not focus a tapped button, so on a phone it could not be opened at all.
+
 ## 0.12.0
 
 > The detail page's title is the page title; the alert has a page-level look.

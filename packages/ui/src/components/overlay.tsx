@@ -329,6 +329,7 @@ export function Tooltip({
   delay = 400,
   bind = true,
   wrap = false,
+  className,
   children,
   ...rest
 }: {
@@ -361,6 +362,11 @@ export function Tooltip({
    * okunduğu gibi).
    */
   wrap?: boolean;
+  /**
+   * The wrapper's own class: a trigger that has to grow in a row (a strip's cell, `flex-1`). TR:
+   * Sarmalayıcının kendi sınıfı: bir satırda büyümesi gereken tetikleyici (bir şeridin hücresi).
+   */
+  className?: string;
   children: React.ReactNode;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
@@ -481,7 +487,7 @@ export function Tooltip({
     <span
 {...dataProps(rest)}
       ref={sarmal}
-      className="relative inline-flex"
+      className={cn("relative inline-flex", className)}
       onPointerEnter={(e) => e.pointerType !== "touch" && gecikmeliAc()}
       onPointerLeave={(e) => e.pointerType !== "touch" && kapat()}
       onPointerDown={dokunus}

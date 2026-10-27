@@ -5,6 +5,35 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.14.0
+
+> A detail page's header reads as one block: the state beside the title, the actions beside the
+> block, a count on a tab.
+
+### Added
+
+- **`DetailTemplate` `titleAside`** · a place beside the title, on its line, for the object's
+  one-word state (a `StatusChip`). The product's, like `status`; the template keeps the place.
+- **`Alert` `actionAlign="center"`** · the action on the middle of the title-and-body block,
+  for a button that closes a paragraph. `start` stays the default (the title's first line).
+- **`DetailTab` `count`** · the number beside a tab's label ("Events 2"), drawn with the same
+  counter as `Tabs`.
+
+
+### Changed
+
+- **`Progress` with a `tone` keeps its stripes** · the md bar draws the tone's two shades, as
+  the accent bar does; a flat toned fill read as another kit beside it. `sm` stays flat.
+
+- **`elevated`'s mark is orange** (`#e5761f`, was the terracotta `#c8664a`): between caution's
+  amber and critical's red it read as brown. Text and wash are unchanged.
+- **`TimelineStrip` says a bucket on hover with the kit's tooltip**, at once, instead of the
+  browser's `title` (late, unstyled, easy to miss). `Tooltip` takes a `className` for its wrapper
+  so a cell can keep its share of the row.
+- **The breadcrumb stands on its own line, 12px above the title** (it was 6px, inside the
+  title's block). **The actions are centred on the title block** (title, identity line,
+  status line) instead of sitting on the breadcrumb's line.
+
 ## 0.13.0
 
 > The tooltip can carry a sentence, stays on the screen, and opens on a tap; a detail page

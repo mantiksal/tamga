@@ -80,3 +80,19 @@ describe("Alert · look=banner", () => {
     expect(css).toMatch(/\.tamga-alert\[data-look="banner"\] > \.tamga-alert-metin\s*\{[^}]*min-width:\s*9rem/);
   });
 });
+
+describe("Alert · actionAlign", () => {
+  it("varsayılan işaretsiz; center bloğun ortasına alıyor", () => {
+    const a = render(<Alert state="info" title="Başlık" action={<button type="button">Aç</button>}>Gövde</Alert>);
+    expect(a.container.querySelector(".tamga-alert")!.getAttribute("data-action-align")).toBeNull();
+    a.unmount();
+    const b = render(
+      <Alert state="info" title="Başlık" actionAlign="center" action={<button type="button">Aç</button>}>
+        Gövde
+      </Alert>,
+    );
+    expect(b.container.querySelector(".tamga-alert")!.getAttribute("data-action-align")).toBe("center");
+    const css = readFileSync(["src/kit.css", "packages/ui/src/kit.css"].find(existsSync)!, "utf8");
+    expect(css).toMatch(/\.tamga-alert\[data-action-align="center"\] > \.tamga-alert-eylem\s*\{[^}]*align-self:\s*center/);
+  });
+});

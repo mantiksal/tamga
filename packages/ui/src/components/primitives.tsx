@@ -148,6 +148,7 @@ export function Alert({
   icon,
   children,
   action,
+  actionAlign = "start",
   onDismiss,
   dismissLabel,
   ...rest
@@ -181,6 +182,14 @@ export function Alert({
   icon?: IconGlyph;
   children?: React.ReactNode;
   action?: React.ReactNode;
+  /**
+   * Where the action sits beside a title with a body under it. `start` (default) on the title's
+   * first line, as the tile. `center` on the whole block: a button that closes a paragraph,
+   * rather than one that answers the title. TR: Altında gövde olan bir başlığın yanında eylemin
+   * yeri. `start` (varsayılan) başlığın ilk satırında, karo gibi. `center` bütün bloğun ortasında:
+   * başlığa cevap veren değil, bir paragrafı bağlayan düğme için.
+   */
+  actionAlign?: "start" | "center";
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
@@ -195,6 +204,7 @@ export function Alert({
       className="tamga-alert"
       data-look={look === "banner" ? "banner" : undefined}
       data-body={children ? "true" : undefined}
+      data-action-align={actionAlign === "center" ? "center" : undefined}
       style={state === "neutral" ? undefined : { background: h.bg }}
       role="status"
     >

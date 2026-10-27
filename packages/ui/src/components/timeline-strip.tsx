@@ -3,6 +3,7 @@ import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
 import type { IconGlyph } from "./icons.js";
 import { toneOf, type Tone } from "./tone.js";
+import { Tooltip } from "./overlay.js";
 
 /**
  * TimelineStrip — kova başına bir işaret, renk durumu taşır.
@@ -89,14 +90,27 @@ export function TimelineStrip({
   return (
     <div {...dataProps(rest)} className={className}>
       <div className="flex items-end" style={{ gap }}>
-        {(data ?? []).map((tone, i) => (
-          <span
-            key={i}
-            title={describe?.(i, tone)}
-            className="flex-1 transition-opacity hover:opacity-60"
-            style={{ height, minWidth, background: toneOf(tone).mark }}
-          />
-        ))}
+        {(data ?? []).map((tone, i) => {
+          const said = describe?.(i, tone);
+          const cell = (
+            <span
+              key={i}
+              aria-label={said || undefined}
+              className={cn("transition-opacity hover:opacity-60", said ? "block w-full" : "flex-1")}
+              style={{ height, minWidth, background: toneOf(tone).mark }}
+            />
+          );
+          /* KUTUNUN SÖZÜ KİTİN İPUCUYLA, `title` İLE DEĞİL: tarayıcının ipucu bir saniye
+             gecikiyor, stilsiz, ve yanından geçen fare onu hiç görmüyordu · "gün gün" okunan
+             bir şeridin her günü üstüne gelince hemen konuşmalı. */
+          return said ? (
+            <Tooltip key={i} label={said} delay={0} placement="top" bind={false} className="flex-1">
+              {cell}
+            </Tooltip>
+          ) : (
+            cell
+          );
+        })}
       </div>
       {labels ? (
         <div className="mt-2 flex justify-between">

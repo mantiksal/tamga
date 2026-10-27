@@ -30,6 +30,15 @@ describe("Progress", () => {
     const b = render(<Progress size="sm" value={50} ariaLabel="x" />);
     expect((b.container.querySelector(".tamga-progress-fill") as HTMLElement).style.background).toBe("");
   });
+  it("md çubukta tone çizgiyi korur: tonun iki gölgesi", () => {
+    const { container } = render(<Progress value={40} ariaLabel="x" tone="danger" />);
+    const fill = container.querySelector(".tamga-progress-fill") as HTMLElement;
+    expect(fill.getAttribute("data-tone")).toBe("danger");
+    expect(fill.style.getPropertyValue("--tamga-progress-tint")).toContain("var(--color-critical-mark)");
+    expect(fill.style.background).toBe("");
+    const k = css.match(/\.tamga-progress-fill\[data-tone\]\s*\{([^}]*)\}/)?.[1] ?? "";
+    expect(k).toMatch(/repeating-linear-gradient/);
+  });
   it("CSS: 4px, kenarsız, gölgesiz, düz dolgu", () => {
     const k = css.match(/\.tamga-progress-sm\s*\{([^}]*)\}/)?.[1] ?? "";
     expect(k).toMatch(/height:\s*4px/);

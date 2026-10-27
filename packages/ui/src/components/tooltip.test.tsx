@@ -55,3 +55,17 @@ describe("Tooltip · wrap", () => {
     expect(k.style.maxWidth).toBe("min(18rem, calc(100vw - 2rem))");
   });
 });
+
+/* ŞERİDİN GÜNÜ KİTİN İPUCUYLA: `title` gecikiyordu ve görünmüyordu. */
+describe("TimelineStrip · gün ipucu", () => {
+  it("üstüne gelince kutunun sözünü hemen gösteriyor", async () => {
+    const { TimelineStrip } = await import("./timeline-strip.js");
+    const { container } = render(
+      <TimelineStrip data={["positive", "danger"]} describe={(i) => (i === 1 ? "25 Ekim · %63" : "")} />,
+    );
+    const hucre = container.querySelector('[aria-label="25 Ekim · %63"]')!;
+    expect(hucre).not.toBeNull();
+    fireEvent.pointerEnter(hucre.parentElement!);
+    expect(container.querySelector("span.fixed")?.textContent).toContain("25 Ekim · %63");
+  });
+});

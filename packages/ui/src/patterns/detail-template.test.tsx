@@ -132,3 +132,33 @@ describe("DetailTemplate · status", () => {
     expect(container.querySelector("[data-detail-status]")).toBeNull();
   });
 });
+
+/* BAŞLIK SATIRI: rozet başlığın yanında, eylemler iz satırında değil başlık bloğunun yanında,
+   sekme sayısı kitin `Tabs` sayacıyla (2026-10-27). */
+describe("DetailTemplate · başlık satırı ve sekme sayısı", () => {
+  it("rozeti başlığın satırına, eylemleri izin dışına koyuyor", () => {
+    const { container } = renderDetail("overview", {
+      titleAside: <span data-rozet>Çalışıyor</span>,
+      actions: <button type="button">Tara</button>,
+    });
+    const h1 = screen.getByRole("heading", { level: 1 });
+    expect(h1.parentElement!.querySelector("[data-rozet]")).not.toBeNull();
+    const iz = container.querySelector("nav")!;
+    expect(iz.contains(screen.getByRole("button", { name: "Tara" }))).toBe(false);
+    expect(iz.parentElement!.contains(screen.getByRole("button", { name: "Tara" }))).toBe(false);
+  });
+  it("sayısı olan sekmede sayıyı, olmayanda hiçbir şey çizmiyor", () => {
+    render(
+      <DetailTemplate
+        breadcrumb={trail}
+        title="bir-kayit"
+        tabs={[{ ...tabs[0]!, count: 2 }, tabs[1]!]}
+        activeTab="overview"
+        labels={LABELS}
+      />,
+    );
+    const sekmeler = document.querySelectorAll("[data-tab]");
+    expect(sekmeler[0]!.querySelector(".tamga-sayac")!.textContent).toBe("2");
+    expect(sekmeler[1]!.querySelector(".tamga-sayac")).toBeNull();
+  });
+});

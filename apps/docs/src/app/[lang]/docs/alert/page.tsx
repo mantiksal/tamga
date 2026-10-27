@@ -110,6 +110,13 @@ const T = {
         karonun ortasına hizalı.
       </>
     ),
+    alignP: (
+      <>
+        <code>actionAlign</code> eylemin yeri: <strong>start</strong> (varsayılan) başlığın ilk
+        satırında, karo gibi; <strong>center</strong> başlık ve gövdenin oluşturduğu bloğun
+        ortasında · iki satırlık bir paragrafı bağlayan düğme yukarıda asılı kalmasın diye.
+      </>
+    ),
     bNotr: "Bakım penceresi planlandı", bNotrAlt: "Pazartesi 03:00'te 20 dakika kapalı kalacak.", bNotrEylem: "Takvimi gör",
     bBilgi: "Yeni sürüm hazır", bBilgiAlt: "Mağaza şablonunun 4.2 sürümü bu gece uygulanacak.",
     bOlumlu: "Mağaza çalışıyor", bOlumluAlt: "Son 24 saatte kesinti yok; ortalama yanıt 180 ms.",
@@ -207,6 +214,13 @@ const T = {
         six tones in the same box; the action and the dismiss sit on the tile&apos;s centre.
       </>
     ),
+    alignP: (
+      <>
+        <code>actionAlign</code> places the action: <strong>start</strong> (default) on the
+        title&apos;s first line, as the tile; <strong>center</strong> on the middle of the title and
+        body block, so a button that closes a two-line paragraph does not hang at its top.
+      </>
+    ),
     bNotr: "Maintenance window scheduled", bNotrAlt: "Closed for 20 minutes on Monday at 03:00.", bNotrEylem: "See the calendar",
     bBilgi: "A new version is ready", bBilgiAlt: "Store template 4.2 rolls out tonight.",
     bOlumlu: "The store is running", bOlumluAlt: "No outage in the last 24 hours; average response 180 ms.",
@@ -281,6 +295,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.bannerH}</H2>
       <P>{t.bannerP}</P>
+      <P>{t.alignP}</P>
       <Demo
         labels={dict.demo}
         align="start"

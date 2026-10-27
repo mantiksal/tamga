@@ -27,12 +27,20 @@ export type DetailTab = {
   /** The translated label: the template draws the word it is given, it does not look one up. TR: Çevrilmiş etiket: şablon kendisine verilen sözcüğü çiziyor, aramıyor. */
   label: string;
   href: string;
+  /** How many rows that tab holds ("Events 2"), drawn as the kit's `Tabs` count. TR: O sekmede kaç satır olduğu ("Olaylar 2"), kitin `Tabs` sayacıyla. */
+  count?: number;
 };
 
 export type DetailTemplateProps = {
   /** The trail above the title. The last item is the current object and takes no href. TR: Başlığın üstündeki iz. Son öğe o anki nesnedir ve href almaz. */
   breadcrumb: { label: string; href?: string }[];
   title: string;
+  /**
+   * Beside the title, on its line: the object's one-word state (a `StatusChip`). The product's,
+   * like `status`; the template keeps only the place. TR: Başlığın yanında, aynı satırda: nesnenin
+   * tek sözcüklük hâli (bir `StatusChip`). `status` gibi ürünün; şablon yalnız yerini tutar.
+   */
+  titleAside?: ReactNode;
   /** Under the title: the object's identity line. TR: Başlığın altı: nesnenin kimlik satırı. */
   subtitle?: string;
   /**
@@ -74,6 +82,7 @@ export type DetailTemplateProps = {
 export function DetailTemplate({
   breadcrumb,
   title,
+  titleAside,
   subtitle,
   status,
   actions,
@@ -87,21 +96,26 @@ export function DetailTemplate({
 }: DetailTemplateProps) {
   return (
     <div className="flex min-h-0 flex-col" data-detail-state={state}>
-      <div className="tamga-gutter flex flex-wrap items-start gap-4 pt-4">
-        {/* BAŞLIK `PageBand`İN BAŞLIĞI: aynı `h1`, aynı yüz, aynı aralıklar (iz
-            6px üstte, alt başlık 6px altta). Liste sayfasında büyük ve kalın,
-            detaya girince küçük ve ince bir `h2` kalıyordu; detay sayfasının
-            `h1`i de yoktu. */}
-        <div className="min-w-0 flex-1 basis-65">
-          <div className="mb-1.5">
-            <Breadcrumb label={labels.breadcrumb} items={breadcrumb} />
-          </div>
-          <h1 className="font-display text-display-sm leading-tight font-extrabold break-words text-ink">{title}</h1>
-          {subtitle ? <p className="mt-1.5 text-body text-ink-soft">{subtitle}</p> : null}
-          {/* `div`, not `p`: the product puts a chip, a link or a whole line in here. */}
-          {status ? <div className="mt-2" data-detail-status>{status}</div> : null}
+      <div className="tamga-gutter pt-4">
+        {/* İZ KENDİ SATIRINDA, 12px üstte. Başlıkla aynı bloktayken eylemler izin hizasına
+            çıkıyordu ve iz başlığa 6px'le yapışıyordu. */}
+        <div className="mb-3">
+          <Breadcrumb label={labels.breadcrumb} items={breadcrumb} />
         </div>
-        {actions ? <div className="ml-auto flex flex-wrap items-center gap-2">{actions}</div> : null}
+        {/* EYLEMLER BAŞLIK BLOĞUNUN ORTASINDA: başlık, kimlik ve durum satırıyla birlikte
+            okunan şeyin yanında duruyorlar, iz satırında değil. */}
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="min-w-0 flex-1 basis-65">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h1 className="font-display text-display-sm leading-tight font-extrabold break-words text-ink">{title}</h1>
+              {titleAside ? <div data-detail-title-aside>{titleAside}</div> : null}
+            </div>
+            {subtitle ? <p className="mt-1.5 text-body text-ink-soft">{subtitle}</p> : null}
+            {/* `div`, not `p`: the product puts a chip, a link or a whole line in here. */}
+            {status ? <div className="mt-2" data-detail-status>{status}</div> : null}
+          </div>
+          {actions ? <div className="ml-auto flex flex-wrap items-center gap-2">{actions}</div> : null}
+        </div>
       </div>
 
       {/* Sekme çubuğu her durumda YERİNDE KALIYOR: hâlâ yüklenen bir nesne yine
@@ -121,6 +135,7 @@ export function DetailTemplate({
                 aria-current={current ? "page" : undefined}
               >
                 {tab.label}
+                {tab.count !== undefined ? <span className="tamga-sayac tabular-nums">{tab.count}</span> : null}
               </Link>
             );
           })}

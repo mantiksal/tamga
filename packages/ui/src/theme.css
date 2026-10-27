@@ -531,7 +531,7 @@
      satırın arkasındaki yıkama. */
   --color-elevated-bg: #f7e6df;
   /* The mark, not the text. TR: Metnin değil, işaretin rengi. */
-  --color-elevated-mark: #c8664a;
+  --color-elevated-mark: #e5761f;
   --color-silent: #4a4f5a; /* Silent's text: a state that is real but carries no urgency, so it takes no hue. TR: Silent'ın metni: gerçek ama aciliyeti olmayan bir durum, o yüzden bir renk tonu almıyor. */
   /* The wash behind a silent chip or row. TR: silent bir çipin ya da satırın
      arkasındaki yıkama. */

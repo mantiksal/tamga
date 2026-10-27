@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { dataProps } from "../lib/data-props.js";
 import { toneOf, yiginRenk, type Tone } from "./tone.js";
 /**
@@ -160,7 +161,19 @@ export function Progress({
            visible label, then to a plain description of what it is */
         aria-label={label ?? ariaLabel ?? "Progress"}
       >
-        <div className="tamga-progress-fill" style={tone ? { width: `${pct}%`, background: toneOf(tone).mark } : { width: `${pct}%` }} />
+        {/* A tone keeps the md bar's stripes, in the tone's own two shades: a flat fill
+            dropped the material the accent bar has, and the two bars read as two kits. */}
+        <div
+          className="tamga-progress-fill"
+          data-tone={size === "sm" ? undefined : tone}
+          style={
+            !tone
+              ? { width: `${pct}%` }
+              : size === "sm"
+                ? { width: `${pct}%`, background: toneOf(tone).mark }
+                : ({ width: `${pct}%`, "--tamga-progress-tint": toneOf(tone).mark } as CSSProperties)
+          }
+        />
       </div>
     </div>
   );

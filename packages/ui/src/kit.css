@@ -235,7 +235,7 @@
 
   --color-elevated: #edb09a;
   --color-elevated-bg: #3a2520;
-  --color-elevated-mark: #c8664a;
+  --color-elevated-mark: #e5761f;
   --color-silent: #b8bec9;
   /* wash behind a silent chip or row */
   --color-silent-bg: #232833;
@@ -4384,6 +4384,15 @@
     border-right: 1.5px solid var(--color-edge-strong);
     transition: width var(--duration-base) var(--ease-standard);
   }
+  /* TONLU DOLGU DA ÇİZGİLİ: çağıranın `tone`u, aynı malzeme o tonun iki gölgesiyle.
+     Düz tonlu dolgu vurgulu çubuğun yanında başka bir kitten gelmiş gibi duruyordu. */
+  .tamga-progress-fill[data-tone] {
+    background: repeating-linear-gradient(
+      135deg,
+      var(--tamga-progress-tint) 0 8px,
+      color-mix(in oklab, var(--tamga-progress-tint) 82%, black) 8px 16px
+    );
+  }
   /* İNCE: tablo hücresine sığan 4px; kenarsız, gölgesiz, düz dolgu, etiket
      satırı yok. Yirmi beş satırda yirmi beş kenarlı çubuk listeyi ağırlaştırıyor.
      Renk çağıranın `tone`undan satır içi `style` ile gelir, yoksa buradaki vurgu. */
@@ -4685,6 +4694,12 @@
   }
   .tamga-alert-kapat {
     margin-top: -1px;
+  }
+  /* EYLEM BLOĞUN ORTASINDA (`actionAlign="center"`): iki satırlık bir gövdeyi
+     bağlayan düğme, başlığın ilk satırında yukarıda asılı kalıyordu. */
+  .tamga-alert[data-action-align="center"] > .tamga-alert-eylem {
+    align-self: center;
+    margin-top: 0;
   }
   /* SAYFA DÜZEYİNDE DURUM KUTUSU (`look="banner"`): bir nesnenin sayfasının
      en üstünde tek cümle · "erişilemiyor", "çalışıyor", "bakımda". Kartın koyu

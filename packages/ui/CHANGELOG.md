@@ -5,6 +5,13 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## Unreleased
+
+### Fixed
+
+- **`Alert look="banner"`: the tile and the action sit on the middle of the text block.** Lined
+  up with the title, the tile stood above a two-line banner's text.
+
 ## 0.14.0
 
 > A detail page's header reads as one block: the state beside the title, the actions beside the

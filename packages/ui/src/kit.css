@@ -4704,9 +4704,10 @@
   /* SAYFA DÜZEYİNDE DURUM KUTUSU (`look="banner"`): bir nesnenin sayfasının
      en üstünde tek cümle · "erişilemiyor", "çalışıyor", "bakımda". Kartın koyu
      kenarı ve sert gölgesi, 44px karo, gösterim yüzüyle başlık, gövde boyunda
-     metin. Hizalar aynı kuralla: başlık 1lh'ını 44'e göre alıyor, eylem (32)
-     ve kapatma (30) 44'ün ortasına. */
+     metin. Karo, eylem ve kapatma metin bloğunun ORTASINDA: başlığa hizalıyken
+     iki satırlı kutuda karo metinden yukarıda duruyordu (2026-10-28). */
   .tamga-alert[data-look="banner"] {
+    align-items: center;
     border: 1.5px solid var(--color-edge-strong);
     border-radius: var(--radius-card);
     box-shadow: 4px 4px 0 var(--color-edge-strong);
@@ -4735,16 +4736,14 @@
     font-size: var(--text-display-sm);
     font-weight: var(--weight-display);
     line-height: 1.2;
-    margin-top: calc((44px - 1lh) / 2);
+    margin-top: 0;
   }
   .tamga-alert[data-look="banner"] .tamga-alert-govde {
     font-size: var(--text-body);
   }
-  .tamga-alert[data-look="banner"] > .tamga-alert-eylem {
-    margin-top: 6px;
-  }
+  .tamga-alert[data-look="banner"] > .tamga-alert-eylem,
   .tamga-alert[data-look="banner"] > .tamga-alert-kapat {
-    margin-top: 7px;
+    margin-top: 0;
   }
 
   /* the live mark — neutral by rule: running is not a deviation */

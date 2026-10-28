@@ -71,7 +71,9 @@ describe("Alert · look=banner", () => {
     const baslik = css.match(/\.tamga-alert\[data-look="banner"\] \.tamga-alert-baslik\s*\{([^}]*)\}/)![1]!;
     expect(baslik).toMatch(/font-family:\s*var\(--font-display\)/);
     expect(baslik).toMatch(/font-size:\s*var\(--text-display-sm\)/);
-    expect(baslik).toMatch(/margin-top:\s*calc\(\(44px - 1lh\) \/ 2\)/);
+    /* Karo ve eylem metin bloğunun ortasında; başlık kendini karoya göre itmiyor. */
+    expect(baslik).toMatch(/margin-top:\s*0/);
+    expect(css).toMatch(/\.tamga-alert\[data-look="banner"\]\s*\{[^}]*align-items:\s*center/);
     expect(css).toMatch(/\.tamga-alert\[data-look="banner"\] \.tamga-alert-govde\s*\{[^}]*font-size:\s*var\(--text-body\)/);
     expect(css).toMatch(/\.tamga-alert-baslik\s*\{[^}]*font-size:\s*var\(--text-body\)/);
     expect(css).toMatch(/\.tamga-alert-govde\s*\{[^}]*font-size:\s*var\(--text-small\)/);

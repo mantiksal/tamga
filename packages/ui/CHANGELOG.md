@@ -7,6 +7,12 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ## Unreleased
 
+### Added
+
+- **`ScoreRing` `display`** · the text inside the ring when the product says more than the whole
+  number ("66,3"). The arc still follows `value`; a text longer than "100" is set a step
+  smaller so it does not crowd the hole.
+
 ### Fixed
 
 - **`Alert look="banner"`: the tile and the action sit on the middle of the text block.** Lined

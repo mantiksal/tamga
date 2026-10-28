@@ -79,10 +79,25 @@ export function ScoreRing({
   size = 96,
   showLabel = true,
   tone,
+  display,
   ...rest
-}: ScoreProps & { [k: `data-${string}`]: unknown }) {
+}: ScoreProps & {
+  /**
+   * The text inside the ring, when the whole number is not what the product says ("66,3" in the
+   * caller's locale). The arc still follows `value`. Omitted, the rounded value. TR: Halkanın
+   * içindeki metin, ürün tam sayıyı söylemiyorsa (çağıranın dilinde "66,3"). Yay yine `value`'yu
+   * izliyor. Verilmezse yuvarlanmış değer.
+   */
+  display?: string;
+  [k: `data-${string}`]: unknown;
+}) {
   const v = Math.min(100, Math.max(0, value));
   const c = toneOf(tone ?? band(v));
+  const text = display ?? String(Math.round(v));
+  /* "100" is the widest a whole score gets; a longer text ("66,3") at the same size crowded the
+     hole, so it steps down. TR: Tam puanın en genişi "100"; daha uzun metin ("66,3") aynı boyda
+     deliği dolduruyordu, bir kademe küçülüyor. */
+  const scale = text.length > 3 ? 0.2 : 0.25;
 
   return (
     <div {...dataProps(rest)} className="tamga-ring-wrap">
@@ -101,8 +116,8 @@ export function ScoreRing({
       >
         {/* Sayı halkanın ölçüsünden türüyor, tip skalasından değil: bu glif her
             çapta kadranla orantılı durmak zorunda. */}
-        <span className="tamga-ring-ic" style={{ fontSize: Math.round(size * 0.25) }}>
-          {Math.round(v)}
+        <span className="tamga-ring-ic" style={{ fontSize: Math.round(size * scale) }}>
+          {text}
         </span>
       </div>
       {showLabel && bandLabel ? <span className="tamga-ring-etiket">{bandLabel}</span> : null}

@@ -1006,6 +1006,16 @@
     transform: translate(3px, 3px);
     box-shadow: 0 0 0 var(--color-critical);
   }
+  .tamga-btn-caution.tamga-btn-sm {
+    box-shadow: 3px 3px 0 var(--color-warn);
+  }
+  .tamga-btn-caution.tamga-btn-sm:not(:disabled):hover {
+    box-shadow: 4px 4px 0 var(--color-warn);
+  }
+  .tamga-btn-caution.tamga-btn-sm:not(:disabled):active {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 var(--color-warn);
+  }
 
   /* The edge is the BASE colour, not the pressed colour. A keycap and the base
      it sits on are one object seen from two sides, so they share an outline —
@@ -1071,6 +1081,22 @@
   }
   .tamga-btn-danger:not(:disabled):active {
     box-shadow: 0 0 0 var(--color-critical);
+  }
+
+  /* UYARININ ADIMI: başarı ve tehlike gibi renk kenarda, dolguda değil. Mürekkep `warn`, işaret
+     tonu (`warn-mark`) değil: sarı işaret beyaz zeminde yazı olarak okunmuyor. */
+  .tamga-btn-caution {
+    background: var(--color-shell);
+    border-color: var(--color-warn);
+    color: var(--color-warn);
+    box-shadow: 4px 4px 0 var(--color-warn);
+  }
+  .tamga-btn-caution:not(:disabled):hover {
+    background: var(--color-warn-bg);
+    box-shadow: 5px 5px 0 var(--color-warn);
+  }
+  .tamga-btn-caution:not(:disabled):active {
+    box-shadow: 0 0 0 var(--color-warn);
   }
 
   /* SESSİZ DURUR, DOKUNULUNCA DÜĞME OLUR: durduğunda düz bir yazı, imleç
@@ -2037,6 +2063,20 @@
     background: var(--color-accent-soft);
     border-color: var(--color-edge-strong);
     box-shadow: 2px 2px 0 var(--color-edge-strong);
+  }
+
+  /* UYARININ MİNİ DÜĞMESİ: kenar, taban ve yazı uyarının mürekkebi; üstüne gelince uyarının zemini.
+     Hover çift sınıf: kitin genel hover'ı sonra geliyor, tek sınıfla vurgu kenarı bunu eziyordu. */
+  .tamga-mini-btn-caution {
+    border-color: var(--color-warn);
+    color: var(--color-warn);
+    box-shadow: 2px 2px 0 var(--color-warn);
+  }
+
+  .tamga-mini-btn.tamga-mini-btn-caution:not(:disabled):hover {
+    background: var(--color-warn-bg);
+    border-color: var(--color-warn);
+    box-shadow: 2px 2px 0 var(--color-warn);
   }
 
   /* SESSİZ MİNİ DÜĞME: kenarı ayraç çizgisinde, tabanı yok · bir satırda üç

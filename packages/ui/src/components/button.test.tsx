@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { Button } from "./button.js";
+import { Button, MiniButton } from "./button.js";
 
 /* MEŞGUL DÜĞMENİN ADI BOŞ KALMAZ: `busyLabel` verilmezse düğmenin kendi metni
    ad olarak kalır (görünmez ama okunur). Belge zaten böyle diyordu; kod demiyordu. */
@@ -53,5 +53,21 @@ describe("Button · busyLook", () => {
     b.unmount();
     const c = render(<Button busyLook="ring">Kaydet</Button>);
     expect(c.container.querySelector("button")!.hasAttribute("busylook")).toBe(false);
+  });
+});
+
+/* UYARININ ADIMI: renk kenarda, dolguda değil; iki boyda da aynı sınıf ailesi. */
+describe("caution · uyarıyı kapatan adım", () => {
+  it("Button ve MiniButton caution sınıfını taşıyor", () => {
+    const { getByText } = render(
+      <>
+        <Button variant="caution">Doğrula</Button>
+        <MiniButton variant="caution" aria-label="Tekrar gönder">
+          Tekrar gönder
+        </MiniButton>
+      </>,
+    );
+    expect(getByText("Doğrula").className).toMatch(/tamga-btn-caution/);
+    expect(getByText("Tekrar gönder").className).toMatch(/tamga-mini-btn-caution/);
   });
 });

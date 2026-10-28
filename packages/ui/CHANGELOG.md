@@ -9,6 +9,9 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ### Added
 
+- **`Button` and `MiniButton` `variant="caution"`** · the step that clears a caution (verify an
+  address, renew a card), drawn like `success` and `danger`: the caution's ink as edge, text and
+  base, its soft tone on hover.
 - **`AppShell` `banner`** · a strip above the whole shell, the rail and the top bar included, for
   an account-wide condition the product will not let the reader overlook. The screen stays one
   viewport tall.

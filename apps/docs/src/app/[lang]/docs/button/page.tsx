@@ -36,6 +36,7 @@ const T = {
     cancel: "Vazgeç",
     confirm: "Onayla",
     remove: "Sil",
+    verify: "Adresi doğrula",
     close: "Kapat",
     details: "Ayrıntılar",
     submit: "Formu gönder",
@@ -128,6 +129,7 @@ const T = {
     cancel: "Cancel",
     confirm: "Confirm",
     remove: "Delete",
+    verify: "Verify address",
     close: "Close",
     details: "Details",
     submit: "Submit form",
@@ -232,6 +234,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 <Button variant="soft">${t.ship}</Button>
 <Button variant="success">${t.confirm}</Button>
 <Button variant="danger">${t.remove}</Button>
+<Button variant="caution">${t.verify}</Button>
 <Button variant="ghost">${t.close}</Button>
 <Button variant="link">${t.details}</Button>
 <Button variant="quiet">${t.details}</Button>`}
@@ -241,6 +244,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         <Button variant="soft">{t.ship}</Button>
         <Button variant="success">{t.confirm}</Button>
         <Button variant="danger">{t.remove}</Button>
+        <Button variant="caution">{t.verify}</Button>
         <Button variant="ghost">{t.close}</Button>
         <Button variant="link">{t.details}</Button>
         <Button variant="quiet">{t.details}</Button>

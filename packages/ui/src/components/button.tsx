@@ -23,6 +23,9 @@ export const buttonVariants = cva("tamga-btn", {
       success: "tamga-btn-success",
       /* destructive: findable and deliberate, not loud */
       danger: "tamga-btn-danger",
+      /* the step that clears a caution (verify an address, renew a card): the caution's ink as an
+         edge, like success and danger, never a fill */
+      caution: "tamga-btn-caution",
       /* no edge, no offset, no lift — it is not an object on the page */
       ghost: "tamga-btn-ghost",
       /* reads as a link, behaves as a button. For a click that runs code but
@@ -180,6 +183,8 @@ export const miniButtonVariants = cva("tamga-mini-btn", {
       soft: "tamga-mini-btn-soft",
       /* bir satırda üç eylem varsa üçü birden nesne olamaz */
       quiet: "tamga-mini-btn-quiet",
+      /* bir uyarıyı kapatan adım, uyarının içinde: kenar ve taban uyarının mürekkebi */
+      caution: "tamga-mini-btn-caution",
     },
   },
   defaultVariants: { variant: "secondary" },

@@ -43,10 +43,12 @@ const T = {
     confirm: "Onayla",
     ship: "Kargola",
     more: "Diğer",
+    resend: "Tekrar gönder",
     varyantlar: (
       <>
-        Dört dolgu: <code>secondary</code> (varsayılan), <code>primary</code>,{" "}
-        <code>soft</code> ve <code>quiet</code>. <strong>Sessiz olanın tabanı yok</strong> ve
+        Beş dolgu: <code>secondary</code> (varsayılan), <code>primary</code>,{" "}
+        <code>soft</code>, <code>quiet</code> ve <code>caution</code> (bir uyarının içindeki,
+        uyarıyı kapatan adım). <strong>Sessiz olanın tabanı yok</strong> ve
         kenarı ayraç çizgisinde: bir satırda üç eylem varsa üçü birden nesne olamaz · biri
         önde durur, ötekiler yerini bilir.
       </>
@@ -88,10 +90,12 @@ const T = {
     confirm: "Approve",
     ship: "Ship",
     more: "More",
+    resend: "Send again",
     varyantlar: (
       <>
-        Four fills: <code>secondary</code> (the default), <code>primary</code>,{" "}
-        <code>soft</code> and <code>quiet</code>. <strong>The quiet one has no base</strong> and
+        Five fills: <code>secondary</code> (the default), <code>primary</code>,{" "}
+        <code>soft</code>, <code>quiet</code> and <code>caution</code> (the step inside a caution
+        that clears it). <strong>The quiet one has no base</strong> and
         its edge is the divider line: with three actions in one row, all three cannot be objects ·
         one stands forward, the others know their place.
       </>
@@ -135,7 +139,8 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         code={`<MiniButton aria-label="${t.edit}"><Icon icon={Edit} size="xs" />${t.edit}</MiniButton>
 <MiniButton variant="primary" aria-label="${t.confirm}">${t.confirm}</MiniButton>
 <MiniButton variant="soft" aria-label="${t.ship}"><Icon icon={Truck} size="xs" />${t.ship}</MiniButton>
-<MiniButton variant="quiet" aria-label="${t.more}"><Icon icon={More} size="xs" />${t.more}</MiniButton>`}
+<MiniButton variant="quiet" aria-label="${t.more}"><Icon icon={More} size="xs" />${t.more}</MiniButton>
+<MiniButton variant="caution" aria-label="${t.resend}">${t.resend}</MiniButton>`}
       >
         {/* Metin de alabiliyor: referansın satırı "Düzenle · Kopyala · Onayla ·
             Kargola · Diğer", yani yalnız ikon taşıyan bir kutu değil. */}
@@ -153,6 +158,9 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         <MiniButton variant="quiet" aria-label={t.more}>
           <Icon icon={More} size="xs" weight="bold" />
           {t.more}
+        </MiniButton>
+        <MiniButton variant="caution" aria-label={t.resend}>
+          {t.resend}
         </MiniButton>
 
         <span className="h-7 w-px bg-[var(--color-div)]" aria-hidden />

@@ -170,8 +170,8 @@ const OGELER: GaleriOgesi[] = [
     boy: "ekran",
     ad: { tr: "Kullanıcı detayı", en: "User detail" },
     aciklama: {
-      tr: "Sekmeler rota, durum değil: her biri adresi değiştirdiği için bağlantı. Burada boş hâli yok: bir liste meşru olarak boş olabilir, bir kayıt olamaz; olmayan kayıt 404'tür.",
-      en: "Tabs are routes, not state: each changes the address, so each is a link. There is no empty state here: a list may legitimately be empty, a record may not; a missing record is a 404.",
+      tr: "Sekmeler rota, durum değil: her biri adresi değiştirdiği için bağlantı. Burada boş hâli yok: bir liste meşru olarak boş olabilir, bir kayıt olamaz; olmayan kayıt 404'tür. Kabuğun üstündeki şerit AppShell'in banner'ı: hesap çapında, gözden kaçmaması gereken bir durum; adımı uyarının kendi düğmesi.",
+      en: "Tabs are routes, not state: each changes the address, so each is a link. There is no empty state here: a list may legitimately be empty, a record may not; a missing record is a 404. The strip above the shell is AppShell's banner: an account-wide condition that must not be overlooked; its step is the caution's own button.",
     },
     ornek: (lang) => <KullaniciDetayi lang={lang} />,
     kod: `<DetailTemplate

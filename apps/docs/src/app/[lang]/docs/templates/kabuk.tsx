@@ -152,11 +152,14 @@ export function Uygulama({
   lang,
   nav,
   aktif,
+  banner,
   children,
 }: {
   lang: Dil;
   nav?: NavEntry[];
   aktif: string;
+  /** Kabuğun üstündeki şerit; AppShell'in `banner`ı. */
+  banner?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const u = U[lang];
@@ -167,6 +170,7 @@ export function Uygulama({
       activePath={aktif}
       linkComponent={DurmusBaglanti}
       topbar={<UstSerit lang={lang} />}
+      banner={banner}
       labels={{ home: u.anaSayfa, primaryNav: u.anaGezinme }}
     >
       {children}

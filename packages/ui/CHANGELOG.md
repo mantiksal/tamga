@@ -5,7 +5,9 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
-## Unreleased
+## 0.15.0
+
+> The shell takes a strip above everything; the caution gets its own button.
 
 ### Added
 
@@ -735,15 +737,6 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 > A light palette takes the brand's hue, and two things a pointer could feel: a checkbox
 > that flickered under hover and a two-line label that centred itself.
 
-### Fixed
-
-- **`Checkbox` no longer centres a two-line label.** It renders a `<button>`, and a browser centres
-  button text; every other choice surface in the kit already neutralises that (`RadioGroup`'s list
-  look, `.tamga-choice-card`), this one did not. A one-word label never showed it; a label with a
-  description under it did.
-
-## Unreleased
-
 ### Changed
 
 - **A light palette now carries the brand's hue.** `makePalette` fixed every light surface at hue
@@ -756,6 +749,10 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ### Fixed
 
+- **`Checkbox` no longer centres a two-line label.** It renders a `<button>`, and a browser centres
+  button text; every other choice surface in the kit already neutralises that (`RadioGroup`'s list
+  look, `.tamga-choice-card`), this one did not. A one-word label never showed it; a label with a
+  description under it did.
 - **A hovered checkbox no longer flickers.** The box lifts a pixel on hover, and the hover target
   was the box itself: a pointer resting on its lower or right edge lost the box as it moved, the
   hover ended, the box came back, the hover started again — a loop that does not stop, because the

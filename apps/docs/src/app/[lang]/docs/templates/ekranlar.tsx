@@ -3,6 +3,7 @@
 import { useState } from "react";
 import {
   Alert,
+  MiniButton,
   Avatar,
   Button,
   Card,
@@ -149,6 +150,8 @@ const S = {
     sekmeSiparis: "Siparişler",
     sekmeEtkinlik: "Etkinlik",
     kunye: "Künye",
+    seritMetin: "Hesabın e-posta adresi doğrulanmadı; bildirimler gitmiyor.",
+    seritEylem: "Doğrulama e-postasını gönder",
     kunyeSatir: ["E-posta", "Telefon", "Rol", "Depo", "Kayıt"],
     kunyeDeger: ["ada@ornek.com", "0500 000 00 00", "Yönetici", "İstanbul · Merkez", "14 Mart 2025"],
     sonSiparisler: "Onayladığı son siparişler",
@@ -389,6 +392,8 @@ const S = {
     sekmeSiparis: "Orders",
     sekmeEtkinlik: "Activity",
     kunye: "Details",
+    seritMetin: "The account's email address is not verified; notifications are not going out.",
+    seritEylem: "Send the verification email",
     kunyeSatir: ["Email", "Phone", "Role", "Warehouse", "Joined"],
     kunyeDeger: [
       "ada@example.com",
@@ -932,7 +937,21 @@ export function KullaniciDetayi({ lang }: { lang: Dil }) {
   const s = S[lang];
   const [ad] = KULLANICILAR[lang][0];
   return (
-    <Uygulama lang={lang} aktif="/kullanicilar">
+    <Uygulama
+      lang={lang}
+      aktif="/kullanicilar"
+      /* KABUĞUN ÜSTÜNDEKİ ŞERİT: hesap çapında, gözden kaçmaması gereken bir durum;
+         adımı uyarının kendi düğmesi. Tek şerit, tam genişlik. */
+      banner={
+        <div
+          className="tamga-gutter flex flex-wrap items-center gap-x-4 gap-y-2 py-2 text-small text-ink"
+          style={{ background: "var(--color-warn-bg)", borderBottom: "1px solid var(--color-warn)" }}
+        >
+          <span>{s.seritMetin}</span>
+          <MiniButton variant="caution" aria-label={s.seritEylem}>{s.seritEylem}</MiniButton>
+        </div>
+      }
+    >
       <DetailTemplate
         breadcrumb={[{ label: s.kullanicilar, href: "#" }, { label: ad }]}
         title={ad}

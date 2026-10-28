@@ -195,3 +195,23 @@ describe("AppShell · grup ayrımı", () => {
     expect(document.querySelector('[data-nav="browse"]')).not.toHaveAttribute("aria-current");
   });
 });
+
+/* ŞERİT KABUĞUN ÜSTÜNDE: ray ve içerik onun altında; verilmezse hiçbir sarmalayıcı yok. */
+describe("AppShell · banner", () => {
+  it("verilen şerit rayın ve içeriğin önünde, tek kez", () => {
+    const { container } = render(
+      <AppShell nav={nav} activePath="/" labels={LABELS} banner={<p>adres doğrulanmadı</p>}>
+        <p>gövde</p>
+      </AppShell>,
+    );
+    const serit = container.querySelector(".tamga-app-banner")!;
+    expect(serit.textContent).toBe("adres doğrulanmadı");
+    const ray = container.querySelector("aside")!;
+    expect(serit.compareDocumentPosition(ray) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(container.querySelectorAll(".tamga-app-banner")).toHaveLength(1);
+  });
+  it("verilmezse şerit yok", () => {
+    const { container } = render(shell("/"));
+    expect(container.querySelector(".tamga-app-banner")).toBeNull();
+  });
+});

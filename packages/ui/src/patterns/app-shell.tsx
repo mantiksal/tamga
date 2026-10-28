@@ -78,6 +78,16 @@ export type AppShellProps = {
    * yalnız yerini garanti ediyor.
    */
   topbar?: ReactNode;
+  /**
+   * A strip above the whole shell, the rail and the top bar included: an account-wide condition
+   * the product will not let the reader overlook (an unverified address, a lapsed payment). The
+   * content and its tone are the caller's; the shell gives it the full width and keeps the screen
+   * one viewport tall. One strip, never a stack. TR: Kabuğun tamamının, ray ve üst şerit dahil,
+   * üstünde bir şerit: ürünün gözden kaçmasına izin vermediği hesap çapında bir durum (doğrulanmamış
+   * adres, aksamış ödeme). İçerik ve tonu çağıranın; kabuk ona tam genişliği veriyor ve ekranı tek
+   * görüntü boyunda tutuyor. Tek şerit, asla yığın.
+   */
+  banner?: ReactNode;
   /** A control at the foot of the rail: an expand/collapse button, say. TR: Rayın dibine giren kontrol: genişlet/daralt düğmesi gibi. */
   railFooter?: ReactNode;
   /**
@@ -117,6 +127,7 @@ export function AppShell({
   activePath,
   rail = "narrow",
   topbar,
+  banner,
   railFooter,
   mainClassName,
   linkComponent: Link = PlainLink,
@@ -177,125 +188,130 @@ export function AppShell({
        HİÇBİR YERDE kullanılmıyordu · rolü olup tüketicisi olmayan iki token.
        Zeminleri değiştiren biri hiçbir şeyin değişmediğini görüyor ve sebebini
        renkte arıyordu. */
-    <div className="flex h-dvh w-full overflow-hidden bg-rail text-ink-soft">
-      {/* Rayın genişliği yüzeyin sol boşluğunu da içeriyor: aşağıdaki kap
-          soldan dolgu vermiyor, yoksa rayın zemini yüzeyin dolgusuyla birleşip
-          simgeleri sola yaslı gösteriyor. */}
-      <aside
-        className={`flex shrink-0 flex-col gap-2 bg-rail py-4 ${
-          wide ? "w-60 px-3" : "w-20 items-center px-1"
-        }`}
-        data-rail={rail}
-      >
-        {brand ? (
-          <>
-            <span
-              aria-label={labels.home}
-              className={`mb-2 flex h-10 shrink-0 items-center text-ink ${wide ? "px-2" : "w-10 justify-center"}`}
-            >
-              {brand}
-            </span>
-            <span className={`h-0 w-6 border-t border-line ${wide ? "ml-2" : ""}`} />
-          </>
-        ) : null}
-
-        <nav
-          aria-label={labels.primaryNav}
-          className={`tamga-rail-scroll flex w-full flex-1 flex-col gap-2 py-1 ${wide ? "" : "items-center"}`}
+    <div className="flex h-dvh w-full flex-col overflow-hidden bg-rail text-ink-soft">
+      {/* ŞERİT KABUĞUN ÜSTÜNDE, İÇİNDE DEĞİL: ray ve içerik onun altında kalan yüksekliği paylaşıyor,
+          ekran yine tek görüntü boyunda. */}
+      {banner ? <div className="tamga-app-banner">{banner}</div> : null}
+      <div className="flex min-h-0 w-full flex-1">
+        {/* Rayın genişliği yüzeyin sol boşluğunu da içeriyor: aşağıdaki kap
+            soldan dolgu vermiyor, yoksa rayın zemini yüzeyin dolgusuyla birleşip
+            simgeleri sola yaslı gösteriyor. */}
+        <aside
+          className={`flex shrink-0 flex-col gap-2 bg-rail py-4 ${
+            wide ? "w-60 px-3" : "w-20 items-center px-1"
+          }`}
+          data-rail={rail}
         >
-          {gruplar.map((grup, gi) => {
-            const id = `${kimlik}-${gi}`;
-            const acik = grup.bolum ? acikMi(grup.bolum) : true;
-            const kilitli = grup.bolum !== undefined && grup.bolum === aktifBolum;
-            return (
-              <Fragment key={grup.bolum ?? `_${gi}`}>
-                {/* BAŞLIK GRUP DEĞİŞTİĞİNDE. Katlanabilirken bir düğme: satırın tamamı
-                    tıklanır, ok sağda döner. Değilken düz etiket · tıklanmaz ve tıklanır
-                    GÖRÜNMEZ, çalışmayan bir hedef gösterilmesin diye. */}
-                {grup.bolum ? (
-                  wide ? (
-                    collapsibleSections ? (
-                      <button
-                        type="button"
-                        className={cn("tamga-rail-section", gi > 0 && "mt-3")}
-                        aria-expanded={acik}
-                        aria-controls={id}
-                        aria-disabled={kilitli || undefined}
-                        data-locked={kilitli || undefined}
-                        onClick={() => degistir(grup.bolum!)}
-                      >
-                        {grup.bolum}
-                        <Icon icon={CaretDown} size="xs" weight="bold" className="tamga-rail-section-caret" />
-                      </button>
-                    ) : (
-                      <p className={`px-2.5 text-caption font-bold uppercase tracking-label text-ink-faint ${gi > 0 ? "mt-5 pb-1.5" : "pb-1.5"}`}>
-                        {grup.bolum}
-                      </p>
-                    )
-                  ) : gi > 0 ? (
-                    /* DAR RAYDA GRUP BİR ÇİZGİ, ve bir süre HİÇBİR ŞEYDİ: başlık `wide`
-                       koşuluna bağlıydı, dolayısıyla daralan ray altı simgeyi tek bir
-                       ayrımsız sütuna çeviriyordu · "başlangıç" ile "araçlar" aynı şey
-                       gibi okunuyordu. İlk grubun önüne çizgi girmiyor: marka ayracı
-                       orada zaten var, ikisi üst üste biner. */
-                    <span className="my-1.5 h-0 w-6 shrink-0 border-t border-line" aria-hidden />
-                  ) : null
-                ) : null}
-                {/* Kapalı gövde `inert`: görünmeyen bağlantı sekmeyle de alınmıyor, ama
-                    DOM'da kalıyor · ürün `data-nav` ile hâlâ bulabilir. */}
-                <div id={id} className="tamga-rail-group-body" data-open={acik} inert={!acik}>
-                  <div className={wide ? undefined : "items-center"}>
-                    {grup.girisler.map((entry) => (
-                      /* RAY BAĞLANTISI KİTİN `RailLink`İ, ELLE ÇİZİLMİYOR: elle yazılan kopya
-                         geniş rayda `tamga-rail-link-wide`ı atlıyordu ve etiket kırpılıyordu.
-                         Gerekçe: docs/gerekce/08-blok-ve-sablon.md */
-                      <RailLink
-                        key={entry.key}
-                        href={entry.href}
-                        onClick={entry.onSelect}
-                        label={entry.label}
-                        active={isCurrent(entry)}
-                        showLabel={wide}
-                        linkComponent={Link}
-                        data-nav={entry.key}
-                      >
-                        {/* 20px: ikon rayda tek başına da taşınıyor (dar hâlde etiket
-                            yok), yani satırı tanıtan şey o · 18px'te bir metin glifi
-                            kadar kalıyordu. AĞIRLIK SEÇİLİYKEN DEĞİŞİYOR: seçili glif
-                            dolu, ötekiler ince · tasarımın "buradasın" işareti bu. */}
-                        <Icon icon={entry.icon} size="md" weight={isCurrent(entry) ? "fill" : "regular"} />
-                      </RailLink>
-                    ))}
+          {brand ? (
+            <>
+              <span
+                aria-label={labels.home}
+                className={`mb-2 flex h-10 shrink-0 items-center text-ink ${wide ? "px-2" : "w-10 justify-center"}`}
+              >
+                {brand}
+              </span>
+              <span className={`h-0 w-6 border-t border-line ${wide ? "ml-2" : ""}`} />
+            </>
+          ) : null}
+
+          <nav
+            aria-label={labels.primaryNav}
+            className={`tamga-rail-scroll flex w-full flex-1 flex-col gap-2 py-1 ${wide ? "" : "items-center"}`}
+          >
+            {gruplar.map((grup, gi) => {
+              const id = `${kimlik}-${gi}`;
+              const acik = grup.bolum ? acikMi(grup.bolum) : true;
+              const kilitli = grup.bolum !== undefined && grup.bolum === aktifBolum;
+              return (
+                <Fragment key={grup.bolum ?? `_${gi}`}>
+                  {/* BAŞLIK GRUP DEĞİŞTİĞİNDE. Katlanabilirken bir düğme: satırın tamamı
+                      tıklanır, ok sağda döner. Değilken düz etiket · tıklanmaz ve tıklanır
+                      GÖRÜNMEZ, çalışmayan bir hedef gösterilmesin diye. */}
+                  {grup.bolum ? (
+                    wide ? (
+                      collapsibleSections ? (
+                        <button
+                          type="button"
+                          className={cn("tamga-rail-section", gi > 0 && "mt-3")}
+                          aria-expanded={acik}
+                          aria-controls={id}
+                          aria-disabled={kilitli || undefined}
+                          data-locked={kilitli || undefined}
+                          onClick={() => degistir(grup.bolum!)}
+                        >
+                          {grup.bolum}
+                          <Icon icon={CaretDown} size="xs" weight="bold" className="tamga-rail-section-caret" />
+                        </button>
+                      ) : (
+                        <p className={`px-2.5 text-caption font-bold uppercase tracking-label text-ink-faint ${gi > 0 ? "mt-5 pb-1.5" : "pb-1.5"}`}>
+                          {grup.bolum}
+                        </p>
+                      )
+                    ) : gi > 0 ? (
+                      /* DAR RAYDA GRUP BİR ÇİZGİ, ve bir süre HİÇBİR ŞEYDİ: başlık `wide`
+                         koşuluna bağlıydı, dolayısıyla daralan ray altı simgeyi tek bir
+                         ayrımsız sütuna çeviriyordu · "başlangıç" ile "araçlar" aynı şey
+                         gibi okunuyordu. İlk grubun önüne çizgi girmiyor: marka ayracı
+                         orada zaten var, ikisi üst üste biner. */
+                      <span className="my-1.5 h-0 w-6 shrink-0 border-t border-line" aria-hidden />
+                    ) : null
+                  ) : null}
+                  {/* Kapalı gövde `inert`: görünmeyen bağlantı sekmeyle de alınmıyor, ama
+                      DOM'da kalıyor · ürün `data-nav` ile hâlâ bulabilir. */}
+                  <div id={id} className="tamga-rail-group-body" data-open={acik} inert={!acik}>
+                    <div className={wide ? undefined : "items-center"}>
+                      {grup.girisler.map((entry) => (
+                        /* RAY BAĞLANTISI KİTİN `RailLink`İ, ELLE ÇİZİLMİYOR: elle yazılan kopya
+                           geniş rayda `tamga-rail-link-wide`ı atlıyordu ve etiket kırpılıyordu.
+                           Gerekçe: docs/gerekce/08-blok-ve-sablon.md */
+                        <RailLink
+                          key={entry.key}
+                          href={entry.href}
+                          onClick={entry.onSelect}
+                          label={entry.label}
+                          active={isCurrent(entry)}
+                          showLabel={wide}
+                          linkComponent={Link}
+                          data-nav={entry.key}
+                        >
+                          {/* 20px: ikon rayda tek başına da taşınıyor (dar hâlde etiket
+                              yok), yani satırı tanıtan şey o · 18px'te bir metin glifi
+                              kadar kalıyordu. AĞIRLIK SEÇİLİYKEN DEĞİŞİYOR: seçili glif
+                              dolu, ötekiler ince · tasarımın "buradasın" işareti bu. */}
+                          <Icon icon={entry.icon} size="md" weight={isCurrent(entry) ? "fill" : "regular"} />
+                        </RailLink>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </Fragment>
-            );
-          })}
-        </nav>
+                </Fragment>
+              );
+            })}
+          </nav>
 
-        {railFooter ? <div className="shrink-0">{railFooter}</div> : null}
-      </aside>
+          {railFooter ? <div className="shrink-0">{railFooter}</div> : null}
+        </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        {/* Üst şerit rayla aynı zemini paylaşıyor: ikisi içeriğin etrafındaki
-            tek çerçeve, ve köşede ton değiştiren bir çerçeve iki ayrı şey gibi
-            okunuyor. */}
-        <header className="tamga-gutter flex items-center gap-4 bg-band py-4">{topbar}</header>
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* Üst şerit rayla aynı zemini paylaşıyor: ikisi içeriğin etrafındaki
+              tek çerçeve, ve köşede ton değiştiren bir çerçeve iki ayrı şey gibi
+              okunuyor. */}
+          <header className="tamga-gutter flex items-center gap-4 bg-band py-4">{topbar}</header>
 
-        {/* Sağ ve alt boşluk kartın kendi ofsetine yer bırakıyor: kırpma tuzağı. */}
-        <div className="min-h-0 flex-1 overflow-hidden pr-4 pb-4">
-          {/* `relative` BİR SÜS DEĞİL, BİR SİGORTA: kaydırılan yüzey konumlu değilse
-              içindeki her `position: absolute` eleman (örneğin `sr-only`) kapsayıcı
-              bloğunu `html`de bulup belgeyi uzatıyor, ve `h-dvh overflow-hidden` olmasına
-              rağmen SAYFANIN KENDİSİ kayıyor.
-              Gerekçe: docs/gerekce/08-blok-ve-sablon.md */}
-          {/* İÇERİK ÇERÇEVENİN İÇİNDE YÜZEN BİR KUTU. Zemin ve kenar zaten
-              `tamga-surface`tan geliyordu; eksik olan köşeydi. Kontrol
-              yarıçapıyla (6px) çizilen bir ekran kutusu, içindeki girdilerle
-              aynı köşeyi taşıyor ve bir kap gibi okunmuyor. */}
-          <main className={cn("tamga-surface tamga-app-main relative h-full min-h-0 overflow-y-auto", mainClassName)}>
-            {children}
-          </main>
+          {/* Sağ ve alt boşluk kartın kendi ofsetine yer bırakıyor: kırpma tuzağı. */}
+          <div className="min-h-0 flex-1 overflow-hidden pr-4 pb-4">
+            {/* `relative` BİR SÜS DEĞİL, BİR SİGORTA: kaydırılan yüzey konumlu değilse
+                içindeki her `position: absolute` eleman (örneğin `sr-only`) kapsayıcı
+                bloğunu `html`de bulup belgeyi uzatıyor, ve `h-dvh overflow-hidden` olmasına
+                rağmen SAYFANIN KENDİSİ kayıyor.
+                Gerekçe: docs/gerekce/08-blok-ve-sablon.md */}
+            {/* İÇERİK ÇERÇEVENİN İÇİNDE YÜZEN BİR KUTU. Zemin ve kenar zaten
+                `tamga-surface`tan geliyordu; eksik olan köşeydi. Kontrol
+                yarıçapıyla (6px) çizilen bir ekran kutusu, içindeki girdilerle
+                aynı köşeyi taşıyor ve bir kap gibi okunmuyor. */}
+            <main className={cn("tamga-surface tamga-app-main relative h-full min-h-0 overflow-y-auto", mainClassName)}>
+              {children}
+            </main>
+          </div>
         </div>
       </div>
     </div>

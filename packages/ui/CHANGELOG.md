@@ -5,6 +5,14 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## Unreleased
+
+### Added
+
+- **`AppShell` `banner`** · a strip above the whole shell, the rail and the top bar included, for
+  an account-wide condition the product will not let the reader overlook. The screen stays one
+  viewport tall.
+
 ## 0.14.1
 
 > The score ring says the exact score; a banner's tile sits on the middle of its text.

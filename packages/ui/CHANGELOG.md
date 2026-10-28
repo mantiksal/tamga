@@ -5,7 +5,9 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
-## Unreleased
+## 0.16.0
+
+> The meter takes the product's own scale; the inline alert's tile sits in its title.
 
 ### Changed
 

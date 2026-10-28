@@ -1,4 +1,4 @@
-import { Card, Table, StatusChip, Dot } from "tamga-ui";
+import { Card, Table, StatusChip, Dot, LinkRow, Link } from "tamga-ui";
 import { TabloOrnegi } from "./ornek";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
@@ -70,6 +70,25 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    rowH: "Satırın tamamı bir bağlantı",
+    rowP: (
+      <>
+        Bir listenin satırı çoğu zaman bir kaydın kapısı: ada değil satıra basılır.{" "}
+        <code>LinkRow</code> satırın tamamını bağlantı yapar, ama bağlantı satırın İÇİNDE gerçek
+        bir <code>&lt;a&gt;</code> olarak kalır: klavyeyle ona gelinir, ekran okuyucu onu okur,
+        Cmd ya da orta tuş yeni sekmede açar. Satırdaki öteki düğme ve bağlantılar kendi işini
+        yapar; hücreden metin seçmek satırı açmaz. Satırda birden çok bağlantı varsa satırınkini{" "}
+        <code>data-row-link</code> ile işaretle.
+      </>
+    ),
+    rowN: (
+      <>
+        <strong>Neden <code>&lt;tr&gt;</code>&apos;yi bir bağlantıyla sarmıyoruz:</strong> geçersiz
+        HTML. Bağlantıyı <code>::after</code> ile satıra yaymak da tutmuyor:{" "}
+        <code>&lt;tr&gt;</code> konumlandırılamıyor, katman tarayıcıdan tarayıcıya başka yere
+        düşüyor. Tık satırda yakalanıp bağlantıya iletiliyor.
+      </>
+    ),
     tamH: "Seçim, sıralama ve satır eylemi",
     tamP: (
       <>
@@ -152,6 +171,25 @@ const T = {
       </>
     ),
     rules: "Rules",
+    rowH: "The whole row is a link",
+    rowP: (
+      <>
+        A list&apos;s row is often the door to a record: people press the row, not the name.{" "}
+        <code>LinkRow</code> makes the whole row the link, while the link stays a real{" "}
+        <code>&lt;a&gt;</code> INSIDE the row: the keyboard reaches it, a screen reader reads it,
+        Cmd or the middle button opens it in a new tab. Other buttons and links in the row do their
+        own job; selecting text in a cell does not open the row. When a row holds more than one
+        link, mark the row&apos;s with <code>data-row-link</code>.
+      </>
+    ),
+    rowN: (
+      <>
+        <strong>Why the <code>&lt;tr&gt;</code> is not wrapped in a link:</strong> invalid HTML.
+        Stretching the link over the row with <code>::after</code> does not hold either: a{" "}
+        <code>&lt;tr&gt;</code> cannot be positioned, and the layer lands somewhere else in each
+        browser. The click is caught on the row and handed to the link.
+      </>
+    ),
     tamH: "Selection, sorting and the row's action",
     tamP: (
       <>
@@ -248,6 +286,45 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.rules}</H2>
       <Note>{t.noEngine}</Note>
+
+      <H2>{t.rowH}</H2>
+      <Demo labels={dict.demo} align="start" code={`<LinkRow>
+  <td><Link href="/products/blue-train">Blue Train · LP</Link></td>
+  <td><StatusChip label="${t.inStock}" state="positive" /></td>
+</LinkRow>`}>
+        <div className="w-full">
+          <Card>
+            <Table>
+              <thead>
+                <tr>
+                  <th>{t.product}</th>
+                  <th className="w-36">{t.state}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(
+                  [
+                    ["Blue Train · LP", "positive", t.inStock],
+                    ["Kind of Blue · LP", "caution", t.low],
+                  ] as const
+                ).map(([name, tone, label]) => (
+                  <LinkRow key={name}>
+                    <td>
+                      <Link href="#">{name}</Link>
+                    </td>
+                    <td>
+                      <StatusChip label={label} state={tone} />
+                    </td>
+                  </LinkRow>
+                ))}
+              </tbody>
+            </Table>
+          </Card>
+        </div>
+      </Demo>
+      <P>{t.rowP}</P>
+      <Note>{t.rowN}</Note>
+      <Props of="LinkRow" lang={lang} etiketli />
 
       <H2>{t.cellH}</H2>
       <P>{t.cellP}</P>

@@ -5246,6 +5246,10 @@
   .tamga-table tbody tr:hover {
     background: var(--color-hover);
   }
+  /* Satırın tamamı bir bağlantı (`LinkRow`): imleç her hücrede bunu söyler. */
+  .tamga-table tbody tr[data-row-link] {
+    cursor: pointer;
+  }
   .tamga-table tbody tr[data-selected="true"] {
     background: var(--color-accent-bg);
   }

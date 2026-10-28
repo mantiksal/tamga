@@ -5,6 +5,23 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.17.0
+
+> Back brings the content back where it was; a table row can be its own link.
+
+### Added
+
+- **`AppShell` keeps the content's place across back and forward** (`restoreScroll`, on by
+  default). The content scrolls inside the shell, not the window, so the browser's own
+  restoration never reached it: going back from a record sent a long list to its top. The place
+  is kept per address for the session and comes back only on back/forward; a new link still opens
+  at the top. Content that loads after the route is waited for a few frames; scrolling by hand
+  stops the wait.
+- **`LinkRow`** · a table row that is its link. The link stays a real `<a>` inside the row
+  (keyboard, screen reader, Cmd or middle button for a new tab); a press anywhere else on the row
+  is handed to it, the row's own buttons and links keep their job, selecting text does not open
+  it. The row's cursor says it. Mark the row's link `data-row-link` when it holds more than one.
+
 ## 0.16.0
 
 > The meter takes the product's own scale; the inline alert's tile sits in its title.

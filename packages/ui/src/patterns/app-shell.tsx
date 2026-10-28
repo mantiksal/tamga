@@ -1,11 +1,12 @@
 "use client";
 
-import { Fragment, useId, useState } from "react";
+import { Fragment, useId, useRef, useState } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import { Icon } from "../components/icon.js";
 import { CaretDown } from "../components/icons.js";
 import { RailLink } from "../components/rail-link.js";
 import { cn } from "../lib/cn.js";
+import { useScrollMemory } from "../lib/use-scroll-memory.js";
 import { PlainLink, type LinkComponent } from "./shared.js";
 
 /**
@@ -117,6 +118,17 @@ export type AppShellProps = {
   collapsedSections?: readonly string[];
   /** Fires with the section name and whether it is now open. TR: Bölüm adı ve artık açık olup olmadığıyla ateşlenir. */
   onSectionToggle?: (section: string, open: boolean) => void;
+  /**
+   * Back and forward bring the content back where it was left. The content scrolls inside the
+   * shell, not the window, so the browser's own restoration never reaches it: a long list sent the
+   * reader back to its top. The place is kept per address for the session; a new link still opens
+   * at the top. Off for a product that restores the place itself.
+   * TR: Geri ve ileri içeriği bırakıldığı yere getirir. İçerik pencerede değil kabukta kayıyor,
+   * tarayıcının kendi geri getirmesi ona hiç ulaşmıyor: uzun bir liste okuru başına atıyordu. Yer
+   * oturum boyunca adres başına tutulur; yeni bir bağlantı yine baştan açar. Yeri kendisi geri
+   * getiren bir ürün için kapatılır.
+   */
+  restoreScroll?: boolean;
   labels: { home: string; primaryNav: string };
   children: ReactNode;
 };
@@ -134,9 +146,12 @@ export function AppShell({
   collapsibleSections = true,
   collapsedSections,
   onSectionToggle,
+  restoreScroll = true,
   labels,
   children,
 }: AppShellProps) {
+  const mainRef = useRef<HTMLElement>(null);
+  useScrollMemory(mainRef, restoreScroll);
   /* Bir giriş kendi alt ağacına sahip, ve EN UZUN EŞLEŞEN KAZANIR: kökün `/`
      olmadığı bir panelde kök giriş altındaki her rotayı yutuyordu.
      Gerekçe: docs/gerekce/08-blok-ve-sablon.md */
@@ -308,7 +323,10 @@ export function AppShell({
                 `tamga-surface`tan geliyordu; eksik olan köşeydi. Kontrol
                 yarıçapıyla (6px) çizilen bir ekran kutusu, içindeki girdilerle
                 aynı köşeyi taşıyor ve bir kap gibi okunmuyor. */}
-            <main className={cn("tamga-surface tamga-app-main relative h-full min-h-0 overflow-y-auto", mainClassName)}>
+            <main
+              ref={mainRef}
+              className={cn("tamga-surface tamga-app-main relative h-full min-h-0 overflow-y-auto", mainClassName)}
+            >
               {children}
             </main>
           </div>

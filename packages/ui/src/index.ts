@@ -45,6 +45,7 @@ export { TreeSelect, type TreeNode } from "./components/tree-select.js";
 
 /* --- yüzeyler ----------------------------------------------------------- */
 export { Card, CardHead, CardBody, Table, Label } from "./components/surface.js";
+export { LinkRow } from "./components/link-row.js";
 
 /* --- veri ---------------------------------------------------------------- */
 export { Pagination, pageWindow } from "./components/pagination.js";

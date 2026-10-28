@@ -48,6 +48,28 @@ const T = {
         <Xref to="score-matrix">Score matrix</Xref>.
       </>
     ),
+    olcekH: "Ürünün kendi ölçeği",
+    olcekP: (
+      <>
+        <code>scale</code> kitin beş eşit bandı yerine ürünün kendi bantları: her bant{" "}
+        <code>to</code>&apos;da biter, genişlik aralığı izler (bir harf notunun F 0–39&apos;u A+
+        95–100&apos;den geniştir; eşit çizilse değerin yeri hakkında yalan söylerdi). Her bant tonunun
+        pasteli (<code>faintTint</code>), değerin düştüğü bant daha güçlü (<code>softTint</code>) ve
+        tonunun mürekkebiyle çevrili, adı da o mürekkepte. <code>display</code> sayıyı ürünün
+        söylediği gibi yazar (&laquo;66,3&raquo;), <code>markLabel</code> onu işaretin üstüne koyar,{" "}
+        <code>head={"{false}"}</code> üst satırı kapatır; sayfa adı ve sayıyı kendisi söylüyorsa.
+        Dar ölçekte değerin olmadığı bantlar <code>short</code> adını alır.
+      </>
+    ),
+    saglik: "Sağlık puanı",
+    olcek: [
+      { to: 40, label: "F 0–39", short: "F", tone: "danger" },
+      { to: 60, label: "D 40–59", short: "D", tone: "elevated" },
+      { to: 75, label: "C 60–74", short: "C", tone: "caution" },
+      { to: 85, label: "B 75–84", short: "B", tone: "info" },
+      { to: 95, label: "A 85–94", short: "A", tone: "positive" },
+      { to: 100, label: "A+ 95–100", short: "A+", tone: "positive" },
+    ] as const,
     bands: "Bantlar",
     bandsWhy: (
       <>
@@ -98,6 +120,29 @@ const T = {
         <Xref to="score-matrix">Score matrix</Xref>.
       </>
     ),
+    olcekH: "The product's own scale",
+    olcekP: (
+      <>
+        <code>scale</code> puts the product&apos;s own bands in place of the kit&apos;s five even
+        ones: each band ends at <code>to</code>, widths follow the ranges (a letter grade&apos;s F
+        0–39 is wider than its A+ 95–100; drawn even they would lie about where the value stands).
+        Every band is its tone&apos;s pastel (<code>faintTint</code>); the band the value falls in
+        is stronger (<code>softTint</code>), edged in its tone&apos;s ink, its name in that ink too.{" "}
+        <code>display</code> writes the number as the product says it (&ldquo;66.3&rdquo;),{" "}
+        <code>markLabel</code> puts it over the mark, <code>head={"{false}"}</code> drops the top
+        line when the page says the name and number itself. On a narrow meter the bands the value
+        is not in take their <code>short</code> name.
+      </>
+    ),
+    saglik: "Health score",
+    olcek: [
+      { to: 40, label: "F 0–39", short: "F", tone: "danger" },
+      { to: 60, label: "D 40–59", short: "D", tone: "elevated" },
+      { to: 75, label: "C 60–74", short: "C", tone: "caution" },
+      { to: 85, label: "B 75–84", short: "B", tone: "info" },
+      { to: 95, label: "A 85–94", short: "A", tone: "positive" },
+      { to: 100, label: "A+ 95–100", short: "A+", tone: "positive" },
+    ] as const,
     bands: "Bands",
     bandsWhy: (
       <>
@@ -151,6 +196,33 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         </div>
       </Demo>
       <P>{t.delta}</P>
+
+      <H2>{t.olcekH}</H2>
+      <P>{t.olcekP}</P>
+      <Demo
+        labels={dict.demo}
+        align="start"
+        code={`<ScoreMeter
+  value={66.3}
+  display="66,3"
+  label="${t.saglik}"
+  markLabel
+  scale={[
+    { to: 40, label: "F 0–39", short: "F", tone: "danger" },
+    { to: 60, label: "D 40–59", short: "D", tone: "elevated" },
+    { to: 75, label: "C 60–74", short: "C", tone: "caution" },
+    { to: 85, label: "B 75–84", short: "B", tone: "info" },
+    { to: 95, label: "A 85–94", short: "A", tone: "positive" },
+    { to: 100, label: "A+ 95–100", short: "A+", tone: "positive" },
+  ]}
+/>
+<ScoreMeter value={91} label="${t.saglik}" scale={…} head={false} markLabel />`}
+      >
+        <div className="flex w-full flex-col gap-10" data-olcek-ornek>
+          <ScoreMeter value={66.3} display="66,3" label={t.saglik} markLabel scale={t.olcek} />
+          <ScoreMeter value={91} label={t.saglik} scale={t.olcek} head={false} markLabel />
+        </div>
+      </Demo>
 
       <H2>{t.bands}</H2>
       <pre className="docs-code my-4">{`>= 90   positive

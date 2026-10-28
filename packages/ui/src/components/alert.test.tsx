@@ -54,14 +54,16 @@ describe("Alert · başarı karosunun glifi", () => {
    DEĞİŞMİYOR: `look` verilmeyince `data-look` yok. */
 describe("Alert · look=banner", () => {
   const css = readFileSync(["src/kit.css", "packages/ui/src/kit.css"].find(existsSync)!, "utf8");
-  it("varsayılanda data-look yok, glif sm; banner'da data-look ve glif md", () => {
+  it("varsayılanda data-look yok, glif xs ve kare başlığın içinde; banner'da data-look ve glif md", () => {
     const a = render(<Alert state="danger" title="Erişilemiyor" />);
     expect(a.container.querySelector(".tamga-alert")!.getAttribute("data-look")).toBeNull();
-    expect(a.container.querySelector(".tamga-alert-tile svg")!.getAttribute("width")).toBe("16");
+    expect(a.container.querySelector(".tamga-alert-tile svg")!.getAttribute("width")).toBe("14");
+    expect(a.container.querySelector(".tamga-alert-baslik > .tamga-alert-tile")).not.toBeNull();
     a.unmount();
     const b = render(<Alert look="banner" state="danger" title="Erişilemiyor">Son kontrol 2 dakika önce.</Alert>);
     expect(b.container.querySelector(".tamga-alert")!.getAttribute("data-look")).toBe("banner");
     expect(b.container.querySelector(".tamga-alert-tile svg")!.getAttribute("width")).toBe("20");
+    expect(b.container.querySelector(".tamga-alert > .tamga-alert-tile")).not.toBeNull();
     expect(b.container.querySelector(".tamga-alert-govde")).not.toBeNull();
   });
   it("CSS: koyu kenar 1.5px, 4px sert gölge, 44px karo, gösterim yüzü başlık, gövde text-body; satır içi boyları kit sınıfında", () => {

@@ -210,16 +210,35 @@ export function Alert({
     >
       {/* GLİF KENDİ KARESİNDE, metnin yanında çıplak değil: yıkanmış bir
           kutunun üstünde çıplak bir glif zemine karışıyor, ve dört uyarı yan
-          yana geldiğinde hangisinin hangisi olduğu ancak renkten okunuyordu. */}
-      <span
-        aria-hidden
-        className="tamga-alert-tile"
-        style={{ background: h.mark, color: h.markInk }}
-      >
-        <Icon icon={icon ?? TON_GLIFI[state]} size={look === "banner" ? "md" : "sm"} weight="fill" />
-      </span>
+          yana geldiğinde hangisinin hangisi olduğu ancak renkten okunuyordu.
+          Satır içi uyarıda kare küçük ve BAŞLIĞIN İÇİNDE: 28 piksellik kare tek satırlık
+          başlığın yanında gövdenin üstünde havada duruyordu (Berika, 2026-10-28). */}
+      {look === "banner" ? (
+        <span
+          aria-hidden
+          className="tamga-alert-tile"
+          style={{ background: h.mark, color: h.markInk }}
+        >
+          <Icon icon={icon ?? TON_GLIFI[state]} size="md" weight="fill" />
+        </span>
+      ) : null}
       <div className="tamga-alert-metin">
-        <p className="tamga-alert-baslik text-ink">{title}</p>
+        <p className="tamga-alert-baslik text-ink">
+          {look === "banner" ? (
+            title
+          ) : (
+            <>
+              <span
+                aria-hidden
+                className="tamga-alert-tile"
+                style={{ background: h.mark, color: h.markInk }}
+              >
+                <Icon icon={icon ?? TON_GLIFI[state]} size="xs" weight="fill" />
+              </span>
+              <span>{title}</span>
+            </>
+          )}
+        </p>
         {/* GÖVDE BİR `div`, `p` DEĞİL: bir uyarının gövdesi çoğu zaman bir LİSTE, ve
             `<p>` içindeki `<ul>` geçersiz HTML · tarayıcı listeyi paragrafın dışına
             çıkarıyor ve hidrasyon patlıyor.

@@ -49,3 +49,13 @@ describe("Progress", () => {
     expect(d).toMatch(/border-right:\s*0/);
   });
 });
+
+/* PASTEL: tonun yumuşak hâli, düz dolgu; çizgi yok. */
+describe("Progress · soft", () => {
+  it("tonlu md çubuk pastel tint ve data-soft taşıyor", () => {
+    const { container } = render(<Progress value={48} tone="elevated" soft ariaLabel="Erişim" />);
+    const fill = container.querySelector<HTMLElement>(".tamga-progress-fill")!;
+    expect(fill.dataset.soft).toBe("true");
+    expect(fill.style.getPropertyValue("--tamga-progress-tint")).toContain("color-mix");
+  });
+});

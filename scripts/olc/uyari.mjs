@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * TARAYICI ÖLÇÜMÜ · Alert'te karo, eylem ve kapatma başlığın İLK satırının
- * ortasında mı: gövdesiz, gövdeli (karo bilerek 2 px aşağıda), ve 390px'te çok
- * satıra inen bir başlıkta; fark en çok 1 px. Doğrudan Chrome (CDP); elle: `pnpm olc:uyari [klasör]`
+ * TARAYICI ÖLÇÜMÜ · satır içi Alert'te karo (başlığın içinde), eylem ve kapatma
+ * başlığın İLK satırının ortasında mı; banner'da karo, eylem ve kapatma metin
+ * bloğunun ortasında mı (gövdeliyken karo 2 px aşağıda). Gövdesiz, gövdeli ve
+ * 390px'te çok satıra inen başlık; fark en çok 1 px. Doğrudan Chrome (CDP); elle: `pnpm olc:uyari [klasör]`
  * (klasör verilirse ekran görüntüsü oraya).
  */
 const CH = process.env.CHROME ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
@@ -34,7 +35,12 @@ const olc = async (genislik) => {
       const tile = a.querySelector(".tamga-alert-tile"); const p = a.querySelector(".tamga-alert-baslik");
       const rg = document.createRange(); rg.selectNodeContents(p); const satirlar = rg.getClientRects(); const satir = satirlar[0];
       const kapat = a.querySelector(".tamga-alert-kapat"); const eylem = a.querySelector(".tamga-alert-eylem");
-      out.push({ baslik: p.textContent.slice(0, 22), govde: p.nextElementSibling ? "gövdeli" : "gövdesiz", satir: Math.round(r(p).height / satir.height), karo: +(orta(r(tile)) - orta(satir)).toFixed(1), kapat: kapat ? +(orta(r(kapat)) - orta(satir)).toFixed(1) : null, eylem: eylem ? +(orta(r(eylem)) - orta(satir)).toFixed(1) : null });
+      /* Satır içi: karo başlığın içinde, eylem ve kapatma ilk satırın ortasında. Banner: karo,
+         eylem ve kapatma metin BLOĞUNUN ortasında (0.14.1); alta sarmış eylem ölçülmüyor. */
+      const banner = a.dataset.look === "banner"; const metin = a.querySelector(".tamga-alert-metin");
+      const eksen = banner ? orta(r(metin)) : orta(satir);
+      const sarmis = (e) => e && r(e).top >= r(metin).bottom;
+      out.push({ baslik: p.textContent.slice(0, 22), look: banner ? "banner" : "inline", govde: metin.querySelector(".tamga-alert-govde") ? "gövdeli" : "gövdesiz", satir: Math.round(r(p).height / satir.height), karo: +(orta(r(tile)) - eksen).toFixed(1), kapat: kapat && !sarmis(kapat) ? +(orta(r(kapat)) - eksen).toFixed(1) : null, eylem: eylem && !sarmis(eylem) ? +(orta(r(eylem)) - eksen).toFixed(1) : null });
     }
     const uzun = [...document.querySelectorAll(".tamga-alert-baslik")].sort((a, b) => b.textContent.length - a.textContent.length)[0];
     const kap = uzun.closest(".tamga-alert").parentElement;
@@ -58,13 +64,15 @@ soyle(hepsi.some((u) => u.govde === "gövdesiz" && u.satir === 1), "sayfada tek 
 soyle(hepsi.some((u) => u.govde === "gövdeli"), "sayfada gövdeli uyarı yok");
 soyle(hepsi.some((u) => u.en === 390 && u.satir >= 2), "390px'te çok satıra inen başlık yok");
 for (const u of hepsi) {
-  const ad = u.en + "px " + u.govde + " " + u.satir + " satır · " + u.baslik;
+  const ad = u.en + "px " + u.look + " " + u.govde + " " + u.satir + " satır · " + u.baslik;
   /* Gövdeli uyarıda karo bilerek 2 px aşağıda: iki satırlık bloğun yanında göz onu yüksek okuyor. */
-  const beklenen = u.govde === "gövdeli" ? 2 : 0;
-  soyle(Math.abs(u.karo - beklenen) <= 1, ad + ": karo ilk satırla hizalı değil (" + u.karo + ", beklenen " + beklenen + ")");
-  soyle(u.kapat === null || Math.abs(u.kapat) <= 1, ad + ": kapatma ilk satırla hizalı değil (" + u.kapat + ")");
-  soyle(u.eylem === null || Math.abs(u.eylem) <= 1, ad + ": eylem ilk satırla hizalı değil (" + u.eylem + ")");
+  /* Banner'da gövdeli karo bilerek 2 px aşağıda (data-body); satır içi karo başlığın satırında. */
+  const beklenen = u.look === "banner" && u.govde === "gövdeli" ? 2 : 0;
+  const eksen = u.look === "banner" ? "metin bloğuyla" : "ilk satırla";
+  soyle(Math.abs(u.karo - beklenen) <= 1, ad + ": karo " + eksen + " hizalı değil (" + u.karo + ", beklenen " + beklenen + ")");
+  soyle(u.kapat === null || Math.abs(u.kapat) <= 1, ad + ": kapatma " + eksen + " hizalı değil (" + u.kapat + ")");
+  soyle(u.eylem === null || Math.abs(u.eylem) <= 1, ad + ": eylem " + eksen + " hizalı değil (" + u.eylem + ")");
 }
 console.log(JSON.stringify(hepsi));
-console.log(hata ? "✗ Uyarı hizası ölçümü başarısız." : "✓ Karo, eylem ve kapatma başlığın ilk satırında; gövdesiz, gövdeli ve 390px'te çok satırlı (" + hepsi.length + " ölçüm).");
+console.log(hata ? "✗ Uyarı hizası ölçümü başarısız." : "✓ Satır içi uyarıda karo, eylem ve kapatma ilk satırda, banner'da metin bloğunun ortasında; gövdesiz, gövdeli ve 390px'te çok satırlı (" + hepsi.length + " ölçüm).");
 process.exit(hata);

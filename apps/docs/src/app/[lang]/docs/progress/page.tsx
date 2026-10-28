@@ -78,6 +78,16 @@ const T = {
       </>
     ),
     kapsam: "Kapsam",
+    softH: "Pastel · soft",
+    softP: (
+      <>
+        <code>soft</code> bir <code>tone</code> ile: tonun çizgili tam işaret rengi yerine pasteli
+        (<code>softTint</code>), düz dolgu. Aynı düz pastellerle çizilmiş bir ölçeğin altındaki
+        çubuklar için: ikisi tek ölçek gibi okunsun, alarm gibi değil. Varsayılan tonlu çubuk
+        çizgili kalıyor.
+      </>
+    ),
+    hiz: "Hız", erisim: "Erişilebilirlik", guvenlik: "Güvenlik",
     related: "İlgili",
     three: (
       <>
@@ -137,6 +147,16 @@ const T = {
       </>
     ),
     kapsam: "Coverage",
+    softH: "Pastel · soft",
+    softP: (
+      <>
+        <code>soft</code> with a <code>tone</code>: the tone&apos;s pastel (<code>softTint</code>) as
+        a flat fill instead of its striped full mark. For bars under a score drawn in the same flat
+        pastels, so the two read as one scale rather than as alarms. The default toned bar stays
+        striped.
+      </>
+    ),
+    hiz: "Speed", erisim: "Accessibility", guvenlik: "Security",
     related: "Related",
     three: (
       <>
@@ -203,6 +223,18 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <P>{t.ucBicim}</P>
 
       <P>{t.neutral}</P>
+
+      <H2>{t.softH}</H2>
+      <P>{t.softP}</P>
+      <Demo yuzey labels={dict.demo} align="start" code={`<Progress value={82} tone="positive" soft label="${t.hiz}" valueText="82" ariaLabel="${t.hiz}" />
+<Progress value={61} tone="caution" soft label="${t.erisim}" valueText="61" ariaLabel="${t.erisim}" />
+<Progress value={34} tone="danger" soft label="${t.guvenlik}" valueText="34" ariaLabel="${t.guvenlik}" />`}>
+        <div className="flex w-full max-w-md flex-col gap-6" data-soft-ornek>
+          <Progress value={82} tone="positive" soft label={t.hiz} valueText="82" ariaLabel={t.hiz} />
+          <Progress value={61} tone="caution" soft label={t.erisim} valueText="61" ariaLabel={t.erisim} />
+          <Progress value={34} tone="danger" soft label={t.guvenlik} valueText="34" ariaLabel={t.guvenlik} />
+        </div>
+      </Demo>
 
       <H2>{t.inceH}</H2>
       <P>{t.inceP}</P>

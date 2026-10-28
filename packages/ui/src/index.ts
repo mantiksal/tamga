@@ -13,6 +13,8 @@ export {
   type ToneStyle,
   tones,
   toneOf,
+  softTint,
+  faintTint,
   TONE_RANK,
   rankOf,
   neutral,
@@ -65,7 +67,7 @@ export { Announcement } from "./components/announcement.js";
 export { Progress } from "./components/progress.js";
 export { SectionHead } from "./components/section.js";
 export { Spinner } from "./components/spinner.js";
-export { ScoreRing, ScoreMeter, ScoreMatrix, type ScoreProps } from "./components/gauge.js";
+export { ScoreRing, ScoreMeter, ScoreMatrix, type MeterBand, type ScoreProps } from "./components/gauge.js";
 
 /* --- structure & overlays ---------------------------------------------- */
 export {

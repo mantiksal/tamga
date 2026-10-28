@@ -5,6 +5,27 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## Unreleased
+
+### Changed
+
+- **`Alert` (inline): the tone's tile is small and sits in the title line.** A 28px tile beside a
+  one-line title stood in the air above the body; now a 20px tile leads the title and the body
+  starts under the title's text. `look="banner"` keeps its 44px tile.
+
+### Added
+
+- **`ScoreMeter` `scale`** · the product's own bands in place of the kit's five even ones: each
+  band ends at `to`, widths follow the ranges (a letter grade's F 0–39 is wider than its A+),
+  every band its tone's pastel, the value's band edged in its tone's ink and its name with it.
+  With `display` (the number as the product says it, "66,3"), `head={false}` (the page says
+  name and number itself) and `markLabel` (the number over the mark). A band's `short` name ("F") stands under the
+  bands the value is not in once the meter is narrow.
+- **`Progress` `soft`** · with a `tone`, the tone's pastel as a flat fill instead of its striped
+  full mark: bars that sit under a score drawn in the same pastels read as one scale, not as alarms.
+- **`softTint(tone)` · `faintTint(tone)`** · the tone's pastel and a lighter one: the value's band
+  and the bars draw with the first, the other bands with the second.
+
 ## 0.15.0
 
 > The shell takes a strip above everything; the caution gets its own button.

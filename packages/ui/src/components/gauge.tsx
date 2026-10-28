@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { dataProps } from "../lib/data-props.js";
-import { toneOf, type Tone } from "./tone.js";
+import type { CSSProperties } from "react";
+import { faintTint, softTint, toneOf, type Tone } from "./tone.js";
 
 /*
  * Aynı okumanın üç biçimi: halka, yatık ölçek, kare ızgara. Üçü de aynı
@@ -136,10 +137,27 @@ export function ScoreRing({
  *
  * Gerekçe: docs/gerekce/03-grafik-ve-olcum.md
  */
+/** One band of a product's own scale: where it ends, what it is called, its tone. */
+export type MeterBand = {
+  to: number;
+  label: string;
+  tone: Tone;
+  /**
+   * The name a narrow meter writes under a band the value is not in ("F" for "F 0–39"); the
+   * value's own band keeps its full name. TR: Dar bir ölçeğin, değerin olmadığı bandın altına
+   * yazdığı ad ("F 0–39" yerine "F"); değerin bandı tam adını koruyor.
+   */
+  short?: string;
+};
+
 export function ScoreMeter({
   value,
   label,
   bands,
+  scale,
+  display,
+  head = true,
+  markLabel = false,
   total = 100,
   size,
   tone,
@@ -153,37 +171,116 @@ export function ScoreMeter({
   bands?: readonly [string, string, string, string, string];
   /** The scale's top, when it is not 100. TR: Ölçeğin tepesi, 100 değilse. */
   total?: number;
+  /**
+   * The product's own scale, worst to best, in place of the kit's five even bands: each band
+   * ends at `to` (the first starts at 0, the last ends at `total`), widths follow the ranges,
+   * every band its tone's pastel and the one the value falls in drawn stronger, its name under
+   * it. A letter grade's ranges are not even (F 0–39 is wider than A+ 95–100), and drawn even
+   * they would lie about where the value stands. `bands` is ignored. TR: Ürünün kendi ölçeği,
+   * kötüden iyiye, kitin beş eşit bandı yerine: her bant `to`da biter (ilki 0'da başlar, sonuncusu
+   * `total`da biter), genişlik aralığı izler, her bant tonunun pasteli ve değerin düştüğü bant daha
+   * güçlü, adı altında. Bir harf notunun aralıkları eşit değil (F 0–39, A+ 95–100'den geniş);
+   * eşit çizilse değerin yeri hakkında yalan söylerdi. `bands` okunmuyor.
+   */
+  scale?: readonly MeterBand[];
+  /**
+   * The number as the product says it ("66,3"), for the head and the mark; absent, the rounded
+   * value. TR: Sayı ürünün söylediği gibi ("66,3"), üst satır ve işaret için; verilmezse
+   * yuvarlanmış değer.
+   */
+  display?: string;
+  /**
+   * The name and number line above the scale. Off when the page says them itself, beside the
+   * meter; `label` stays the accessible name. TR: Ölçeğin üstündeki ad ve sayı satırı. Sayfa
+   * onları ölçeğin yanında kendisi söylüyorsa kapalı; `label` erişilebilir ad olarak kalıyor.
+   */
+  head?: boolean;
+  /** The number written over the mark. TR: Sayı işaretin üstünde yazılı. */
+  markLabel?: boolean;
   [k: `data-${string}`]: unknown;
 }) {
   const v = Math.min(total, Math.max(0, value));
   const pct = (v / total) * 100;
+  const text = display ?? String(Math.round(v));
+  /* Each band from the previous one's end; the value falls in the first band it is under, the
+     top of the scale in the last. */
+  const own = scale?.map((b, i) => {
+    const from = i === 0 ? 0 : scale[i - 1]!.to;
+    const on = v >= from && (v < b.to || (i === scale.length - 1 && v <= total));
+    return { ...b, from, on };
+  });
+  const columns = own?.map((b) => `${Math.max(b.to - b.from, 0)}fr`).join(" ");
 
   return (
     <div
       {...dataProps(rest)}
       className="tamga-meter"
-      style={{ maxWidth: size ?? "35rem" }}
+      /* The product's own scale fills its place; the kit's five bands keep their reading width. */
+      style={{ maxWidth: size ?? (scale ? undefined : "35rem") }}
       role="group"
       aria-label={label}
     >
-      <div className="tamga-meter-ust">
-        <span className="tamga-meter-ad">{label}</span>
-        <span className="tamga-meter-sayi">
-          {Math.round(v)}
-          <span className="tamga-meter-toplam"> / {total}</span>
-        </span>
-      </div>
-      <div className="tamga-meter-yol">
+      {head ? (
+        <div className="tamga-meter-ust">
+          <span className="tamga-meter-ad">{label}</span>
+          <span className="tamga-meter-sayi">
+            {text}
+            <span className="tamga-meter-toplam"> / {total}</span>
+          </span>
+        </div>
+      ) : null}
+      <div className="tamga-meter-yol" data-mark-label={markLabel || undefined}>
+        {markLabel ? (
+          <span className="tamga-meter-deger" style={{ left: `${pct}%` }} aria-hidden>
+            {text}
+          </span>
+        ) : null}
         {/* İŞARET BANTLARIN ÜSTÜNDE, içinde değil: bandın rengi ölçeğin kendisi,
             skor ise o ölçek üzerinde bir NOKTA. */}
         <span className="tamga-meter-ok" style={{ left: `calc(${pct}% - 7px)` }} aria-hidden />
-        <div className="tamga-meter-bantlar">
-          {BANT_RENKLERI.map((renk) => (
-            <span key={renk} style={{ background: renk }} />
+        {own ? (
+          <div className="tamga-meter-bantlar" style={{ gridTemplateColumns: columns }}>
+            {own.map((b) => (
+              <span
+                key={b.label}
+                data-on={b.on || undefined}
+                style={
+                  {
+                    background: b.on ? softTint(b.tone) : faintTint(b.tone),
+                    "--tamga-meter-edge": toneOf(b.tone).fg,
+                  } as CSSProperties
+                }
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="tamga-meter-bantlar">
+            {BANT_RENKLERI.map((renk) => (
+              <span key={renk} style={{ background: renk }} />
+            ))}
+          </div>
+        )}
+      </div>
+      {own ? (
+        <div className="tamga-meter-adlar" style={{ gridTemplateColumns: columns }} aria-hidden>
+          {own.map((b) => (
+            <span
+              key={b.label}
+              data-on={b.on || undefined}
+              style={{ "--tamga-meter-edge": toneOf(b.tone).fg } as CSSProperties}
+            >
+              {b.short ? (
+                <>
+                  <span className="tamga-meter-ad-uzun">{b.label}</span>
+                  <span className="tamga-meter-ad-kisa">{b.short}</span>
+                </>
+              ) : (
+                b.label
+              )}
+            </span>
           ))}
         </div>
-      </div>
-      {bands ? (
+      ) : bands ? (
         <div className="tamga-meter-adlar" aria-hidden>
           {bands.map((b) => (
             <span key={b}>{b}</span>

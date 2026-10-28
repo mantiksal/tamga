@@ -94,6 +94,27 @@ export function toneOf(tone: Tone): ToneStyle {
 }
 
 /**
+ * The tone's pastel: its mark half way to the shell. One score drawn in the same tone in two
+ * places (a meter's band, a bar's fill) reads as one family and not as two alarms; the full mark
+ * stays for the small things that must be found (a dot, a chip). TR: Tonun pasteli: işaret rengi
+ * kabuğa yarı yolda. Aynı skor iki yerde aynı tonla çizildiğinde (ölçeğin bandı, çubuğun dolgusu)
+ * iki alarm değil tek aile gibi okunuyor; tam işaret rengi bulunması gereken küçük şeylere kalıyor
+ * (nokta, çip).
+ */
+export function softTint(tone: Tone): string {
+  return `color-mix(in oklab, ${tones[tone].mark} 50%, var(--color-shell))`;
+}
+
+/**
+ * Lighter still: a band the value is not in, beside the one it is (`softTint`). Visible as its
+ * tone, quieter than the value's own. TR: Daha da açık: değerin olmadığı bant, olduğu bandın
+ * (`softTint`) yanında. Tonu okunuyor, değerinkinden sessiz.
+ */
+export function faintTint(tone: Tone): string {
+  return `color-mix(in oklab, ${tones[tone].mark} 28%, var(--color-shell))`;
+}
+
+/**
  * How loudly a tone asks for the screen's single pulse (see live-scope). `null`
  * means "never pulses"; only `danger` breathes. This is the DEFAULT, not the
  * policy: a product that ranks its own states passes an explicit rank.

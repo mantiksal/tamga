@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { dataProps } from "../lib/data-props.js";
-import { toneOf, yiginRenk, type Tone } from "./tone.js";
+import { softTint, toneOf, yiginRenk, type Tone } from "./tone.js";
 /**
  * Progress · ne kadar kaldığını söyler.
  *
@@ -21,6 +21,7 @@ export function Progress({
   ariaLabel,
   size = "md",
   tone,
+  soft = false,
   className = "",
   ...rest
 }: {
@@ -77,6 +78,14 @@ export function Progress({
    * ton rollerinden; yoksa vurgu.
    */
   tone?: Tone;
+  /**
+   * With a `tone`: the tone's pastel (`softTint`) as a flat fill instead of its striped full mark.
+   * For a row of bars under a score drawn in the same flat pastels, so the two read as one scale
+   * and not as alarms. TR: `tone` ile: tonun çizgili tam işaret rengi yerine pasteli (`softTint`),
+   * düz dolgu. Aynı düz pastellerle çizilmiş bir skorun altındaki çubuklar için; ikisi alarm gibi
+   * değil tek ölçek gibi okunsun.
+   */
+  soft?: boolean;
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
@@ -166,12 +175,16 @@ export function Progress({
         <div
           className="tamga-progress-fill"
           data-tone={size === "sm" ? undefined : tone}
+          data-soft={(tone && soft && size !== "sm") || undefined}
           style={
             !tone
               ? { width: `${pct}%` }
               : size === "sm"
-                ? { width: `${pct}%`, background: toneOf(tone).mark }
-                : ({ width: `${pct}%`, "--tamga-progress-tint": toneOf(tone).mark } as CSSProperties)
+                ? { width: `${pct}%`, background: soft ? softTint(tone) : toneOf(tone).mark }
+                : ({
+                    width: `${pct}%`,
+                    "--tamga-progress-tint": soft ? softTint(tone) : toneOf(tone).mark,
+                  } as CSSProperties)
           }
         />
       </div>

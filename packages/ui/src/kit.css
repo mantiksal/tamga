@@ -4119,6 +4119,8 @@
     flex-direction: column;
     gap: 14px;
     width: 100%;
+    /* Bant adları kap ölçüsüne göre kısalıyor (aşağıda, .tamga-meter-ad-kisa). */
+    container-type: inline-size;
   }
   .tamga-meter-ust {
     align-items: baseline;
@@ -4172,6 +4174,52 @@
     font-weight: var(--weight-strong);
     grid-template-columns: repeat(5, 1fr);
     text-align: center;
+  }
+  /* ÜRÜNÜN ÖLÇEĞİ: bantlar kenarsız pastel, değerin bandı tonunun mürekkebiyle çevrili; adı da
+     o mürekkepte. Kenarlı beş eşit bant kitin kendi ölçeğinde kalıyor. */
+  .tamga-meter-bantlar[style] > span {
+    border-color: transparent;
+  }
+  .tamga-meter-bantlar > span[data-on] {
+    border-color: var(--tamga-meter-edge);
+  }
+  .tamga-meter-adlar > span {
+    white-space: nowrap;
+  }
+  /* DAR ÖLÇEKTE KISA AD: aralıklar sığmıyor, üst üste biniyordu (390 px'te ölçüldü); değerin
+     bandı tam adını koruyor. Kap ölçüsü, ekran ölçüsü değil: ölçek bir kartın yarısında da durur. */
+  .tamga-meter-ad-kisa {
+    display: none;
+  }
+  @container (max-width: 560px) {
+    .tamga-meter-adlar > span:not([data-on]) > .tamga-meter-ad-uzun {
+      display: none;
+    }
+    .tamga-meter-adlar > span:not([data-on]) > .tamga-meter-ad-kisa {
+      display: inline;
+    }
+  }
+  .tamga-meter-adlar > span[data-on] {
+    color: var(--tamga-meter-edge);
+  }
+  /* SAYI İŞARETİN ÜSTÜNDE: yol yukarı açılıyor, sayı işaretle aynı noktada ortalanıyor. */
+  /* Sayı ile ok arasında hava: bitişikken ikisi tek bir leke gibi okunuyordu (Berika, 2026-10-28). */
+  .tamga-meter-yol[data-mark-label] {
+    padding-top: 44px;
+  }
+  .tamga-meter-yol[data-mark-label] > .tamga-meter-ok {
+    top: 28px;
+  }
+  .tamga-meter-deger {
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--weight-strong);
+    color: var(--color-ink);
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
   }
 
   /* OLAY ŞERİDİ: yatay duraklar. Kutular ADIM, nokta değil · her birinin
@@ -4438,6 +4486,11 @@
       var(--tamga-progress-tint) 0 8px,
       color-mix(in oklab, var(--tamga-progress-tint) 82%, black) 8px 16px
     );
+  }
+  /* PASTEL DÜZ: pastel bir ölçeğin altında duran çubuk çizgisiz; çizgi, ölçeğin düz
+     bantlarının yanında ikinci bir malzeme gibi okunuyordu (Berika, 2026-10-28). */
+  .tamga-progress-fill[data-tone][data-soft] {
+    background: var(--tamga-progress-tint);
   }
   /* İNCE: tablo hücresine sığan 4px; kenarsız, gölgesiz, düz dolgu, etiket
      satırı yok. Yirmi beş satırda yirmi beş kenarlı çubuk listeyi ağırlaştırıyor.
@@ -4708,15 +4761,30 @@
     border: 1px solid var(--color-edge-strong);
     border-radius: calc(var(--radius) - 1px);
   }
+  /* SATIR İÇİ UYARIDA KARE BAŞLIĞIN İÇİNDE: 20 piksel, başlıkla aynı satırda ortalı;
+     gövde başlığın metniyle hizalı başlıyor (kare + boşluk kadar içeride). */
+  .tamga-alert:not([data-look]) .tamga-alert-baslik {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .tamga-alert:not([data-look]) .tamga-alert-baslik > .tamga-alert-tile {
+    width: 20px;
+    height: 20px;
+    margin-top: calc((1lh - 20px) / 2);
+    border-radius: var(--radius-chip);
+  }
+  .tamga-alert:not([data-look]) .tamga-alert-govde {
+    padding-left: 28px;
+  }
   .tamga-alert-eylem,
   .tamga-alert-kapat {
     flex: none;
   }
-  /* KARO BAŞLIĞIN İLK SATIRININ ORTASINDA, başlık kaç satır olursa olsun ve
-     gövde olsa da olmasa da: kutu üstten hizalı, BAŞLIK kendi satır yüksekliğini
-     karonun 28 pikseline göre aşağı alıyor (`1lh` başlığın kendi değeri). Tek
-     satırda `center`, üç satırlık bir başlıkta karoyu bloğun ortasına kaçırıyordu.
-     Eylem (sm, 32) ve kapatma (30) karodan uzun; merkezleri 14'e çekiliyor. */
+  /* BAŞLIĞIN İLK SATIRI 14 PX'LİK BİR EKSENDE: başlık kendi satır yüksekliğini
+     28'e göre aşağı alıyor (`1lh` başlığın kendi değeri), eylem (sm, 32) ve
+     kapatma (30) aynı eksene çekiliyor; satır içi karo (20) başlığın içinde ve
+     satırına ortalı. Banner kendi eksenini kuruyor (metin bloğunun ortası). */
   .tamga-alert-baslik {
     font-size: var(--text-body);
     font-weight: var(--weight-body);

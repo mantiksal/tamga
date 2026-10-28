@@ -5,7 +5,9 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
-## Unreleased
+## 0.14.1
+
+> The score ring says the exact score; a banner's tile sits on the middle of its text.
 
 ### Added
 

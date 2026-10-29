@@ -48,7 +48,7 @@ const T = {
       <>
         <strong>Anahtar tek başına neyi açtığını söylemez.</strong> Bir ayar ekranında{" "}
         <code>showLabel</code> verin: <code>label</code> görünür bir soru olur, solda durur ve
-        anahtar onu satırın sonunda cevaplar. Soruya tıklamak anahtarı çevirir.{" "}
+        anahtar onu hemen ardında, ortada cevaplar; satırın sonuna itilince geniş bir kartta sorudan çok uzak kalıyordu. Soruya tıklamak anahtarı çevirir.{" "}
         <code>description</code> sorunun altındaki sonuç cümlesidir (&quot;Açıkken sayfanın
         başında tema düğmesi görünür&quot;) ve anahtarla birlikte okunur. Bu satırı her ekran
         elle kuruyordu; şimdi anahtarın kendisi. <code>showLabel</code> olmadan anahtar bir
@@ -93,7 +93,7 @@ const T = {
       <>
         <strong>A switch alone does not say what it turns on.</strong> On a settings screen, pass{" "}
         <code>showLabel</code>: <code>label</code> becomes a visible question on the left, and the
-        switch answers it at the end of the line. Clicking the question flips the switch.{" "}
+        switch answers it right after it, centred; pushed to the end of the line it sat far from its question on a wide card. Clicking the question flips the switch.{" "}
         <code>description</code> is the consequence under the question (&quot;When on, a theme
         button shows at the top of the page&quot;) and is read with the switch. Every screen was
         building this row by hand; now it is the switch itself. Without <code>showLabel</code> the

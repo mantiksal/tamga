@@ -45,10 +45,10 @@ export function Switch({
    */
   compact?: boolean;
   /**
-   * Writes `label` beside the switch: the question on the left, the switch answering it at the
-   * end of the line. A switch alone does not say what it turns on, and every settings screen was
+   * Writes `label` beside the switch: the question on the left, the switch answering it right
+   * after it. A switch alone does not say what it turns on, and every settings screen was
    * building this row by hand. Clicking the question flips the switch. TR: `label`'ı anahtarın
-   * yanına yazar: soru solda, onu cevaplayan anahtar satırın sonunda. Tek başına bir anahtar neyi
+   * yanına yazar: soru solda, onu cevaplayan anahtar hemen ardında. Tek başına bir anahtar neyi
    * açtığını söylemiyor, ve her ayar ekranı bu satırı elle kuruyordu. Soruya tıklamak anahtarı
    * çevirir.
    */
@@ -96,8 +96,10 @@ export function Switch({
   return (
     /* Satır biçiminde kancalar SATIRDA: sunulan öğe artık bu, ve aynı kanca iki
        elemanda dursaydı bir test hangisine tıkladığını bilemezdi. */
-    <span {...dataProps(rest)} className="flex items-start gap-4" data-switch-row>
-      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+    /* ANAHTAR SORUSUNUN HEMEN YANINDA, ortada: satırın sonuna itildiğinde geniş bir kartta
+       cevapladığı sorudan bir ekran uzakta duruyordu. */
+    <span {...dataProps(rest)} className="flex items-center gap-6" data-switch-row>
+      <span className="flex min-w-0 flex-col gap-0.5">
         <label id={`${id}-ad`} htmlFor={id} className={cn("text-body font-bold", disabled ? "text-ink-faint" : "cursor-pointer text-ink")}>
           {label}
         </label>

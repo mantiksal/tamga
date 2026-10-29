@@ -235,13 +235,16 @@ export function ColorField({
         className="min-w-0 flex-1 font-mono"
         onChange={(e) => onChange(e.target.value)}
       />
-      {/* GERİ ALMA YALNIZ YAZILMIŞ BİR RENK VARKEN: boşken kapalı bir düğme hiçbir
-          şey söylemiyor, ve on dört satırda on dört kapalı düğme bir yığın. */}
-      {!varsayilanda && !disabled ? (
-        <MiniButton variant="quiet" aria-label={labels.reset} onClick={() => onChange("")}>
-          <Icon icon={Undo} size="xs" />
-        </MiniButton>
-      ) : null}
+      {/* GERİ ALMA YALNIZ YAZILMIŞ BİR RENK VARKEN, ama yeri her satırda ayrılı: boşken
+          kapalı bir düğme hiçbir şey söylemiyor, ve düğme gelip gidince kod alanı daralıp
+          genişliyor, alt alta alanların hizası bozuluyordu. */}
+      <span className="flex w-8 shrink-0 justify-center">
+        {!varsayilanda && !disabled ? (
+          <MiniButton variant="quiet" aria-label={labels.reset} onClick={() => onChange("")}>
+            <Icon icon={Undo} size="xs" />
+          </MiniButton>
+        ) : null}
+      </span>
     </span>
   );
 }

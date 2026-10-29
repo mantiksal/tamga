@@ -5,6 +5,18 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.18.1
+
+> The switch sits by its question; the colour field's undo keeps its place.
+
+### Fixed
+
+- **`Switch` with `showLabel` sits right after its question, centred on it**, not at the end of
+  the line: on a wide card it stood a screen away from what it answered.
+- **`ColorField` reserves the undo button's place** even while there is nothing to undo, so the
+  code field no longer shrinks and grows as a colour is written and cleared, and stacked fields
+  stay aligned.
+
 ## 0.18.0
 
 > A list that can be reordered by hand or by keyboard; the settings screen's controls grow up.

@@ -51,7 +51,7 @@ const T = {
         Bir tablonun yatay kaydırma kabı, bir kartın <code>overflow</code>&apos;u onu kırpıyordu:
         tek satırlık bir tablodaki satır menüsünün yarısı görünmüyordu, ve z-index bir kırpmayı
         aşamaz. Açılınca tetikleyici ölçülüyor; altında yer yoksa ve üstünde varsa menü yukarı
-        açılıyor. Sayfa kayınca kapanıyor, menünün kendi kaydırması kapatmıyor.{" "}
+        açılıyor. Sayfa ya da tablo kayınca menü tetikleyicisini izliyor, tetikleyici görünür alandan çıkınca kapanıyor.{" "}
         <Xref to="tooltip">Tooltip</Xref> da aynı yolu izliyor.
       </>
     ),
@@ -90,8 +90,7 @@ const T = {
         <code>fixed</code>). A table&apos;s horizontal scroll box, a card&apos;s{" "}
         <code>overflow</code>, clipped it: half of a row menu in a one-row table could not be seen,
         and a z-index cannot get past a clip. The trigger is measured on opening; with no room
-        below and room above, the menu opens upward. It closes when the page scrolls; scrolling the
-        menu itself does not close it. <Xref to="tooltip">Tooltip</Xref> takes the same path.
+        below and room above, the menu opens upward. When the page or a table scrolls, the menu follows its trigger and closes once the trigger leaves the screen. <Xref to="tooltip">Tooltip</Xref> takes the same path.
       </>
     ),
     rules: "Rules",

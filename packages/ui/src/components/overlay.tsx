@@ -117,13 +117,10 @@ export function DropdownMenu({
      yoksa ve üstünde varsa yukarı açılıyor: bir listenin son satırındaki menü
      ekranın dibinden taşıyordu. */
   const [yer, setYer] = useState<{ left: number; top: number } | null>(null);
-  useLayoutEffect(() => {
+  const olc = useCallback(() => {
     const tetik = box.current;
     const el = panel.current;
-    if (!open || !tetik || !el) {
-      setYer(null);
-      return;
-    }
+    if (!tetik || !el) return;
     const r = tetik.getBoundingClientRect();
     const p = el.getBoundingClientRect();
     const bosluk = parseFloat(getComputedStyle(tetik).getPropertyValue("--overlay-gap")) || 0;
@@ -134,25 +131,34 @@ export function DropdownMenu({
     const sol = align === "end" ? r.right - p.width : r.left;
     const enSag = document.documentElement.clientWidth - pay - p.width;
     setYer({ left: Math.max(pay, Math.min(sol, enSag)), top: sigmiyor ? ustte : altta });
-  }, [open, loading, items.length, align, box]);
+  }, [align, box]);
+  useLayoutEffect(() => {
+    if (!open) {
+      setYer(null);
+      return;
+    }
+    olc();
+  }, [open, loading, items.length, olc]);
 
-  /* Kaydırma tetikleyiciyi panelin altından çekiyor; o an kapanması, yanlış yerde
-     durmasından iyi. Panelin KENDİ kaydırması sayılmıyor: uzun bir menüyü
-     kaydıran kişi onu kapatmak istemiyor. */
+  /* KAYDIRMA PANELİ KAPATMIYOR, YERİNİ YENİLİYOR. Kapatıyordu, ve tablo içindeki her
+     menü açılır açılmaz kapanıyordu: odak ilk öğeye geçince tarayıcı onu göstermek
+     için tablonun kaydırma kabını kaydırıyor, kural bunu kaydırma sanıyordu. Panel
+     tetikleyiciyi izliyor; tetikleyici görünür alandan tamamen çıkınca kapanıyor. */
   useEffect(() => {
     if (!open) return;
-    const kaydi = (e: Event) => {
+    const izle = (e: Event) => {
       if (panel.current?.contains(e.target as Node)) return;
-      setOpen(false);
+      const r = box.current?.getBoundingClientRect();
+      if (r && (r.bottom < 0 || r.top > window.innerHeight)) setOpen(false);
+      else olc();
     };
-    const boyut = () => setOpen(false);
-    window.addEventListener("scroll", kaydi, true);
-    window.addEventListener("resize", boyut);
+    window.addEventListener("scroll", izle, true);
+    window.addEventListener("resize", olc);
     return () => {
-      window.removeEventListener("scroll", kaydi, true);
-      window.removeEventListener("resize", boyut);
+      window.removeEventListener("scroll", izle, true);
+      window.removeEventListener("resize", olc);
     };
-  }, [open]);
+  }, [open, olc, box]);
 
   /* KAPANIŞ GECİKMELİ, ANINDA DEĞİL. Tetikleyici ile panel arasında birkaç
      piksellik bir boşluk var ve işaretçi oradan geçerken `pointerleave`

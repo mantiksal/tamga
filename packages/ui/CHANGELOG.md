@@ -5,6 +5,18 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.18.2
+
+> A row menu inside a table stays open.
+
+### Fixed
+
+- **`DropdownMenu` no longer closes itself the moment it opens inside a table.** 0.18.0 closed
+  the menu on any scroll outside the panel; opening moves focus to the first item, the browser
+  scrolls the table's box to show it, and that counted as a scroll. The menu now follows its
+  trigger when the page or a container scrolls and closes only once the trigger leaves the
+  screen. Row menus in tables (events, status pages, properties) were affected.
+
 ## 0.18.1
 
 > The switch sits by its question; the colour field's undo keeps its place.

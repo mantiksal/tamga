@@ -45,6 +45,16 @@ const T = {
         kendi kendine düzeltmez.
       </>
     ),
+    kirpma: (
+      <>
+        <strong>Panel bulunduğu kaba göre değil ekrana göre açılıyor</strong> (<code>fixed</code>).
+        Bir tablonun yatay kaydırma kabı, bir kartın <code>overflow</code>&apos;u onu kırpıyordu:
+        tek satırlık bir tablodaki satır menüsünün yarısı görünmüyordu, ve z-index bir kırpmayı
+        aşamaz. Açılınca tetikleyici ölçülüyor; altında yer yoksa ve üstünde varsa menü yukarı
+        açılıyor. Sayfa kayınca kapanıyor, menünün kendi kaydırması kapatmıyor.{" "}
+        <Xref to="tooltip">Tooltip</Xref> da aynı yolu izliyor.
+      </>
+    ),
     rules: "Kurallar",
     plane: (
       <>
@@ -72,6 +82,16 @@ const T = {
         default) to the left, <code>end</code> to the right. Near the right edge of the page you
         need <code>end</code>, otherwise the panel spills off screen, and the component does not
         fix that for you.
+      </>
+    ),
+    kirpma: (
+      <>
+        <strong>The panel opens against the screen, not against its container</strong> (
+        <code>fixed</code>). A table&apos;s horizontal scroll box, a card&apos;s{" "}
+        <code>overflow</code>, clipped it: half of a row menu in a one-row table could not be seen,
+        and a z-index cannot get past a clip. The trigger is measured on opening; with no room
+        below and room above, the menu opens upward. It closes when the page scrolls; scrolling the
+        menu itself does not close it. <Xref to="tooltip">Tooltip</Xref> takes the same path.
       </>
     ),
     rules: "Rules",
@@ -111,6 +131,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <P>{t.danger}</P>
 
       <P>{t.align}</P>
+      <P>{t.kirpma}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.plane}</Note>

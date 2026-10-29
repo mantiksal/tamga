@@ -44,6 +44,14 @@ const T = {
         şerit, içinde durduğu satırdan uzun kalıyor.
       </>
     ),
+    kapali: (
+      <>
+        <code>disabled</code> seçimi kapatır ama göstermeyi bırakmaz: kuyu kesik kenarlı olur,
+        seçenekler soluklaşır, seçili olan kendi zemini ve çizgisiyle okunur kalır, yalnız
+        tabanını bırakır. Yalnız bakabilen bir kullanıcı neyin seçili olduğunu görmeli;
+        örnekteki ikinci şerit öyle.
+      </>
+    ),
     rules: "Kurallar",
     notTabs: (
       <>
@@ -73,6 +81,14 @@ const T = {
         screen, <code>sm</code> for one in a <strong>toolbar</strong>: a card header, or the
         example box on this page. The reason is measurement: the base size is drawn at 13.5px
         and the strip ends up taller than the row it sits in.
+      </>
+    ),
+    kapali: (
+      <>
+        <code>disabled</code> closes the choice without hiding it: the well gets a dashed edge,
+        the options fade, and the chosen one stays readable on its own ground and line, giving
+        up only its base. Someone who may only look should still see what is chosen; the second
+        strip in the example is like that.
       </>
     ),
     rules: "Rules",
@@ -112,6 +128,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       </Demo>
       <P>{t.seated}</P>
       <P>{t.boy}</P>
+      <P>{t.kapali}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.notTabs}</Note>

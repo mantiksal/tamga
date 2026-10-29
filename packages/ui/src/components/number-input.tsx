@@ -27,6 +27,10 @@ export function NumberInput({
   /** Artır/azalt düğmelerinin erişilebilir adları. Kit çeviri çekmez. */
   labels,
   locale,
+  id: verilenId,
+  placeholder,
+  "aria-describedby": tarif,
+  "aria-invalid": ariaInvalid,
   className,
   ...rest
 }: {
@@ -58,11 +62,33 @@ export function NumberInput({
    * kit seçmiyor, çağıran veriyor.
    */
   locale?: string;
+  /**
+   * The text field's id, for a `Field`'s `htmlFor`. Without it the label named nothing and a
+   * click on it focused nothing. TR: Metin alanının id'si, bir `Field`'ın `htmlFor`'u için.
+   * Yokken etiket hiçbir şeyi adlandırmıyordu ve ona tıklamak hiçbir şeyi odaklamıyordu.
+   */
+  id?: string;
+  /**
+   * Shown while the value is empty; the value an empty field falls back to, like "6". TR: Değer
+   * boşken görünür; boş alanın düştüğü değer, "6" gibi.
+   */
+  placeholder?: string;
+  /**
+   * Lands on the text field, not on the wrapper. `Field` clones its child with this, and on the
+   * outer span the help line under the field was read for nothing. TR: Sarmalayıcıya değil
+   * metin alanına düşer. `Field` çocuğunu bununla kopyalıyor, ve dıştaki span'de alanın altındaki
+   * yardım satırı hiçbir şey için okunmuyordu.
+   */
+  "aria-describedby"?: string;
+  /** Same path as `aria-describedby`: `Field`'s error reaches the field. TR: `aria-describedby` ile aynı yol: `Field`'ın hatası alana ulaşır. */
+  "aria-invalid"?: boolean;
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
-  const id = useId();
+  const uretilen = useId();
+  const id = verilenId ?? uretilen;
+  const gecersiz = invalid || ariaInvalid === true;
   /* YAZARKEN BİÇİMLENMİYOR, BIRAKINCA BİÇİMLENİYOR.
      Her tuşta biçimlemek "249," yazan birinin virgülünü siliyor, yani ondalık
      yazılamıyor. Taslak yalnız odaktayken yaşıyor; odak çıkınca değerin kendisi
@@ -137,7 +163,9 @@ export function NumberInput({
         inputMode="decimal"
         value={taslak ?? goster(value)}
         disabled={disabled}
-        aria-invalid={invalid || undefined}
+        placeholder={placeholder}
+        aria-describedby={tarif}
+        aria-invalid={gecersiz || undefined}
         onChange={(e) => {
           setTaslak(e.target.value);
           /* Binlik ayracı temizleniyor, ondalık ayracı noktaya çevriliyor:
@@ -164,7 +192,7 @@ export function NumberInput({
         /* Sağ boşluk spinner'ın genişliği (38px) artı kenar payı; birim varsa
            onun yeri de eklenir. Elle sayı yazmak yerine hesaplanıyor, çünkü
            birim "₺" da olabilir "adet" de. */
-        className={cn("tamga-input tamga-sayi w-full", invalid && "tamga-input-invalid")}
+        className={cn("tamga-input tamga-sayi w-full", gecersiz && "tamga-input-invalid")}
         style={{ paddingRight: suffix ? 96 : 48 }}
       />
 

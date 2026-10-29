@@ -1,8 +1,8 @@
 import { GorunumOrnek } from "./ornek";
 import { Icon } from "tamga-ui";
-import { BoardView, Contrast, Crop, Image, Palette } from "tamga-ui/icons";
+import { BoardView, Contrast, Crop, Eyedropper, Image, Palette } from "tamga-ui/icons";
 import { Demo } from "@/components/demo";
-import { ImageUploadDemo } from "@/components/interactive";
+import { ColorFieldDemo, ImageUploadDemo } from "@/components/interactive";
 import { getDictionary } from "@/i18n/get-dictionary";
 import type { Locale } from "@/i18n/config";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -30,6 +30,7 @@ const KOD = `<AppearanceTemplate
    sorulan, kesim en az. Her kart kendi props tablosuna gidiyor. */
 const PARCALAR = [
   { ad: "ColorSwatches", glif: Palette },
+  { ad: "ColorField", glif: Eyedropper },
   { ad: "ThemeCards", glif: Contrast },
   { ad: "RailCards", glif: BoardView },
   { ad: "ImageField", glif: Image },
@@ -143,6 +144,7 @@ const T = {
     },
     parcalar: [
       "Hazır renk kutuları + kendi rengin",
+      "Tek renk: seçici, kod, varsayılan",
       "Üç tema, üç minyatür",
       "Menü genişliği, minyatürle",
       "Logo yükleme alanı",
@@ -208,6 +210,29 @@ const T = {
         İNSANA yaptırıyor: kare bir çerçeve, sürükleniyor ve boyutlanıyor. Amblem hiç
         yüklenmezse <Xref to="logo-tile">LogoTile</Xref> baş harften bir karo üretiyor, ve bu
         çalışan bir cevap.
+      </>
+    ),
+    renkH: "Tek bir renk, bir alan",
+    renkP: (
+      <>
+        <code>ColorSwatches</code> bir seçim: birkaç hazır renk ve bir serbest kutu. Bir temanın on
+        dört rengi olduğunda her birinin hazırı yok ama her birinin bir varsayılanı var, ve boş
+        bırakmak &quot;varsayılan kalsın&quot; demek. <code>ColorField</code> bunun alanı: kare,
+        kod ve geri alma. <strong>Kare bir tuş, iki katmanlı</strong>: renk seçilmemişken varsayılanı giyip kenarı ve
+        sert tabanıyla yükselmiş duruyor, renk seçilince basılmış oturuyor; seçim yapıldı, tuş
+        yerine indi. Kod alanı varsayılanı yer tutucu olarak taşıyor, seçici oradan başlıyor, ve
+        bir renk yazılınca geri alma düğmesi beliriyor. Kod bir hex, bir <code>rgb()</code> ya da bir renk adı
+        olabilir: okunamayan bir değer kareyi bozmuyor, varsayılanda bırakıyor, ve hatayı{" "}
+        <Xref to="field">Field</Xref> söylüyor (<code>invalid</code>). <code>id</code> ve{" "}
+        <code>htmlFor</code> ile etiket kod alanını adlandırır. <code>disabled</code> iken kare
+        açılmaz, geri alma görünmez.
+      </>
+    ),
+    kapaliP: (
+      <>
+        <code>ThemeCards</code> ve <code>RailCards</code> <code>disabled</code> alıyor: resimler
+        kalıyor, kenarlar kesikleşiyor, seçili kart yükselmiş duruyor. Yalnız bakabilen biri neyin
+        seçili olduğunu okumalı; seçimi gizlemek ona hiçbir şey söylemezdi.
       </>
     ),
     yukleH: "Sunucuya yükleme",
@@ -330,6 +355,7 @@ const T = {
     },
     parcalar: [
       "Ready swatches + your own colour",
+      "One colour: picker, code, default",
       "Three themes, three miniatures",
       "Menu width, as miniatures",
       "The logo upload field",
@@ -400,6 +426,30 @@ const T = {
         and that is a working answer.
       </>
     ),
+    renkH: "One colour, one field",
+    renkP: (
+      <>
+        <code>ColorSwatches</code> is a choice: a few ready colours and a free box. When a theme
+        has fourteen colours, none of them has ready options but each has a default, and leaving it
+        empty means &quot;keep the default&quot;. <code>ColorField</code> is the field for that:
+        the square, the code and the undo. <strong>The square is a key, in two layers</strong>: with no colour chosen it wears the
+        default and stands raised on its edge and hard base; once a colour is chosen it sits
+        pressed, the choice made and the key down. The code field carries the default as a
+        placeholder, the picker starts there, and once a colour is written the undo button
+        appears. The code can be
+        a hex, an <code>rgb()</code> or a colour name: a value that cannot be read leaves the
+        square on the default instead of breaking it, and <Xref to="field">Field</Xref> tells the
+        error (<code>invalid</code>). With <code>id</code> and <code>htmlFor</code> the label names
+        the code field. With <code>disabled</code> the square does not open and the undo is gone.
+      </>
+    ),
+    kapaliP: (
+      <>
+        <code>ThemeCards</code> and <code>RailCards</code> take <code>disabled</code>: the pictures
+        stay, the edges turn dashed, the chosen card stays raised. Someone who may only look
+        should read what is chosen; hiding the choice would tell them nothing.
+      </>
+    ),
     yukleH: "Uploading to a server",
     yukleP: (
       <>
@@ -453,6 +503,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.rayH}</H2>
       <P>{t.rayP}</P>
+      <P>{t.kapaliP}</P>
       <Note>{t.amblemN}</Note>
 
       <H2>{t.parcaH}</H2>
@@ -469,6 +520,20 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
           </a>
         ))}
       </div>
+
+      <H2>{t.renkH}</H2>
+      <P>{t.renkP}</P>
+      <Demo labels={dict.demo} align="start" code={`<Field label="…" htmlFor="page-bg" description="…">
+  <ColorField
+    id="page-bg"
+    value={colour}            // "" = the default
+    defaultValue="#f7f8fa"
+    onChange={setColour}
+    labels={{ pick: "…", reset: "…" }}
+  />
+</Field>`}>
+        <ColorFieldDemo lang={lang} />
+      </Demo>
 
       <H2>{t.yukleH}</H2>
       <P>{t.yukleP}</P>
@@ -492,6 +557,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         [
           "AppearanceTemplate",
           "ColorSwatches",
+          "ColorField",
           "ThemeCards",
           "RailCards",
           "ImageField",

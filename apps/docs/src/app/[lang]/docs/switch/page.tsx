@@ -44,6 +44,19 @@ const T = {
         <strong>AÇILDIĞINI</strong> gösteren şey o hareket.
       </>
     ),
+    row: (
+      <>
+        <strong>Anahtar tek başına neyi açtığını söylemez.</strong> Bir ayar ekranında{" "}
+        <code>showLabel</code> verin: <code>label</code> görünür bir soru olur, solda durur ve
+        anahtar onu satırın sonunda cevaplar. Soruya tıklamak anahtarı çevirir.{" "}
+        <code>description</code> sorunun altındaki sonuç cümlesidir (&quot;Açıkken sayfanın
+        başında tema düğmesi görünür&quot;) ve anahtarla birlikte okunur. Bu satırı her ekran
+        elle kuruyordu; şimdi anahtarın kendisi. <code>showLabel</code> olmadan anahtar bir
+        tablonun ya da bir araç çubuğunun içinde yalnız durur, adı <code>label</code>&apos;dan
+        erişilebilir ad olarak gelir. <code>disabled</code> iken soru soluklaşır ve tıklanmaz;
+        üstteki örneğin üçüncü satırı öyle.
+      </>
+    ),
     rules: "Kurallar",
     notChoice: (
       <>
@@ -76,6 +89,19 @@ const T = {
         <strong>turned on</strong>, not merely that it is on.
       </>
     ),
+    row: (
+      <>
+        <strong>A switch alone does not say what it turns on.</strong> On a settings screen, pass{" "}
+        <code>showLabel</code>: <code>label</code> becomes a visible question on the left, and the
+        switch answers it at the end of the line. Clicking the question flips the switch.{" "}
+        <code>description</code> is the consequence under the question (&quot;When on, a theme
+        button shows at the top of the page&quot;) and is read with the switch. Every screen was
+        building this row by hand; now it is the switch itself. Without <code>showLabel</code> the
+        switch stands alone inside a table or a toolbar, and <code>label</code> is its accessible
+        name. With <code>disabled</code> the question fades and takes no click; the third row
+        above is like that.
+      </>
+    ),
     rules: "Rules",
     notChoice: (
       <>
@@ -103,9 +129,16 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
   return (
     <>
       <PageHead title={p.title[lang]} blurb={p.blurb[lang]} />
-      <Demo labels={dict.demo} code={`<Switch on={on} onChange={setOn} label="…" />`}>
+      <Demo labels={dict.demo} code={`<Switch
+  showLabel
+  label="…"
+  description="…"
+  on={on}
+  onChange={setOn}
+/>`}>
         <SwitchDemo lang={lang} />
       </Demo>
+      <P>{t.row}</P>
       <P>{t.fill}</P>
       <P>{t.thumb}</P>
 

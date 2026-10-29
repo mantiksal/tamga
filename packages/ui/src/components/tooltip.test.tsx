@@ -34,6 +34,27 @@ describe("Tooltip · dokunmatik", () => {
   });
 });
 
+/* FAREYLE TIKLAMAK AÇIK BIRAKMIYOR. Tıklanan bir ray bağlantısı odağı tutuyordu ve odak ipucunu
+   açıyordu: sayfa değişince kabarcık boşlukta asılı kalıyordu. Klavye odağı yine açar. */
+describe("Tooltip · fare tıkı", () => {
+  it("fareyle basıp odaklanmak açmaz; ardından gelen klavye odağı açar", () => {
+    const { container, getByRole } = render(
+      <Tooltip label="Durum Sayfaları">
+        <button type="button">Tetik</button>
+      </Tooltip>,
+    );
+    const sarmal = container.querySelector("span.relative")!;
+    const basis = createEvent.pointerDown(sarmal);
+    Object.defineProperty(basis, "pointerType", { value: "mouse" });
+    fireEvent(sarmal, basis);
+    fireEvent.focus(getByRole("button"));
+    expect(kabarcik(container)).toBeNull();
+    fireEvent.blur(getByRole("button"));
+    fireEvent.focus(getByRole("button"));
+    expect(kabarcik(container)).not.toBeNull();
+  });
+});
+
 describe("Tooltip · wrap", () => {
   it("varsayılan tek satır; wrap 288px'te kırar", () => {
     const a = render(

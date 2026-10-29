@@ -435,10 +435,15 @@ export function Select({
    * DURUM olan listeler için (sipariş durumu, önem derecesi): göz, listedeki
    * rengi tablodaki renge okumadan eşliyor. Yalnız seçenek gerçekten bir
    * durumsa verin; bir kargo firmasının yanındaki kare süstür.
+   *
+   * `hint` is a quiet value beside the label ("2-3 days"); `description` is a sentence under it
+   * ("Only whether it works"), for options that need saying what they do. TR: `hint` etiketin
+   * yanındaki sessiz değer ("2-3 gün"); `description` altındaki cümle ("Yalnız çalışıp
+   * çalışmadığı"), ne yaptığını söylemesi gereken seçenekler için.
    */
   options: readonly (
     | string
-    | ({ value: string; label?: string; tone?: Tone; hint?: string } & Record<string, unknown>)
+    | ({ value: string; label?: string; tone?: Tone; hint?: string; description?: string } & Record<string, unknown>)
   )[];
   /**
    * `label` is the option's TEXT when it differs from its identity: a locale is stored as "tr"
@@ -598,7 +603,7 @@ export function Select({
           {loading && <SkeletonOptions rows={loadingRows} />}
           {!loading && options.map((ham) => {
             const nesne = typeof ham === "string" ? { value: ham } : ham;
-            const { value: o, label: etiket, tone: ton, hint: ipucu, ...kanca } = nesne;
+            const { value: o, label: etiket, tone: ton, hint: ipucu, description: aciklama, ...kanca } = nesne;
             return (
             <button
               /* KANCA ÖNCE, KİTİN KENDİ NİTELİKLERİ SONRA: çağıranın geçirdiği
@@ -629,7 +634,16 @@ export function Select({
                   style={{ background: toneOf(ton).mark }}
                 />
               ) : null}
-              <span className="min-w-0 flex-1 truncate">{etiket ?? o}</span>
+              {/* AÇIKLAMA İKİNCİ SATIRDA, ipucu yanda: ipucu bir değer ("2-3 gün"), açıklama
+                  bir cümle ("Yalnız çalışıp çalışmadığı") · cümle yana sığmıyor, kesiliyordu. */}
+              {aciklama ? (
+                <span className="flex min-w-0 flex-1 flex-col text-left">
+                  <span className="truncate">{etiket ?? o}</span>
+                  <span className="text-small text-ink-faint">{aciklama}</span>
+                </span>
+              ) : (
+                <span className="min-w-0 flex-1 truncate">{etiket ?? o}</span>
+              )}
               {/* SEÇENEĞİN SESSİZ İKİNCİ SATIRI YAN YANA: "2-3 gün", "₺49",
                   "son 30 gün". Alta koymak listeyi iki kat uzatıyor, ve okunan
                   şey hâlâ tek bir seçim. */}

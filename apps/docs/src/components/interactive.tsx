@@ -55,7 +55,7 @@ import {
   RichText,
   TreeSelect,
   type Tone, DateTimePicker,
-  Tag, ColorSwatches,
+  Tag, ColorSwatches, ColorField, SortableList,
   ColorMark,
   ImageField, LogoTile,
   SelectPanel,
@@ -483,8 +483,9 @@ export function SelectDemo({ lang }: L) {
   const d = D[lang];
   const n = N[lang];
   const [value, setValue] = useState<string>();
+  const [gorunum, setGorunum] = useState("history");
   return (
-    <div className="w-70">
+    <div className="flex w-70 flex-col gap-4">
       <Select
         icon={Truck}
         options={[
@@ -498,9 +499,31 @@ export function SelectDemo({ lang }: L) {
         placeholder={n.kargoSec}
         aria-label={n.kargoFirmasi}
       />
+      {/* İKİNCİSİ AÇIKLAMALI: seçeneğin ne yaptığı bir cümle, değerin yanına sığmıyor. */}
+      <Select
+        options={SECIM_ACIKLAMA[lang]}
+        value={gorunum}
+        onChange={setGorunum}
+        placeholder={SECIM_ACIKLAMA[lang][1]!.label}
+        aria-label={SECIM_ACIKLAMA_AD[lang]}
+      />
     </div>
   );
 }
+
+const SECIM_ACIKLAMA_AD = { tr: "Görünüm", en: "View" };
+const SECIM_ACIKLAMA = {
+  tr: [
+    { value: "status", label: "Yalnız durum", description: "Yalnız çalışıp çalışmadığı" },
+    { value: "history", label: "90 gün şeridiyle", description: "Son 90 günün şeridiyle" },
+    { value: "dims", label: "Boyutlarla", description: "Erişim, performans, teknik düzen ve güvenlik ayrı ayrı" },
+  ],
+  en: [
+    { value: "status", label: "State only", description: "Only whether it works" },
+    { value: "history", label: "With the 90-day strip", description: "With the last 90 days' strip" },
+    { value: "dims", label: "With dimensions", description: "Availability, performance, technical health and security, each on its own" },
+  ],
+};
 
 const AGAC = {
   tr: [
@@ -787,19 +810,14 @@ export function SwitchDemo({ lang }: L) {
   return (
     <div className="flex w-full max-w-130 flex-col">
       {satirlar.map((r, i) => (
-        <span
-          key={r.ad}
-          className="flex items-center gap-4 py-3"
-          style={{ borderBottom: "1px dashed var(--color-line)" }}
-        >
-          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="text-body font-bold">{r.ad}</span>
-            <span className="text-small text-ink-faint">{r.alt}</span>
-          </span>
+        <span key={r.ad} className="py-3" style={{ borderBottom: "1px dashed var(--color-line)" }}>
           <Switch
+            showLabel
+            label={r.ad}
+            description={r.alt}
             on={ayarlar[i] ?? false}
             onChange={(v) => setAyarlar((a) => a.map((x, j) => (j === i ? v : x)))}
-            label={r.ad}
+            disabled={i === 2}
           />
         </span>
       ))}
@@ -810,17 +828,17 @@ export function SwitchDemo({ lang }: L) {
 export function SegmentedDemo({ lang }: L) {
   const d = D[lang];
   const [v, setV] = useState("list");
+  const secenekler = [
+    { value: "list", label: d.list },
+    { value: "board", label: d.board },
+    { value: "calendar", label: d.calendar },
+  ];
+  /* İKİNCİSİ KAPALI: aynı seçim, yalnız bakabilen birinin gördüğü hâli. */
   return (
-    <Segmented
-      label={d.view}
-      value={v}
-      onChange={setV}
-      options={[
-        { value: "list", label: d.list },
-        { value: "board", label: d.board },
-        { value: "calendar", label: d.calendar },
-      ]}
-    />
+    <div className="flex flex-wrap items-center gap-4">
+      <Segmented label={d.view} value={v} onChange={setV} options={secenekler} />
+      <Segmented label={d.view} value="board" options={secenekler} disabled />
+    </div>
   );
 }
 
@@ -1372,6 +1390,10 @@ const N = {
     imgUploading: "Yükleniyor…", imgRemoving: "Kaldırılıyor…", imgUploaded: "Yüklendi", imgRemoved: "Kaldırıldı",
     imgConfirm: "Gönder", imgCancel: "Vazgeç", imgFail: "Sunucu hatasını taklit et", imgFailText: "Sunucu 500 döndü; dosya yerinde, yeniden dene.",
     imgLocked: "Logo yalnız Pro planda değiştirilebilir.", imgLock: "Kilitli göster",
+    cfPage: "Sayfa arka planı", cfButton: "Düğme arka planı", cfIssue: "Sorun varken arka plan",
+    cfDefault: (hex: string) => `Boş bırakılırsa ${hex}.`, cfPick: (ad: string) => `${ad} için renk seç`,
+    cfReset: (ad: string) => `${ad}: varsayılana dön`, cfInvalid: "Bu bir renk değil. #2c5fd6 ya da rgb(44, 95, 214) gibi yazın.",
+    cfLock: "Yalnız bakabilen biri olarak göster",
     spSecin: "Kargo seçin", spAra: "Kargo ara", spYok: "Eşleşen yok", spTemizle: "Temizle", spKargolar: "Kargolar", spTumu: "Tümü",
     tagCustomer: "Müşteri", tagCampaign: "Kampanya", tagWhite: "Beyaz", tagBlack: "Siyah", suggest: "Öneri",
     tagUrgent: "Acil", tagBrick: "Kiremit", tagGreen: "Yeşil", tagBlue: "Mavi", tagPurple: "Mor",
@@ -1464,6 +1486,10 @@ const N = {
     imgUploading: "Uploading…", imgRemoving: "Removing…", imgUploaded: "Uploaded", imgRemoved: "Removed",
     imgConfirm: "Send", imgCancel: "Cancel", imgFail: "Simulate a server error", imgFailText: "The server returned 500; the file stays, try again.",
     imgLocked: "The logo can only be changed on the Pro plan.", imgLock: "Show locked",
+    cfPage: "Page background", cfButton: "Button background", cfIssue: "Background when something is wrong",
+    cfDefault: (hex: string) => `Left empty, ${hex}.`, cfPick: (name: string) => `Pick a colour for ${name}`,
+    cfReset: (name: string) => `${name}: back to the default`, cfInvalid: "This is not a colour. Write it like #2c5fd6 or rgb(44, 95, 214).",
+    cfLock: "Show as someone who may only look",
     spSecin: "Choose a carrier", spAra: "Search carriers", spYok: "No match", spTemizle: "Clear", spKargolar: "Carriers", spTumu: "All",
     tagCustomer: "Customer", tagCampaign: "Campaign", tagWhite: "White", tagBlack: "Black", suggest: "Suggestion",
     tagUrgent: "Urgent", tagBrick: "Brick", tagGreen: "Green", tagBlue: "Blue", tagPurple: "Purple",
@@ -1681,6 +1707,104 @@ export function ImageUploadDemo({ lang }: L) {
         <Switch label={n.imgFail} on={hata} onChange={setHata} />
         <Switch label={n.imgLock} on={kilit} onChange={setKilit} />
       </div>
+    </div>
+  );
+}
+
+/* SIRALANABİLİR LİSTE: bir durum sayfasının dört satırı gibi kısa, adlı öğeler. */
+const SIRA = {
+  tr: {
+    items: ["Web sitesi", "API", "Ödeme sayfası", "Yardım merkezi"],
+    handle: (ad: string) => `${ad} öğesini taşı`,
+    instructions: "Boşluk tutar, yukarı ve aşağı oklar taşır, Boşluk bırakır, Esc vazgeçer.",
+    picked: (ad: string, s: number, t: number) => `${ad} tutuldu. ${t} öğeden ${s}. sırada.`,
+    moved: (ad: string, s: number, t: number) => `${ad}, ${t} öğeden ${s}. sırada.`,
+    dropped: (ad: string, s: number, t: number) => `${ad} bırakıldı. ${t} öğeden ${s}. sırada.`,
+    cancelled: (ad: string) => `Taşıma iptal edildi. ${ad} eski yerinde.`,
+    order: "Sıra",
+    lock: "Yalnız bakabilen biri olarak göster",
+  },
+  en: {
+    items: ["Website", "API", "Checkout page", "Help centre"],
+    handle: (name: string) => `Move ${name}`,
+    instructions: "Space picks up, the up and down arrows move, Space drops, Esc cancels.",
+    picked: (name: string, p: number, t: number) => `${name} picked up. Position ${p} of ${t}.`,
+    moved: (name: string, p: number, t: number) => `${name}, position ${p} of ${t}.`,
+    dropped: (name: string, p: number, t: number) => `${name} dropped. Position ${p} of ${t}.`,
+    cancelled: (name: string) => `Move cancelled. ${name} is back in place.`,
+    order: "Order",
+    lock: "Show as someone who may only look",
+  },
+};
+export function SortableListDemo({ lang }: L) {
+  const d = SIRA[lang];
+  const [sira, setSira] = useState(() => d.items.map((ad, i) => ({ key: `k${i}`, ad })));
+  const [kilit, setKilit] = useState(false);
+  return (
+    <div className="flex w-full max-w-130 flex-col gap-4">
+      <SortableList
+        items={sira}
+        itemLabel={(i) => i.ad}
+        disabled={kilit}
+        onReorder={(keys) => setSira((x) => keys.map((k) => x.find((i) => i.key === k)!))}
+        labels={d}
+        renderItem={(item, { handle }) => (
+          <span
+            className="flex items-center gap-3 rounded-card px-3 py-2"
+            style={{ border: "1px solid var(--color-line)", background: "var(--color-shell)" }}
+          >
+            {handle}
+            <span className="text-body font-bold text-ink">{item.ad}</span>
+          </span>
+        )}
+      />
+      <p className="text-small text-ink-faint">
+        {d.order}: {sira.map((i) => i.ad).join(" · ")}
+      </p>
+      <Switch showLabel label={d.lock} on={kilit} onChange={setKilit} />
+    </div>
+  );
+}
+
+/* RENK ALANI: üç renk, biri yazılmış, biri boş (varsayılanda), biri geçersiz. */
+/* Geçerliliği tarayıcı söylüyor, ve yalnız oraya geçince: sunucuda `CSS` yok. */
+const renkMi = (v: string) => CSS.supports("color", v);
+export function ColorFieldDemo({ lang }: L) {
+  const n = N[lang];
+  const [renk, setRenk] = useState({ page: "", button: "#7c3aed", issue: "#d99a1" });
+  const [kilit, setKilit] = useState(false);
+  const [tarayicida, setTarayicida] = useState(false);
+  useEffect(() => setTarayicida(true), []);
+  const satirlar = [
+    { key: "page", ad: n.cfPage, varsayilan: "#f7f8fa" },
+    { key: "button", ad: n.cfButton, varsayilan: "#2c5fd6" },
+    { key: "issue", ad: n.cfIssue, varsayilan: "#d99a1e" },
+  ] as const;
+  return (
+    <div className="flex w-full max-w-130 flex-col gap-5">
+      {satirlar.map((r) => {
+        const deger = renk[r.key];
+        const gecersiz = tarayicida && deger.trim() !== "" && !renkMi(deger.trim());
+        return (
+          <Field
+            key={r.key}
+            label={r.ad}
+            htmlFor={`cf-${r.key}`}
+            {...(gecersiz ? { error: n.cfInvalid } : { description: n.cfDefault(r.varsayilan) })}
+          >
+            <ColorField
+              id={`cf-${r.key}`}
+              value={deger}
+              defaultValue={r.varsayilan}
+              invalid={gecersiz}
+              disabled={kilit}
+              onChange={(v) => setRenk((x) => ({ ...x, [r.key]: v }))}
+              labels={{ pick: n.cfPick(r.ad), reset: n.cfReset(r.ad) }}
+            />
+          </Field>
+        );
+      })}
+      <Switch showLabel label={n.cfLock} on={kilit} onChange={setKilit} />
     </div>
   );
 }

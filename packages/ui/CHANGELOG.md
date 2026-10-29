@@ -5,6 +5,42 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.18.0
+
+> A list that can be reordered by hand or by keyboard; the settings screen's controls grow up.
+
+### Added
+
+- **`SortableList`** · rows reordered by drag or by keyboard. The grip is a button: Space picks
+  up, arrows move, Space drops, Escape cancels; every step is announced. Pointer events, not
+  HTML5 drag and drop, so it works on touch; `onReorder` fires once, on drop, with every key in
+  the new order. `disabled` draws the rows without grips.
+- **`ColorField`** · one colour by picker or by code, with the default it falls back to: the
+  square wears the written colour (or the default, dashed), the code field takes the default as
+  its placeholder, an undo button appears only once a colour is written. Wires a `Field`'s help
+  line through `id`, `aria-describedby` and `aria-invalid`.
+- **`Switch` `showLabel` and `description`** · the question on the left, the switch at the end
+  of the line, the consequence under the question; the label is a `<label>` that flips the
+  switch, the description is read with it. `id` for something outside pointing at it.
+- **`Segmented`, `ThemeCards`, `RailCards` `disabled`** · shown, not offered: the chosen option
+  stays readable, nothing can be picked, the well's edge goes dashed.
+- **`NumberInput` `id`, `placeholder`, `aria-describedby`, `aria-invalid`** · a `Field`'s label
+  names the text field and its help or error line reaches it; before, the label named nothing.
+- **`Select` option `description`** · a sentence under the label ("Only whether it works") for
+  options that must say what they do; `hint` stays the quiet value beside it.
+- **`DetailTemplate` tab `error`** · a warning mark after a tab's label and the sentence a screen
+  reader hears ("2 fields have an error"); a form split over tabs showed its error only on the
+  open tab.
+- **`SettingsPanel` `aside`** · a mark at the far end of the title row saying what the whole
+  panel is set for ("☀ Light theme"); not an action.
+
+### Changed
+
+- **`DropdownMenu` is positioned `fixed` and measured on open.** A table's horizontal scroll
+  container used to clip it (half the menu missing in a one-row table), and no z-index escapes
+  a clip. With no room below and room above it opens upward; it stays 16px inside the window's
+  edges; a scroll outside the panel closes it, a scroll inside a long menu does not.
+
 ## 0.17.0
 
 > Back brings the content back where it was; a table row can be its own link.

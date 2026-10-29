@@ -78,7 +78,11 @@ const T = {
         <strong>Sekmeler rota, durum değil.</strong> Her biri adresi değiştirdiği için bir bağlantı;
         düğme olarak çizmek geri düğmesini, orta tıkı ve birine sekme bağlantısı göndermeyi
         kaybettirirdi. Burada &ldquo;boş&rdquo; hâli yok: bir liste meşru olarak boş olabilir, bir
-        nesne olamaz. Olmayan bir kayıt 404&apos;tür, ve o bir rotanın cevabıdır.
+        nesne olamaz. Olmayan bir kayıt 404&apos;tür, ve o bir rotanın cevabıdır. Sekmelere bölünmüş
+        bir formda kaydı durduran alan başka bir sekmedeyse o sekme <code>error</code> taşır: adının
+        ardında bir uyarı işareti, ve ekran okuyucunun adla birlikte duyduğu cümle (&ldquo;2 alanda
+        hata&rdquo;). Hata yalnız açık sekmede görünüyordu; başka sekmeden kaydeden kişi hiçbir şey
+        görmüyordu.
       </>
     ),
     ayarH: "Ayarlar",
@@ -87,7 +91,10 @@ const T = {
         Kazara dokuzuncu bir bölüm büyütmeye en açık ekran burası: her yeni özellik anahtarını
         koyacak bir yer arıyor. Bölüm listesi dışarıdan geliyor, yani bölüm eklemek olması gerektiği
         şey oluyor: bir karar. <strong>Kapsam gösteriliyor, tahmin edilmiyor</strong>: bir ayarın
-        kişiye mi çalışma alanına mı ait olduğu, onu kimin değiştirebileceğini belirliyor.
+        kişiye mi çalışma alanına mı ait olduğu, onu kimin değiştirebileceğini belirliyor. Bir{" "}
+        <code>SettingsPanel</code> bütünüyle bir şeye göre ayarlanıyorsa (bir temanın renkleri
+        gibi) bunu başlık satırının öteki ucunda <code>aside</code> ile söyleyin: &ldquo;☀ Açık
+        tema&rdquo;. Eylem değil bir işaret; eylemler panelin gövdesinde durur.
       </>
     ),
     sihirbazH: "Sihirbaz",
@@ -205,7 +212,11 @@ const T = {
         <strong>Tabs are routes, not state.</strong> Each one changes the address, so each is a
         link; drawing them as buttons would cost the back button, middle-click, and any chance of
         linking someone to a tab. There is no &ldquo;empty&rdquo; here: a list can legitimately be
-        empty, an object cannot. A missing record is a 404, and that is a route&apos;s answer.
+        empty, an object cannot. A missing record is a 404, and that is a route&apos;s answer. In a
+        form split over tabs, when the field that stopped a save sits on another tab, that tab
+        carries <code>error</code>: a warning mark after its name, and the sentence a screen reader
+        hears with the name (&ldquo;2 fields have an error&rdquo;). The error used to show on the
+        open tab only, and someone saving from another tab saw nothing.
       </>
     ),
     ayarH: "Settings",
@@ -214,7 +225,10 @@ const T = {
         This is the screen most likely to grow a ninth section by accident: every new feature wants
         somewhere to put its toggle. The section list comes from outside, so adding one becomes what
         it should be: a decision. <strong>Scope is shown, not guessed</strong>: whether a setting
-        belongs to the person or the workspace decides who may change it.
+        belongs to the person or the workspace decides who may change it. When a{" "}
+        <code>SettingsPanel</code> as a whole is set for something (a theme&apos;s colours, say),
+        say so at the far end of the title row with <code>aside</code>: &ldquo;☀ Light
+        theme&rdquo;. A mark, not an action; actions belong in the panel&apos;s body.
       </>
     ),
     sihirbazH: "Wizard",

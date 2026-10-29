@@ -3452,6 +3452,22 @@
     box-shadow: 2px 2px 0 var(--color-edge);
     transform: translate(-1px, -1px);
   }
+  /* KAPALI ŞERİT: kuyu kesik kenarlı, seçenekler soluk ve basılamıyor. Seçili
+     öğe kendi zeminini ve çizgisini koruyor ama TABANINI bırakıyor: basılamayan
+     bir şeyin altında taban olmaz (`.tamga-btn:disabled`), ama "hangisi" yine
+     okunmalı. */
+  .tamga-segment[data-disabled] {
+    border-style: dashed;
+  }
+  .tamga-segment > button:disabled {
+    cursor: default;
+    color: var(--color-ink-faint);
+  }
+  .tamga-segment > button[data-active="true"]:disabled {
+    color: var(--color-ink);
+    box-shadow: none;
+    transform: none;
+  }
   /* Yol 2px ama varış +1: segment -1'de duruyor, yani zemini +1'de. */
   .tamga-segment > button[data-active="true"]:active {
     transform: translate(1px, 1px);
@@ -5595,6 +5611,83 @@
   .tamga-swatch-custom {
     border-style: dashed;
   }
+  /* SIRALANABİLİR LİSTE · satırlar alt alta, aralarında kitin satır boşluğu.
+     Satırın kendisi çağıranın; liste yalnız kabı ve tutulan satırın duruşunu
+     veriyor. */
+  .tamga-sortable {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .tamga-sortable-row {
+    position: relative;
+    border-radius: var(--radius-card);
+  }
+  /* TUTULAN SATIR YÜKSELİYOR: elde olan şey öne çıkıyor, ve nerede olduğu
+     kayarken de okunuyor. Yasa 1'in formülü: kenar ve gölge aynı renkte,
+     merdivenin 4'ünde. */
+  .tamga-sortable-row[data-dragging] {
+    z-index: 1;
+    outline: 1.5px solid var(--color-edge);
+    border-color: var(--color-edge);
+    box-shadow: 4px 4px 0 var(--color-edge);
+    transform: translate(-2px, -2px);
+  }
+  /* TUTAMAK bir düğme: dokunmatikte sayfayı kaydırmasın diye `touch-action`
+     kapalı, imleç "tutulabilir" diyor. */
+  .tamga-sortable-handle {
+    display: inline-grid;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: var(--radius-ctl);
+    background: transparent;
+    color: var(--color-ink-faint);
+    cursor: grab;
+    touch-action: none;
+  }
+  .tamga-sortable-handle:hover {
+    background: var(--color-nav-hover-bg);
+    color: var(--color-ink);
+  }
+  .tamga-sortable-handle[aria-pressed="true"] {
+    color: var(--color-ink);
+    cursor: grabbing;
+  }
+
+  /* ALANIN KARESİ girdiyle aynı boyda: 44 px'lik bir seçim kutusu 40 px'lik kod
+     alanının yanında yarım basamak taşıyordu. KARE BİR TUŞ, iki katmanlı: renk
+     seçilmemişken kenarı ve sert tabanıyla yükselmiş duruyor ("bas, seç"), renk
+     seçilince BASILMIŞ oturuyor · seçim yapıldı, tuş yerine indi. Yol 2px, Yasa 1:
+     kenar ve taban aynı renkte. */
+  .tamga-swatch-field {
+    width: var(--control);
+    height: var(--control);
+    flex-shrink: 0;
+    border-color: var(--color-edge-strong);
+    box-shadow: 2px 2px 0 var(--color-edge-strong);
+  }
+  .tamga-swatch-field:not([data-off]):not([data-chosen]):not([data-selected="true"]):hover {
+    border-color: var(--color-edge-strong);
+    box-shadow: 3px 3px 0 var(--color-edge-strong);
+    transform: translate(-1px, -1px);
+  }
+  .tamga-swatch-field:not([data-off]):active,
+  .tamga-swatch-field[data-chosen] {
+    border-color: var(--color-edge-strong);
+    box-shadow: 0 0 0 var(--color-edge-strong);
+    transform: translate(2px, 2px);
+  }
+  .tamga-swatch-field[data-off] {
+    border-style: dashed;
+    box-shadow: none;
+    cursor: default;
+  }
+  .tamga-swatch-field[data-off] .tamga-color-input {
+    cursor: default;
+  }
   /* "Renk yok" kutusu: kesik kenar, kartın zemini, mürekkep glif. */
   .tamga-swatch-none {
     border-style: dashed;
@@ -5669,6 +5762,19 @@
     overflow: hidden;
     height: 104px;
     border-bottom: 1.5px solid var(--color-line);
+  }
+  /* KAPALI KART RESMİNİ KORUYOR, kenarı kesikleşiyor: kitin "bu şu an bir tuş
+     değil" dili (`.tamga-btn:disabled`). Seçili kart yükselmiş kalıyor, çünkü
+     yükselme burada bir eylem değil bir KONUM: yalnız bakabilen biri neyin
+     seçili olduğunu yine okumalı. */
+  .tamga-preview-card:disabled {
+    cursor: default;
+  }
+  .tamga-preview-card:disabled:not([data-selected="true"]) {
+    border-style: dashed;
+  }
+  .tamga-preview-card:disabled .tamga-preview-text {
+    color: var(--color-ink-faint);
   }
   .tamga-preview-card[data-selected="true"] .tamga-preview-box {
     border-bottom-color: var(--color-edge);

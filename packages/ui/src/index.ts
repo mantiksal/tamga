@@ -39,6 +39,7 @@ export { Checkbox } from "./components/checkbox.js";
 export { RadioGroup } from "./components/radio-group.js";
 export { Switch } from "./components/switch.js";
 export { Segmented } from "./components/segmented.js";
+export { SortableList } from "./components/sortable-list.js";
 export { Tabs, TabPanel, type TabItem } from "./components/tabs.js";
 export { RichText, type RichTextFormat } from "./components/rich-text.js";
 export { TreeSelect, type TreeNode } from "./components/tree-select.js";
@@ -135,6 +136,7 @@ export {
 export { ThemeToggle, LocaleSwitcher, LogoTile, AccountButton, type ThemePreference } from "./components/chrome.js";
 export {
   ColorSwatches,
+  ColorField,
   ThemeCards,
   RailCards,
   ImageField,

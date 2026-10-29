@@ -162,3 +162,19 @@ describe("DetailTemplate · başlık satırı ve sekme sayısı", () => {
     expect(sekmeler[1]!.querySelector(".tamga-sayac")).toBeNull();
   });
 });
+
+/* SEKMEDE HATA: glif ve ekran okuyucunun duyduğu cümle; sekmelere bölünmüş bir form
+   hatasını yalnız açık sekmede gösteriyordu. */
+describe("DetailTemplate · sekme hatası", () => {
+  it("error verilen sekme uyarı işareti ve görünmez cümle taşıyor, adı cümleyle birlikte", () => {
+    render(
+      <DetailTemplate breadcrumb={trail} title="bir-kayit" tabs={[{ ...tabs[0]!, error: "2 alanda hata" }, tabs[1]!]} activeTab={tabs[1]!.key} labels={LABELS}>
+        <p>gövde</p>
+      </DetailTemplate>,
+    );
+    const hatali = document.querySelector('[data-tab="' + tabs[0]!.key + '"]')!;
+    expect(hatali.querySelector("[data-tab-error] svg")).not.toBeNull();
+    expect(hatali.textContent).toContain("2 alanda hata");
+    expect(document.querySelector('[data-tab="' + tabs[1]!.key + '"] [data-tab-error]')).toBeNull();
+  });
+});

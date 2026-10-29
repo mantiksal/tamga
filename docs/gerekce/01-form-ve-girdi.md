@@ -454,3 +454,20 @@ o zaman `return`ü unutan bir çağıran sessizce "yüklendi" izlenimi veriyordu
 her şey geliştirmede uyarır. **Red metni olduğu gibi:** kit "Failed to fetch"i çeviremez, çünkü
 hangi dilde olduğunu bilemez. Çağıran ağ hatasını kendi sözüne çevirip öyle reddeder; boş sebep
 `labels.errorUpload`a düşer.
+
+## Sıralanabilir liste
+
+**Sürükleme tek yol değil.** Fareyle sürüklemek klavye kullanan, ekran okuyucu kullanan ve
+titreyen bir elle dokunan biri için yok. `SortableList`'in tutamağı bu yüzden bir düğme: Boşluk
+tutar, oklar taşır, Boşluk bırakır, Esc vazgeçer. Her adım sesli söyleniyor, çünkü taşınan şeyin
+nerede olduğu ekranda bir yer, ekran okuyucuda bir sayı ("4 öğeden 2. sırada").
+
+**İşaretçi olayları, HTML5 sürükle-bırakı değil.** HTML5 sürüklemesi dokunmatikte hiç çalışmıyor
+ve sürüklenen şeyin görüntüsünü tarayıcı çiziyor; kitin fiziğiyle yükselen bir satır olmuyor.
+
+**Sıra taşınırken yerelde.** `onReorder` bırakınca bir kez ateşleniyor: her adımda ateşlenseydi
+bir sunucuya kaydeden ürün her ok tuşunda yazardı.
+
+**Gruplar arası taşıma yok.** Bir öğenin hangi gruba gideceği ürünün sözlüğü; iki liste bir
+"Gruba taşı" menüsüyle bağlanabilir.
+

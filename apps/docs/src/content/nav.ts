@@ -301,6 +301,7 @@ const PAGES: DocPage[] = [
   c("separator", "Separator", "Gruplama; dekorasyon değil", "Grouping; not decoration"),
   c("sheet", "Sheet", "Yandan girer, bilgi verir", "It enters from the side and informs"),
   c("skeleton", "Skeleton", "Ne geleceğini söyler", "It says what is coming"),
+  c("sortable-list", "Sortable list", "Sürükle, ya da klavyeyle taşı", "Drag it, or move it by keyboard"),
   c("sort-header", "Sort header", "Yön oku yalnız sıralı sütunda", "The arrow only on the sorted column"),
   c("sparkline", "Sparkline", "Eksensiz; tek soru: yön ne", "No axes; one question: which way"),
   c("spinner", "Spinner", "Bir şeyin sürdüğünü söyler", "It says something is taking time"),

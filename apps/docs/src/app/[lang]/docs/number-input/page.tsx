@@ -78,6 +78,15 @@ const T = {
         &quot;düğme, düğme&quot;dir. Kit çeviri yapmaz.
       </>
     ),
+    field: (
+      <>
+        Bir <Xref to="field">Field</Xref>&apos;ın içinde <code>id</code> verin ve{" "}
+        <code>htmlFor</code>&apos;a aynısını yazın: etiket alanı adlandırır, alanın altındaki
+        açıklama ve hata da <code>aria-describedby</code> ile dıştaki kaba değil metin alanının
+        kendisine bağlanır. Boş bir değer bir varsayılana düşüyorsa onu <code>placeholder</code>
+        ile söyleyin (&quot;6&quot;): alan boş görünür ama ne olacağı okunur.
+      </>
+    ),
     related: "İlgili",
     rel: (
       <>
@@ -135,6 +144,16 @@ const T = {
         &quot;button, button&quot; to a screen reader. The kit does not translate.
       </>
     ),
+    field: (
+      <>
+        Inside a <Xref to="field">Field</Xref>, give it an <code>id</code> and write the same in{" "}
+        <code>htmlFor</code>: the label names the field, and the help line and the error under it
+        are wired through <code>aria-describedby</code> to the text field itself, not to the
+        wrapper. When an empty value falls back to a default, say so with{" "}
+        <code>placeholder</code> (&quot;6&quot;): the field looks empty but what will happen can
+        be read.
+      </>
+    ),
     related: "Related",
     rel: (
       <>
@@ -171,6 +190,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.rules}</H2>
       <Note>{t.labels}</Note>
+      <P>{t.field}</P>
 
       <H2>Props</H2>
       <Props of="NumberInput" lang={lang} />

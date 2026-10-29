@@ -111,6 +111,49 @@ export function DropdownMenu({
   const panel = useRef<HTMLDivElement>(null);
   useListKeys({ open: open && !loading, containerRef: panel, onClose: close });
 
+  /* PANEL `fixed`, `absolute` DEĞİL: bir tablonun yatay kaydırma kabı onu kırpıyordu
+     (tek satırlık bir tabloda menünün yarısı görünmüyordu), ve z-index bir kırpmayı
+     aşamaz · `Tooltip`'in kararının aynısı. Bedeli açılışta ölçmek. Altında yer
+     yoksa ve üstünde varsa yukarı açılıyor: bir listenin son satırındaki menü
+     ekranın dibinden taşıyordu. */
+  const [yer, setYer] = useState<{ left: number; top: number } | null>(null);
+  useLayoutEffect(() => {
+    const tetik = box.current;
+    const el = panel.current;
+    if (!open || !tetik || !el) {
+      setYer(null);
+      return;
+    }
+    const r = tetik.getBoundingClientRect();
+    const p = el.getBoundingClientRect();
+    const bosluk = parseFloat(getComputedStyle(tetik).getPropertyValue("--overlay-gap")) || 0;
+    const pay = 16;
+    const altta = r.bottom + bosluk;
+    const ustte = r.top - bosluk - p.height;
+    const sigmiyor = altta + p.height > window.innerHeight - pay && ustte >= pay;
+    const sol = align === "end" ? r.right - p.width : r.left;
+    const enSag = document.documentElement.clientWidth - pay - p.width;
+    setYer({ left: Math.max(pay, Math.min(sol, enSag)), top: sigmiyor ? ustte : altta });
+  }, [open, loading, items.length, align, box]);
+
+  /* Kaydırma tetikleyiciyi panelin altından çekiyor; o an kapanması, yanlış yerde
+     durmasından iyi. Panelin KENDİ kaydırması sayılmıyor: uzun bir menüyü
+     kaydıran kişi onu kapatmak istemiyor. */
+  useEffect(() => {
+    if (!open) return;
+    const kaydi = (e: Event) => {
+      if (panel.current?.contains(e.target as Node)) return;
+      setOpen(false);
+    };
+    const boyut = () => setOpen(false);
+    window.addEventListener("scroll", kaydi, true);
+    window.addEventListener("resize", boyut);
+    return () => {
+      window.removeEventListener("scroll", kaydi, true);
+      window.removeEventListener("resize", boyut);
+    };
+  }, [open]);
+
   /* KAPANIŞ GECİKMELİ, ANINDA DEĞİL. Tetikleyici ile panel arasında birkaç
      piksellik bir boşluk var ve işaretçi oradan geçerken `pointerleave`
      tetikleniyor: menü tam üstüne gidilirken kapanıyordu. 120ms, o boşluğu
@@ -152,8 +195,15 @@ export function DropdownMenu({
         <div
           ref={panel}
           role="menu"
-          className="tamga-overlay tamga-menu absolute top-[var(--overlay-below)] z-40 overflow-hidden"
-          style={{ width, [align === "end" ? "right" : "left"]: 0 }}
+          className="tamga-overlay tamga-menu fixed z-40 overflow-hidden"
+          /* İlk çizimde ölçülene kadar görünmez: ölçüm boyamadan önce koşuyor
+             (`useLayoutEffect`), bu yalnız bir sigorta. */
+          style={{
+            width,
+            left: yer?.left ?? 0,
+            top: yer?.top ?? 0,
+            visibility: yer ? undefined : "hidden",
+          }}
           aria-busy={loading || undefined}
         >
           {loading && <SkeletonOptions rows={loadingRows} />}
@@ -379,6 +429,7 @@ export function Tooltip({
   const [kayma, setKayma] = useState(0);
   const id = useId();
   const bekleyen = useRef<number | null>(null);
+  const fareyleOdak = useRef(false);
 
   const olc = useCallback(() => {
     const el = sarmal.current;
@@ -490,8 +541,23 @@ export function Tooltip({
       className={cn("relative inline-flex", className)}
       onPointerEnter={(e) => e.pointerType !== "touch" && gecikmeliAc()}
       onPointerLeave={(e) => e.pointerType !== "touch" && kapat()}
-      onPointerDown={dokunus}
-      onFocusCapture={olc}
+      onPointerDown={(e) => {
+        /* FAREYLE BASMAK İPUCUNU KAPATIYOR, ve ardından gelen odak onu açmıyor: tıklanan
+           bir bağlantı odağı tutuyor, sayfa değişse de ipucu boşlukta asılı kalıyordu.
+           Klavyeyle gelen odak eskisi gibi açıyor. */
+        if (e.pointerType === "mouse") {
+          fareyleOdak.current = true;
+          kapat();
+        }
+        dokunus(e);
+      }}
+      onFocusCapture={() => {
+        if (fareyleOdak.current) {
+          fareyleOdak.current = false;
+          return;
+        }
+        olc();
+      }}
       onBlurCapture={kapat}
     >
       {/* ETİKET HER ZAMAN DOM'DA, görünür kabarcık ise yalnız açıkken. İpucu

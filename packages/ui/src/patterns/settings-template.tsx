@@ -153,12 +153,20 @@ export function SettingsPanel({
   title,
   description,
   inheritedFrom,
+  aside,
   children,
 }: {
   title: string;
   description?: string;
   /** Like "inherited from the workspace": a full sentence written by the caller. TR: "çalışma alanından geliyor" gibi, çağıran tarafından yazılmış tam cümle. */
   inheritedFrom?: string;
+  /**
+   * At the far end of the title row: what the whole panel is set for, like "☀ Light theme" on a
+   * theme's colours. A mark of the panel, not an action; actions belong in the panel's body. TR:
+   * Başlık satırının öteki ucunda: bütün panelin neye göre ayarlandığı, bir temanın renklerinde
+   * "☀ Açık tema" gibi. Panelin bir işareti, eylem değil; eylemler panelin gövdesinde durur.
+   */
+  aside?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -180,6 +188,11 @@ export function SettingsPanel({
         {inheritedFrom ? (
           <span className="text-caption text-ink-faint" data-inherited-from>
             {inheritedFrom}
+          </span>
+        ) : null}
+        {aside ? (
+          <span className="ml-auto flex shrink-0 items-center" data-panel-aside>
+            {aside}
           </span>
         ) : null}
       </div>

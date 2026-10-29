@@ -93,6 +93,7 @@ export const TRANSLATED: readonly string[] = [
   "sheet",
   "skeleton",
   "slider",
+  "sortable-list",
   "sort-header",
   "sparkline",
   "spinner",

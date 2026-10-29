@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { cn } from "../lib/cn.js";
 import { makePalette } from "../lib/palette.js";
 import { dataProps } from "../lib/data-props.js";
 import { IMAGE_ACCEPT, RAW_LIMIT, prepareImage } from "../lib/image.js";
 import { uyar } from "../lib/uyar.js";
 import { Alert } from "./primitives.js";
-import { Button } from "./button.js";
+import { Button, MiniButton } from "./button.js";
 import { Icon } from "./icon.js";
-import { Check, Eyedropper, Close } from "./icons.js";
+import { Input } from "./input.js";
+import { Check, Eyedropper, Close, Undo } from "./icons.js";
 
 /* ------------------------------------------------------------------ *
  * Bir görünüm ayarı ekranının üç parçası: renk, tema, görsel.
@@ -138,6 +139,127 @@ export function ColorSwatches({
   );
 }
 
+/**
+ * One colour, by picker or by code, with the default it falls back to.
+ * TR: Seçiciyle ya da kodla tek bir renk, ve düştüğü varsayılan.
+ *
+ * `ColorSwatches` BİR SEÇİM: birkaç hazır renk ve bir serbest kutu. Bu bir ALAN:
+ * on dört rengi olan bir tema ekranında her rengin hazırı yok, ama her birinin bir
+ * varsayılanı var, ve boş bırakmak "varsayılan kalsın" demek. Ürünler bunu üç
+ * parçadan (tek kutulu `ColorSwatches`, bir metin alanı, bir geri alma) elle
+ * kuruyordu ve kutu her zaman seçili çentiğini taşıyordu: on dört kare, on dört
+ * çentik.
+ */
+export function ColorField({
+  value,
+  onChange,
+  defaultValue,
+  labels,
+  disabled = false,
+  invalid = false,
+  id,
+  "aria-describedby": tarif,
+  "aria-invalid": ariaInvalid,
+  className,
+  ...rest
+}: {
+  /**
+   * What the person wrote: a hex, an `rgb()`, a colour name. `""` means the default. TR: Kişinin
+   * yazdığı: bir hex, bir `rgb()`, bir renk adı. `""` varsayılan demek.
+   */
+  value: string;
+  /** Fires with the new value; the undo button sends `""`. TR: Yeni değerle ateşlenir; geri alma düğmesi `""` gönderir. */
+  onChange: (value: string) => void;
+  /**
+   * The colour an empty value falls back to, as a hex. It fills the square with a dashed edge,
+   * stands in the code field as its placeholder, and is where the picker starts. TR: Boş değerin
+   * düştüğü renk, hex olarak. Kareyi kesik kenarla doldurur, kod alanında yer tutucu olarak
+   * durur, ve seçici oradan başlar.
+   */
+  defaultValue: string;
+  /** The picker's and the undo button's accessible names. TR: Seçicinin ve geri alma düğmesinin erişilebilir adları. */
+  labels: { pick: string; reset: string };
+  disabled?: boolean;
+  invalid?: boolean;
+  /** The code field's id, for a `Field`'s `htmlFor`. TR: Kod alanının id'si, bir `Field`'ın `htmlFor`'u için. */
+  id?: string;
+  /** Lands on the code field; `Field` wires its help line through it. TR: Kod alanına düşer; `Field` yardım satırını bununla bağlar. */
+  "aria-describedby"?: string;
+  "aria-invalid"?: boolean;
+  className?: string;
+  /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
+  [k: `data-${string}`]: unknown;
+}) {
+  const yazilan = value.trim();
+  const varsayilanda = yazilan === "";
+  /* KARE YAZILANI GİYİYOR, yazılan bir renk olarak okunabildiği sürece; okunamayan
+     bir değer (yarım bir hex, bir yazım hatası) kareyi boşaltmıyor, varsayılanda
+     bırakıyor. Hatayı söyleyen kare değil alanın kendisi (`invalid`). */
+  const tarayicida = useSyncExternalStore(abonelikYok, () => true, () => false);
+  const zemin = varsayilanda || (tarayicida && !renkMi(yazilan)) ? defaultValue : yazilan;
+  const secici = altiHane(yazilan) ?? altiHane(defaultValue) ?? "#000000";
+  const gecersiz = invalid || ariaInvalid === true;
+  return (
+    <span {...dataProps(rest)} className={cn("flex items-center gap-2", className)}>
+      {/* VARSAYILANDAYKEN YÜKSELMİŞ, RENK SEÇİLİNCE BASILMIŞ: kare bir tuş, ve seçim
+          onu yerine indiriyor. Çentik yok: tek kutulu bir alanda neyin seçili olduğu
+          sorusu sorulmuyor. */}
+      <label
+        className="tamga-swatch tamga-swatch-field"
+        data-default={varsayilanda || undefined}
+        data-chosen={varsayilanda ? undefined : true}
+        data-off={disabled || undefined}
+        title={labels.pick}
+        style={{ background: zemin }}
+      >
+        <span className="sr-only">{labels.pick}</span>
+        <input
+          type="color"
+          value={secici}
+          disabled={disabled}
+          onChange={(e) => onChange(e.target.value)}
+          className="tamga-color-input"
+          aria-label={labels.pick}
+        />
+      </label>
+      <Input
+        id={id}
+        value={value}
+        placeholder={defaultValue}
+        disabled={disabled}
+        invalid={gecersiz}
+        aria-invalid={gecersiz || undefined}
+        aria-describedby={tarif}
+        spellCheck={false}
+        autoComplete="off"
+        className="min-w-0 flex-1 font-mono"
+        onChange={(e) => onChange(e.target.value)}
+      />
+      {/* GERİ ALMA YALNIZ YAZILMIŞ BİR RENK VARKEN: boşken kapalı bir düğme hiçbir
+          şey söylemiyor, ve on dört satırda on dört kapalı düğme bir yığın. */}
+      {!varsayilanda && !disabled ? (
+        <MiniButton variant="quiet" aria-label={labels.reset} onClick={() => onChange("")}>
+          <Icon icon={Undo} size="xs" />
+        </MiniButton>
+      ) : null}
+    </span>
+  );
+}
+
+/* Tarayıcı bu değeri bir renk olarak okuyor mu. Yalnız tarayıcıda soruluyor:
+   sunucuda `CSS` yok, ve iki taraf farklı cevap verirse sayfa hidrasyonda kırılır. */
+function renkMi(deger: string): boolean {
+  return typeof CSS !== "undefined" && typeof CSS.supports === "function" ? CSS.supports("color", deger) : true;
+}
+const abonelikYok = () => () => {};
+
+/** `#abc` ya da `#aabbcc` → `#aabbcc`; renk seçicinin tek kabul ettiği biçim. Başka her şey `null`. */
+function altiHane(deger: string): string | null {
+  if (/^#[0-9a-f]{6}$/i.test(deger)) return deger.toLowerCase();
+  if (/^#[0-9a-f]{3}$/i.test(deger)) return `#${[...deger.slice(1)].map((c) => c + c).join("")}`.toLowerCase();
+  return null;
+}
+
 /* Damalı zemin: "burada renk yok". Kutunun kendisi bir renk olduğu için boş
    hâlin de bir zemini olmak zorunda, ve düz bir gri yedinci bir renk gibi
    okunuyordu. */
@@ -208,12 +330,14 @@ function OnizlemeKarti({
   onSelect,
   label,
   sub,
+  disabled = false,
   children,
 }: {
   selected: boolean;
   onSelect: () => void;
   label: string;
   sub?: string;
+  disabled?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -223,6 +347,7 @@ function OnizlemeKarti({
       aria-checked={selected}
       tabIndex={selected ? 0 : -1}
       data-selected={selected}
+      disabled={disabled}
       className="tamga-preview-card"
       onClick={onSelect}
     >
@@ -256,6 +381,7 @@ export function ThemeCards({
   value,
   onChange,
   labels,
+  disabled = false,
   className,
   ...rest
 }: {
@@ -271,6 +397,12 @@ export function ThemeCards({
     darkNote?: string;
     systemNote?: string;
   };
+  /**
+   * The pictures stay, the choice is closed: the chosen card still stands raised, so someone who
+   * may only look reads what is set. TR: Resimler kalıyor, seçim kapanıyor: seçili kart yine
+   * yükselmiş duruyor, yalnız bakabilen biri neyin seçili olduğunu okuyor.
+   */
+  disabled?: boolean;
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
@@ -286,6 +418,7 @@ export function ThemeCards({
       {...dataProps(rest)}
       role="radiogroup"
       aria-label={labels.group}
+      aria-disabled={disabled || undefined}
       className={cn("tamga-preview-grid", className)}
     >
       {secenekler.map((s) => (
@@ -295,6 +428,7 @@ export function ThemeCards({
           onSelect={() => onChange(s.deger)}
           label={s.ad}
           sub={s.alt}
+          disabled={disabled}
         >
           <span className="tamga-theme-box">
             <Yarim theme={s.deger === "dark" ? "dark" : "light"} />
@@ -323,6 +457,7 @@ export function RailCards({
   value,
   onChange,
   labels,
+  disabled = false,
   className,
   ...rest
 }: {
@@ -338,6 +473,12 @@ export function RailCards({
     wideNote?: string;
     freeNote?: string;
   };
+  /**
+   * The pictures stay, the choice is closed: the chosen card still stands raised, so someone who
+   * may only look reads what is set. TR: Resimler kalıyor, seçim kapanıyor: seçili kart yine
+   * yükselmiş duruyor, yalnız bakabilen biri neyin seçili olduğunu okuyor.
+   */
+  disabled?: boolean;
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
@@ -353,6 +494,7 @@ export function RailCards({
       {...dataProps(rest)}
       role="radiogroup"
       aria-label={labels.group}
+      aria-disabled={disabled || undefined}
       className={cn("tamga-preview-grid", className)}
     >
       {secenekler.map((s) => (
@@ -362,6 +504,7 @@ export function RailCards({
           onSelect={() => onChange(s.deger)}
           label={s.ad}
           sub={s.alt}
+          disabled={disabled}
         >
           <span className="tamga-rail-mini" data-mode={s.deger} aria-hidden>
             <span className="tamga-rail-mini-rail">

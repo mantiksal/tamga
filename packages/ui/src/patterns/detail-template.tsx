@@ -2,6 +2,9 @@
 
 import type { ReactNode } from "react";
 import { Breadcrumb } from "../components/primitives.js";
+import { Icon } from "../components/icon.js";
+import { Warning } from "../components/icons.js";
+import { toneOf } from "../components/tone.js";
 import { SkeletonPanel } from "../components/skeleton.js";
 import {
   Busy,
@@ -16,7 +19,8 @@ import {
  * Her nesne (detay) ekranının şekli: iz, başlık, eylemler, sekmeler, gövde.
  *
  * Sekmeler rota (bağlantı), durum değil; sekmesiz kullanım "yeni kayıt"
- * ekranıdır. Boş hâli yok. Gerekçe: docs/adr/0004-sablon-katmani.md
+ * ekranıdır. Boş hâli yok. Taslak tutan bir düzenleyici de bağlantıyla geziyor
+ * (`?tab=`): taslak sekmede değil ekranda yaşıyor, sekme yalnız bir görünüm. Gerekçe: docs/adr/0004-sablon-katmani.md
  */
 
 export type DetailState = "ready" | "loading" | "error";
@@ -29,6 +33,15 @@ export type DetailTab = {
   href: string;
   /** How many rows that tab holds ("Events 2"), drawn as the kit's `Tabs` count. TR: O sekmede kaç satır olduğu ("Olaylar 2"), kitin `Tabs` sayacıyla. */
   count?: number;
+  /**
+   * The tab holds something that stopped a save: the sentence a screen reader hears, like "2 fields
+   * have an error". Drawn as a warning mark after the label. A form split over tabs showed its
+   * error only on the open tab, and someone who saved from another one saw nothing. TR: Sekmede bir
+   * kaydı durduran bir şey var: ekran okuyucunun duyduğu cümle, "2 alanda hata" gibi. Etiketin
+   * ardında bir uyarı işareti olarak çiziliyor. Sekmelere bölünmüş bir form hatasını yalnız açık
+   * sekmede gösteriyordu, ve başka bir sekmeden kaydeden biri hiçbir şey görmüyordu.
+   */
+  error?: string;
 };
 
 export type DetailTemplateProps = {
@@ -136,6 +149,14 @@ export function DetailTemplate({
               >
                 {tab.label}
                 {tab.count !== undefined ? <span className="tamga-sayac tabular-nums">{tab.count}</span> : null}
+                {/* GLİF VE CÜMLE: renk tek başına söylemiyor (1.4.1), cümle de görünür
+                    satırı uzatmıyor; okuyucu onu sekmenin adıyla birlikte duyuyor. */}
+                {tab.error ? (
+                  <span className="inline-flex items-center" data-tab-error style={{ color: toneOf("danger").fg }}>
+                    <Icon icon={Warning} size="sm" weight="fill" aria-hidden />
+                    <span className="sr-only">{tab.error}</span>
+                  </span>
+                ) : null}
               </Link>
             );
           })}

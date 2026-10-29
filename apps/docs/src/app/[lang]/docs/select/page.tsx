@@ -49,6 +49,14 @@ const T = {
     kargo: "Kargo",
     kargoHata: "Bir kargo seç.",
     kargoSec: "Kargo seç",
+    aciklama: (
+      <>
+        <code>hint</code> etiketin yanındaki sessiz bir değer: &quot;2-3 gün&quot;, &quot;₺49&quot;.
+        Seçeneğin ne yaptığını bir cümleyle söylemek gerekiyorsa <code>description</code> verin:
+        etiketin altına, ikinci satıra iner. Cümle yana sığmıyordu, kesiliyordu; örnekteki
+        ikinci kutu öyle.
+      </>
+    ),
     rules: "Kurallar",
     ph: (
       <>
@@ -90,6 +98,14 @@ const T = {
     kargo: "Carrier",
     kargoHata: "Pick a carrier.",
     kargoSec: "Pick a carrier",
+    aciklama: (
+      <>
+        <code>hint</code> is a quiet value beside the label: &quot;2-3 days&quot;, &quot;$9&quot;.
+        When an option needs a sentence to say what it does, pass <code>description</code>: it
+        goes under the label, on a second line. The sentence did not fit beside it and was cut;
+        the second box in the example is like that.
+      </>
+    ),
     rules: "Rules",
     ph: (
       <>
@@ -150,6 +166,8 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
           </Field>
         </div>
       </Demo>
+
+      <P>{t.aciklama}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.ph}</Note>

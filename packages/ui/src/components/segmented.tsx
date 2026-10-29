@@ -18,6 +18,7 @@ export function Segmented<T extends string>({
   onChange,
   label,
   size = "base",
+  disabled = false,
   className,
 }: {
   /**
@@ -38,6 +39,12 @@ export function Segmented<T extends string>({
    * uzun kalıyor.
    */
   size?: "base" | "sm";
+  /**
+   * Shown, not offered: the chosen option stays readable and nothing can be picked. For someone
+   * who may only look. TR: Gösteriliyor, sunulmuyor: seçili seçenek okunur kalıyor ve hiçbir şey
+   * seçilemiyor. Yalnız bakabilen biri için.
+   */
+  disabled?: boolean;
   className?: string;
 }) {
   /* OKLARLA GEZİLİYOR, VE ŞERİTTE TEK DURAK VAR. Bir radyo grubunda Tab tuşu
@@ -47,7 +54,7 @@ export function Segmented<T extends string>({
   function oklar(e: React.KeyboardEvent<HTMLDivElement>) {
     const yon = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
     const uc = e.key === "Home" ? 0 : e.key === "End" ? options.length - 1 : -1;
-    if (yon === 0 && uc < 0) return;
+    if (disabled || (yon === 0 && uc < 0)) return;
 
     const simdi = options.findIndex((o) => o.value === value);
     const hedef =
@@ -63,6 +70,8 @@ export function Segmented<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
+      aria-disabled={disabled || undefined}
+      data-disabled={disabled || undefined}
       className={cn("tamga-segment", size === "sm" && "tamga-segment-sm", className)}
       onKeyDown={oklar}
     >
@@ -76,6 +85,7 @@ export function Segmented<T extends string>({
           aria-checked={value === v}
           tabIndex={value === v ? 0 : -1}
           data-active={value === v}
+          disabled={disabled}
           onClick={() => onChange?.(v)}
         >
           {etiket}

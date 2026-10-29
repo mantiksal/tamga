@@ -6,6 +6,9 @@ dist/
 # artık var olmayan sayfaları arıyor.
 .next/
 .next-verify/
+# Next her açılışta yeniden yazıyor (dev `.next/dev`, build `.next-verify` yolunu basıyor);
+# git'te durursa her dev/verify sırası ağacı kirletip yayını durduruyor. Next'in kendi şablonu da yoksayıyor.
+apps/docs/next-env.d.ts
 .DS_Store
 *.log
 .turbo/

@@ -227,6 +227,8 @@ export function DropdownMenu({
             return (
               <button
                 key={i}
+                /* Menü portalsız, yerinde çiziliyor: bir formun içindeyse tür verilmemiş öğe formu gönderirdi. */
+                type="button"
                 role={item.checked === undefined ? "menuitem" : "menuitemradio"}
                 aria-checked={item.checked}
                 data-selected={item.checked || undefined}

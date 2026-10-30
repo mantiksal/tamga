@@ -5,6 +5,16 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.18.3
+
+> Choosing from a menu inside a form no longer submits the form.
+
+### Fixed
+
+- **`DropdownMenu` items and `Select` options are `type="button"`.** Both lists are drawn in
+  place, without a portal; inside a `<form>` an untyped `<button>` submits it, so picking "move
+  to group" in a single-record editor saved the form before the move was applied and lost it.
+
 ## 0.18.2
 
 > A row menu inside a table stays open.

@@ -612,6 +612,8 @@ export function Select({
                  görünürdü. */
               {...kanca}
               key={o}
+              /* Liste yerinde çiziliyor: bir formun içinde seçim formu göndermesin. */
+              type="button"
               role="option"
               aria-selected={o === current}
               data-tamga-option

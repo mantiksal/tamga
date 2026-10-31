@@ -331,6 +331,7 @@ const PAGES: DocPage[] = [
   c("tree-select", "Tree select", "Ağaçtan çoklu seçim", "Many at once, from a tree"),
   c("page-band", "Page band", "Her ekranın tepesi", "The top of every screen"),
   c("password-input", "Password input", "Göster, çünkü yazdığını göremezsin", "Reveal it, because you cannot see what you typed"),
+  c("phone-field", "Phone field", "Ülke ve numara, E.164 olarak", "Country and number, as E.164"),
   c("rich-text", "Rich text", "Biçimlendirilebilir metin; düğmeleri ürün seçer", "Formatted text; the product picks the buttons"),
   c("rail-link", "Rail link", "İkon raylı gezinme", "Icon rail navigation"),
   c("reveal", "Reveal", "Aşağıdan giren blok", "A block that enters from below"),

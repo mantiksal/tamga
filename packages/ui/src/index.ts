@@ -57,6 +57,7 @@ export { TimelineStrip } from "./components/timeline-strip.js";
 /* --- gelişmiş girdi ------------------------------------------------------ */
 export { NumberInput } from "./components/number-input.js";
 export { Combobox, type ComboOption } from "./components/combobox.js";
+export { PhoneField, countryForTimeZone } from "./components/phone-field.js";
 export { FileUpload, type UploadItem } from "./components/file-upload.js";
 export { DatePicker, Calendar, type DateISO, type DateRange, DateTimePicker, type DateTimeISO } from "./components/date-picker.js";
 

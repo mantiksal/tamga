@@ -71,6 +71,7 @@ export const TRANSLATED: readonly string[] = [
   "page-band",
   "pagination",
   "password-input",
+  "phone-field",
   "popover",
   "progress",
   "radio-group",

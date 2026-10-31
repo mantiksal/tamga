@@ -35,6 +35,8 @@ import {
   Table,
   NumberInput,
   Combobox,
+  PhoneField,
+  countryForTimeZone,
   DatePicker,
   FileUpload,
   LocaleSwitcher,
@@ -152,6 +154,10 @@ const D = {
     stockDown: "Stoğu azalt",
     unit: "adet",
     searchProduct: "Ürün ara…",
+    phoneCountry: "Ülke",
+    phoneNumber: "Telefon numarası",
+    phoneNoCountry: "Eşleşen ülke yok",
+    phoneSaved: "Kaydedilecek değer",
     noResult: "Sonuç yok",
     openList: "Listeyi aç",
     pickDate: "Tarih seç",
@@ -241,6 +247,10 @@ const D = {
     stockDown: "Decrease stock",
     unit: "pcs",
     searchProduct: "Search products…",
+    phoneCountry: "Country",
+    phoneNumber: "Phone number",
+    phoneNoCountry: "No matching country",
+    phoneSaved: "Value to save",
     noResult: "No results",
     openList: "Open the list",
     pickDate: "Pick a date",
@@ -1175,6 +1185,41 @@ export function ComboboxDemo({ lang }: L) {
           { value: "p4", label: "Giant Steps · LP", hint: "SKU-4474" },
         ]}
       />
+    </div>
+  );
+}
+
+/* Telefon: ilk tahmin okuyucunun kendi saat diliminden, kaydedilecek E.164 değeri altında. */
+export function PhoneFieldDemo({ lang, disabled = false, invalid = false }: L & { disabled?: boolean; invalid?: boolean }) {
+  const d = D[lang];
+  const [v, setV] = useState("");
+  const [ulke, setUlke] = useState("TR");
+  useEffect(() => {
+    setUlke(countryForTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone) ?? "TR");
+  }, []);
+  return (
+    <div className="flex w-full max-w-xl flex-col gap-2">
+      <PhoneField
+        key={ulke}
+        value={v}
+        onChange={setV}
+        defaultCountry={ulke}
+        locale={lang === "tr" ? "tr-TR" : "en-US"}
+        disabled={disabled}
+        invalid={invalid}
+        labels={{
+          country: d.phoneCountry,
+          number: d.phoneNumber,
+          empty: d.phoneNoCountry,
+          clear: d.clearSelection,
+          open: d.openList,
+        }}
+      />
+      {!disabled && !invalid ? (
+        <span className="text-small text-ink-soft">
+          {d.phoneSaved}: <code>{v || "\"\""}</code>
+        </span>
+      ) : null}
     </div>
   );
 }

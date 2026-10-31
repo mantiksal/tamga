@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { useFixedPanel } from "../lib/fixed-panel.js";
 import { cn } from "../lib/cn.js";
 import { inputVariants } from "./input.js";
 import { dataProps } from "../lib/data-props.js";
@@ -301,6 +302,8 @@ export function MultiSelect({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const box = useRef<HTMLDivElement>(null);
+  const liste = useRef<HTMLDivElement>(null);
+  const yer = useFixedPanel(open, box, liste);
 
   const [active, setActive] = useState(0);
 
@@ -421,7 +424,7 @@ export function MultiSelect({
       </span>
 
       {open ? (
-        <div id={id} role="listbox" aria-multiselectable className="tamga-overlay tamga-menu absolute z-30 mt-2 max-h-64 w-full overflow-y-auto">
+        <div id={id} ref={liste} style={yer} role="listbox" aria-multiselectable className="tamga-overlay tamga-menu absolute z-30 mt-2 max-h-64 w-full overflow-y-auto">
           {shown.length === 0 ? (
             <p className="px-4 py-3 text-small text-ink-faint">{labels.empty}</p>
           ) : (

@@ -146,6 +146,7 @@ export function PhoneField({
         labels={{ empty: labels.empty, clear: labels.clear, open: labels.open }}
         disabled={disabled}
         invalid={invalid}
+        clearable={false}
         className="shrink-0 sm:w-56"
       />
       <Input

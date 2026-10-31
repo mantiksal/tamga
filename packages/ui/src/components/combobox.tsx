@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { useFixedPanel } from "../lib/fixed-panel.js";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
@@ -49,6 +50,7 @@ export function Combobox<T extends string>({
   labels,
   disabled = false,
   invalid = false,
+  clearable = true,
   "aria-label": ariaLabel,
   className,
   ...rest
@@ -65,6 +67,13 @@ export function Combobox<T extends string>({
   labels: { empty: string; clear: string; open: string };
   disabled?: boolean;
   invalid?: boolean;
+  /**
+   * Whether the choice can be emptied. `false` for a field that always holds a value (a time zone,
+   * a country): an × that does nothing when pressed is a broken promise. TR: Seçim boşaltılabilir
+   * mi. Her zaman bir değeri olan alan için `false` (saat dilimi, ülke): basınca bir şey yapmayan
+   * bir × tutulmayan bir söz.
+   */
+  clearable?: boolean;
   /** The box's accessible name when no visible label is bound to it. TR: Bağlı görünür bir etiket yoksa kutunun erişilebilir adı. */
   "aria-label"?: string;
   className?: string;
@@ -76,6 +85,8 @@ export function Combobox<T extends string>({
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const box = useRef<HTMLDivElement>(null);
+  const liste = useRef<HTMLDivElement>(null);
+  const yer = useFixedPanel(open, box, liste);
 
   const selected = options.find((o) => o.value === value);
 
@@ -149,7 +160,7 @@ export function Combobox<T extends string>({
           )}
         />
         <span className="absolute right-1.5 flex items-center gap-0.5">
-          {selected ? (
+          {selected && clearable ? (
             <button
               type="button"
               className="tamga-mini-btn" data-inset="true"
@@ -177,6 +188,8 @@ export function Combobox<T extends string>({
       {open ? (
         <div
           id={`${id}-list`}
+          ref={liste}
+          style={yer}
           role="listbox"
           className="tamga-overlay tamga-menu absolute z-30 mt-2 max-h-72 w-full overflow-y-auto"
         >

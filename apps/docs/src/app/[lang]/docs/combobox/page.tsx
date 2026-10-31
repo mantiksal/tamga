@@ -43,6 +43,13 @@ const T = {
         yüz kayıt istemcide süzülür, elli bin kayıt sunucuda, ve bu kararı ürün verir.
       </>
     ),
+    clearable: (
+      <>
+        <code>clearable</code> varsayılan olarak açık: seçili değerin yanında bir × durur. Her zaman
+        bir değeri olan bir alanda (saat dilimi, ülke) <code>clearable={"{false}"}</code> verin;
+        basınca bir şey yapmayan bir × tutulmayan bir sözdür.
+      </>
+    ),
     rules: "Kurallar",
     focus: (
       <>
@@ -73,6 +80,13 @@ const T = {
         If <code>onSearch</code> is given, no filtering happens and the incoming list is shown as
         it is: five hundred rows filter on the client, fifty thousand on the server, and the
         product makes that call.
+      </>
+    ),
+    clearable: (
+      <>
+        <code>clearable</code> is on by default: an × sits beside the chosen value. On a field that
+        always holds a value (a time zone, a country), pass <code>clearable={"{false}"}</code>; an ×
+        that does nothing when pressed is a promise not kept.
       </>
     ),
     rules: "Rules",
@@ -113,6 +127,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         <ComboboxDemo lang={lang} />
       </Demo>
       <P>{t.search}</P>
+      <P>{t.clearable}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.focus}</Note>

@@ -321,6 +321,7 @@ export function LogoTile({
   src,
   size = "base",
   surface = "auto",
+  edge = "strong",
   className,
   ...rest
 }: {
@@ -340,6 +341,15 @@ export function LogoTile({
    * tersi. Zemin, kenarı ve baş harf sabit bir üçlü gelir; karo iki temada da aynı okunur.
    */
   surface?: "auto" | "light" | "dark";
+  /**
+   * The frame. `strong` is the kit's dark 1.5px edge, for the product's own brand (a workspace or
+   * status page logo). `soft` is a hairline in the page's line colour, for a THIRD-PARTY mark in a
+   * row of many (an integrations catalogue): a hard frame around every logo competes with the
+   * marks themselves. TR: Çerçeve. `strong` kitin koyu 1.5px kenarı, ürünün kendi markası için.
+   * `soft` sayfanın çizgi renginde ince bir kenar, çok sayıda ÜÇÜNCÜ TARAF işaretinin yan yana
+   * durduğu yer için: her logonun etrafındaki sert çerçeve işaretlerin kendisiyle yarışıyor.
+   */
+  edge?: "strong" | "soft";
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
@@ -348,6 +358,7 @@ export function LogoTile({
     <span
       {...dataProps(rest)}
       data-surface={surface === "auto" ? undefined : surface}
+      data-edge={edge === "soft" ? "soft" : undefined}
       className={cn("tamga-logo-tile", size === "sm" && "tamga-logo-tile-sm", className)}
     >
       {src ? (

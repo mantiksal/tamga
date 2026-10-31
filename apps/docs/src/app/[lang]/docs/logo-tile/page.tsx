@@ -72,6 +72,14 @@ const T = {
         karo değişmez.
       </>
     ),
+    edge: (
+      <>
+        <code>edge</code> çerçeveyi seçer. <code>strong</code> (varsayılan) kitin koyu kenarı,
+        ürünün kendi markası için. <code>soft</code> ince, açık bir çizgi: bir entegrasyon
+        kataloğunda olduğu gibi pek çok üçüncü taraf logosu yan yana dururken, sert çerçeve
+        logoların kendisiyle yarışır.
+      </>
+    ),
     rules: "Kurallar",
     related: "İlgili",
   },
@@ -118,6 +126,14 @@ const T = {
         and the tile does not change when the theme does.
       </>
     ),
+    edge: (
+      <>
+        <code>edge</code> picks the frame. <code>strong</code> (the default) is the kit&apos;s dark
+        edge, for the product&apos;s own brand. <code>soft</code> is a thin, light line: where many
+        third-party logos sit side by side, as in an integrations catalogue, a hard frame competes
+        with the logos themselves.
+      </>
+    ),
     rules: "Rules",
     related: "Related",
   },
@@ -152,6 +168,12 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         <LogoTile name="Tamga" src="/tamga-mark-light.svg" surface="light" />
         <LogoTile name="Tamga" src="/tamga-mark-dark.svg" surface="dark" />
         <LogoTile name="Koyu" surface="dark" />
+      </Demo>
+      <P>{t.edge}</P>
+      <Demo labels={dict.demo} code={`<LogoTile name="Slack" edge="strong" />
+<LogoTile name="Slack" edge="soft" />`}>
+        <LogoTile name="Slack" edge="strong" />
+        <LogoTile name="Slack" edge="soft" />
       </Demo>
 
 

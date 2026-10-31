@@ -6314,6 +6314,13 @@
     border-color: var(--color-logo-edge-dark);
     color: var(--color-logo-ink-dark);
   }
+  /* İNCE KENAR: üçüncü taraf işaretleri yan yana dururken (bir entegrasyon kataloğu) her birinin
+     etrafındaki koyu çerçeve logonun kendisiyle yarışıyordu (2026-10-31). Zeminden sonra
+     geliyor ki `surface`'ın kenar rengini de yensin. */
+  .tamga-logo-tile[data-edge="soft"] {
+    border-width: 1px;
+    border-color: var(--color-line);
+  }
   .tamga-logo-tile-sm {
     width: 40px;
     height: 40px;

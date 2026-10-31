@@ -9,6 +9,7 @@ import { dataProps } from "../lib/data-props.js";
 import { Close } from "./icons.js";
 import { SkeletonOptions, SkeletonPanel } from "./skeleton.js";
 import { Kbd } from "./display.js";
+import { Segmented } from "./segmented.js";
 import { Button } from "./button.js";
 import { useDismiss, useFocusTrap, useListKeys } from "./a11y.js";
 import { MiniButton } from "./button.js";
@@ -46,7 +47,29 @@ export type MenuItem =
       shortcut?: string;
     }
   | { kind: "separator" }
-  | { kind: "label"; label: string };
+  | { kind: "label"; label: string }
+  /**
+   * Who the menu belongs to, at its top: a name and, under it, an address. Not a command, so it
+   * is not focusable. TR: Menünün kime ait olduğu, en üstte: bir ad ve altında bir adres. Bir
+   * komut değil, odak almıyor.
+   */
+  | { kind: "header"; title: string; detail?: string }
+  /**
+   * A setting chosen in place, as icons on one line (a theme: light · dark · system). Picking
+   * does NOT close the menu: the person sees the result and may pick again. The arrows up and
+   * down reach the chosen icon, left and right move the choice. TR: Yerinde seçilen bir ayar,
+   * tek satırda ikonlar (tema: açık · koyu · sistem). Seçmek menüyü KAPATMIYOR: kişi sonucu
+   * görüyor, yeniden seçebiliyor. Yukarı ve aşağı oklar seçili ikona iner, sağ ve sol seçimi
+   * değiştirir.
+   */
+  | {
+      kind: "choice";
+      label: string;
+      value: string;
+      /** `label` is each icon's accessible name and tooltip. TR: `label` her ikonun erişilebilir adı ve ipucu. */
+      options: readonly { value: string; label: string; icon: React.ReactNode }[];
+      onChange: (value: string) => void;
+    };
 
 export function DropdownMenu({
   trigger,
@@ -221,6 +244,49 @@ export function DropdownMenu({
               return (
                 <span key={i} className="tamga-menu-baslik">
                   {item.label}
+                </span>
+              );
+            }
+            if (item.kind === "header") {
+              return (
+                <span key={i} className="flex min-w-0 flex-col px-2.5 pt-1.5 pb-2" data-menu-header>
+                  <span className="truncate text-body font-bold text-ink">{item.title}</span>
+                  {item.detail ? (
+                    <span className="truncate text-small text-ink-soft">{item.detail}</span>
+                  ) : null}
+                </span>
+              );
+            }
+            if (item.kind === "choice") {
+              return (
+                <span
+                  key={i}
+                  className="flex items-center justify-between gap-3 px-2.5 py-1"
+                  data-menu-choice
+                >
+                  {/* The rows' own type: the label reads as one of the menu's lines. */}
+                  <span
+                    className="text-ink"
+                    style={{ fontSize: 14, fontWeight: "var(--weight-label)" }}
+                  >
+                    {item.label}
+                  </span>
+                  <Segmented
+                    size="sm"
+                    className="tamga-segment-icons"
+                    label={item.label}
+                    value={item.value}
+                    onChange={item.onChange}
+                    options={item.options.map((o) => ({
+                      value: o.value,
+                      label: o.icon,
+                      "aria-label": o.label,
+                      title: o.label,
+                      /* Only the chosen icon is a stop for the menu's arrows; the strip moves
+                         the choice itself. */
+                      ...(o.value === item.value ? { "data-tamga-option": "" } : {}),
+                    }))}
+                  />
                 </span>
               );
             }

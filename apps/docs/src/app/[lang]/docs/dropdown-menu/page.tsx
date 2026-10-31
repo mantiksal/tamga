@@ -1,4 +1,4 @@
-import { MenuDemo } from "@/components/interactive";
+import { AccountMenuDemo, MenuDemo } from "@/components/interactive";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -55,6 +55,15 @@ const T = {
         <Xref to="tooltip">Tooltip</Xref> da aynı yolu izliyor.
       </>
     ),
+    hesap: "Hesap menüsü",
+    hesapMetin: (
+      <>
+        <code>kind=&quot;header&quot;</code> menünün kime ait olduğunu en üstte yazar: ad ve altında
+        adres; bir komut değil, odak almaz. <code>kind=&quot;choice&quot;</code> bir ayarı yerinde,
+        tek satırda ikonlarla seçtirir (tema: açık · koyu · sistem). Seçmek menüyü kapatmaz; kişi
+        sonucu görür. Yukarı ve aşağı oklar seçili ikona iner, sağ ve sol seçimi değiştirir.
+      </>
+    ),
     rules: "Kurallar",
     plane: (
       <>
@@ -93,6 +102,16 @@ const T = {
         below and room above, the menu opens upward. When the page or a table scrolls, the menu follows its trigger and closes once the trigger leaves the screen. <Xref to="tooltip">Tooltip</Xref> takes the same path.
       </>
     ),
+    hesap: "Account menu",
+    hesapMetin: (
+      <>
+        <code>kind=&quot;header&quot;</code> says whose menu it is, at the top: a name and an address
+        under it; not a command, so it takes no focus. <code>kind=&quot;choice&quot;</code> sets a
+        setting in place, as icons on one line (a theme: light · dark · system). Picking does not
+        close the menu; the person sees the result. The arrows up and down reach the chosen icon,
+        left and right move the choice.
+      </>
+    ),
     rules: "Rules",
     plane: (
       <>
@@ -128,6 +147,32 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         <MenuDemo lang={lang} />
       </Demo>
       <P>{t.danger}</P>
+
+      <H2>{t.hesap}</H2>
+      <Demo labels={dict.demo} code={`<DropdownMenu
+  trigger={<AccountButton … />}
+  items={[
+    { kind: "header", title: "…", detail: "…@…" },
+    { kind: "separator" },
+    { label: "…", onSelect: openAccount },
+    {
+      kind: "choice",
+      label: "…",
+      value: theme,
+      onChange: setTheme,
+      options: [
+        { value: "light", label: "…", icon: <Icon icon={Sun} /> },
+        { value: "dark", label: "…", icon: <Icon icon={MoonStars} /> },
+        { value: "system", label: "…", icon: <Icon icon={Desktop} /> },
+      ],
+    },
+    { kind: "separator" },
+    { label: "…", onSelect: signOut },
+  ]}
+/>`}>
+        <AccountMenuDemo lang={lang} />
+      </Demo>
+      <P>{t.hesapMetin}</P>
 
       <P>{t.align}</P>
       <P>{t.kirpma}</P>

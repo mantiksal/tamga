@@ -62,7 +62,7 @@ import {
   ImageField, LogoTile,
   SelectPanel,
 } from "tamga-ui";
-import { Archive, Bell, Copy, CurrencyDollar, Delete, Download, Edit, Filter, More, Print, Refresh, Settings, Truck } from "tamga-ui/icons";
+import { Archive, Bell, Copy, CurrencyDollar, Delete, Desktop, Download, Edit, Filter, MoonStars, More, Print, Refresh, Settings, SignOut, Sun, Truck } from "tamga-ui/icons";
 import { Demo, type DemoLabels } from "@/components/demo";
 
 /**
@@ -482,6 +482,47 @@ export function MenuDemo({ lang }: L) {
         { label: d.refresh, icon: <Icon icon={Refresh} size="xs" />, shortcut: "R", onSelect: () => {} },
         { kind: "separator" },
         { label: n.iptal, icon: <Icon icon={Delete} size="xs" />, state: "danger", shortcut: "⌫", onSelect: () => {} },
+      ]}
+    />
+  );
+}
+
+/* Bir hesap menüsü: kimin menüsü olduğu en üstte, tema yerinde seçiliyor ve
+   menü kapanmıyor, çıkış ayracın altında. */
+const HESAP = {
+  tr: { kim: "Ayşe Yılmaz", posta: "ayse@ornek.com", hesap: "Hesap", gorunum: "Görünüm", acik: "Açık", koyu: "Koyu", sistem: "Sistem", cikis: "Çıkış", ac: "Hesap menüsü" },
+  en: { kim: "Ada Lovelace", posta: "ada@example.com", hesap: "Account", gorunum: "Appearance", acik: "Light", koyu: "Dark", sistem: "System", cikis: "Sign out", ac: "Account menu" },
+};
+
+export function AccountMenuDemo({ lang }: L) {
+  const h = HESAP[lang];
+  const [tema, setTema] = useState("system");
+  return (
+    <DropdownMenu
+      align="start"
+      width={260}
+      trigger={
+        <button className="tamga-icon-btn" aria-label={h.ac}>
+          <Icon icon={Settings} size="sm" />
+        </button>
+      }
+      items={[
+        { kind: "header", title: h.kim, detail: h.posta },
+        { kind: "separator" },
+        { label: h.hesap, onSelect: () => {} },
+        {
+          kind: "choice",
+          label: h.gorunum,
+          value: tema,
+          onChange: setTema,
+          options: [
+            { value: "light", label: h.acik, icon: <Icon icon={Sun} size="xs" /> },
+            { value: "dark", label: h.koyu, icon: <Icon icon={MoonStars} size="xs" /> },
+            { value: "system", label: h.sistem, icon: <Icon icon={Desktop} size="xs" /> },
+          ],
+        },
+        { kind: "separator" },
+        { label: h.cikis, icon: <Icon icon={SignOut} size="xs" />, onSelect: () => {} },
       ]}
     />
   );

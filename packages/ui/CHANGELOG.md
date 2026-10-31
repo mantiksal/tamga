@@ -5,6 +5,30 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.20.0
+
+> The account menu says whose it is and picks a theme in place; the page's one search gets a key.
+
+### Added
+
+- **`DropdownMenu` `header` and `choice` rows** · `header` is who the menu belongs to (a name
+  and, under it, an address), not a command and not focusable. `choice` is a setting picked in
+  place, as icons on one line (theme: light · dark · system); picking does not close the menu,
+  up and down reach the chosen icon, left and right move the choice. An account menu example on
+  the docs page.
+- **`Combobox` `look="search"`, `shortcut`, `footer`** · a box to type into and go rather than a
+  field that keeps a choice: no caret, the list opens only once something is typed, a pick does
+  not stay in the box. `shortcut="k"` focuses it from anywhere with ⌘K (Ctrl K off a Mac) and
+  draws the key in the box; `footer` is a line pinned under the list, inside the panel.
+- **`IconButton` `tooltip`** · shows the button's name on hover and on keyboard focus; the name
+  stays the accessible name, nothing is read twice. Off by default.
+
+### Fixed
+
+- **`AccountButton` is the strip's size** (`--control`, the same as the icon buttons beside it)
+  with the button's corner; it was a fixed 38px and sat 1.4px above the squares next to it
+  because it was an inline box in a block wrapper.
+
 ## 0.19.0
 
 > A phone field that knows countries; drop-down lists that no clipping box can cut.

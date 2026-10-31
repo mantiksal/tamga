@@ -3480,16 +3480,20 @@
      KİM OLDUĞUN. Şeritteki tek dolu kutu olması, gözün onu aramadan bulmasını
      sağlıyor. Baş harf display yüzünde ve en üst ağırlıkta: tek bir glif,
      okunacak bir sözcük değil bir işaret. */
+  /* THE STRIP'S OWN SIZE, `--control`, as the icon buttons beside it: a fixed 38px stood 2px
+     short of them, and in a row of squares the smallest one reads as a mistake. */
+  /* `flex`, not `inline-flex`, as `.tamga-icon-btn`: an inline box in a block wrapper (a menu's
+     trigger) grows a line's descender under it and sat 1.4px above the squares beside it. */
   .tamga-account-btn {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 38px;
+    width: var(--control);
+    height: var(--control);
     flex-shrink: 0;
     overflow: hidden;
     border: 1.5px solid var(--color-edge-strong);
-    border-radius: var(--radius-ctl);
+    border-radius: var(--radius-btn);
     background: var(--color-accent);
     color: var(--color-accent-ink);
     font-family: var(--font-display);
@@ -3499,6 +3503,10 @@
     cursor: pointer;
     transition: transform var(--duration-press) var(--ease-standard),
       box-shadow var(--duration-press) var(--ease-standard);
+  }
+  .tamga-account-btn > * {
+    width: 100%;
+    height: 100%;
   }
   .tamga-account-btn:hover {
     transform: translate(-1px, -1px);

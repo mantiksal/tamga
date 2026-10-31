@@ -265,12 +265,7 @@ export function DropdownMenu({
                   data-menu-choice
                 >
                   {/* The rows' own type: the label reads as one of the menu's lines. */}
-                  <span
-                    className="text-ink"
-                    style={{ fontSize: 14, fontWeight: "var(--weight-label)" }}
-                  >
-                    {item.label}
-                  </span>
+                  <span className="text-body font-semibold text-ink">{item.label}</span>
                   <Segmented
                     size="sm"
                     className="tamga-segment-icons"

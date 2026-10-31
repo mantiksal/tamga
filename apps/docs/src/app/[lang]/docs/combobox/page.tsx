@@ -43,6 +43,16 @@ const T = {
         yüz kayıt istemcide süzülür, elli bin kayıt sunucuda, ve bu kararı ürün verir.
       </>
     ),
+    arama: (
+      <>
+        <code>look=&quot;search&quot;</code> yazıp gidilen bir kutu yapar (bir sayfanın genel
+        araması): ok çizilmez, çünkü ok &quot;listeden seç&quot; der; liste ancak bir şey yazılınca
+        açılır ve seçilen kutuda kalmaz. Varsayılan <code>look=&quot;select&quot;</code> seçim tutan
+        alandır. <code>shortcut=&quot;k&quot;</code> kutuya ⌘K (Mac dışında Ctrl K) ile her yerden
+        odaklanır ve tuşu kutunun içinde gösterir; sayfanın tek araması için. <code>footer</code>{" "}
+        listenin altına bir satır koyar: aranan yeri genişletmenin yolu (&quot;Her yerde ara&quot;).
+      </>
+    ),
     clearable: (
       <>
         <code>clearable</code> varsayılan olarak açık: seçili değerin yanında bir × durur. Her zaman
@@ -80,6 +90,17 @@ const T = {
         If <code>onSearch</code> is given, no filtering happens and the incoming list is shown as
         it is: five hundred rows filter on the client, fifty thousand on the server, and the
         product makes that call.
+      </>
+    ),
+    arama: (
+      <>
+        <code>look=&quot;search&quot;</code> makes a box you type into and go from (a page&apos;s
+        general search): no caret, because a caret says &quot;pick from a list&quot;; the list opens
+        only once something is typed, and a pick does not stay in the box. The default{" "}
+        <code>look=&quot;select&quot;</code> is a field that keeps a choice.{" "}
+        <code>shortcut=&quot;k&quot;</code> focuses the box from anywhere with ⌘K (Ctrl K off a Mac)
+        and shows the key in the box; for the page&apos;s one search. <code>footer</code> puts a line
+        under the list: the way to widen what is searched (&quot;Search everywhere&quot;).
       </>
     ),
     clearable: (
@@ -128,6 +149,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       </Demo>
       <P>{t.search}</P>
       <P>{t.clearable}</P>
+      <P>{t.arama}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.focus}</Note>

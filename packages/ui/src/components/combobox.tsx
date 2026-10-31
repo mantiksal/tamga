@@ -5,6 +5,7 @@ import { useFixedPanel } from "../lib/fixed-panel.js";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
 import { Icon } from "./icon.js";
+import { Kbd } from "./display.js";
 import { CaretDown, Close, Search } from "./icons.js";
 
 /**
@@ -51,6 +52,9 @@ export function Combobox<T extends string>({
   disabled = false,
   invalid = false,
   clearable = true,
+  look = "select",
+  shortcut,
+  footer,
   "aria-label": ariaLabel,
   className,
   ...rest
@@ -74,6 +78,25 @@ export function Combobox<T extends string>({
    * bir × tutulmayan bir söz.
    */
   clearable?: boolean;
+  /**
+   * `search` is a box to type into and go, not a field that keeps a choice: no caret (a caret
+   * says "pick from a list"), the list opens only once something is typed, and a pick does not
+   * stay in the box. TR: `search` yazıp gidilen bir kutu, seçim tutan bir alan değil: ok yok
+   * (ok "listeden seç" der), liste ancak bir şey yazılınca açılır ve seçilen kutuda kalmaz.
+   */
+  look?: "select" | "search";
+  /**
+   * A letter that, with ⌘ (Ctrl off a Mac), focuses the box from anywhere on the page; drawn in
+   * the box as a key. For the ONE search of a page: two boxes bound to one key fight. TR: ⌘ (Mac
+   * dışında Ctrl) ile sayfanın her yerinden kutuya odaklanan harf; kutuda tuş olarak çiziliyor.
+   * Sayfanın TEK araması için: aynı tuşa bağlı iki kutu çakışır.
+   */
+  shortcut?: string;
+  /**
+   * A line under the list, inside the panel: a way to widen or narrow what is searched. TR:
+   * Listenin altında, panelin içinde bir satır: aranan yeri genişletmenin ya da daraltmanın yolu.
+   */
+  footer?: ReactNode;
   /** The box's accessible name when no visible label is bound to it. TR: Bağlı görünür bir etiket yoksa kutunun erişilebilir adı. */
   "aria-label"?: string;
   className?: string;
@@ -86,9 +109,28 @@ export function Combobox<T extends string>({
   const [active, setActive] = useState(0);
   const box = useRef<HTMLDivElement>(null);
   const liste = useRef<HTMLDivElement>(null);
-  const yer = useFixedPanel(open, box, liste);
+  const girdi = useRef<HTMLInputElement>(null);
+  const arama = look === "search";
+  /* Aramada liste ancak bir şey yazılınca açılıyor: boş bir kutuya odaklanmak "sonuç yok" demez. */
+  const acik = open && (!arama || query.trim() !== "");
+  const yer = useFixedPanel(acik, box, liste);
 
-  const selected = options.find((o) => o.value === value);
+  const selected = arama ? undefined : options.find((o) => o.value === value);
+  const [mac, setMac] = useState(true);
+  useEffect(() => {
+    setMac(/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent));
+  }, []);
+  useEffect(() => {
+    if (!shortcut) return;
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === shortcut.toLowerCase()) {
+        e.preventDefault();
+        girdi.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [shortcut]);
 
   const shown = useMemo(() => {
     if (onSearch || query.trim() === "") return options;
@@ -121,12 +163,13 @@ export function Combobox<T extends string>({
       <span className="relative flex items-center">
         <Icon icon={Search} size="xs" className="pointer-events-none absolute left-3 text-ink-faint" />
         <input
+          ref={girdi}
           type="text"
           role="combobox"
-          aria-expanded={open}
+          aria-expanded={acik}
           aria-controls={`${id}-list`}
           aria-autocomplete="list"
-          aria-activedescendant={open && shown[active] ? `${id}-opt-${active}` : undefined}
+          aria-activedescendant={acik && shown[active] ? `${id}-opt-${active}` : undefined}
           aria-label={ariaLabel}
           aria-invalid={invalid || undefined}
           disabled={disabled}
@@ -146,7 +189,7 @@ export function Combobox<T extends string>({
             } else if (e.key === "ArrowUp") {
               e.preventDefault();
               setActive((i) => Math.max(i - 1, 0));
-            } else if (e.key === "Enter" && open && shown[active]) {
+            } else if (e.key === "Enter" && acik && shown[active]) {
               e.preventDefault();
               commit(shown[active]);
             } else if (e.key === "Escape") {
@@ -173,19 +216,27 @@ export function Combobox<T extends string>({
               <Icon icon={Close} size="xs" />
             </button>
           ) : null}
-          <button
-            type="button"
-            className="tamga-mini-btn" data-inset="true"
-            aria-label={labels.open}
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-          >
-            <Icon icon={CaretDown} size="xs" />
-          </button>
+          {arama ? (
+            shortcut && !query ? (
+              <Kbd className="pointer-events-none mr-1">
+                {mac ? `⌘${shortcut.toUpperCase()}` : `Ctrl ${shortcut.toUpperCase()}`}
+              </Kbd>
+            ) : null
+          ) : (
+            <button
+              type="button"
+              className="tamga-mini-btn" data-inset="true"
+              aria-label={labels.open}
+              aria-expanded={open}
+              onClick={() => setOpen((v) => !v)}
+            >
+              <Icon icon={CaretDown} size="xs" />
+            </button>
+          )}
         </span>
       </span>
 
-      {open ? (
+      {acik ? (
         <div
           id={`${id}-list`}
           ref={liste}
@@ -217,6 +268,12 @@ export function Combobox<T extends string>({
               </button>
             ))
           )}
+          {/* Pinned to the panel's foot: a long list must not scroll the way out of sight. */}
+          {footer ? (
+            <div className="sticky -bottom-[5px] mt-1 border-t border-line bg-shell px-2 pt-2 pb-1">
+              {footer}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>

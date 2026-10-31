@@ -5,6 +5,31 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.19.0
+
+> A phone field that knows countries; drop-down lists that no clipping box can cut.
+
+### Added
+
+- **`PhoneField`** · a country list and a number box; the value is E.164 ("+905551234567") or
+  empty, the person never types the "+" or the code. The list names countries in the page's
+  language (`Intl.DisplayNames`) and is searchable by name or code. A stored number resolves its
+  own country (the longest code wins; a shared code like +1 prefers the field's own country);
+  `defaultCountry` is the first guess, usually from the time zone through
+  `countryForTimeZone("Europe/Istanbul")`. Country codes from react-phone-input-2 (MIT), zones
+  from the IANA tz database.
+- **`Combobox` `clearable`** · `false` for a field that always holds a value (a time zone, a
+  country): no × that does nothing.
+- **`LogoTile` `edge`** · `soft` is a hairline in the page's line colour for a third-party mark
+  in a row of many (an integrations catalogue); `strong` (default) stays the kit's dark edge.
+
+### Changed
+
+- **`Combobox` and `MultiSelect` lists are positioned `fixed`**, measured on open, the way
+  `DropdownMenu` is since 0.18.0: a scrolling container (a sheet's body, a dialog) used to clip
+  them. With no room below and room above the list opens upward; it follows the box when the page
+  scrolls.
+
 ## 0.18.3
 
 > Choosing from a menu inside a form no longer submits the form.

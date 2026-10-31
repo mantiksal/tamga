@@ -47,3 +47,13 @@ describe("LogoTile · surface", () => {
     expect(b.innerHTML).toBe(beklenen);
   });
 });
+
+/* İNCE KENAR: üçüncü taraf işaretleri yan yana dururken koyu çerçeve logoyla yarışıyordu. */
+describe("LogoTile · edge", () => {
+  it("varsayılan strong: nitelik yok; soft: data-edge ve çizgi renginde 1px kenar", () => {
+    const { container, rerender } = render(<LogoTile name="Acme" />);
+    expect(container.firstElementChild!.getAttribute("data-edge")).toBeNull();
+    rerender(<LogoTile name="Acme" edge="soft" />);
+    expect(container.firstElementChild!.getAttribute("data-edge")).toBe("soft");
+  });
+});

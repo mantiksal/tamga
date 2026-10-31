@@ -1,6 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../lib/cn.js";
 import { Spinner } from "./spinner.js";
+import { Tooltip } from "./overlay.js";
 
 /**
  * The button family, typed.
@@ -161,17 +162,37 @@ export function IconButton({
   className,
   size,
   variant,
+  tooltip = false,
   "aria-label": label,
   ...props
 }: React.ComponentProps<"button"> &
-  VariantProps<typeof iconButtonVariants> & { "aria-label": string }) {
-  return (
+  VariantProps<typeof iconButtonVariants> & {
+    "aria-label": string;
+    /**
+     * Shows the name in a tooltip on hover AND keyboard focus. An icon alone is rarely a label
+     * (NN/g: only a handful are known by everybody), so a button in a toolbar should say what it
+     * is. TR: Adı üzerine gelince VE klavye odağında ipucuyla gösterir. Tek başına bir ikon nadiren
+     * etikettir (NN/g: herkesin tanıdığı ikon bir avuç), o yüzden bir araç çubuğundaki düğme ne
+     * olduğunu söylemeli.
+     */
+    tooltip?: boolean;
+  }) {
+  const button = (
     <button
       data-slot="icon-button"
       aria-label={label}
       className={cn(iconButtonVariants({ size, variant }), className)}
       {...props}
     />
+  );
+  /* `bind={false}`: the name is already the button's accessible name; describing it again would
+     read it twice. */
+  return tooltip ? (
+    <Tooltip label={label} bind={false}>
+      {button}
+    </Tooltip>
+  ) : (
+    button
   );
 }
 

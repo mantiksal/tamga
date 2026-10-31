@@ -31,6 +31,13 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: Loc
  */
 const T = {
   tr: {
+    ipucu: (
+      <>
+        <code>tooltip</code> adı üzerine gelince ve klavye odağında bir ipucuyla gösterir. Tek
+        başına bir ikon nadiren etikettir; bir araç çubuğundaki ikon düğmesi ne olduğunu söylemeli.
+        Ad zaten düğmenin erişilebilir adı olduğu için ipucu ikinci kez okunmaz.
+      </>
+    ),
     add: "Ekle",
     refresh: "Yenile",
     remove: "Sil",
@@ -78,6 +85,13 @@ const T = {
     ),
   },
   en: {
+    ipucu: (
+      <>
+        <code>tooltip</code> shows the name in a tooltip on hover and on keyboard focus. An icon alone
+        is rarely a label; an icon button in a toolbar should say what it is. The name is already the
+        button&apos;s accessible name, so the tooltip is not read twice.
+      </>
+    ),
     add: "Add",
     refresh: "Refresh",
     remove: "Delete",
@@ -175,6 +189,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <P>{t.boylar}</P>
       <P>{t.varyantlar}</P>
       <P>{t.size}</P>
+      <P>{t.ipucu}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.label}</Note>

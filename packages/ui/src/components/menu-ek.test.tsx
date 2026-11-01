@@ -94,3 +94,24 @@ describe("AccountButton · şeridin ölçüsü", () => {
     expect(kural).toMatch(/display:\s*flex/);
   });
 });
+
+/* YOL BULMA MENÜSÜ: satırın altında nereye götürdüğü, dışarı çıkan satırda ok. */
+describe("DropdownMenu · description ve external", () => {
+  it("açıklama ikinci satır, dış bağlantıda ok; sıradan satır değişmedi", () => {
+    render(
+      <DropdownMenu
+        trigger={<button type="button">Yardım</button>}
+        items={[
+          { kind: "item", label: "Belgeler", description: "Kurulum ve API", external: true, onSelect: vi.fn() },
+          { kind: "item", label: "Kısayollar", onSelect: vi.fn() },
+        ]}
+        defaultOpen
+      />,
+    );
+    const [belgeler, kisayollar] = screen.getAllByRole("menuitem");
+    expect(belgeler!.textContent).toContain("Kurulum ve API");
+    expect(belgeler!.querySelector("svg")).not.toBeNull();
+    expect(kisayollar!.querySelector("svg")).toBeNull();
+    expect(kisayollar!.textContent).toBe("Kısayollar");
+  });
+});

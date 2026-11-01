@@ -5,6 +5,19 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.21.0
+
+> Steps can fill their row; a menu row can say where it leads.
+
+### Added
+
+- **`Steps` `stretch`** · spreads the steps across the whole width, the lines between them
+  growing to fill it, for a dialog or a card whose steps head the body. Off by default: the
+  steps keep their own size and wrap.
+- **`DropdownMenu` item `description` and `external`** · a quieter second line under the label
+  for a menu people open to find their way (help, resources), and a small arrow on a row that
+  leaves the product (a new tab, another site), said before the click.
+
 ## 0.20.0
 
 > The account menu says whose it is and picks a theme in place; the page's one search gets a key.

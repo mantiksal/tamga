@@ -6,7 +6,7 @@ import { toneOf } from "./tone.js";
 import { Icon } from "./icon.js";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
-import { Close } from "./icons.js";
+import { ArrowUpRight, Close } from "./icons.js";
 import { SkeletonOptions, SkeletonPanel } from "./skeleton.js";
 import { Kbd } from "./display.js";
 import { Segmented } from "./segmented.js";
@@ -45,6 +45,19 @@ export type MenuItem =
        * BAĞLAMIYOR: global bir kısayolu menünün bağlaması, zaten bağlayan sayfayla çakışırdı.
        */
       shortcut?: string;
+      /**
+       * A second, quieter line under the label: what the row leads to, for a menu people open to
+       * find their way (help, resources). The menu grows wider rows, not a tooltip. TR: Etiketin
+       * altında ikinci, sessiz bir satır: satırın nereye götürdüğü; yolunu bulmak için açılan bir
+       * menü için (yardım, kaynaklar).
+       */
+      description?: string;
+      /**
+       * The row leaves the product (a new tab, another site): a small arrow says so before the
+       * click. TR: Satır ürünün dışına çıkıyor (yeni sekme, başka bir site): küçük bir ok bunu
+       * tıklamadan önce söylüyor.
+       */
+      external?: boolean;
     }
   | { kind: "separator" }
   | { kind: "label"; label: string }
@@ -307,7 +320,17 @@ export function DropdownMenu({
                 }}
               >
                 {item.icon}
-                <span className="min-w-0 flex-1 truncate text-left">{item.label}</span>
+                {item.description ? (
+                  <span className="flex min-w-0 flex-1 flex-col text-left">
+                    <span className="truncate">{item.label}</span>
+                    <span className="text-small font-normal text-ink-faint">{item.description}</span>
+                  </span>
+                ) : (
+                  <span className="min-w-0 flex-1 truncate text-left">{item.label}</span>
+                )}
+                {item.external ? (
+                  <Icon icon={ArrowUpRight} size="xs" className="shrink-0 text-ink-faint" aria-hidden />
+                ) : null}
                 {item.shortcut ? <Kbd className="ml-auto shrink-0">{item.shortcut}</Kbd> : null}
               </button>
             );

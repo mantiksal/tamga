@@ -55,6 +55,14 @@ const T = {
         <Xref to="tooltip">Tooltip</Xref> da aynı yolu izliyor.
       </>
     ),
+    yol: (
+      <>
+        Bir satıra <code>description</code> verilirse etiketin altında ikinci, sessiz bir satır
+        çizilir: satırın nereye götürdüğü. Yolunu bulmak için açılan menüler içindir (yardım,
+        kaynaklar). <code>external</code> satırın ürünün dışına çıktığını sağdaki küçük bir okla
+        tıklamadan önce söyler.
+      </>
+    ),
     hesap: "Hesap menüsü",
     hesapMetin: (
       <>
@@ -102,6 +110,14 @@ const T = {
         below and room above, the menu opens upward. When the page or a table scrolls, the menu follows its trigger and closes once the trigger leaves the screen. <Xref to="tooltip">Tooltip</Xref> takes the same path.
       </>
     ),
+    yol: (
+      <>
+        Give a row a <code>description</code> and a second, quieter line is drawn under its label:
+        where the row leads. It is for menus people open to find their way (help, resources).{" "}
+        <code>external</code> says, with a small arrow on the right, that the row leaves the product
+        before it is clicked.
+      </>
+    ),
     hesap: "Account menu",
     hesapMetin: (
       <>
@@ -147,6 +163,8 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         <MenuDemo lang={lang} />
       </Demo>
       <P>{t.danger}</P>
+
+      <P>{t.yol}</P>
 
       <H2>{t.hesap}</H2>
       <Demo labels={dict.demo} code={`<DropdownMenu

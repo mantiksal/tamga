@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { DatePicker, DateTimePicker, Calendar, anYap, gunOku } from "./date-picker.js";
+import { Dialog } from "./overlay.js";
 
 /**
  * Açılan takvimin KAPANMA yolları; sınır, klavye ve saat.
@@ -44,6 +45,24 @@ describe("DatePicker · takvim nasıl kapanır", () => {
     ustTiklama.mockClear();
     fireEvent.click(screen.getByText("Nisan 2026"));
     expect(ustTiklama).not.toHaveBeenCalled();
+  });
+  it("diyalogda Esc yalnız takvimi kapatır: odak takvimde de, dışarıda da diyalog açık kalır", () => {
+    const onClose = vi.fn();
+    render(
+      <Dialog open onClose={onClose} title="Form" closeLabel="Kapat">
+        <DatePicker locale="tr-TR" value="2026-04-15" onChange={vi.fn()} placeholder="Tarih" labels={ETIKETLER} />
+      </Dialog>,
+    );
+    fireEvent.click(screen.getByRole("textbox"));
+    fireEvent.keyDown(gun("20")!, { key: "Escape" });
+    expect(kapali()).toBe(true);
+    expect(onClose).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("textbox"));
+    fireEvent.keyDown(document.body, { key: "Escape" });
+    expect(kapali()).toBe(true);
+    expect(onClose).not.toHaveBeenCalled();
+    fireEvent.keyDown(screen.getByRole("textbox"), { key: "Escape" });
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
   it("alanın kendi içine tıklamak kapatmaz · tetik dışarı sayılmaz", () => {
     ac();

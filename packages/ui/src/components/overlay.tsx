@@ -899,7 +899,8 @@ function DialogShell({
   useScrollLock(open);
   useEffect(() => {
     if (!open) return;
-    const esc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    /* İçerideki açık bir katmanın (takvim, liste) tükettiği Esc diyaloğu kapatmıyor. */
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && !e.defaultPrevented && onClose();
     document.addEventListener("keydown", esc);
     return () => document.removeEventListener("keydown", esc);
   }, [open, onClose]);

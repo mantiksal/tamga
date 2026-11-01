@@ -259,7 +259,13 @@ export function Combobox<T extends string>({
               e.preventDefault();
               commit(shown[active]);
             } else if (e.key === "Escape") {
-              /* İlk basış kapatır, kapalıyken ikincisi yazılanı siler. */
+              /* İlk basış kapatır, kapalıyken ikincisi yazılanı siler. İkisi de
+                 Esc'i TÜKETİYOR: diyaloğun içinde diyaloğu da kapatıyordu. Üçüncü
+                 basış (kapalı ve boş) diyaloğa gidiyor. */
+              if (acik || query) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
               if (acik) setOpen(false);
               else if (query) {
                 setQuery("");

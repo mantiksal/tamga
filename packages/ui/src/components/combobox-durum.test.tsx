@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { Combobox } from "./combobox.js";
 import { Select } from "./primitives.js";
+import { Dialog } from "./overlay.js";
 
 /* SUNUCUDA ARAYAN KUTU "sonuç yok"u erken söylemez: yüklenirken loading, kısa sorguda short,
    boşta empty (ya da ileri bir yol); gruplar başlıklı, durumlu seçenek kareli; oklar döngüsel;
@@ -73,5 +74,38 @@ describe("Select · sabit liste", () => {
     fireEvent.scroll(document.querySelector("[data-kap]")!);
     expect(screen.queryByRole("listbox")).not.toBeNull();
     rect.mockRestore();
+  });
+});
+
+/* ESC EN ÜSTTEKİ KATMANIN: diyaloğun içinde açık bir liste Esc'i tüketiyor,
+   diyalog kapanmıyor (yazılan form gidiyordu). */
+describe("Diyalog içinde Esc", () => {
+  it("Select: ilk Esc listeyi kapatır, diyalog açık kalır; ikincisi diyaloğu kapatır", () => {
+    const onClose = vi.fn();
+    render(
+      <Dialog open onClose={onClose} title="Form" closeLabel="Kapat">
+        <Select options={["A", "B"]} placeholder="Seç" aria-label="Harf" />
+      </Dialog>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Harf" }));
+    fireEvent.keyDown(screen.getAllByRole("option")[0]!, { key: "Escape" });
+    expect(screen.queryByRole("listbox")).toBeNull();
+    expect(onClose).not.toHaveBeenCalled();
+    fireEvent.keyDown(screen.getByRole("button", { name: "Harf" }), { key: "Escape" });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+  it("Combobox: açıkken ve yazılıyken Esc tüketilir; kapalı ve boşken diyaloğa gider", () => {
+    const onClose = vi.fn();
+    render(
+      <Dialog open onClose={onClose} title="Form" closeLabel="Kapat">
+        <Combobox options={SEC} onChange={vi.fn()} placeholder="Ara" aria-label="Şehir" labels={L} />
+      </Dialog>,
+    );
+    fireEvent.change(kutu(), { target: { value: "br" } });
+    fireEvent.keyDown(kutu(), { key: "Escape" });
+    fireEvent.keyDown(kutu(), { key: "Escape" });
+    expect(onClose).not.toHaveBeenCalled();
+    fireEvent.keyDown(kutu(), { key: "Escape" });
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

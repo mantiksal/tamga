@@ -138,3 +138,25 @@ varsa odak onun.
 `focusable` listesinden seçiliyor ki gizli ya da devre dışı bir elemana odak
 verilmesin: kapalı bir düğmeye odaklanmak, odağı hiç vermemekle aynı şey ama
 sessizce.
+
+### Esc en üstteki katmanın.
+
+Ölçülen hata: diyalogdaki bir DateTimePicker'da takvim açıkken Esc'e basınca
+diyalog da kapanıyordu ve kullanıcının yazdığı form gidiyordu. Diyalogdaki bir
+Select'te de aynısı. Sebep, her katmanın Esc'i `document`ta dinlemesi: tuş
+oraya kadar çıkıyor ve onu duyan herkes kapanıyordu.
+
+Sözleşme artık şu: Esc'i karşılayan katman onu TÜKETİR (`preventDefault` +
+`stopPropagation`), ve `Dialog`/`Sheet` tüketilmiş bir Esc'e
+(`defaultPrevented`) kapanmaz. `useListKeys`, `useDismiss`, `Combobox`,
+`MultiSelect` ve zengin metnin bağlantı kutusu buna uyuyor.
+
+`useDismiss` İKİ YERDE DİNLİYOR. Odak kutunun içindeyse kutunun kendisinde: içteki
+bir Select önce davranıyor, tükettiyse takvim açık kalıyor (Esc saat listesini
+kapatır, takvimi değil). Odak dışarıdaysa (Safari bir düğmeye tıklayınca odağı
+`body`ye bırakıyor) `document`ın yakalama evresinde, yani diyaloğun
+dinleyicisinden önce. Aynı düğümdeki iki dinleyicinin sırası kayıt sırasıdır ve
+diyalog hep önce kaydoluyor; `stopPropagation` bunu çözmezdi.
+
+`Combobox` kapalı ve boşken Esc'i bırakıyor: tüketecek bir şey kalmadığında tuş
+diyaloğun.

@@ -161,7 +161,10 @@ export function useListKeys({
           list[list.length - 1]?.focus();
           break;
         case "Escape":
+          /* Esc BU LİSTENİN: diyaloğun içindeki bir Select'te Esc diyaloğu da
+             kapatıyordu, yazılan form gidiyordu. Bkz. `useDismiss`. */
           e.preventDefault();
+          e.stopPropagation();
           onClose();
           break;
         case " ":
@@ -184,20 +187,37 @@ export function useListKeys({
  * Shared, because an overlay nobody can dismiss is a trap rather than a style:
  * `DatePicker` kept its own open state and had none of this. The returned ref
  * marks what counts as "inside", and that includes the trigger.
+ *
+ * ESC TÜKETİLİYOR: kutunun kendisinde, odak dışarıdaysa `document`ın yakalama
+ * evresinde; yoksa diyaloğu da kapatıyordu. Gerekçe: docs/gerekce/09-kitaplik.md
  */
 export function useDismiss<T extends HTMLElement = HTMLDivElement>(open: boolean, close: () => void) {
   const box = useRef<T>(null);
   useEffect(() => {
     if (!open) return;
+    const el = box.current;
     const away = (e: MouseEvent) => {
       if (box.current && !box.current.contains(e.target as Node)) close();
     };
-    const esc = (e: KeyboardEvent) => e.key === "Escape" && close();
+    const tuket = (e: KeyboardEvent) => {
+      e.stopPropagation();
+      if (e.defaultPrevented) return;
+      e.preventDefault();
+      close();
+    };
+    const icerde = (e: KeyboardEvent) => e.key === "Escape" && tuket(e);
+    const disarda = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      if (el && e.target instanceof Node && el.contains(e.target)) return;
+      tuket(e);
+    };
     document.addEventListener("mousedown", away);
-    document.addEventListener("keydown", esc);
+    el?.addEventListener("keydown", icerde);
+    document.addEventListener("keydown", disarda, true);
     return () => {
       document.removeEventListener("mousedown", away);
-      document.removeEventListener("keydown", esc);
+      el?.removeEventListener("keydown", icerde);
+      document.removeEventListener("keydown", disarda, true);
     };
   }, [open, close]);
   return box;

@@ -348,7 +348,12 @@ export function MultiSelect({
       onChange(value.slice(0, -1));
       return;
     }
-    if (e.key === "Escape") setOpen(false);
+    /* Açık liste Esc'i tüketiyor: diyaloğun içinde diyaloğu da kapatıyordu. */
+    if (e.key === "Escape" && open) {
+      e.preventDefault();
+      e.stopPropagation();
+      setOpen(false);
+    }
   }
 
   return (

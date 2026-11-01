@@ -237,7 +237,12 @@ export function RichText({
                 e.preventDefault();
                 baglantiUygula();
               }
-              if (e.key === "Escape") setBaglantiAcik(false);
+              if (e.key === "Escape") {
+                /* Bağlantı kutusu Esc'i tüketiyor; diyaloğa gitmiyor. */
+                e.preventDefault();
+                e.stopPropagation();
+                setBaglantiAcik(false);
+              }
             }}
             placeholder={labels.linkUrl}
             aria-label={labels.linkUrl}

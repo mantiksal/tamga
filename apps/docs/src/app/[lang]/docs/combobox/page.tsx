@@ -53,6 +53,16 @@ const T = {
         listenin altına bir satır koyar: aranan yeri genişletmenin yolu (&quot;Her yerde ara&quot;).
       </>
     ),
+    durumlar: (
+      <>
+        Sunucuda arayan bir kutu &quot;sonuç yok&quot;u erken söylememeli: <code>loading</code>{" "}
+        cevap gelene kadar <code>labels.loading</code>, <code>minQuery</code> altındaki sorgu{" "}
+        <code>labels.short</code> der. <code>header</code> listenin üstünde nerede arandığını
+        yazar; <code>empty</code> sonuçsuz durumda bir çıkmaz yerine ileri bir yol koyar.
+        Seçenekteki <code>group</code> başlıkları, <code>tone</code> durum karesini çizer;{" "}
+        <code>labels.count</code> sonuç sayısını ekran okuyucuya duyurur.
+      </>
+    ),
     clearable: (
       <>
         <code>clearable</code> varsayılan olarak açık: seçili değerin yanında bir × durur. Her zaman
@@ -103,6 +113,17 @@ const T = {
         under the list: the way to widen what is searched (&quot;Search everywhere&quot;).
       </>
     ),
+    durumlar: (
+      <>
+        A box that searches on the server must not say &quot;no results&quot; too early:{" "}
+        <code>loading</code> says <code>labels.loading</code> until the answer comes, and a query
+        under <code>minQuery</code> says <code>labels.short</code>. <code>header</code> writes
+        where the search looks, over the list; <code>empty</code> puts a way forward where there
+        are no results, instead of a dead end. An option&apos;s <code>group</code> draws headings,
+        its <code>tone</code> the state square; <code>labels.count</code> tells a screen reader
+        how many results there are.
+      </>
+    ),
     clearable: (
       <>
         <code>clearable</code> is on by default: an × sits beside the chosen value. On a field that
@@ -150,6 +171,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <P>{t.search}</P>
       <P>{t.clearable}</P>
       <P>{t.arama}</P>
+      <P>{t.durumlar}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.focus}</Note>

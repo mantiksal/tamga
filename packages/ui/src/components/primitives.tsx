@@ -1,6 +1,15 @@
 "use client";
 
-import { cloneElement, isValidElement, useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  cloneElement,
+  isValidElement,
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import type { Tone } from "./tone.js";
 import type { IconGlyph } from "./icons.js";
 import { toneOf } from "./tone.js";
@@ -541,6 +550,48 @@ export function Select({
   const close = useCallback(() => setOpen(false), []);
   useListKeys({ open: open && !loading, containerRef: list, onClose: close });
 
+  /* LİSTE `fixed`, `absolute` DEĞİL: bir diyaloğun kaydırılan gövdesi onu kırpıyordu
+     (davet penceresinde rol listesinin yarısı görünmüyordu) ve z-index bir kırpmayı
+     aşamaz · `DropdownMenu`'nün kararının aynısı. Altında yer yoksa ve üstünde varsa
+     yukarı açılıyor. */
+  const [yer, setYer] = useState<{ left: number; top: number; width: number } | null>(null);
+  const olc = useCallback(() => {
+    const tetik = box.current;
+    const el = list.current;
+    if (!tetik || !el) return;
+    const r = tetik.getBoundingClientRect();
+    const p = el.getBoundingClientRect();
+    const bosluk = parseFloat(getComputedStyle(tetik).getPropertyValue("--overlay-gap")) || 0;
+    const pay = 16;
+    const altta = r.bottom + bosluk;
+    const ustte = r.top - bosluk - p.height;
+    const sigmiyor = altta + p.height > window.innerHeight - pay && ustte >= pay;
+    setYer({ left: r.left, top: sigmiyor ? ustte : altta, width: r.width });
+  }, []);
+  useLayoutEffect(() => {
+    if (!open) {
+      setYer(null);
+      return;
+    }
+    olc();
+  }, [open, loading, options.length, olc]);
+  /* Kaydırma listeyi kapatmıyor, yerini yeniliyor; tetik görünür alandan çıkınca kapanıyor. */
+  useEffect(() => {
+    if (!open) return;
+    const izle = (e: Event) => {
+      if (list.current?.contains(e.target as Node)) return;
+      const r = box.current?.getBoundingClientRect();
+      if (r && (r.bottom < 0 || r.top > window.innerHeight)) setOpen(false);
+      else olc();
+    };
+    window.addEventListener("scroll", izle, true);
+    window.addEventListener("resize", olc);
+    return () => {
+      window.removeEventListener("scroll", izle, true);
+      window.removeEventListener("resize", olc);
+    };
+  }, [open, olc]);
+
   useEffect(() => {
     if (!open) return;
     /* Seçili satır listenin ortasına; YALNIZ liste kaydırılıyor. `scrollIntoView`
@@ -597,7 +648,14 @@ export function Select({
         <div
           ref={list}
           role="listbox"
-          className="tamga-overlay tamga-menu tamga-select-liste absolute left-0 top-[var(--overlay-below)] z-40 flex w-full flex-col gap-0.5"
+          className="tamga-overlay tamga-menu tamga-select-liste fixed z-40 flex flex-col gap-0.5"
+          /* Ölçülene kadar görünmez: ölçüm boyamadan önce koşuyor, bu bir sigorta. */
+          style={{
+            left: yer?.left ?? 0,
+            top: yer?.top ?? 0,
+            width: yer?.width,
+            visibility: yer ? undefined : "hidden",
+          }}
           aria-busy={loading || undefined}
         >
           {loading && <SkeletonOptions rows={loadingRows} />}

@@ -70,6 +70,7 @@ const T = {
         <strong>Bir kahraman, sonra ızgara.</strong> Kahraman bir slot çünkü iki özet ekranı oraya
         farklı şeyler koyuyor; ama ilişki aynı: tam olarak bir şey cevaptır. İki kahramanı olan bir
         ekranın kahramanı yoktur, ve bir pano tam böyle eşit karolardan oluşan bir duvara dönüşür.
+        Başlık bir düğüm: bir pano durumunu başlık yapabilir ve onu taşıyan kelimeyi renklendirebilir.
       </>
     ),
     detayH: "Detay",
@@ -204,6 +205,8 @@ const T = {
         <strong>One hero, then a grid.</strong> The hero is a slot because two overview screens put
         different things in it, but the relationship is the same: exactly one thing is the answer. A
         screen with two heroes has no hero, which is how a dashboard becomes a wall of equal tiles.
+        The title is a node: a dashboard can make its state the heading and colour the word that
+        carries it.
       </>
     ),
     detayH: "Detail",

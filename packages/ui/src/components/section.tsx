@@ -73,7 +73,9 @@ export function SectionHead({
 
   return (
     <div {...dataProps(rest)} className="tamga-head tamga-gutter tamga-section">
-      <h3 className={`text-subhead font-semibold ${mono ? "font-mono text-control font-bold" : ""}`}>
+      {/* BOLD, not semibold (2026-11-01, Berika): at semibold a card's head read lighter than the
+          rows under it, and the eye did not stop on it. */}
+      <h3 className={`text-subhead font-bold ${mono ? "font-mono text-control" : ""}`}>
         {title}
       </h3>
       {meta ? <span className="tamga-label">{meta}</span> : null}

@@ -14,7 +14,12 @@ import { Busy, ErrorSlot, type ErrorLabels, type TemplateError } from "./shared.
 export type OverviewState = "ready" | "loading" | "error";
 
 export type OverviewTemplateProps = {
-  title: string;
+  /**
+   * The page's heading. A node, so a dashboard can make its state the heading and colour the word
+   * that carries it ("**27 mülk** bugün sizi bekliyor"). TR: Sayfanın başlığı. Düğüm, ki bir pano
+   * durumunu başlık yapıp onu taşıyan kelimeyi renklendirebilsin.
+   */
+  title: ReactNode;
   subtitle?: string;
   actions?: ReactNode;
 
@@ -50,7 +55,10 @@ export function OverviewTemplate({
         <PageBand title={title} subtitle={subtitle} actions={actions} />
       </div>
 
-      <div className="tamga-gutter min-h-0 flex-1 py-6">
+      {/* No top padding of its own: the band above already ends in its own 16px, and a second
+          24px made the gap under a title-and-subtitle twice the one above it (2026-11-01,
+          Berika). The list template's rhythm. */}
+      <div className="tamga-gutter min-h-0 flex-1 pt-2 pb-6">
         {state === "loading" ? (
           <Busy label={labels.loading}>
             <div className="flex flex-col gap-6">

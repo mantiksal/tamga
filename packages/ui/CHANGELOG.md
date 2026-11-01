@@ -5,6 +5,42 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.22.0
+
+> A combobox that searches a server says what it is doing; a select no dialog can clip.
+
+### Added
+
+- **`Combobox` states and structure** · `loading` (the answer is still coming, said instead of
+  "no results"), `minQuery` with `labels.short`, `empty` (a way forward where there are no
+  results), `header` (where this search looks, over the list), `labels.count` (how many results,
+  read by a screen reader). Options take `group` (a heading where the group changes) and `tone`
+  (the state square, as in `Select`). Arrows wrap around; Escape closes the list first and clears
+  the query second. Only the active row carries `data-active`.
+- **`AuthTemplate` `peek`** · a figure looking over the card's top edge from behind it, single
+  column only.
+- **`OverviewTemplate` `title` is a node**, so a dashboard can make its state the heading and
+  colour the word that carries it.
+
+### Changed
+
+- **`Select`'s list is positioned `fixed`**, measured on open, as `DropdownMenu` and `Combobox`
+  are: a dialog's scrolling body used to clip it. It opens upward when there is no room below,
+  follows the trigger when the page scrolls and closes once the trigger leaves the screen.
+- **`SectionHead` is bold**, not semibold: at semibold a card's head read lighter than the rows
+  under it.
+- **`AuthTemplate` split screen's title is a page heading** (display face, extrabold) with a
+  body-size subtitle; in a card it stays the quiet line it was.
+- **`OverviewTemplate`'s body sits 8px under the band**, not 24px: the band already ends in its
+  own spacing and the gap under the title was twice the one above it.
+
+### Fixed
+
+- **`cn` knows the kit's type sizes.** tailwind-merge took an unknown `text-*` for a colour, so
+  `cn("text-body", "text-ink-faint")` dropped the size: a disabled `RadioGroup` option, a
+  disabled `Checkbox` and the split `AuthTemplate` subtitle lost their size silently. The ten
+  `--text-*` tokens are now a size group of their own.
+
 ## 0.21.0
 
 > Steps can fill their row; a menu row can say where it leads.

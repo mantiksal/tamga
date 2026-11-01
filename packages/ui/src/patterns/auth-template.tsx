@@ -16,6 +16,7 @@ export function AuthTemplate({
   children,
   footer,
   aside,
+  peek,
 }: {
   /** The brand's mark. The mark, not the wordmark: this screen's job is one field and one button. TR: Markanın işareti. Sözcük markası değil işaret: bu ekranın işi tek alan ve tek düğme. */
   brand?: ReactNode;
@@ -33,6 +34,15 @@ export function AuthTemplate({
    * ziyan etmek.
    */
   aside?: ReactNode;
+  /**
+   * A figure that looks over the card's top edge from behind it: drawn under the card, so the
+   * card hides its lower half. Single column only; the split screen has no card to hide behind.
+   * The figure's own negative bottom margin sets how far it sinks. TR: Kartın üst kenarından,
+   * arkasından bakan bir figür: kartın altında çiziliyor, yani alt yarısını kart saklıyor. Yalnız
+   * tek sütunda; bölünmüş ekranda arkasına saklanacak kart yok. Ne kadar gömüleceğini figürün
+   * kendi negatif alt boşluğu belirliyor.
+   */
+  peek?: ReactNode;
 }) {
   const split = aside !== undefined;
 
@@ -55,16 +65,41 @@ export function AuthTemplate({
       >
         {brand}
         <div>
-          <h1 className="text-title font-semibold text-ink">{title}</h1>
+          {/* Split, the title opens a column of its own and carries it: large and heavy, as a
+              page's heading. In a card it stays the card's quiet line (2026-11-01, Berika). */}
+          <h1
+            className={cn(
+              "text-ink",
+              split
+                ? "font-display text-display-sm leading-tight font-extrabold"
+                : "text-title font-semibold",
+            )}
+          >
+            {title}
+          </h1>
           {subtitle ? (
-            <p className="mt-1 text-small leading-relaxed text-ink-faint">{subtitle}</p>
+            <p
+              className={cn(
+                "leading-relaxed",
+                split ? "text-body text-ink-soft" : "mt-1 text-small text-ink-faint",
+              )}
+            >
+              {subtitle}
+            </p>
           ) : null}
         </div>
       </div>
 
       {/* Gövde HER ZAMAN SOLA yaslı: bir etiket ortalanmaz, alanının solunda
           durur. Ortalanan şey sayfanın kimliği, doldurulan şey değil. */}
-      <div className={cn("text-start", split ? undefined : "tamga-card p-6")}>{children}</div>
+      {peek && !split ? (
+        <div className="pointer-events-none relative z-0 flex justify-center" aria-hidden>
+          {peek}
+        </div>
+      ) : null}
+      <div className={cn("relative z-10 text-start", split ? undefined : "tamga-card p-6")}>
+        {children}
+      </div>
 
       {footer ? <p className="mt-6 text-small text-ink-faint">{footer}</p> : null}
     </div>

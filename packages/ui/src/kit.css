@@ -4010,11 +4010,12 @@
   .tamga-gun:hover:not(:disabled):not([data-selected="true"]) {
     background: var(--color-hover);
   }
-  /* TAKVİM KUTUSU: sığmıyorsa tetiğin sağ kenarına hizalanır (çekmecede
-     sağdan taşıp yarısı görünmüyordu). Bileşen ölçüp `data-align` yazıyor. */
-  .tamga-takvim-kutu[data-align="end"] {
-    left: auto;
-    right: 0;
+  /* TAKVİM KUTUSU `fixed` ve yerini bileşen ölçüyor: sığmıyorsa tetiğin sağ
+     kenarına hizalanır ve `data-align="end"` yazar (çekmecede sağdan taşıp yarısı
+     görünmüyordu). Konum satır içi stil; burada yalnız dar ekranda taşmasın diye
+     genişlik sınırı. */
+  .tamga-takvim-kutu {
+    max-width: calc(100vw - 16px);
   }
   /* KAPALI GÜN: soluk mürekkep, imleç "olmaz" diyor, zemin almıyor · aralık
      dışı bir gün bir hedef değil, bir bilgi. */

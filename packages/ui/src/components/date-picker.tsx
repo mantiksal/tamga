@@ -42,17 +42,46 @@ export type DateRange = { from?: DateISO; to?: DateISO };
 function TakvimKutusu({ children }: { children: ReactNode }) {
   const kutu = useRef<HTMLDivElement>(null);
   const [hiza, setHiza] = useState<"start" | "end">("start");
-  useLayoutEffect(() => {
+  /* KUTU `fixed`, `absolute` DEĞİL: bir diyaloğun kaydırılan gövdesi onu
+     kırpıyordu (bakım penceresinde takvimin yarısı görünmüyordu) · Select'in
+     kararının aynısı. Tetiğe göre ölçülüyor: sağa sığmıyorsa tetiğin sağ
+     kenarına hizalanıyor, altında yer yoksa ve üstünde varsa yukarı açılıyor. */
+  const [yer, setYer] = useState<{ left: number; top: number } | null>(null);
+  const olc = useCallback(() => {
     const el = kutu.current;
-    if (!el) return;
-    let kap: HTMLElement | null = el.parentElement;
-    while (kap && kap !== document.body && getComputedStyle(kap).overflowX === "visible") kap = kap.parentElement;
-    const sag = kap && kap !== document.body ? kap.getBoundingClientRect().right : window.innerWidth;
+    const tetik = el?.parentElement;
+    if (!el || !tetik) return;
+    const r = tetik.getBoundingClientRect();
     const b = el.getBoundingClientRect();
-    setHiza(b.right > sag - 8 && b.left - (b.right - sag) >= 0 ? "end" : "start");
+    const pay = 8;
+    const bosluk = 8;
+    const sona = r.left + b.width > window.innerWidth - pay && r.right - b.width >= pay;
+    setHiza(sona ? "end" : "start");
+    const altta = r.bottom + bosluk;
+    const ustte = r.top - bosluk - b.height;
+    const sigmiyor = altta + b.height > window.innerHeight - pay && ustte >= pay;
+    setYer({ left: sona ? r.right - b.width : r.left, top: sigmiyor ? ustte : altta });
   }, []);
+  useLayoutEffect(() => {
+    olc();
+  }, [olc]);
+  /* Kaydırma ve yeniden boyutlanma kutuyu tetiğe bağlı tutuyor. */
+  useEffect(() => {
+    window.addEventListener("scroll", olc, true);
+    window.addEventListener("resize", olc);
+    return () => {
+      window.removeEventListener("scroll", olc, true);
+      window.removeEventListener("resize", olc);
+    };
+  }, [olc]);
   return (
-    <div ref={kutu} data-align={hiza} className="tamga-overlay tamga-takvim-kutu absolute z-30 mt-2 p-3" onClick={(e) => e.stopPropagation()}>
+    <div
+      ref={kutu}
+      data-align={hiza}
+      className="tamga-overlay tamga-takvim-kutu fixed z-40 p-3"
+      style={{ left: yer?.left ?? 0, top: yer?.top ?? 0, right: "auto", visibility: yer ? undefined : "hidden" }}
+      onClick={(e) => e.stopPropagation()}
+    >
       {children}
     </div>
   );

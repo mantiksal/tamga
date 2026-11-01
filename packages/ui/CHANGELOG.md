@@ -5,6 +5,18 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.22.1
+
+> The calendar is no longer clipped by a dialog.
+
+### Fixed
+
+- **`DatePicker` and `DateTimePicker` calendars are positioned `fixed`**, measured against the
+  trigger, as `Select` and `DropdownMenu` are: a dialog's scrolling body used to cut the
+  calendar in half. It aligns to the trigger's right edge when it would run past the window,
+  opens upward when there is no room below, follows the trigger on scroll, and never exceeds the
+  viewport width on a narrow screen.
+
 ## 0.22.0
 
 > A combobox that searches a server says what it is doing; a select no dialog can clip.

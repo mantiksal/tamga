@@ -5,6 +5,26 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.22.2
+
+> Escape closes the topmost layer only; the calendar finds the side with room.
+
+### Fixed
+
+- **Escape belongs to the topmost layer.** An open calendar, select, combobox, multi-select or
+  the rich-text link box inside a dialog or sheet consumes Escape; the dialog closes only on
+  the next press. Before, one Escape closed both and the form being typed was lost.
+  `useDismiss` consumes it on the box itself and, when focus is outside, at the document's
+  capture phase; `Dialog` and `Sheet` ignore a consumed Escape.
+- **The calendar opens on the side with room.** Below if it fits, else above; if it fits
+  neither, on the roomier side with its height capped and its inside scrolling; in a window
+  too short for either it is pinned inside the viewport. On a 720px screen the time pickers
+  of a `DateTimePicker` in a dialog used to fall off the screen.
+- **`DateTimePicker`'s time row is the calendar's width**: the selects no longer carry
+  `Select`'s fixed width, which widened the box and left the grid on the left.
+- **`Toast` breaks a long unbroken value** (a request id) inside the box instead of running
+  past its edge.
+
 ## 0.22.1
 
 > The calendar is no longer clipped by a dialog.

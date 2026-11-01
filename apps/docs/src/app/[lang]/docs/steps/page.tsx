@@ -30,6 +30,13 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: Loc
  */
 const T = {
   tr: {
+    yay: (
+      <>
+        <code>stretch</code> adımları bütün genişliğe yayar, aradaki çizgiler boşluğu doldurur:
+        adımların bir diyaloğun ya da kartın gövdesine başlık olduğu yer için. Kapalıyken adımlar
+        kendi boyunda durur ve sığmayan alta iner.
+      </>
+    ),
     lead: (
       <>
         Üründe bir sihirbaz şablonu vardı ve <strong>adım göstergesi yoktu</strong>, yani
@@ -69,6 +76,13 @@ const T = {
     ),
   },
   en: {
+    yay: (
+      <>
+        <code>stretch</code> spreads the steps across the whole width, the lines between them
+        growing to fill it: for steps that head a dialog or a card. Off, the steps sit at their own
+        size and wrap when they do not fit.
+      </>
+    ),
     lead: (
       <>
         The product had a wizard template and <strong>no step indicator</strong>, so the user did
@@ -132,6 +146,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         </div>
       </Demo>
       <P>{t.three}</P>
+      <P>{t.yay}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.ol}</Note>

@@ -576,6 +576,7 @@ export type Step = { key: string; label: string } & Record<string, unknown>;
 export function Steps({
   steps,
   current,
+  stretch = false,
   className,
   ...rest
 }: {
@@ -588,12 +589,26 @@ export function Steps({
   steps: readonly Step[];
   /** The active step, counting from zero. TR: Sıfırdan sayan aktif adım. */
   current: number;
+  /**
+   * Spreads the steps across the whole width, the lines between them growing to fill it: for a
+   * dialog or a card whose steps head the body. Off, the steps sit at their own size. TR: Adımları
+   * bütün genişliğe yayar, aradaki çizgiler boşluğu doldurur: adımların gövdeye başlık olduğu bir
+   * diyalog ya da kart için. Kapalıyken adımlar kendi boyunda durur.
+   */
+  stretch?: boolean;
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
   return (
-    <ol {...dataProps(rest)} className={cn("flex flex-wrap items-center gap-x-3 gap-y-2", className)}>
+    <ol
+      {...dataProps(rest)}
+      className={cn(
+        "flex items-center gap-x-3 gap-y-2",
+        stretch ? "w-full flex-nowrap" : "flex-wrap",
+        className,
+      )}
+    >
       {steps.map(({ key, label, ...adimRest }, i) => {
         const done = i < current;
         const active = i === current;
@@ -603,7 +618,11 @@ export function Steps({
              `aria-current` ile birlikte "şu adım, ve şu an açık olan o" diye
              ölçülebiliyor. Kitin kendi nitelikleri sonra yazılıyor: çağıran
              `aria-current`i kazara ezemesin. */
-          <li key={key} {...adimRest} className="flex items-center gap-3">
+          <li
+            key={key}
+            {...adimRest}
+            className={cn("flex items-center gap-3", stretch && i < steps.length - 1 && "flex-1")}
+          >
             {/* ÜÇ DURUM ÜÇ FİZİKLE, renkle değil: gelecek düz, şimdiki
                 yükselir, biten oturur. Ölçü üçünde de aynı — `min-w` artı
                 dolgu, genişliği içeriğe bırakıyordu ve `Check` glifi rakamdan
@@ -625,7 +644,11 @@ export function Steps({
             </span>
             {/* ÇİZGİ DE BİLGİ: geçilen aralık aksan, kalanı kenar rengi. */}
             {i < steps.length - 1 ? (
-              <span aria-hidden className="tamga-step-line" data-done={done ? "true" : "false"} />
+              <span
+                aria-hidden
+                className={cn("tamga-step-line", stretch && "flex-1")}
+                data-done={done ? "true" : "false"}
+              />
             ) : null}
           </li>
         );

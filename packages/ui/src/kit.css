@@ -3585,6 +3585,9 @@
     box-shadow: 4px 4px 0 var(--color-accent);
     /* Kendi yüzeyi, kendi hizası — `.tamga-overlay`deki sebebin aynısı. */
     text-align: start;
+    /* BOŞLUKSUZ DEĞER KUTUDA KIRILIYOR: bir istek kimliği
+       (`req_e0514f16…`) kutunun sağından taşıyordu. */
+    overflow-wrap: anywhere;
   }
   /* BİLDİRİM SÜTUNU: ölçüyü KAP veriyor, bildirim değil.
      `Toast` sabit genişlikteydi ve dar bir kapta taşıyordu; genişliği ona

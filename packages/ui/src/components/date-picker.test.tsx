@@ -451,3 +451,48 @@ describe("boş alan en erken seçilebilir ayda açılıyor", () => {
     expect(ayAdi()).toBe("Ağustos 2032");
   });
 });
+
+/* TAKVİM KUTUSU DİKEYDE: 720px'lik ekranda ne alta ne üste tam sığıyordu ve
+   aşağıda kalıp saat seçicilerini ekran dışına itiyordu. */
+describe("TakvimKutusu · dikey yer", () => {
+  const kur = (tetik: { top: number; bottom: number }, dogal: number) => {
+    const rect = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect");
+    rect.mockImplementation(function (this: HTMLElement) {
+      const kutu = this.classList.contains("tamga-takvim-kutu");
+      const r = kutu ? { top: 0, bottom: dogal, height: dogal } : { ...tetik, height: tetik.bottom - tetik.top };
+      return { ...r, left: 100, right: 400, width: 300, x: 100, y: r.top, toJSON() {} } as DOMRect;
+    });
+    const yuk = vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(function (this: HTMLElement) {
+      return this.classList.contains("tamga-takvim-kutu") ? dogal : 0;
+    });
+    const eski = window.innerHeight;
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 720 });
+    render(<DatePicker locale="tr-TR" value="2026-04-15" onChange={vi.fn()} placeholder="Tarih" labels={ETIKETLER} />);
+    fireEvent.click(screen.getByRole("textbox"));
+    const el = document.querySelector<HTMLElement>(".tamga-takvim-kutu")!;
+    rect.mockRestore();
+    yuk.mockRestore();
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: eski });
+    return el.style;
+  };
+  it("altta yer varsa altta, sınırsız", () => {
+    const s = kur({ top: 100, bottom: 140 }, 420);
+    expect(s.top).toBe("148px");
+    expect(s.maxHeight).toBe("");
+  });
+  it("altta yoksa ve üstte varsa üstte", () => {
+    const s = kur({ top: 600, bottom: 640 }, 420);
+    expect(s.top).toBe(`${600 - 8 - 420}px`);
+  });
+  it("iki tarafa da sığmıyorsa geniş olan tarafta, yüksekliği sınırlı ve içi kayıyor", () => {
+    const alt = kur({ top: 300, bottom: 340 }, 420);
+    expect(alt.top).toBe("348px");
+    expect(alt.maxHeight).toBe(`${720 - 8 - 348}px`);
+    expect(alt.overflowY).toBe("auto");
+  });
+  it("üst taraf genişse üstte, ekranın kenarından başlıyor", () => {
+    const s = kur({ top: 400, bottom: 440 }, 420);
+    expect(s.top).toBe("8px");
+    expect(s.maxHeight).toBe(`${400 - 16}px`);
+  });
+});

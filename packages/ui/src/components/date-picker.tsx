@@ -42,25 +42,40 @@ export type DateRange = { from?: DateISO; to?: DateISO };
 function TakvimKutusu({ children }: { children: ReactNode }) {
   const kutu = useRef<HTMLDivElement>(null);
   const [hiza, setHiza] = useState<"start" | "end">("start");
-  /* KUTU `fixed`, `absolute` DEĞİL: bir diyaloğun kaydırılan gövdesi onu
-     kırpıyordu (bakım penceresinde takvimin yarısı görünmüyordu) · Select'in
-     kararının aynısı. Tetiğe göre ölçülüyor: sağa sığmıyorsa tetiğin sağ
-     kenarına hizalanıyor, altında yer yoksa ve üstünde varsa yukarı açılıyor. */
-  const [yer, setYer] = useState<{ left: number; top: number } | null>(null);
+  /* KUTU `fixed`, `absolute` DEĞİL: diyaloğun kaydırılan gövdesi onu kırpıyordu.
+     Dikeyde sığdığı tarafa, alt önce; hiçbirine sığmıyorsa yeri çok olan tarafa,
+     yüksekliği sınırlı ve içi kayıyor. Gerekçe: docs/gerekce/01-form-ve-girdi.md */
+  const [yer, setYer] = useState<{ left: number; top: number; maxHeight?: number } | null>(null);
   const olc = useCallback(() => {
     const el = kutu.current;
     const tetik = el?.parentElement;
     if (!el || !tetik) return;
     const r = tetik.getBoundingClientRect();
     const b = el.getBoundingClientRect();
+    /* Doğal yükseklik `scrollHeight`ten: bir önceki ölçümün `maxHeight`i
+       kutuyu kısmış olabilir, `b.height` kısılmış hâli okur. */
+    const yukseklik = el.scrollHeight + (el.offsetHeight - el.clientHeight);
     const pay = 8;
     const bosluk = 8;
     const sona = r.left + b.width > window.innerWidth - pay && r.right - b.width >= pay;
     setHiza(sona ? "end" : "start");
-    const altta = r.bottom + bosluk;
-    const ustte = r.top - bosluk - b.height;
-    const sigmiyor = altta + b.height > window.innerHeight - pay && ustte >= pay;
-    setYer({ left: sona ? r.right - b.width : r.left, top: sigmiyor ? ustte : altta });
+    const left = sona ? r.right - b.width : r.left;
+    const altBos = window.innerHeight - pay - (r.bottom + bosluk);
+    const ustBos = r.top - bosluk - pay;
+    if (yukseklik <= altBos) return setYer({ left, top: r.bottom + bosluk });
+    if (yukseklik <= ustBos) return setYer({ left, top: r.top - bosluk - yukseklik });
+    /* İki taraf da çok darsa (alçak bir pencere) kutu tetiği örterek ekranın
+       içine kısılıyor: 200px'ten kısa bir pencerede kaydırmak takvimi okutmuyor. */
+    const genis = Math.max(altBos, ustBos);
+    if (genis < 200) {
+      const h = Math.min(yukseklik, window.innerHeight - 2 * pay);
+      return setYer({ left, top: Math.max(pay, window.innerHeight - pay - h), maxHeight: h });
+    }
+    setYer(
+      altBos >= ustBos
+        ? { left, top: r.bottom + bosluk, maxHeight: altBos }
+        : { left, top: r.top - bosluk - ustBos, maxHeight: ustBos },
+    );
   }, []);
   useLayoutEffect(() => {
     olc();
@@ -79,7 +94,14 @@ function TakvimKutusu({ children }: { children: ReactNode }) {
       ref={kutu}
       data-align={hiza}
       className="tamga-overlay tamga-takvim-kutu fixed z-40 p-3"
-      style={{ left: yer?.left ?? 0, top: yer?.top ?? 0, right: "auto", visibility: yer ? undefined : "hidden" }}
+      style={{
+        left: yer?.left ?? 0,
+        top: yer?.top ?? 0,
+        right: "auto",
+        maxHeight: yer?.maxHeight,
+        overflowY: yer?.maxHeight !== undefined ? "auto" : undefined,
+        visibility: yer ? undefined : "hidden",
+      }}
       onClick={(e) => e.stopPropagation()}
     >
       {children}
@@ -844,7 +866,7 @@ export function DateTimePicker({
               <Select
                 aria-label={labels.period}
                 placeholder={labels.period}
-                disabled={!g}
+                  disabled={!g}
                 value={saat < 12 ? "am" : "pm"}
                 onChange={(v) => yay(g, v === "am" ? saat % 12 : (saat % 12) + 12, dakika)}
                 options={[{ value: "am", label: donem.am }, { value: "pm", label: donem.pm }]}

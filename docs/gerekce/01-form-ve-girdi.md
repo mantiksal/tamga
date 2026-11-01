@@ -112,6 +112,17 @@ ZAMAN DİLİMİ YOK. Bileşen yalnız YIL-AY-GÜN ile çalışır. Bir sipariş 
 "15 Nisan" ister, "15 Nisan 00:00 UTC+3" değil; saat karıştırıldığında gün
 sınırında bir kayma doğar ve kimse sebebini bulamaz.
 
+### Takvim kutusu dikeyde.
+
+Kutu `fixed` ve tetiğe göre ölçülüyor. Sığdığı tarafa açılıyor, önce alta.
+Hiçbir tarafa tam sığmıyorsa YERİ ÇOK OLAN tarafa açılıyor ve yüksekliği o
+boşlukla sınırlanıyor, içi kayıyor. Eski kural "altta sığmıyorsa ve üstte tam
+sığıyorsa yukarı" idi: 1280×720 bir ekranda diyalogdaki DateTimePicker ne alta
+ne üste sığıyordu, kutu aşağıda kalıyor ve saat seçicileri ekranın dışında,
+kaydırılamaz duruyordu. İki taraf da 200 pikselden darsa (alçak bir pencere)
+kutu tetiği örterek ekranın içine kısılıyor: o boyda kaydırılan bir takvim
+okunmuyor.
+
 
 ---
 

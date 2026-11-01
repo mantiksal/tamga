@@ -845,10 +845,13 @@ export function DateTimePicker({
             /* Gün seçilince takvim AÇIK KALIYOR: saat daha seçilecek. */
             onSelect={(d) => yay(d, saat, dakika)}
           />
+          {/* SAAT SATIRI IZGARANIN GENİŞLİĞİNDE: Select'in `w-56`sı kutuyu genişletip
+              ızgarayı solda bırakıyordu; `w-0 flex-1` satıra genişlik katkısı vermiyor. */}
           <div className="mt-3 flex items-center gap-2 border-t border-line pt-3">
             <Select
               aria-label={labels.hour}
               placeholder={labels.hour}
+              className="w-0 min-w-0 flex-1"
               disabled={!g}
               value={String(saat)}
               onChange={(v) => yay(g, Number(v), dakika)}
@@ -857,6 +860,7 @@ export function DateTimePicker({
             <Select
               aria-label={labels.minute}
               placeholder={labels.minute}
+              className="w-0 min-w-0 flex-1"
               disabled={!g}
               value={String(dakika)}
               onChange={(v) => yay(g, saat, Number(v))}
@@ -866,7 +870,8 @@ export function DateTimePicker({
               <Select
                 aria-label={labels.period}
                 placeholder={labels.period}
-                  disabled={!g}
+                className="w-0 min-w-0 flex-1"
+                disabled={!g}
                 value={saat < 12 ? "am" : "pm"}
                 onChange={(v) => yay(g, v === "am" ? saat % 12 : (saat % 12) + 12, dakika)}
                 options={[{ value: "am", label: donem.am }, { value: "pm", label: donem.pm }]}

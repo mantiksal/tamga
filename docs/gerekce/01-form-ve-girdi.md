@@ -123,6 +123,11 @@ kaydırılamaz duruyordu. İki taraf da 200 pikselden darsa (alçak bir pencere)
 kutu tetiği örterek ekranın içine kısılıyor: o boyda kaydırılan bir takvim
 okunmuyor.
 
+SAAT SATIRI IZGARANIN GENİŞLİĞİNDE. Select'in varsayılan `w-56`sı iki kutuyla
+satırı ~450 piksele çıkarıyor, kutu genişliyor ve 280'lik gün ızgarası solda
+kalıyordu. Saat kutuları `w-0 flex-1`: satır kutuya genişlik katmıyor, ızgaranın
+verdiğini paylaşıyor.
+
 
 ---
 

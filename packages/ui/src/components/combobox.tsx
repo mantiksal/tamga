@@ -33,10 +33,10 @@ export type ComboOption<T extends string> = {
    */
   tone?: Tone;
   /**
-   * A picture before the label, the option's own mark (a brand's `LogoTile`), as on `Select`. The
-   * chosen option's picture takes the search glyph's place while nothing is typed. TR: Etiketin
-   * önünde seçeneğin kendi işareti (markanın `LogoTile`'ı), `Select`'teki gibi. Seçilinin görseli,
-   * bir şey yazılmazken arama glifinin yerine geçiyor.
+   * A picture before the label, the option's own mark (an `<img>` of a logo, a kit `Icon`), as on
+   * `Select`. The chosen option's picture takes the search glyph's place while nothing is typed.
+   * TR: Etiketin önünde seçeneğin kendi işareti (bir logonun `<img>`'i, kitin bir `Icon`'u),
+   * `Select`'teki gibi. Seçilinin görseli, bir şey yazılmazken arama glifinin yerine geçiyor.
    */
   media?: ReactNode;
 } & Record<string, unknown>;
@@ -234,7 +234,7 @@ export function Combobox<T extends string>({
     <div {...dataProps(rest)} ref={box} className={cn("relative", className)}>
       <span className="relative flex items-center">
         {selected?.media && !query ? (
-          <span className="tamga-option-media pointer-events-none absolute left-1.5">{selected.media}</span>
+          <span className="tamga-option-media pointer-events-none absolute left-2.5">{selected.media}</span>
         ) : (
           <Icon icon={Search} size="xs" className="pointer-events-none absolute left-3 text-ink-faint" />
         )}

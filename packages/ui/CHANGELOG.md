@@ -5,6 +5,18 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.23.0
+
+> An option can carry its own picture.
+
+### Added
+
+- **`Select` and `Combobox` option `media`** · a picture before the label, the thing's own mark
+  (an `<img>` of a brand's logo, a flag, a kit `Icon`), drawn as it is in a frameless 20px slot.
+  In the list and, for the chosen option, in the closed box; in a `Combobox` it takes the search
+  glyph's place while nothing is typed. On a `disabled` option it fades with the row. Not
+  `icon`, which names the list; `media` names the option.
+
 ## 0.22.2
 
 > Escape closes the topmost layer only; the calendar finds the side with room.

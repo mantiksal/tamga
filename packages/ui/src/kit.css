@@ -4720,10 +4720,21 @@
   }
   /* SEÇENEĞİN GÖRSELİ (`media`): markanın logosu ya da bir bayrak, etiketin önünde. Kapalı bir
      seçenekte satırla birlikte soluk; parlak bir logo "bunu seçebilirsin" diyordu. */
+  /* ÇERÇEVESİZ VE KÜÇÜK: içine doğrudan bir resim ya da kitin ikonu konuyor; çerçeveli bir karo
+     (`LogoTile`) satırı iki katına çıkarıyor ve etiketten büyük okunuyordu. Resim yuvaya sığar. */
   .tamga-option-media {
     display: flex;
     flex-shrink: 0;
     align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+  }
+  .tamga-option-media > img,
+  .tamga-option-media > svg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
   .tamga-option:disabled {
     cursor: default;

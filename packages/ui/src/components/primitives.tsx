@@ -450,13 +450,14 @@ export function Select({
    * yanındaki sessiz değer ("2-3 gün"); `description` altındaki cümle ("Yalnız çalışıp
    * çalışmadığı"), ne yaptığını söylemesi gereken seçenekler için.
    *
-   * `media` is a picture before the label, the thing's own mark (a brand's `LogoTile`, a flag):
-   * drawn in the list and, for the chosen option, in the closed box. Not `icon`, which is the
-   * kit's glyph naming the LIST; `media` names the OPTION. On a `disabled` option it is drawn
-   * faint with the row. TR: `media` etiketin önündeki görsel, şeyin kendi işareti (markanın
-   * `LogoTile`'ı, bir bayrak): listede ve seçili seçenek için kapalı kutuda çiziliyor. `icon`
-   * değil; o LİSTEYİ adlandıran kit glifi, `media` SEÇENEĞİ adlandırıyor. `disabled` bir
-   * seçenekte satırla birlikte soluk.
+   * `media` is a picture before the label, the thing's own mark: an `<img>` of a brand's logo,
+   * a flag, or a kit `Icon`, drawn as it is in a small frameless 20px slot, in the list and, for
+   * the chosen option, in the closed box. Not `icon`, which is the kit's glyph naming the LIST;
+   * `media` names the OPTION. On a `disabled` option it is drawn faint with the row. TR: `media`
+   * etiketin önündeki görsel, şeyin kendi işareti: markanın logosunun `<img>`'i, bir bayrak ya
+   * da kitin bir `Icon`'u; 20px'lik çerçevesiz küçük yuvada olduğu gibi, listede ve seçili
+   * seçenek için kapalı kutuda çiziliyor. `icon` değil; o LİSTEYİ adlandıran kit glifi, `media`
+   * SEÇENEĞİ adlandırıyor. `disabled` bir seçenekte satırla birlikte soluk.
    */
   options: readonly (
     | string

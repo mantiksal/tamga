@@ -1,4 +1,5 @@
-import { Field, LogoTile, Select } from "tamga-ui";
+import { Field, Icon, Select } from "tamga-ui";
+import { Bell, Mail, Phone } from "tamga-ui/icons";
 import { SelectDemo } from "@/components/interactive";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
@@ -49,15 +50,18 @@ const T = {
     medyaH: "Seçeneğin görseli",
     medyaP: (
       <>
-        <code>media</code> etiketin önüne seçeneğin kendi işaretini çizer: markanın{" "}
-        <Xref to="logo-tile">LogoTile</Xref>&apos;ı, bir bayrak. Seçili seçeneğin görseli kapalı
-        kutuda da durur, yani göz seçtiğini listede gördüğü gibi tanır. <code>icon</code>
-        değildir: o listeyi adlandıran kit glifi, <code>media</code> seçeneği adlandırır.{" "}
-        <code>disabled</code> bir seçenekte görsel satırla birlikte soluklaşır.
+        <code>media</code> etiketin önüne seçeneğin kendi işaretini çizer: markanın logosunun{" "}
+        <code>&lt;img&gt;</code>&apos;i ya da kitin bir <Xref to="icons">Icon</Xref>&apos;u, çerçevesiz,
+        20px&apos;lik küçük bir yuvada. Seçili seçeneğin görseli kapalı kutuda da durur, yani göz
+        seçtiğini listede gördüğü gibi tanır. <code>icon</code> değildir: o listeyi adlandıran kit
+        glifi, <code>media</code> seçeneği adlandırır. <code>disabled</code> bir seçenekte görsel
+        satırla birlikte soluklaşır.
       </>
     ),
     kanal: "Kanal türü",
     kanalSec: "Tür seç",
+    marka: "Marka",
+    markaSec: "Marka seç",
     kargo: "Kargo",
     kargoHata: "Bir kargo seç.",
     kargoSec: "Kargo seç",
@@ -110,15 +114,18 @@ const T = {
     medyaH: "An option's picture",
     medyaP: (
       <>
-        <code>media</code> draws the option&apos;s own mark before its label: a brand&apos;s{" "}
-        <Xref to="logo-tile">LogoTile</Xref>, a flag. The chosen option&apos;s picture stays in the
-        closed box too, so the eye knows its choice as it saw it in the list. It is not{" "}
-        <code>icon</code>: that is the kit&apos;s glyph naming the list, <code>media</code> names
-        the option. On a <code>disabled</code> option the picture fades with its row.
+        <code>media</code> draws the option&apos;s own mark before its label: an{" "}
+        <code>&lt;img&gt;</code> of a brand&apos;s logo or a kit <Xref to="icons">Icon</Xref>, frameless,
+        in a small 20px slot. The chosen option&apos;s picture stays in the closed box too, so the
+        eye knows its choice as it saw it in the list. It is not <code>icon</code>: that is the
+        kit&apos;s glyph naming the list, <code>media</code> names the option. On a{" "}
+        <code>disabled</code> option the picture fades with its row.
       </>
     ),
     kanal: "Channel type",
     kanalSec: "Pick a type",
+    marka: "Brand",
+    markaSec: "Pick a brand",
     kargo: "Carrier",
     kargoHata: "Pick a carrier.",
     kargoSec: "Pick a carrier",
@@ -197,27 +204,51 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <P>{t.medyaP}</P>
       <Demo labels={dict.demo} align="start" code={`<Select
   options={[
-    { value: "email", label: "E-posta", media: <LogoTile name="E-posta" size="sm" /> },
-    { value: "slack", label: "Slack", media: <LogoTile name="Slack" size="sm" /> },
-    { value: "teams", label: "Teams", media: <LogoTile name="Teams" size="sm" />, disabled: true },
+    { value: "tamga", label: "Tamga", media: <img src="/tamga-mark-light.svg" alt="" /> },
+    { value: "mantiksal", label: "Mantıksal", media: <img src="/mantiksal-mark.svg" alt="" /> },
+  ]}
+  placeholder="${t.markaSec}"
+/>
+<Select
+  options={[
+    { value: "email", label: "E-posta", media: <Icon icon={Mail} size="sm" /> },
+    { value: "push", label: "Push", media: <Icon icon={Bell} size="sm" /> },
+    { value: "sms", label: "SMS", media: <Icon icon={Phone} size="sm" />, disabled: true },
   ]}
   placeholder="${t.kanalSec}"
 />`}>
-        <Field label={t.kanal} htmlFor="kanal">
-          <Select
-            options={[
-              { value: "email", label: "E-posta", media: <LogoTile name="E-posta" size="sm" /> },
-              { value: "slack", label: "Slack", media: <LogoTile name="Slack" size="sm" /> },
-              {
-                value: "teams",
-                label: "Teams",
-                media: <LogoTile name="Teams" size="sm" />,
-                disabled: true,
-              },
-            ]}
-            placeholder={t.kanalSec}
-          />
-        </Field>
+        <div className="grid w-full gap-7 sm:grid-cols-2" data-not-ornek>
+          <Field label={t.marka} htmlFor="marka">
+            <Select
+              options={[
+                { value: "tamga", label: "Tamga", media: <img src="/tamga-mark-light.svg" alt="" /> },
+                {
+                  value: "mantiksal",
+                  label: "Mantıksal",
+                  media: <img src="/mantiksal-mark.svg" alt="" />,
+                },
+              ]}
+              placeholder={t.markaSec}
+              className="w-full"
+            />
+          </Field>
+          <Field label={t.kanal} htmlFor="kanal">
+            <Select
+              options={[
+                { value: "email", label: "E-posta", media: <Icon icon={Mail} size="sm" /> },
+                { value: "push", label: "Push", media: <Icon icon={Bell} size="sm" /> },
+                {
+                  value: "sms",
+                  label: "SMS",
+                  media: <Icon icon={Phone} size="sm" />,
+                  disabled: true,
+                },
+              ]}
+              placeholder={t.kanalSec}
+              className="w-full"
+            />
+          </Field>
+        </div>
       </Demo>
 
       <H2>{t.rules}</H2>

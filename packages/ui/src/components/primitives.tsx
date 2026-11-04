@@ -449,10 +449,25 @@ export function Select({
    * ("Only whether it works"), for options that need saying what they do. TR: `hint` etiketin
    * yanındaki sessiz değer ("2-3 gün"); `description` altındaki cümle ("Yalnız çalışıp
    * çalışmadığı"), ne yaptığını söylemesi gereken seçenekler için.
+   *
+   * `media` is a picture before the label, the thing's own mark (a brand's `LogoTile`, a flag):
+   * drawn in the list and, for the chosen option, in the closed box. Not `icon`, which is the
+   * kit's glyph naming the LIST; `media` names the OPTION. On a `disabled` option it is drawn
+   * faint with the row. TR: `media` etiketin önündeki görsel, şeyin kendi işareti (markanın
+   * `LogoTile`'ı, bir bayrak): listede ve seçili seçenek için kapalı kutuda çiziliyor. `icon`
+   * değil; o LİSTEYİ adlandıran kit glifi, `media` SEÇENEĞİ adlandırıyor. `disabled` bir
+   * seçenekte satırla birlikte soluk.
    */
   options: readonly (
     | string
-    | ({ value: string; label?: string; tone?: Tone; hint?: string; description?: string } & Record<string, unknown>)
+    | ({
+        value: string;
+        label?: string;
+        tone?: Tone;
+        hint?: string;
+        description?: string;
+        media?: React.ReactNode;
+      } & Record<string, unknown>)
   )[];
   /**
    * `label` is the option's TEXT when it differs from its identity: a locale is stored as "tr"
@@ -543,10 +558,13 @@ export function Select({
   const current = value ?? inner;
   /* DÜĞMEDE DEĞER DEĞİL ETİKETİ YAZIYOR: kimliği "tr" olan bir seçenek
      "Türkçe" diye okunur, ve düğme listeyle aynı sözcüğü göstermek zorunda. */
-  const gorunen =
-    options
-      .map((o) => (typeof o === "string" ? { value: o } : o))
-      .find((o) => o.value === current)?.label ?? current;
+  const secilen = options
+    .map((o) => (typeof o === "string" ? { value: o } : o))
+    .find((o) => o.value === current) as { label?: string; media?: React.ReactNode } | undefined;
+  const gorunen = secilen?.label ?? current;
+  /* SEÇİLİNİN GÖRSELİ KUTUDA DA: listede logosuyla seçilen şey kapanınca düz metne dönüyordu,
+     göz seçtiğini kutuda tanıyamıyordu. */
+  const secilenGorsel = secilen?.media;
   const close = useCallback(() => setOpen(false), []);
   useListKeys({ open: open && !loading, containerRef: list, onClose: close });
 
@@ -639,6 +657,7 @@ export function Select({
             Glif o yolculuğu kaldırıyor. Sessiz renkte: bir işaret değil bir
             başlık. */}
         {icon ? <Icon icon={icon} size="sm" className="shrink-0 text-ink-faint" /> : null}
+        {secilenGorsel ? <span className="tamga-option-media">{secilenGorsel}</span> : null}
         <span className={cn("min-w-0 flex-1 truncate", current ? "" : "text-ink-faint")}>
           {gorunen || placeholder}
         </span>
@@ -661,7 +680,15 @@ export function Select({
           {loading && <SkeletonOptions rows={loadingRows} />}
           {!loading && options.map((ham) => {
             const nesne = typeof ham === "string" ? { value: ham } : ham;
-            const { value: o, label: etiket, tone: ton, hint: ipucu, description: aciklama, ...kanca } = nesne;
+            const {
+              value: o,
+              label: etiket,
+              tone: ton,
+              hint: ipucu,
+              description: aciklama,
+              media: gorsel,
+              ...kanca
+            } = nesne as typeof nesne & { media?: React.ReactNode };
             return (
             <button
               /* KANCA ÖNCE, KİTİN KENDİ NİTELİKLERİ SONRA: çağıranın geçirdiği
@@ -694,6 +721,7 @@ export function Select({
                   style={{ background: toneOf(ton).mark }}
                 />
               ) : null}
+              {gorsel ? <span className="tamga-option-media">{gorsel}</span> : null}
               {/* AÇIKLAMA İKİNCİ SATIRDA, ipucu yanda: ipucu bir değer ("2-3 gün"), açıklama
                   bir cümle ("Yalnız çalışıp çalışmadığı") · cümle yana sığmıyor, kesiliyordu. */}
               {aciklama ? (

@@ -4718,6 +4718,20 @@
   .tamga-option[data-selected="true"] {
     background: var(--color-accent-bg);
   }
+  /* SEÇENEĞİN GÖRSELİ (`media`): markanın logosu ya da bir bayrak, etiketin önünde. Kapalı bir
+     seçenekte satırla birlikte soluk; parlak bir logo "bunu seçebilirsin" diyordu. */
+  .tamga-option-media {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+  }
+  .tamga-option:disabled {
+    cursor: default;
+    color: var(--color-ink-faint);
+  }
+  .tamga-option:disabled .tamga-option-media {
+    opacity: 0.5;
+  }
   /* TEHLİKELİ BÖLGE: kenar ve karo kritik tonda, kart değil · bütün kartı
      boyamak içindeki uyarıyı ve düğmeleri yutuyor. Satırlar çizgiyle ayrı.
      Gerekçe: docs/gerekce/08-blok-ve-sablon.md */

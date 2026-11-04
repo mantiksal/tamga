@@ -32,6 +32,13 @@ export type ComboOption<T extends string> = {
    * TR: Seçenek bir DURUMSA etiketin önünde kare (`Select`'tekiyle aynı `tamga-mark`).
    */
   tone?: Tone;
+  /**
+   * A picture before the label, the option's own mark (a brand's `LogoTile`), as on `Select`. The
+   * chosen option's picture takes the search glyph's place while nothing is typed. TR: Etiketin
+   * önünde seçeneğin kendi işareti (markanın `LogoTile`'ı), `Select`'teki gibi. Seçilinin görseli,
+   * bir şey yazılmazken arama glifinin yerine geçiyor.
+   */
+  media?: ReactNode;
 } & Record<string, unknown>;
 
 /**
@@ -226,7 +233,11 @@ export function Combobox<T extends string>({
   return (
     <div {...dataProps(rest)} ref={box} className={cn("relative", className)}>
       <span className="relative flex items-center">
-        <Icon icon={Search} size="xs" className="pointer-events-none absolute left-3 text-ink-faint" />
+        {selected?.media && !query ? (
+          <span className="tamga-option-media pointer-events-none absolute left-1.5">{selected.media}</span>
+        ) : (
+          <Icon icon={Search} size="xs" className="pointer-events-none absolute left-3 text-ink-faint" />
+        )}
         <input
           ref={girdi}
           type="text"
@@ -336,7 +347,7 @@ export function Combobox<T extends string>({
           ) : durum === "empty" ? (
             empty ?? <p className="px-3 py-2.5 text-body text-ink-faint">{labels.empty}</p>
           ) : (
-            shown.map(({ value: v, label: etiket, hint, group, tone, ...rest }, i) => [
+            shown.map(({ value: v, label: etiket, hint, group, tone, media, ...rest }, i) => [
               group && group !== shown[i - 1]?.group ? (
                 <p
                   key={`${v}-group`}
@@ -363,6 +374,7 @@ export function Combobox<T extends string>({
                 {tone ? (
                   <span aria-hidden className="tamga-mark shrink-0" style={{ background: toneOf(tone).mark }} />
                 ) : null}
+                {media ? <span className="tamga-option-media">{media}</span> : null}
                 <span className="block min-w-0 flex-1">
                   <span className="block truncate">{vurgula(etiket, query)}</span>
                   {hint ? (

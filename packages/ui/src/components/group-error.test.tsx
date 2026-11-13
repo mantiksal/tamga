@@ -130,3 +130,22 @@ describe("Select · Field'ın bağladığı nitelikleri yutmuyor", () => {
     expect(onChange).toHaveBeenCalledWith("B");
   });
 });
+
+/* SAFARİ'DE LABEL İÇİNDEKİ KUTU: düğmenin çocuğuna tıklama label üzerinden ikinci kez
+   düğmeye gidiyor, kutu iki kez değişiyordu. Kare ve glif tıklama hedefi değil. */
+describe("Checkbox · kare tıklama hedefi değil", () => {
+  it("kare pointer-events-none taşıyor, kutu label içinde de bir kez değişiyor", () => {
+    const onChange = vi.fn();
+    render(
+      <label>
+        <Checkbox label={null} checked onChange={onChange} />
+        <span>Kabul ediyorum</span>
+      </label>,
+    );
+    const kare = document.querySelector(".tamga-check")!;
+    expect(kare.className).toMatch(/pointer-events-none/);
+    fireEvent.click(screen.getByRole("checkbox"));
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith(false);
+  });
+});

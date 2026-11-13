@@ -5,6 +5,19 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.23.1
+
+> A checkbox inside a label unticks in Safari.
+
+### Fixed
+
+- **`Checkbox` inside a `<label>` toggles once in Safari.** The box is a `<button>`; when the
+  press landed on its square or on the check glyph, Safari sent the click to the button and
+  then, through the label, to the button again, so the box flipped twice and stayed put. Only a
+  press on the button's own edge worked. The square and the glyph no longer take the pointer;
+  the button is always the target, and no browser re-dispatches a click whose target is the
+  labelled control itself.
+
 ## 0.23.0
 
 > An option can carry its own picture.

@@ -85,8 +85,12 @@ export function Checkbox({
         className,
       )}
     >
+      {/* KARE TIKLAMA HEDEFİ DEĞİL, DÜĞME HEDEF: bir `<label>`ın içindeki düğmenin
+          ÇOCUĞUNA tıklanınca Safari tıklamayı hem düğmeye hem label üzerinden yeniden
+          düğmeye gönderiyor; kutu iki kez değişip yerinde kalıyordu (Berika, 2026-11-13).
+          Hedef düğmenin kendisiyken hiçbir tarayıcı ikinci kez göndermiyor. */}
       <span
-        className={cn("tamga-check", compact && "tamga-check-sm")}
+        className={cn("tamga-check pointer-events-none", compact && "tamga-check-sm")}
         data-checked={(checked || indeterminate) && !disabled}
         data-off={disabled || undefined}
       >

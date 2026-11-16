@@ -5,6 +5,18 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.23.2
+
+> A disabled icon button looks disabled.
+
+### Fixed
+
+- **`IconButton` and `MiniButton` have a disabled look.** Only `Button` had one: a sunk ground,
+  a dashed edge, faint ink and no shadow. A disabled `IconButton` or `MiniButton` drew exactly
+  like an enabled one, so a locked action read as a broken one. Both now take the same look as
+  `Button`. A `MiniButton` inside a field (`data-inset`) stays flat, as it is when enabled.
+  `check-physics` now fails when a pressable family has no disabled state.
+
 ## 0.23.1
 
 > A checkbox inside a label unticks in Safari.

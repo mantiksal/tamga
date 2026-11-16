@@ -925,8 +925,11 @@
      kopyası yapıyordu: aynı şey, daha sönük. Kesikli kenar + çukur zemin ise
      "bu şu an bir tuş değil" diyor, ve bunu renkten bağımsız söylüyor: kontrast
      ayarı açık bir ekranda ya da renk körlüğünde de okunuyor. Katman da
-     kalkıyor, çünkü basılamayan bir şeyin altında taban olmaz. */
-  .tamga-btn:disabled {
+     kalkıyor, çünkü basılamayan bir şeyin altında taban olmaz. İkon ve mini
+     düğme aynı aile: onlarda bu hâl yoktu ve kapalıyken açık görünüyorlardı. */
+  .tamga-btn:disabled,
+  .tamga-icon-btn:disabled,
+  .tamga-mini-btn:disabled {
     background: var(--color-sunk);
     border-style: dashed;
     border-color: var(--color-edge);

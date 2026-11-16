@@ -239,6 +239,30 @@ for (const [aile, d] of aileler) {
   }
 }
 
+/* ---- H · kapalı hâl ---- *
+ *
+ * Basılan ve kapatılabilen (`:not(:disabled)` ile yazılan) her aile kendi kapalı
+ * hâlini taşır: gölgesiz, yani basılamayan bir şeyin altında taban yok. Yoksa
+ * kapalı nesne açığıyla aynı çiziliyor: `IconButton` ve `MiniButton` böyleydi,
+ * kilitli bir "yeniden gönder" bozuk sanıldı (2026-11-16). Boy ve
+ * varyant aileleri (`tamga-btn-sm`) kökün (`tamga-btn`) kapalı hâlini miras alır.
+ */
+const kapaliAileler = new Set(
+  kurallar
+    .filter((k) => /:disabled/.test(k.secici.replace(/:not\([^)]*\)/g, "")) && k.tamGolge === "none")
+    .map((k) => k.aile),
+);
+const kapanabilir = kurallar.filter(
+  (k) => /:not\(:disabled\):active/.test(k.secici) && k.kayma && !/[ >]/.test(k.aile),
+);
+const bildirilen = new Set();
+for (const k of kapanabilir) {
+  const kapali = [...kapaliAileler].some((a) => k.aile === a || k.aile.startsWith(`${a}-`));
+  if (kapali || bildirilen.has(k.aile)) continue;
+  bildirilen.add(k.aile);
+  ekle(k, `H · basılan nesnenin kapalı hâli yok; \`${k.aile}:disabled\` açığıyla aynı çiziliyor (gölgesiz olmalı)`);
+}
+
 if (hatalar.length) {
   console.error(`check-physics: ${hatalar.length} yasa ihlali.\n`);
   for (const h of hatalar) console.error(h);

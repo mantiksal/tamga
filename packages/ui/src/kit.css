@@ -5353,7 +5353,11 @@
     box-shadow: 1px 1px 0 var(--color-edge);
   }
 
-  .tamga-link {
+  /* DÜĞME GÖRÜNÜMLÜ BAĞLANTI DÜĞMEDİR · `Link`'e `buttonVariants` verilince bu
+     kural dosyada düğmeden sonra geldiği için rengini ve kalınlığını eziyordu:
+     dolu düğmede vurgu zemine vurgu yazı (kontrast 1,35). `:where` ağırlığı
+     artırmıyor; artırsa `-quiet` gibi varyantlar rengini kaybederdi. */
+  .tamga-link:where(:not(.tamga-btn, .tamga-icon-btn, .tamga-mini-btn)) {
     color: var(--color-accent-line);
     font-weight: var(--weight-label);
     text-underline-offset: 3px;
@@ -5362,7 +5366,7 @@
        kendi imlecini söylemeli. */
     cursor: pointer;
   }
-  .tamga-link:hover {
+  .tamga-link:where(:not(.tamga-btn, .tamga-icon-btn, .tamga-mini-btn)):hover {
     text-decoration: underline;
   }
 

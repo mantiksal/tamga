@@ -5,6 +5,19 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.23.3
+
+> A link styled as a button reads like the button.
+
+### Fixed
+
+- **A `Link` with `buttonVariants` takes the button's colour and weight.** `.tamga-link` comes
+  after the button rules in the kit's CSS and weighs the same, so a link styled as a button
+  kept the link's colour, weight and hover underline. On a primary button that was accent text
+  on an accent ground: with a pale brand colour in the dark theme, a contrast of 1.35. The link
+  rules now leave `tamga-btn`, `tamga-icon-btn` and `tamga-mini-btn` alone, without weighing
+  more, so `-quiet`, `-standalone` and `-marked` keep working as before. A test holds the rule.
+
 ## 0.23.2
 
 > A disabled icon button looks disabled.

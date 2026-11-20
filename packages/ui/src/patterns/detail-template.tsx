@@ -54,8 +54,12 @@ export type DetailTemplateProps = {
    * tek sözcüklük hâli (bir `StatusChip`). `status` gibi ürünün; şablon yalnız yerini tutar.
    */
   titleAside?: ReactNode;
-  /** Under the title: the object's identity line. TR: Başlığın altı: nesnenin kimlik satırı. */
-  subtitle?: string;
+  /**
+   * Under the title: the object's identity line. A node, so a part of it can be a link (a site's
+   * address opening the site). TR: Başlığın altı: nesnenin kimlik satırı. Düğüm, çünkü bir parçası
+   * bağlantı olabilir (sitenin adresi siteyi açar).
+   */
+  subtitle?: ReactNode;
   /**
    * Under the identity line: the object's state right now ("running", "shipped", "overdue"). The
    * template keeps only its place and the 8px above it; what goes in is the product's (a

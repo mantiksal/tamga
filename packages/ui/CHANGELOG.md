@@ -5,6 +5,16 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.23.4
+
+> A detail page's identity line can hold a link.
+
+### Changed
+
+- **`DetailTemplate`'s `subtitle` takes a node, not only a string.** A part of the identity line
+  can now be a link, such as a property's address opening the site in a new tab. A string works
+  as before.
+
 ## 0.23.3
 
 > A link styled as a button reads like the button.

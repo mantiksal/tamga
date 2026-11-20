@@ -112,6 +112,21 @@ describe("DetailTemplate · başlık PageBand ile aynı", () => {
   });
 });
 
+/* KİMLİK SATIRINDA BAĞLANTI: adres siteyi açabilsin diye alt başlık düğüm alıyor. */
+describe("DetailTemplate · alt başlıkta bağlantı", () => {
+  it("bağlantı alt başlığın içinde çiziliyor", () => {
+    renderDetail("overview", {
+      subtitle: (
+        <>
+          <a href="https://ornek.com" target="_blank" rel="noopener noreferrer">ornek.com</a> · web
+        </>
+      ),
+    });
+    const link = screen.getByRole("link", { name: "ornek.com" });
+    expect(link.closest("p")?.className).toMatch(/text-body/);
+  });
+});
+
 /* DURUM SATIRI ÜRÜNÜN. Şablon yalnız yerini tutuyor: kimlik satırının altında, sekmelerden önce,
    ve verilmezse hiç çizilmiyor (boş bir 8px kalmasın). */
 describe("DetailTemplate · status", () => {

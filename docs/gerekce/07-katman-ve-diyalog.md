@@ -230,3 +230,18 @@ itiliyor; ok kaymıyor, tetikleyiciyi göstermeye devam ediyor.
 DOKUNMA AÇIYOR. Telefonda üstüne gelmek yok, iOS Safari dokunulan düğmeye
 odak da vermiyor, ve dokunuşun sonundaki `pointerleave` kabarcığı açılmadan
 kapatıyordu. Dokunuş aç/kapa; başka yere dokununca kapanıyor.
+
+### Tam ekran katman gövdede çizilir.
+
+`fixed inset-0` ekrana göre konumlanır, ama bir atası `transform` taşıyorsa o ataya
+göre konumlanır. Üzerine gelince kalkan bir kartın (`tamga-card-live`) içinde açılan
+diyalog kartın içine düşüyor, fare diyaloğa geçince kart iniyor, diyalog ekrana
+dönüyordu: açılıp kapanıyormuş gibi titreyen bir döngü (2026-11-24). `Dialog`,
+`ConfirmDialog` ve `Sheet` artık nerede yazılırsa yazılsın `document.body`'de
+çiziliyor (`lib/to-body.ts`).
+
+HİDRASYON. Sunucuda yerinde, istemcide portalda çizilen bir katman ilk çizimde
+uyuşmuyor; açık doğan bir diyalog hidrasyon hatası veriyordu. Katman ancak bileşen
+bağlandıktan sonra çiziliyor (`useMounted`, `useSyncExternalStore` ile): sunucu ve ilk
+istemci çizimi aynı (boş), portal hemen ardından geliyor. Diyalog etkileşimle açıldığı
+için gözle görülen bir fark yok.

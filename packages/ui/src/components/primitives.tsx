@@ -17,7 +17,7 @@ import { Icon } from "./icon.js";
 import { CaretRight, Check, Close, Failure, Info, Success, Warning } from "./icons.js";
 import { SkeletonOptions, SkeletonPanel } from "./skeleton.js";
 import { useScrollLock } from "../lib/scroll-lock.js";
-import { toBody } from "../lib/to-body.js";
+import { toBody, useMounted } from "../lib/to-body.js";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
 import { useFocusTrap, useListKeys } from "./a11y.js";
@@ -429,6 +429,7 @@ export function Select({
   "aria-label": ariaLabel,
   "aria-describedby": ariaDescribedby,
   "aria-invalid": ariaInvalid,
+  id,
   title,
   className,
   ...rest
@@ -543,12 +544,23 @@ export function Select({
    */
   "aria-describedby"?: string;
   "aria-invalid"?: boolean;
+  /**
+   * The trigger's id, for a `Field`'s `htmlFor`: the label names the select and a click on it
+   * focuses the trigger. TR: Tetiğin id'si, bir `Field`'ın `htmlFor`'u için: etiket seçiciyi
+   * adlandırır, tıklamak tetiği odaklar.
+   */
+  id?: string;
   /** Locks the trigger; the list cannot open. TR: Tetiği kilitler; liste açılmaz. */
   disabled?: boolean;
   /** The trigger's tooltip: the full text when the shown value is clipped. TR: Tetiğin ipucu: görünen değer kesildiğinde tam metin. */
   title?: string;
-  /** Genişlik ve konum çağıranın. Varsayılan `w-56`; `w-full` verildiğinde
-   *  tailwind-merge onu ezer, yani kontrol kabına uyar. */
+  /**
+   * Width and place are the caller's. The default `w-56` is for a select standing alone (a
+   * toolbar, a filter row); in a form grid or a drawer give `w-full`, and the box takes its
+   * cell. TR: Genişlik ve konum çağıranın. Varsayılan `w-56` tek başına duran seçici için
+   * (araç çubuğu, filtre satırı); form ızgarasında ya da çekmecede `w-full` verin, kutu
+   * hücresini alır.
+   */
   className?: string;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
@@ -627,16 +639,17 @@ export function Select({
   }, [open]);
 
   return (
-    /* GENİŞLİK SABİT DEĞİL. Bir süre `w-56` yazılıydı ve `className` bile
-       alınmıyordu; sonuç, kontrolün hiçbir ızgaraya ya da filtre çubuğuna
-       sığmaması ve kabından taşarak yatay kaydırma açması. Bir form kontrolü
-       kendi genişliğine karar veremez; kabı karar verir. */
+    /* VARSAYILAN GENİŞLİK TEK BAŞINA DURAN SEÇİCİ İÇİN (`w-56`); kabı olan seçici
+       genişliğini `className` ile kabından alır (`w-full`), tailwind-merge
+       varsayılanı düşürür. Bir süre `className` hiç alınmıyordu ve kontrol
+       hiçbir ızgaraya sığmıyordu. */
     <div {...dataProps(rest)} ref={box} className={cn("relative w-56", className)}>
       {/* DÜĞME DEĞİL, KENDİ SINIFI. `Button` olarak çiziliyordu ve bir filtre
           çubuğunda yedi kara kutu yan yana geliyordu; hangisinin DOLU olduğu
           okunmuyordu, oysa bir filtrenin taşıdığı tek bilgi o. `data-set` boş
           ile dolu hâli ayırıyor: boşken bir alan, doluyken bir nesne. */}
       <button
+        id={id}
         type="button"
         className="tamga-select justify-between"
         data-set={(set ?? Boolean(current)) ? "true" : undefined}
@@ -801,6 +814,7 @@ export function Sheet({
 }) {
   /* the trap has to be called before any early return, so the hook lives here
      and the null is returned after it */
+  const bagli = useMounted();
   const panel = useFocusTrap<HTMLElement>(open);
   useScrollLock(open);
   useEffect(() => {
@@ -866,5 +880,6 @@ export function Sheet({
         ) : null}
       </aside>
     </div>,
+    bagli,
   );
 }

@@ -77,6 +77,13 @@ const T = {
         panelde ya da bir kartın içinde. Üçüncüsü yok; bir skala ancak sınırlıyken skaladır.
       </>
     ),
+    yonlendirici: (
+      <>
+        <code>href</code>&apos;li satır düz bir <code>&lt;a&gt;</code>; uygulama içi bir adres
+        için <code>linkComponent</code> ile yönlendiricinin bağlantısını verin (<Xref to="link">Link</Xref>{" "}
+        ve <Xref to="card">Card</Xref> ile aynı sözleşme), satır sayfayı yeniden yüklemesin.
+      </>
+    ),
     rules: "Kurallar",
     related: "İlgili",
   },
@@ -125,6 +132,14 @@ const T = {
       <>
         Two heights: <code>base</code> (the default, roomy) and <code>sm</code>, for a dense
         panel or inside a card. There is no third; a scale is only a scale while it stays small.
+      </>
+    ),
+    yonlendirici: (
+      <>
+        A row with <code>href</code> is a plain <code>&lt;a&gt;</code>; for an in-app address pass
+        the router&apos;s link as <code>linkComponent</code> (the same contract as{" "}
+        <Xref to="link">Link</Xref> and <Xref to="card">Card</Xref>), so the row does not reload the
+        page.
       </>
     ),
     rules: "Rules",
@@ -177,6 +192,8 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       </Demo>
 
       <P>{t.size}</P>
+
+      <P>{t.yonlendirici}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.element}</Note>

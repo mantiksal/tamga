@@ -1,4 +1,5 @@
 import { PopoverDemo } from "@/components/interactive";
+import { KontrolluPopover } from "./ornek";
 import type { Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { PageHead, H2, P, Note } from "@/components/prose";
@@ -44,6 +45,18 @@ const T = {
         kendi kendine düzeltmez.
       </>
     ),
+    kontrolH: "Durumu ürün tutuyor",
+    kontrolP: (
+      <>
+        <code>open</code> verilince panel <strong>kontrollü</strong>: açık olup olmadığını ürün tutar,
+        her değişikliği <code>onOpenChange</code> ile duyar (tetik, Escape, dışarı tıklama, kapatma
+        kontrolü). Satırlarından biri seçilince kapanması gereken bir bildirim paneli için. Verilmezse
+        panel durumunu kendisi tutar, eskisi gibi.
+      </>
+    ),
+    bildirimler: "Bildirimler",
+    bildirimSatirlari: ["Yedekleme tamamlandı", "Yeni yorum: Ada", "Fatura hazır"],
+    secilenSayac: "Seçilen",
     rules: "Kurallar",
     plane: (
       <>
@@ -71,6 +84,18 @@ const T = {
         fix that for you.
       </>
     ),
+    kontrolH: "The product holds the state",
+    kontrolP: (
+      <>
+        With <code>open</code> the panel is <strong>controlled</strong>: the product holds whether it
+        is open and hears every change through <code>onOpenChange</code> (the trigger, Escape, a
+        click away, the close control). For a notifications panel that must close once one of its
+        rows is picked. Without it the panel keeps its own state, as before.
+      </>
+    ),
+    bildirimler: "Notifications",
+    bildirimSatirlari: ["Backup finished", "New comment: Ada", "Invoice ready"],
+    secilenSayac: "Picked",
     rules: "Rules",
     plane: (
       <>
@@ -101,6 +126,15 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       </Demo>
 
       <P>{t.align}</P>
+
+      <H2>{t.kontrolH}</H2>
+      <P>{t.kontrolP}</P>
+      <Demo labels={dict.demo} code={`const [open, setOpen] = useState(false);
+<Popover open={open} onOpenChange={setOpen} trigger={<Button>${t.bildirimler}</Button>}>
+  <ListRow onClick={() => { pick(row); setOpen(false); }}>…</ListRow>
+</Popover>`}>
+        <KontrolluPopover tetik={t.bildirimler} baslik={t.bildirimler} satirlar={[...t.bildirimSatirlari]} sayac={t.secilenSayac} />
+      </Demo>
 
       <H2>{t.rules}</H2>
       <Note>{t.plane}</Note>

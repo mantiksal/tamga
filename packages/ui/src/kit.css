@@ -4581,6 +4581,10 @@
   .tamga-progress-split > span + span {
     border-left: 1.5px solid var(--color-edge-strong);
   }
+  /* BOŞ PAY RAYIN ZEMİNİ: kalan kapasite bir renk değil, boşluk. */
+  .tamga-progress-split > span[data-empty] {
+    background: var(--color-sunk);
+  }
 
   .tamga-progress-lejant {
     display: flex;
@@ -4831,7 +4835,7 @@
     display: flex;
     align-items: flex-start;
     gap: 8px;
-    font-size: 1rem;
+    font-size: var(--text-subhead);
     font-weight: var(--weight-label);
   }
   .tamga-alert:not([data-look]) .tamga-alert-baslik > .tamga-alert-tile {

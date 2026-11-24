@@ -4,7 +4,8 @@ import { Dialog } from "./overlay.js";
 import { Sheet } from "./primitives.js";
 
 /* TAM EKRAN KATMAN GÖVDEDE: `transform` taşıyan bir atanın içinde yazılan diyalog o ataya göre
-   konumlanıyor, üzerine gelince kalkan kartta açılıp kapanıyormuş gibi titriyordu. */
+   konumlanıyor, üzerine gelince kalkan kartta açılıp kapanıyormuş gibi titriyordu. Portal
+   bağlandıktan sonra geliyor: sunucuyla ilk istemci çizimi aynı (boş), hidrasyon uyuşuyor. */
 describe("tam ekran katman document.body'de çizilir", () => {
   it("Dialog, kalkan bir kartın içinde yazılsa da kartın dışında", () => {
     const { container } = render(

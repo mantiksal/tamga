@@ -41,6 +41,10 @@ const T = {
     hataH: "Field içinde hata",
     hataP: (
       <>
+        <code>id</code> tetiğe gider, <Xref to="field">Field</Xref>&apos;ın <code>htmlFor</code>&apos;u ona
+        bağlanır: etiket seçiciyi adlandırır, tıklamak tetiği odaklar. Varsayılan genişlik{" "}
+        <code>w-56</code> tek başına duran seçici için; bir form ızgarasında ya da çekmecede{" "}
+        <code>className=&quot;w-full&quot;</code> verin, kutu hücresini alır.{" "}
         <Xref to="field">Field</Xref> hata satırını çocuğuna <code>aria-describedby</code> ve{" "}
         <code>aria-invalid</code> ile bağlıyor; Select ikisini de tetik düğmesine geçirir, kenar
         hatalı girdiyle aynı kritik rengi giyer. Eskiden ikisi yutuluyordu ve hata metni seçiciye
@@ -105,6 +109,10 @@ const T = {
     hataH: "An error inside Field",
     hataP: (
       <>
+        <code>id</code> goes to the trigger and <Xref to="field">Field</Xref>&apos;s{" "}
+        <code>htmlFor</code> binds to it: the label names the select, a click focuses the trigger.
+        The default width <code>w-56</code> is for a select standing alone; in a form grid or a
+        drawer give <code>className=&quot;w-full&quot;</code> and the box takes its cell.{" "}
         <Xref to="field">Field</Xref> wires its error line to the child with{" "}
         <code>aria-describedby</code> and <code>aria-invalid</code>; Select passes both to the
         trigger button and its edge wears the same critical colour as a failing input. Both used to
@@ -183,17 +191,17 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <H2>{t.hataH}</H2>
       <P>{t.hataP}</P>
       <Demo labels={dict.demo} align="start" code={`<Field label="${t.kargo}" htmlFor="kargo">
-  <Select options={[…]} placeholder="${t.kargoSec}" className="w-full" />
+  <Select id="kargo" options={[…]} placeholder="${t.kargoSec}" className="w-full" />
 </Field>
 <Field label="${t.kargo}" error="${t.kargoHata}" htmlFor="kargo2">
-  <Select options={[…]} placeholder="${t.kargoSec}" className="w-full" />
+  <Select id="kargo2" options={[…]} placeholder="${t.kargoSec}" className="w-full" />
 </Field>`}>
         <div className="grid w-full gap-7 sm:grid-cols-2" data-not-ornek>
           <Field label={t.kargo} htmlFor="kargo">
-            <Select options={["Atlas", "Aras", "MNG"]} placeholder={t.kargoSec} className="w-full" />
+            <Select id="kargo" options={["Atlas", "Aras", "MNG"]} placeholder={t.kargoSec} className="w-full" />
           </Field>
           <Field label={t.kargo} error={t.kargoHata} htmlFor="kargo2">
-            <Select options={["Atlas", "Aras", "MNG"]} placeholder={t.kargoSec} className="w-full" />
+            <Select id="kargo2" options={["Atlas", "Aras", "MNG"]} placeholder={t.kargoSec} className="w-full" />
           </Field>
         </div>
       </Demo>

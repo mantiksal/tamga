@@ -14,7 +14,7 @@ import { Button } from "./button.js";
 import { useDismiss, useFocusTrap, useListKeys } from "./a11y.js";
 import { MiniButton } from "./button.js";
 import { useScrollLock } from "../lib/scroll-lock.js";
-import { toBody } from "../lib/to-body.js";
+import { toBody, useMounted } from "../lib/to-body.js";
 
 /**
  * Katman düzlemi · 6 piksel, sayfanın ulaşabildiği 4 pikselin ötesi. Perde
@@ -354,10 +354,22 @@ export function Popover({
   loading = false,
   loadingBlock,
   closeLabel,
+  open: acikDisaridan,
+  onOpenChange,
   ...rest
 }: {
   trigger: React.ReactNode;
   title?: string;
+  /**
+   * Given, the panel is CONTROLLED: the product holds whether it is open and hears every change
+   * through `onOpenChange` (the trigger, Escape, a click away, the close control). For a panel
+   * that must close when one of its rows is picked. Without it the panel keeps its own state,
+   * as before. TR: Verilirse panel KONTROLLÜ: açık olup olmadığını ürün tutar ve her değişikliği
+   * `onOpenChange` ile duyar (tetik, Escape, dışarı tıklama, kapatma kontrolü). Satırlarından
+   * biri seçilince kapanması gereken panel için. Verilmezse panel durumunu kendisi tutar.
+   */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   /**
    * Given, a quiet close control appears in the corner · and without it there is none, which is
    * the panel's normal shape: a popover is dismissed by Escape or by clicking away, and a dialog
@@ -383,12 +395,22 @@ export function Popover({
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
-  const [open, setOpen] = useState(false);
-  const box = useDismiss(open, () => setOpen(false));
+  const [icAcik, setIcAcik] = useState(false);
+  const kontrollu = acikDisaridan !== undefined;
+  const open = kontrollu ? acikDisaridan : icAcik;
+  const setOpen = useCallback(
+    (sonraki: boolean) => {
+      if (!kontrollu) setIcAcik(sonraki);
+      onOpenChange?.(sonraki);
+    },
+    [kontrollu, onOpenChange],
+  );
+  const kapat = useCallback(() => setOpen(false), [setOpen]);
+  const box = useDismiss(open, kapat);
 
   return (
     <div {...dataProps(rest)} ref={box} className="relative inline-flex">
-      <span onClick={() => setOpen((o) => !o)}>{trigger}</span>
+      <span onClick={() => setOpen(!open)}>{trigger}</span>
       {open && (
         <div
           className="tamga-overlay tamga-pop absolute top-[var(--overlay-below)] z-40"
@@ -417,7 +439,7 @@ export function Popover({
               type="button"
               className="tamga-icon-btn tamga-icon-btn-sm tamga-icon-btn-ghost absolute top-2 right-2"
               aria-label={closeLabel}
-              onClick={() => setOpen(false)}
+              onClick={kapat}
             >
               <Icon icon={Close} size="xs" />
             </button>
@@ -894,6 +916,7 @@ function DialogShell({
   children: React.ReactNode;
   [k: `data-${string}`]: unknown;
 }) {
+  const bagli = useMounted();
   const panel = useFocusTrap<HTMLDivElement>(open);
   /* Aynı kaçak `Dialog`da da vardı: odak hapsediliyor ama arkadaki sayfa
      kayıyordu. Kullanıcı etkileşemediği bir şeyi kaydırabiliyordu. */
@@ -940,6 +963,7 @@ function DialogShell({
         {children}
       </div>
     </div>,
+    bagli,
   );
 }
 

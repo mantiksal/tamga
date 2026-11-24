@@ -44,6 +44,13 @@ const T = {
     hedef: "Aylık hedef",
     depo: "Depo doluluğu",
     dagilim: "Sipariş durumu dağılımı",
+    kapasite: "Haftalık kapasite", planli: "Planlı 30s", tasan: "Taşan 4s",
+    bosPay: (
+      <>
+        <code>split</code>&apos;te bir pay <code>empty</code> ise boş kapasitedir: rayın kendi
+        zemininde çizilir, lejanta girmez. Boş payı gri bir tonla boyamak onu dolu gösteriyordu.
+      </>
+    ),
     teslim: "Teslim %48",
     kargoda: "Kargoda %24",
     hazirlaniyor: "Hazırlanıyor %20",
@@ -112,6 +119,14 @@ const T = {
     hedef: "Monthly target",
     depo: "Warehouse capacity",
     dagilim: "Order status split",
+    kapasite: "Weekly capacity", planli: "Planned 30h", tasan: "Over 4h",
+    bosPay: (
+      <>
+        In <code>split</code> a share with <code>empty</code> is the unfilled capacity: drawn in
+        the track&apos;s own ground and left out of the legend. Painting it as a grey tone made it
+        read as full.
+      </>
+    ),
     teslim: "Delivered 48%",
     kargoda: "Shipping 24%",
     hazirlaniyor: "Preparing 20%",
@@ -196,6 +211,16 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
     { value: 20, label: "${t.hazirlaniyor}" },
     { value: 8, tone: "danger", label: "${t.iade}" },
   ]}
+/>
+
+<Progress
+  look="split"
+  label="${t.kapasite}"
+  segments={[
+    { value: 30, tone: "info", label: "${t.planli}" },
+    { value: 4, tone: "caution", label: "${t.tasan}" },
+    { value: 6, empty: true },
+  ]}
 />`}>
         <div className="flex w-full max-w-160 flex-col gap-6">
           <Progress value={84} label={t.hedef} ariaLabel={t.aria} />
@@ -218,9 +243,20 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
               { value: 8, tone: "danger", label: t.iade },
             ]}
           />
+          <Progress
+            look="split"
+            label={t.kapasite}
+            ariaLabel={t.aria}
+            segments={[
+              { value: 30, tone: "info", label: t.planli },
+              { value: 4, tone: "caution", label: t.tasan },
+              { value: 6, empty: true },
+            ]}
+          />
         </div>
       </Demo>
       <P>{t.ucBicim}</P>
+      <P>{t.bosPay}</P>
 
       <P>{t.neutral}</P>
 

@@ -74,15 +74,19 @@ export function RadioGroup<T extends string>({
      dizildiğinde ikinci satırları hizasız kalıyor, alt alta okunuyorlar.
      Izgara isteyen çağıran `className` ile söylüyor. */
   const kabuk = cn(look === "chip" ? "flex flex-wrap gap-2" : "flex flex-col gap-2.5", className);
-  const secenekler = options.map(({ value: v, label: etiket, ...rest }) => (
+  /* SEÇENEĞİN KENDİ KAPALI HÂLİ: `disabled` taşıyan seçenek düğme olarak kapanıyordu
+     ama grubun kapalı çizimini almıyordu; ürün kitin sınıfını yamıyordu. */
+  const secenekler = options.map(({ value: v, label: etiket, ...rest }) => {
+    const kapali = disabled || rest.disabled === true;
+    return (
     <button
       key={v}
       type="button"
       {...rest}
       role="radio"
       aria-checked={value === v}
-      aria-disabled={disabled || undefined}
-      onClick={() => !disabled && onChange?.(v)}
+      aria-disabled={kapali || undefined}
+      onClick={() => !kapali && onChange?.(v)}
       /* ÜSTTEN HİZALI VE TAM GENİŞLİK, ikisi de iki satırlık bir seçenek yüzünden:
          `items-center` işareti iki satırın ortasına kaçırıyor (işaret ilk satıra ait),
          içerik kadar genişlik de seçenekleri tırtıklı bir sütun yapıyor.
@@ -92,7 +96,7 @@ export function RadioGroup<T extends string>({
         look === "list" && "flex w-full items-start gap-2 text-left",
         look === "chip" && "tamga-choice-chip",
         look === "card" && "tamga-choice-card",
-        disabled && "text-ink-faint",
+        kapali && "text-ink-faint",
       )}
     >
       {/* ÜSTTEN HİZA YALNIZ İKİ SATIR OLABİLEN BİÇİMLERDE. `tamga-choice-mark`
@@ -100,12 +104,13 @@ export function RadioGroup<T extends string>({
           aynı kural işareti aşağı kaydırırdı. */}
       <span
         className={cn("tamga-radio", look !== "chip" && "tamga-choice-mark")}
-        data-checked={value === v && !disabled}
-        data-off={disabled || undefined}
+        data-checked={value === v && !kapali}
+        data-off={kapali || undefined}
       />
       <span className="min-w-0 flex-1">{etiket}</span>
     </button>
-  ));
+    );
+  });
   /* BAŞLIK VE NOT GRUBUN İÇİNDE, fieldset/legend gibi: kök her zaman
      `role="radiogroup"`, kanca ve `data-look` hep aynı elemanda. Yalnız başlık
      ya da not varken seçenekler bir iç kaba iniyor ve ritim Field'ınki olur:

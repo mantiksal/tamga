@@ -101,6 +101,7 @@ export function Swap({
 export function ListRow({
   size = "base",
   href,
+  linkComponent: Router,
   onClick,
   className,
   children,
@@ -108,6 +109,13 @@ export function ListRow({
 }: {
   size?: "base" | "sm";
   href?: string;
+  /**
+   * The router's link for `href`, the same contract as `Link` and `Card`: an in-app row does not
+   * reload the page. Without it a plain `<a>`. TR: `href` için yönlendiricinin bağlantısı, `Link`
+   * ve `Card` ile aynı sözleşme: uygulama içi bir satır sayfayı yeniden yüklemez. Verilmezse düz
+   * `<a>`.
+   */
+  linkComponent?: ComponentType<{ href: string; className?: string; children?: ReactNode; [k: string]: unknown }>;
   onClick?: () => void;
   className?: string;
   children: ReactNode;
@@ -115,6 +123,13 @@ export function ListRow({
   [k: `data-${string}`]: unknown;
 }) {
   const cls = cn("tamga-list-row", size === "sm" && "tamga-list-row-sm", className);
+  if (href && Router) {
+    return (
+      <Router {...dataProps(rest)} href={href} className={cls}>
+        {children}
+      </Router>
+    );
+  }
   if (href) {
     return (
       <a {...dataProps(rest)} href={href} className={cls}>

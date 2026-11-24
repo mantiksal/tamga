@@ -119,3 +119,16 @@ describe("SettingsPanel · aside", () => {
     expect(isaret.className).toMatch(/ml-auto/);
   });
 });
+
+/* SELECT ID: Field'ın htmlFor'u tetiğe bağlanıyor; etiket seçiciyi adlandırıyor. */
+describe("Select · id", () => {
+  it("id tetik düğmesinde, Field etiketi onu adlandırıyor", () => {
+    render(
+      <Field label="Kargo" htmlFor="kargo">
+        <Select id="kargo" options={["A"]} placeholder="Seç" />
+      </Field>,
+    );
+    const tetik = screen.getByRole("button", { name: "Kargo" });
+    expect(tetik.id).toBe("kargo");
+  });
+});

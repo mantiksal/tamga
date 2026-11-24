@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { RadioGroup } from "./radio-group.js";
 import { PasswordInput } from "./advanced-input.js";
 
@@ -120,5 +120,30 @@ describe("Seçenek kartı dolgusu", () => {
     const { existsSync, readFileSync } = require("node:fs") as typeof import("node:fs");
     const css = readFileSync(["src/kit.css", "packages/ui/src/kit.css"].find(existsSync)!, "utf8");
     expect(css.match(/\.tamga-choice-card\s*\{([^}]*)\}/)?.[1]).toMatch(/padding:\s*12px 16px/);
+  });
+});
+
+/* TEK SEÇENEĞİN KAPALI HÂLİ: seçenek `disabled` taşıyınca düğme kapanıyordu ama işaret
+   grubun kapalı çizimini almıyordu; ürün kitin sınıfını yamıyordu. */
+describe("RadioGroup · seçenek disabled", () => {
+  it("kapalı seçenek data-off, aria-disabled ve soluk; tıklama onChange'e gitmiyor; ötekiler açık", () => {
+    const onChange = vi.fn();
+    render(
+      <RadioGroup
+        label="Tür"
+        value="site"
+        onChange={onChange}
+        options={[{ value: "site", label: "Site" }, { value: "api", label: "API", disabled: true }]}
+      />,
+    );
+    const api = screen.getByRole("radio", { name: "API" });
+    expect(api.getAttribute("aria-disabled")).toBe("true");
+    expect(api.querySelector(".tamga-radio")!.hasAttribute("data-off")).toBe(true);
+    expect(api.className).toMatch(/text-ink-faint/);
+    fireEvent.click(api);
+    expect(onChange).not.toHaveBeenCalled();
+    const site = screen.getByRole("radio", { name: "Site" });
+    expect(site.querySelector(".tamga-radio")!.hasAttribute("data-off")).toBe(false);
+    expect(site.getAttribute("aria-disabled")).toBeNull();
   });
 });

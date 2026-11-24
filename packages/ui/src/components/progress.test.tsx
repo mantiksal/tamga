@@ -59,3 +59,24 @@ describe("Progress · soft", () => {
     expect(fill.style.getPropertyValue("--tamga-progress-tint")).toContain("color-mix");
   });
 });
+
+/* BOŞ PAY: kalan kapasite rayın zemininde, lejantta yok. Nötr bir payla boyanınca
+   "dolu" okunuyordu. */
+describe("Progress · split boş pay", () => {
+  it("empty pay zemin rengini alıyor, data-empty taşıyor, lejanta girmiyor", () => {
+    const { container } = render(
+      <Progress look="split" label="Kapasite" ariaLabel="Kapasite" segments={[
+        { value: 30, tone: "info", label: "Planlı" },
+        { value: 10, tone: "caution", label: "Taşan" },
+        { value: 60, empty: true, label: "Boş" },
+      ]} />,
+    );
+    const paylar = container.querySelectorAll<HTMLElement>(".tamga-progress-split > span");
+    expect(paylar).toHaveLength(3);
+    expect(paylar[2]!.hasAttribute("data-empty")).toBe(true);
+    expect(paylar[2]!.style.background).toBe("");
+    expect(paylar[0]!.style.background).not.toBe("");
+    const lejant = [...container.querySelectorAll(".tamga-progress-lejant span")].map((s) => s.textContent);
+    expect(lejant).toEqual(["Planlı", "Taşan"]);
+  });
+});

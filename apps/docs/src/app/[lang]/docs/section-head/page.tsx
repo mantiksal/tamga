@@ -68,6 +68,17 @@ const T = {
         gri olduğunda başlıkla arasındaki bağ okunmuyordu.
       </>
     ),
+    duzeyH: "Düzey ve kimlik",
+    duzeyP: (
+      <>
+        <code>size=&quot;lg&quot;</code> sayfanın bölümü, şeridin <code>h1</code>&apos;inin altında:
+        varsayılanı <code>h2</code>. <code>base</code> kartın kendi başlığı, <code>h3</code>. Sayfanın
+        düzeni başka diyorsa <code>level</code> ile 2, 3 ya da 4 verilir; <code>sub</code> bir başlık
+        değil. <code>id</code> başlık öğesine gider; bir{" "}
+        <code>&lt;section aria-labelledby&gt;</code> adını ondan alır ve ekran okuyucunun bölüm
+        listesinde görünür.
+      </>
+    ),
     rules: "Kurallar",
     notCardHead: (
       <>
@@ -122,6 +133,17 @@ const T = {
         rhythm. In a quiet grey the eyebrow read as a separate line rather than part of the title.
       </>
     ),
+    duzeyH: "Level and id",
+    duzeyP: (
+      <>
+        <code>size=&quot;lg&quot;</code> is a page&apos;s section under the band&apos;s{" "}
+        <code>h1</code>: an <code>h2</code> by default. <code>base</code> is a card&apos;s own heading,
+        an <code>h3</code>. When the page&apos;s outline says otherwise, <code>level</code> sets 2, 3 or
+        4; <code>sub</code> is not a heading. <code>id</code> goes to the heading element, so a{" "}
+        <code>&lt;section aria-labelledby&gt;</code> names itself by it and shows up in a screen
+        reader&apos;s list of regions.
+      </>
+    ),
     rules: "Rules",
     notCardHead: (
       <>
@@ -158,16 +180,20 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
 
       <H2>{t.buyukH}</H2>
       <P>{t.buyukP}</P>
-      <Demo labels={dict.demo} align="start" grid={false} code={`<SectionHead
-  size="lg"
-  eyebrow="${t.magaza}"
-  title="${t.orders}"
-  description="${t.buyukAciklama}"
-  action={<><Button>${t.disaAktar}</Button><Button variant="primary">${t.yeniSiparis}</Button></>}
-/>`}>
-        <div className="w-full">
+      <Demo labels={dict.demo} align="start" grid={false} code={`<section aria-labelledby="orders">
+  <SectionHead
+    size="lg"
+    id="orders"
+    eyebrow="${t.magaza}"
+    title="${t.orders}"
+    description="${t.buyukAciklama}"
+    action={<><Button>${t.disaAktar}</Button><Button variant="primary">${t.yeniSiparis}</Button></>}
+  />
+</section>`}>
+        <section className="w-full" aria-labelledby="orders-ornek">
           <SectionHead
             size="lg"
+            id="orders-ornek"
             eyebrow={t.magaza}
             title={t.orders}
             description={t.buyukAciklama}
@@ -184,8 +210,9 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
               </>
             }
           />
-        </div>
+        </section>
       </Demo>
+      <P>{t.duzeyP}</P>
 
       <H2>{t.altH}</H2>
       <P>{t.altP}</P>

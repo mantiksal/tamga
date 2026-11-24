@@ -5,9 +5,44 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
-## 0.23.4
+## 0.24.0
 
-> A dialog stays put inside a lifted card; five things a product had to patch from outside are now the kit's own.
+> A capacity bar has an empty share; page sections are real sections; a dialog stays put inside a lifted card.
+
+### Added
+
+- **`Progress` `split` share `empty`** · the unfilled capacity: drawn in the track's own ground,
+  not a colour, and left out of the legend. A capacity bar had to paint its empty part as a grey
+  "neutral" share, which read as full.
+- **`SectionHead` `id` and `level`** · `id` goes to the heading element, so a
+  `<section aria-labelledby>` can name itself by it; `level` sets the heading to 2, 3 or 4.
+  `size="lg"` is now an `h2` by default (it was an `h3`): a page's section under the band's
+  `h1` skipped a level. `base` stays an `h3`, `sub` stays a non-heading. No product used `lg`.
+- **`Select` `id`** · the trigger's id, for a `Field`'s `htmlFor`: the label names the select
+  and a click on it focuses the trigger. The default width stays `w-56` (a select standing
+  alone); the comment that said otherwise now says what the code does: in a grid or a drawer
+  give `w-full`.
+- **`Popover` `open` and `onOpenChange`** · controlled use: the product holds whether the panel is
+  open and hears every change (trigger, Escape, click away, close control), so a panel can
+  close when one of its rows is picked. Uncontrolled use is unchanged.
+- **`ListRow` `linkComponent`** · the router's link for `href`, the same contract as `Link` and
+  `Card`: an in-app row no longer reloads the page.
+- **`RadioGroup` option `disabled` has a look** · the mark takes the group's disabled drawing
+  (dashed edge, sunk ground, no shadow) and the label fades; the button was already closed but
+  drew like an open one.
+- **`AuthTemplate width="wide"`.** The form column at 32rem instead of 24rem, for a form whose
+  answers sit side by side.
+- **`Collapsible printOpen`.** On paper the body prints open even when the section is closed on
+  screen, for a report's folded groups.
+
+### Changed
+
+- **`DetailTemplate`'s `subtitle` takes a node, not only a string.** A part of the identity line
+  can now be a link, such as a property's address opening the site in a new tab. A string works
+  as before.
+- **`WizardTemplate`'s step title is extrabold.** Headings read heavier than the copy under them.
+- **An inline `Alert`'s title is `--text-subhead` (16px) and semibold.** At body size and weight, title and
+  text read as one paragraph.
 
 ### Fixed
 
@@ -15,27 +50,11 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
   `fixed`, and a `fixed` element is placed against an ancestor that has a `transform`. Opened
   inside a card that lifts on hover (`tamga-card-live`), the dialog fell into the card; moving the
   pointer onto it dropped the card and threw the dialog back to the screen, so it flickered open and
-  shut. The layer is now portalled to the body wherever it is written. On the server it stays in
-  place.
+  shut. The layer is now portalled to the body wherever it is written; it is drawn only once the
+  component is mounted, so a dialog open on the first paint hydrates without a mismatch.
 - **`Progress look="blocks"` paints every filled cell in one colour and takes `tone`.** The last
   filled cell was a pastel; a capacity of one in three read as a single washed-out cell. `data-son`
   stays as a hook.
-
-### Changed
-
-- **`DetailTemplate`'s `subtitle` takes a node, not only a string.** A part of the identity line
-  can now be a link, such as a property's address opening the site in a new tab. A string works
-  as before.
-- **An inline `Alert`'s title is 16px and semibold.** At body size and weight, title and text read
-  as one paragraph.
-- **`WizardTemplate`'s step title is extrabold.** Headings read heavier than the copy under them.
-
-### Added
-
-- **`AuthTemplate width="wide"`.** The form column at 32rem instead of 24rem, for a form whose
-  answers sit side by side.
-- **`Collapsible printOpen`.** On paper the body prints open even when the section is closed on
-  screen, for a report's folded groups.
 
 ## 0.23.3
 

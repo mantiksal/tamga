@@ -36,7 +36,7 @@ describe("Collapsible printOpen · kâğıtta açık", () => {
 describe("Satır içi Alert · başlık gövdeden ayrı", () => {
   it("16 px, yarı kalın", () => {
     expect(css).toMatch(
-      /\.tamga-alert:not\(\[data-look\]\) \.tamga-alert-baslik \{[^}]*font-size: 1rem;[^}]*font-weight: var\(--weight-label\)/,
+      /\.tamga-alert:not\(\[data-look\]\) \.tamga-alert-baslik \{[^}]*font-size: var\(--text-subhead\);[^}]*font-weight: var\(--weight-label\)/,
     );
   });
 });

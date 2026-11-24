@@ -11,9 +11,24 @@ export function SectionHead({
   meta,
   mono = false,
   action,
+  id,
+  level,
   ...rest
 }: {
   title: string;
+  /**
+   * Goes to the heading element, so a `<section aria-labelledby>` can name itself by it. TR:
+   * Başlık öğesine gidiyor; bir `<section aria-labelledby>` adını ondan alabilsin.
+   */
+  id?: string;
+  /**
+   * The heading's level. `lg` is a page's section under the band's `h1`, so it is an `h2`;
+   * `base` is a card's own heading, an `h3`. Set it when the page's outline says otherwise.
+   * `sub` is not a heading. TR: Başlığın düzeyi. `lg` şeridin `h1`inin altındaki sayfa bölümü,
+   * yani `h2`; `base` bir kartın kendi başlığı, `h3`. Sayfanın düzeni başka diyorsa verin. `sub`
+   * bir başlık değil.
+   */
+  level?: 2 | 3 | 4;
   /**
    * The short word above the title, in the accent: which area of the product this section
    * belongs to. TR: Başlığın üstündeki kısa sözcük, vurgu renginde: bu bölümün ürünün hangi
@@ -41,6 +56,10 @@ export function SectionHead({
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
   [k: `data-${string}`]: unknown;
 }) {
+  /* DÜZEY BÖLÜMÜN YERİNDEN: sayfa bölümü `h2`, kart başlığı `h3`. İkisi de `h3`
+     çiziliyordu; şeridin `h1`inin altındaki bölüm bir düzey atlıyor, ekran
+     okuyucu bölüm listesinde ad bulamıyordu. */
+  const Baslik = `h${level ?? (size === "lg" ? 2 : 3)}` as "h2" | "h3" | "h4";
   if (size === "lg") {
     /* SAYFA BÖLÜMÜNÜN BAŞI: kartın şeridi değil · kendi kuralı ve iç boşluğu
        yok, çünkü sayfanın ritmini kap veriyor. Üst etiket VURGU renginde:
@@ -49,9 +68,9 @@ export function SectionHead({
       <div {...dataProps(rest)} className="flex flex-wrap items-end gap-4">
         <div className="flex min-w-60 flex-1 flex-col gap-1.5">
           {eyebrow ? <span className="tamga-eyebrow">{eyebrow}</span> : null}
-          <h3 className="font-display text-display leading-tight font-extrabold tracking-tight text-ink">
+          <Baslik id={id} className="font-display text-display leading-tight font-extrabold tracking-tight text-ink">
             {title}
-          </h3>
+          </Baslik>
           {description ? <p className="text-body text-ink-faint">{description}</p> : null}
         </div>
         {action ? <div className="flex flex-wrap items-center gap-3">{action}</div> : null}
@@ -64,7 +83,7 @@ export function SectionHead({
        zaten bir kere şerit taşıyor; ayıran şey altındaki kural. */
     return (
       <div {...dataProps(rest)} className="tamga-subhead">
-        <strong className="font-display text-subhead text-ink">{title}</strong>
+        <strong id={id} className="font-display text-subhead text-ink">{title}</strong>
         {meta ? <span className="tamga-sayac tabular-nums">{meta}</span> : null}
         {action ? <div className="ml-auto flex items-center gap-2">{action}</div> : null}
       </div>
@@ -75,9 +94,9 @@ export function SectionHead({
     <div {...dataProps(rest)} className="tamga-head tamga-gutter tamga-section">
       {/* BOLD, not semibold (2026-11-01, Berika): at semibold a card's head read lighter than the
           rows under it, and the eye did not stop on it. */}
-      <h3 className={`text-subhead font-bold ${mono ? "font-mono text-control" : ""}`}>
+      <Baslik id={id} className={`text-subhead font-bold ${mono ? "font-mono text-control" : ""}`}>
         {title}
-      </h3>
+      </Baslik>
       {meta ? <span className="tamga-label">{meta}</span> : null}
       {action ? <div className="ml-auto flex items-center gap-2">{action}</div> : null}
     </div>

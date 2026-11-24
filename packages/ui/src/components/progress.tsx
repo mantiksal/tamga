@@ -49,7 +49,19 @@ export function Progress({
    * locale. TR: yalnız `split`: paylar, sırayla. `label` lejant satırının tamamı, çağıranın
    * yazdığı gibi ("Teslim %48") · kit yüzde biçimlemiyor, çünkü işaret de yeri de bir yerel.
    */
-  segments?: readonly ({ value: number; tone?: Tone; label?: string } & Record<string, unknown>)[];
+  segments?: readonly ({
+    value: number;
+    tone?: Tone;
+    label?: string;
+    /**
+     * The share that is NOT filled: the remaining capacity. Drawn in the track's own ground,
+     * not a colour, and left out of the legend. Without it a capacity bar had to paint its
+     * empty part as a grey "neutral" share, which read as full. TR: Dolu OLMAYAN pay: kalan
+     * kapasite. Renkle değil rayın kendi zemininde çiziliyor ve lejanta girmiyor. Onsuz bir
+     * kapasite çubuğu boş payını gri "nötr" bir payla boyuyordu, o da dolu okunuyordu.
+     */
+    empty?: boolean;
+  } & Record<string, unknown>)[];
   /**
    * The line above the bar, on the left: what is progressing. TR: Çubuğun üstündeki satır, solda:
    * ilerleyen şeyin adı.
@@ -142,17 +154,21 @@ export function Progress({
       <div {...dataProps(rest)} className={className}>
         {ust}
         <div className="tamga-progress-split" role="img" aria-label={label ?? ariaLabel ?? "Progress"}>
-          {paylar.map(({ value: v, tone, label: _etiket, ...kanca }, i) => (
+          {paylar.map(({ value: v, tone, label: _etiket, empty, ...kanca }, i) => (
             <span
               {...kanca}
               key={i}
-              style={{ width: `${(v / toplam) * 100}%`, background: tone ? toneOf(tone).mark : yiginRenk(i) }}
+              data-empty={empty || undefined}
+              style={{
+                width: `${(v / toplam) * 100}%`,
+                background: empty ? undefined : tone ? toneOf(tone).mark : yiginRenk(i),
+              }}
             />
           ))}
         </div>
-        {paylar.some((p) => p.label) ? (
+        {paylar.some((p) => p.label && !p.empty) ? (
           <div className="tamga-progress-lejant">
-            {paylar.map((p, i) => (p.label ? <span key={i}>{p.label}</span> : null))}
+            {paylar.map((p, i) => (p.label && !p.empty ? <span key={i}>{p.label}</span> : null))}
           </div>
         ) : null}
       </div>

@@ -97,6 +97,13 @@ const T = {
         alıyor, çiziyor ve ekran okuyucu bağlantısını kuruyor.
       </>
     ),
+    kapaliP: (
+      <>
+        Tek bir seçenek <code>disabled</code> taşıyabilir: düğmesi kapanır ve işareti grubun kapalı
+        çizimini alır (kesik kenar, çukur zemin, gölge yok), etiketi soluklaşır. Ötekiler açık kalır.
+      </>
+    ),
+    yok: "Stokta yok",
     kargo: "Kargo",
     kargoAlt: "Teslimat süresi yönteme göre değişir.",
     kargoHata: "Birini seçmelisin.",
@@ -192,6 +199,14 @@ const T = {
         for screen readers.
       </>
     ),
+    kapaliP: (
+      <>
+        One option can carry <code>disabled</code>: its button closes and its mark takes the
+        group&apos;s disabled drawing (dashed edge, sunk ground, no shadow), its label fades. The
+        others stay open.
+      </>
+    ),
+    yok: "Out of stock",
     kargo: "Shipping",
     kargoAlt: "Delivery time depends on the method.",
     kargoHata: "Pick one.",
@@ -258,6 +273,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <P>{t.notP}</P>
       <Demo labels={dict.demo} align="start" grid={false} code={`<RadioGroup label="${t.kargo}" showLabel description="${t.kargoAlt}" … />
 <RadioGroup label="${t.kargo}" showLabel error="${t.kargoHata}" errorPrefix="${t.hataOnek}" … />
+<RadioGroup label="${t.kargo}" options={[…, { value: "exp", label: "${t.exp}", disabled: true }]} … />
 <RadioGroup look="card" label="${t.kargo}" error="${t.kargoHata}" errorPrefix="${t.hataOnek}" … />`}>
         <div className="flex w-full flex-wrap items-start gap-8" data-not-ornek>
           <RadioGroup
@@ -278,6 +294,12 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
             options={[{ value: "std", label: t.std }, { value: "exp", label: t.exp }]}
           />
           <RadioGroup
+            label={t.kargo}
+            value="std"
+            className="w-60 max-w-full"
+            options={[{ value: "std", label: t.std }, { value: "exp", label: t.exp, disabled: true, title: t.yok }]}
+          />
+          <RadioGroup
             look="card"
             label={t.kargo}
             error={t.kargoHata}
@@ -292,6 +314,7 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
         </div>
       </Demo>
       <Note>{t.notN}</Note>
+      <P>{t.kapaliP}</P>
 
       <H2>{t.rules}</H2>
       <Note>{t.roles}</Note>

@@ -23,6 +23,7 @@ export function Collapsible({
   meta,
   note,
   unmountOnClose = false,
+  printOpen = false,
   className,
   children,
   ...rest
@@ -75,6 +76,14 @@ export function Collapsible({
    * başına veri çeken bir gövde için.
    */
   unmountOnClose?: boolean;
+  /**
+   * On paper the body prints open even when the section is closed on screen: a report's folded
+   * groups, where a closed section would leave a heading over nothing. Needs the body in the DOM
+   * (not with `unmountOnClose`). TR: Kâğıtta gövde, ekranda kapalı olsa da açık basılır: bir
+   * raporun katlı grupları, kapalı bölüm boş bir başlık bırakırdı. Gövdenin DOM'da olmasını ister
+   * (`unmountOnClose` ile olmaz).
+   */
+  printOpen?: boolean;
   className?: string;
   children: ReactNode;
   /** `data-*` hooks pass through. TR: `data-*` kancaları geçiyor. */
@@ -98,6 +107,7 @@ export function Collapsible({
       {...dataProps(rest)}
       className={cn("tamga-collapsible", className)}
       data-open={acik || undefined}
+      data-print-open={printOpen || undefined}
     >
       <button
         type="button"

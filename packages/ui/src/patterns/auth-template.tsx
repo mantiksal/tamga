@@ -17,7 +17,15 @@ export function AuthTemplate({
   footer,
   aside,
   peek,
+  width = "default",
 }: {
+  /**
+   * The form column's width. `default` 24rem, one field and one button; `wide` 32rem, for a form
+   * whose answers sit side by side (three cards on a sign-up). TR: Form sütununun genişliği.
+   * `default` 24rem, tek alan ve tek düğme; `wide` 32rem, cevapları yan yana duran bir form için
+   * (kayıtta üç kart).
+   */
+  width?: "default" | "wide";
   /** The brand's mark. The mark, not the wordmark: this screen's job is one field and one button. TR: Markanın işareti. Sözcük markası değil işaret: bu ekranın işi tek alan ve tek düğme. */
   brand?: ReactNode;
   title: string;
@@ -56,7 +64,7 @@ export function AuthTemplate({
      kendisi söylüyor: tek sütunda üçü de ortada, bölünmüş ekranda üçü de solda
      — çünkü orada blok bir sütunun başlangıcı, sayfanın merkezi değil. */
   const form = (
-    <div className={cn("w-full max-w-96", split ? undefined : "text-center")}>
+    <div className={cn("w-full", width === "wide" ? "max-w-lg" : "max-w-96", split ? undefined : "text-center")}>
       <div
         className={cn(
           "mb-7 flex flex-col gap-3",

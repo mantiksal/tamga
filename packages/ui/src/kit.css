@@ -272,6 +272,15 @@
 }
 
 @layer base {
+  /* KÂĞITTA AÇIK BASILAN BÖLÜM (`Collapsible printOpen`): gövdenin `hidden`'ı ekranda kalır,
+     baskıda kalkar. Bu katmanda, çünkü Tailwind'in `[hidden] { display: none !important }`'u da
+     burada: katmanlı bir !important'ı ancak aynı katmanda özgüllük yener (ölçüldü,
+     2026-10-22). */
+  @media print {
+    .tamga-collapsible[data-print-open] > [hidden] {
+      display: block !important;
+    }
+  }
 
   body {
     background: var(--color-shell);
@@ -4551,14 +4560,11 @@
     background: var(--color-sunk);
   }
 
+  /* Dolu hücrelerin hepsi tek renk: `tone` verildiyse onun işaret rengi, yoksa vurgu. Son hücre
+     artık açık tonda değil (2026-11-24): 3'te 1'lik kotada tek soluk hücre dolu okunmuyordu. */
   .tamga-progress-blok[data-dolu] {
     border-color: var(--color-edge-strong);
-    background: var(--color-accent);
-  }
-
-  /* SON DOLU HÜCRE AÇIK TONDA: "burada duruyoruz" diyen tek işaret. */
-  .tamga-progress-blok[data-son] {
-    background: var(--color-accent-soft);
+    background: var(--tamga-progress-blok-dolu, var(--color-accent));
   }
 
   /* PARÇALI DAĞILIM: tek yol, paylara bölünmüş. Paylar arasındaki çizgi
@@ -4819,10 +4825,14 @@
   }
   /* SATIR İÇİ UYARIDA KARE BAŞLIĞIN İÇİNDE: 20 piksel, başlıkla aynı satırda ortalı;
      gövde başlığın metniyle hizalı başlıyor (kare + boşluk kadar içeride). */
+  /* Satır içi uyarının başlığı gövdeden ayrı okunur: 16 px, yarı kalın. Gövde boyu ve
+     kalınlığındayken başlık ile açıklama tek paragraf gibi okunuyordu (2026-11-11). */
   .tamga-alert:not([data-look]) .tamga-alert-baslik {
     display: flex;
     align-items: flex-start;
     gap: 8px;
+    font-size: 1rem;
+    font-weight: var(--weight-label);
   }
   .tamga-alert:not([data-look]) .tamga-alert-baslik > .tamga-alert-tile {
     width: 20px;

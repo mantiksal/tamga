@@ -66,7 +66,9 @@ export function WizardTemplate({
 
       <div className="tamga-gutter min-h-0 flex-1 py-6">
         <div className="max-w-[var(--measure)]">
-          <h2 className="text-title font-semibold text-ink">{title}</h2>
+          {/* Adımın başlığı en kalın (2026-11-24, Berika: başlıklar cılız durmasın); bir ürün
+              bunu yamayla yapıyordu. */}
+          <h2 className="text-title font-extrabold text-ink">{title}</h2>
           {subtitle ? <p className="mt-1 text-small text-ink-faint">{subtitle}</p> : null}
           <div className="mt-6">
             {state === "error" ? <ErrorSlot error={error} labels={labels} /> : children}

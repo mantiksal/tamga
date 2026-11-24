@@ -17,6 +17,7 @@ import { Icon } from "./icon.js";
 import { CaretRight, Check, Close, Failure, Info, Success, Warning } from "./icons.js";
 import { SkeletonOptions, SkeletonPanel } from "./skeleton.js";
 import { useScrollLock } from "../lib/scroll-lock.js";
+import { toBody } from "../lib/to-body.js";
 import { cn } from "../lib/cn.js";
 import { dataProps } from "../lib/data-props.js";
 import { useFocusTrap, useListKeys } from "./a11y.js";
@@ -811,7 +812,7 @@ export function Sheet({
   }, [open, onClose]);
 
   if (!open) return null;
-  return (
+  return toBody(
     /* ÇEKMECE KENARDAN İÇERİDE DURUYOR (2026-09-24). Öncesinde ekranın kenarına
        YAPIŞIKTI ve iki şeyi birden kaybediyordu: köşeleri elle sıfırlanmak
        zorundaydı (`borderRadius: 0`), ve katmanı ekran dışında kalıyordu ·
@@ -864,6 +865,6 @@ export function Sheet({
           <div className="flex justify-end gap-2 border-t border-line px-4.5 py-4">{footer}</div>
         ) : null}
       </aside>
-    </div>
+    </div>,
   );
 }

@@ -14,6 +14,7 @@ import { Button } from "./button.js";
 import { useDismiss, useFocusTrap, useListKeys } from "./a11y.js";
 import { MiniButton } from "./button.js";
 import { useScrollLock } from "../lib/scroll-lock.js";
+import { toBody } from "../lib/to-body.js";
 
 /**
  * Katman düzlemi · 6 piksel, sayfanın ulaşabildiği 4 pikselin ötesi. Perde
@@ -910,7 +911,7 @@ function DialogShell({
      pikseldir. Panel de yüzeyi kaplıyor ve dikey bir akış oluyor, ki gövde
      kendi içinde kaysın ve başlık ile ayak yerinde kalsın. */
   const tam = size === "full";
-  return (
+  return toBody(
     <div
       /* KANCA BURADA, `role="dialog"` ile aynı elemanda: diyaloğu rolüyle
          bulan bir test kancayı da orada bulmalı. Bir süre başlık şeridindeydi
@@ -938,7 +939,7 @@ function DialogShell({
       >
         {children}
       </div>
-    </div>
+    </div>,
   );
 }
 

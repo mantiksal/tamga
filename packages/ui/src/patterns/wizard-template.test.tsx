@@ -155,3 +155,15 @@ describe("Steps'in kimliği", () => {
     expect(screen.getByText("Notify")).toBeTruthy();
   });
 });
+
+/* Adımın başlığı en kalın (2026-11-24): bir ürün bunu yamayla yapıyordu. */
+describe("WizardTemplate · adım başlığı", () => {
+  it("font-extrabold", () => {
+    render(
+      <WizardTemplate steps={steps} activeStep={steps[0]!.key} title="Adım" labels={LABELS}>
+        <p>gövde</p>
+      </WizardTemplate>,
+    );
+    expect(screen.getByRole("heading", { level: 2, name: "Adım" }).className).toMatch(/font-extrabold/);
+  });
+});

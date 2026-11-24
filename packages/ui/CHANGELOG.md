@@ -7,13 +7,35 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 ## 0.23.4
 
-> A detail page's identity line can hold a link.
+> A dialog stays put inside a lifted card; five things a product had to patch from outside are now the kit's own.
+
+### Fixed
+
+- **`Dialog`, `ConfirmDialog` and `Sheet` render in `document.body`.** A full-screen layer is
+  `fixed`, and a `fixed` element is placed against an ancestor that has a `transform`. Opened
+  inside a card that lifts on hover (`tamga-card-live`), the dialog fell into the card; moving the
+  pointer onto it dropped the card and threw the dialog back to the screen, so it flickered open and
+  shut. The layer is now portalled to the body wherever it is written. On the server it stays in
+  place.
+- **`Progress look="blocks"` paints every filled cell in one colour and takes `tone`.** The last
+  filled cell was a pastel; a capacity of one in three read as a single washed-out cell. `data-son`
+  stays as a hook.
 
 ### Changed
 
 - **`DetailTemplate`'s `subtitle` takes a node, not only a string.** A part of the identity line
   can now be a link, such as a property's address opening the site in a new tab. A string works
   as before.
+- **An inline `Alert`'s title is 16px and semibold.** At body size and weight, title and text read
+  as one paragraph.
+- **`WizardTemplate`'s step title is extrabold.** Headings read heavier than the copy under them.
+
+### Added
+
+- **`AuthTemplate width="wide"`.** The form column at 32rem instead of 24rem, for a form whose
+  answers sit side by side.
+- **`Collapsible printOpen`.** On paper the body prints open even when the section is closed on
+  screen, for a report's folded groups.
 
 ## 0.23.3
 

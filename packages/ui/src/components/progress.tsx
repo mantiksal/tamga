@@ -74,8 +74,9 @@ export function Progress({
    */
   size?: "md" | "sm";
   /**
-   * The fill's colour from the kit's tone roles; absent, the accent. TR: Dolgunun rengi kitin
-   * ton rollerinden; yoksa vurgu.
+   * The fill's colour from the kit's tone roles; absent, the accent. `blocks` paints every filled
+   * cell in it. TR: Dolgunun rengi kitin ton rollerinden; yoksa vurgu. `blocks` bütün dolu
+   * hücreleri onunla boyar.
    */
   tone?: Tone;
   /**
@@ -101,8 +102,10 @@ export function Progress({
     ) : null;
 
   if (look === "blocks") {
-    /* SON DOLU HÜCRE AÇIK TONDA: "burada duruyoruz" diyen tek işaret o · hepsi
-       aynı dolulukta olduğunda saymak gerekiyor, oysa sayı zaten üstte yazılı. */
+    /* DOLU HÜCRELERİN HEPSİ TEK RENK, `tone` ALIR (2026-11-24). Son dolu hücre açık tondaydı
+       ("burada duruyoruz" diye); 3'te 1'lik bir kotada tek, soluk bir hücre kalıyordu ve dolu
+       okunmuyordu. Sayı zaten üstte yazılı. `data-son`
+       kanca olarak kalıyor. */
     const dolu = Math.round((pct / 100) * blocks);
     return (
       <div {...dataProps(rest)} className={className}>
@@ -114,7 +117,10 @@ export function Progress({
           aria-valuemin={0}
           aria-valuemax={100}
           aria-label={label ?? ariaLabel ?? "Progress"}
-          style={{ gridTemplateColumns: `repeat(${blocks}, 1fr)` }}
+          style={{
+            gridTemplateColumns: `repeat(${blocks}, 1fr)`,
+            ...(tone ? ({ "--tamga-progress-blok-dolu": toneOf(tone).mark } as CSSProperties) : {}),
+          }}
         >
           {Array.from({ length: blocks }, (_, i) => (
             <span

@@ -5,6 +5,21 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.24.1
+
+> Tab stays in the window opened from a drawer; a page section's heading sits under the page's.
+
+### Fixed
+
+- **A focus trap leaves Tab to the layer that has focus.** Since 0.24.0 a dialog opened from a
+  sheet is portalled to the body, outside the sheet's DOM; the sheet's trap took focus to be
+  "outside" and pulled it to its close button on every Tab. Now a trap stays out when focus sits
+  in another open layer; it takes over again once that layer closes. A gate test holds a dialog
+  inside a sheet.
+- **`SectionHead size="lg"` is a step under the page title.** It was `--text-display` (30px),
+  bigger than `PageBand`'s `--text-display-sm` (24px) `h1` above it; it is `--text-title` (18px)
+  now, still in the display face and extrabold, above a card's 16px strip.
+
 ## 0.24.0
 
 > A capacity bar has an empty share; page sections are real sections; a dialog stays put inside a lifted card.

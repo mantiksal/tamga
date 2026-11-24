@@ -38,11 +38,11 @@ export function SectionHead({
   /** One quiet line under the title. TR: Başlığın altındaki tek sessiz satır. */
   description?: string;
   /**
-   * `base` a card's own header strip, `lg` a section of a PAGE: a bigger title, no closing rule
-   * and no gutter of its own. `sub` a row INSIDE a card that opens a sub-section: no band
+   * `base` a card's own header strip, `lg` a section of a PAGE: a title bigger than a card's and
+   * a step under the page's own (`PageBand`), no closing rule and no gutter of its own. `sub` a row INSIDE a card that opens a sub-section: no band
    * behind it, a rule under it, and `meta` becomes a count chip beside the title.
-   * TR: `base` bir kartın kendi başlık şeridi, `lg` bir SAYFANIN bölümü · daha büyük başlık,
-   * kapatan kural yok, kendi iç boşluğu yok. `sub` bir kartın İÇİNDE alt bölüm açan satır ·
+   * TR: `base` bir kartın kendi başlık şeridi, `lg` bir SAYFANIN bölümü · kartınkinden büyük,
+   * sayfanınkinden (`PageBand`) bir basamak küçük başlık, kapatan kural yok, kendi iç boşluğu yok. `sub` bir kartın İÇİNDE alt bölüm açan satır ·
    * arkasında şerit yok, altında kural var, ve `meta` başlığın yanında bir sayı çipi oluyor.
    */
   size?: "base" | "lg" | "sub";
@@ -68,7 +68,7 @@ export function SectionHead({
       <div {...dataProps(rest)} className="flex flex-wrap items-end gap-4">
         <div className="flex min-w-60 flex-1 flex-col gap-1.5">
           {eyebrow ? <span className="tamga-eyebrow">{eyebrow}</span> : null}
-          <Baslik id={id} className="font-display text-display leading-tight font-extrabold tracking-tight text-ink">
+          <Baslik id={id} className="font-display text-title leading-tight font-extrabold tracking-tight text-ink">
             {title}
           </Baslik>
           {description ? <p className="text-body text-ink-faint">{description}</p> : null}

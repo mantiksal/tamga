@@ -39,6 +39,12 @@ function focusable(root: HTMLElement): HTMLElement[] {
  * the page behind the scrim, where a keyboard user is stuck operating a page
  * they cannot see. The scrim only stops the mouse.
  */
+/* AÇIK KATMANLAR: odak başka bir açık katmandaysa Tab onundur, bu tuzak karışmaz.
+   Katmanlar gövdeye portallandığından beri çekmeceden açılan pencere çekmecenin
+   DOM'unda değil; çekmecenin tuzağı odağı "dışarıda" sayıp Kapat'a çekiyordu (0.24.0).
+   Sıra değil üyelik: React çocuğun etkisini önce koştuğu için yığın sırası yanıltır. */
+const katmanlar = new Set<HTMLElement>();
+
 export function useFocusTrap<T extends HTMLElement>(open: boolean) {
   const ref = useRef<T>(null);
   const restoreTo = useRef<HTMLElement | null>(null);
@@ -47,6 +53,7 @@ export function useFocusTrap<T extends HTMLElement>(open: boolean) {
     if (!open) return;
     const root = ref.current;
     if (!root) return;
+    katmanlar.add(root);
 
     restoreTo.current = document.activeElement as HTMLElement | null;
 
@@ -65,6 +72,8 @@ export function useFocusTrap<T extends HTMLElement>(open: boolean) {
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Tab") return;
+      const odak = document.activeElement;
+      if (!root.contains(odak) && [...katmanlar].some((k) => k !== root && k.contains(odak))) return;
       const items = focusable(root);
       if (items.length === 0) {
         e.preventDefault();
@@ -91,6 +100,7 @@ export function useFocusTrap<T extends HTMLElement>(open: boolean) {
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("keydown", onKey);
+      katmanlar.delete(root);
       /* give focus back to whatever opened this, not to the top of the page */
       restoreTo.current?.focus?.();
     };

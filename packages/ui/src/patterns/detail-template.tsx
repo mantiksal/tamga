@@ -49,6 +49,13 @@ export type DetailTemplateProps = {
   breadcrumb: { label: string; href?: string }[];
   title: string;
   /**
+   * The title as the product marks it: a sign before the name, the name in its own colour (an
+   * add-on the object is in). Drawn in the heading instead of `title`; `title` stays the plain
+   * text. TR: Ürünün işaretlediği başlık: adın önünde bir işaret, adın kendi renginde (nesnenin
+   * içinde olduğu bir eklenti). Başlıkta `title` yerine çizilir; `title` düz metin olarak kalır.
+   */
+  titleMark?: ReactNode;
+  /**
    * Beside the title, on its line: the object's one-word state (a `StatusChip`). The product's,
    * like `status`; the template keeps only the place. TR: Başlığın yanında, aynı satırda: nesnenin
    * tek sözcüklük hâli (bir `StatusChip`). `status` gibi ürünün; şablon yalnız yerini tutar.
@@ -99,6 +106,7 @@ export type DetailTemplateProps = {
 export function DetailTemplate({
   breadcrumb,
   title,
+  titleMark,
   titleAside,
   subtitle,
   status,
@@ -124,7 +132,7 @@ export function DetailTemplate({
         <div className="flex flex-wrap items-center gap-4">
           <div className="min-w-0 flex-1 basis-65">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <h1 className="font-display text-display-sm leading-tight font-extrabold break-words text-ink">{title}</h1>
+              <h1 className="font-display text-display-sm leading-tight font-extrabold break-words text-ink">{titleMark ?? title}</h1>
               {titleAside ? <div data-detail-title-aside>{titleAside}</div> : null}
             </div>
             {subtitle ? <p className="mt-1.5 text-body text-ink-soft">{subtitle}</p> : null}

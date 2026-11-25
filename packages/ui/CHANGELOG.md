@@ -5,6 +5,20 @@ Versions follow [semver](https://semver.org/). Through `0.x`, breaking changes m
 
 > 🇹🇷 Türkçe için [tamga.org.tr/tr](https://tamga.org.tr/tr).
 
+## 0.25.0
+
+> A dialog can carry the product's band above its title; a detail page's title can be drawn as the product marks it.
+
+### Added
+
+- **`Dialog` `hero`** · a slot above the title, edge to edge and outside the scrolling body: a
+  filled strip, a picture, the product's own mark on its offer window. Not a second title; the
+  question stays in the title, and the band stays put when the body scrolls. Left out, nothing
+  is drawn. A gate test holds the band above the title and outside the scroll area.
+- **`DetailTemplate` `titleMark`** · the title as the product marks it: a sign before the name,
+  the name in its own colour. Drawn in the `h1` instead of `title`; `title` stays the plain text
+  and is still required.
+
 ## 0.24.1
 
 > Tab stays in the window opened from a drawer; a page section's heading sits under the page's.

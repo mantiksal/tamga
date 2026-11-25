@@ -192,4 +192,10 @@ describe("DetailTemplate · sekme hatası", () => {
     expect(hatali.textContent).toContain("2 alanda hata");
     expect(document.querySelector('[data-tab="' + tabs[1]!.key + '"] [data-tab-error]')).toBeNull();
   });
+
+  it("titleMark başlıkta title'ın yerine çizilir; verilmezse title", () => {
+    renderDetail("overview", { titleMark: <span data-testid="isaret">✦ bir-kayit</span> });
+    const h1 = document.querySelector("h1")!;
+    expect(h1.querySelector('[data-testid="isaret"]')).not.toBeNull();
+  });
 });

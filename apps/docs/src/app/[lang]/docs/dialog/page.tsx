@@ -43,6 +43,14 @@ const T = {
       </>
     ),
     rules: "Kurallar",
+    heroH: "Başlığın üstünde bir şerit",
+    heroP: (
+      <>
+        <code>hero</code> başlığın üstünde, kenardan kenara ve kayan gövdenin dışında bir alan:
+        ürünün kendi işareti, dolu bir şerit ya da bir görsel. İkinci bir başlık değildir, soru
+        yine başlıkta; gövde kaydığında şerit yerinde kalır. Verilmezse hiçbir şey çizilmez.
+      </>
+    ),
     boyH: "Dört boy",
     boyP: (
       <>
@@ -110,6 +118,15 @@ const T = {
       </>
     ),
     rules: "Rules",
+    heroH: "A band above the title",
+    heroP: (
+      <>
+        <code>hero</code> is a slot above the title, edge to edge and outside the scrolling body:
+        the product&apos;s own mark, a filled strip or a picture. It is not a second title, the
+        question stays in the title; when the body scrolls the band stays put. Left out, nothing is
+        drawn.
+      </>
+    ),
     boyH: "Four sizes",
     boyP: (
       <>
@@ -194,6 +211,9 @@ export default async function Page({ params }: { params: Promise<{ lang: Locale 
       <H2>{t.boyH}</H2>
       <P>{t.boyP}</P>
       <Note>{t.boyN}</Note>
+
+      <H2>{t.heroH}</H2>
+      <P>{t.heroP}</P>
 
       <H2>Props</H2>
       <Props of="Dialog" lang={lang} etiketli />

@@ -84,6 +84,8 @@ const T = {
         ardında bir uyarı işareti, ve ekran okuyucunun adla birlikte duyduğu cümle (&ldquo;2 alanda
         hata&rdquo;). Hata yalnız açık sekmede görünüyordu; başka sekmeden kaydeden kişi hiçbir şey
         görmüyordu.
+        Başlık ürünün işaretlediği gibi çizilebilir (<code>titleMark</code>): adın önünde bir
+        işaret, ad kendi renginde; <code>title</code> yine düz metin olarak verilir.
       </>
     ),
     ayarH: "Ayarlar",
@@ -220,6 +222,8 @@ const T = {
         carries <code>error</code>: a warning mark after its name, and the sentence a screen reader
         hears with the name (&ldquo;2 fields have an error&rdquo;). The error used to show on the
         open tab only, and someone saving from another tab saw nothing.
+        The title can be drawn as the product marks it (<code>titleMark</code>): a sign before the
+        name, the name in its own colour; <code>title</code> is still given as plain text.
       </>
     ),
     ayarH: "Settings",

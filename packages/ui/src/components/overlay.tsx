@@ -1061,6 +1061,7 @@ export function Dialog({
   loading = false,
   closeLabel,
   size = "md",
+  hero,
   ...rest
 }: {
   open: boolean;
@@ -1068,6 +1069,13 @@ export function Dialog({
   title: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  /**
+   * A band above the title, edge to edge and outside the scrolling body: a product's own mark on
+   * its offer window (a filled strip, a picture). Not a second title: the title stays the
+   * question. TR: Başlığın üstünde, kenardan kenara ve kayan gövdenin dışında bir şerit: ürünün
+   * kendi işareti (dolu bir şerit, bir görsel). İkinci başlık değildir: soru yine başlıktır.
+   */
+  hero?: React.ReactNode;
   /**
    * contents not in yet; the panel holds its shape instead of showing a spinner TR: içerik
    * henüz gelmedi; panel bir dönen simge göstermek yerine şeklini koruyor
@@ -1090,6 +1098,7 @@ export function Dialog({
 }) {
   return (
     <DialogShell {...dataProps(rest)} open={open} onClose={onClose} loading={loading} label={title} size={size}>
+      {hero ? <div className="shrink-0">{hero}</div> : null}
       <div className="tamga-head tamga-gutter tamga-section shrink-0">
         <h3 className="text-subhead font-semibold">{title}</h3>
         <MiniButton onClick={onClose} aria-label={closeLabel} className="ml-auto">
